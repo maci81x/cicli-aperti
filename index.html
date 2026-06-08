@@ -797,19 +797,22 @@ async function loadAll() {
   if (state.view === 'matrix') renderSkeleton();
 
   try {
-    const [r1, r2, r3] = await Promise.all([
+    const [r1, r2] = await Promise.all([
       db.from('cicli').select('*').order('created_at', { ascending: false }),
-      db.from('persone').select('*').order('nome'),
-      db.from('categorie').select('*').order('ordine').catch(() => ({ data: [], error: null }))
+      db.from('persone').select('*').order('nome')
     ]);
     if (r1.error) throw r1.error;
     if (r2.error) throw r2.error;
-    state.cicli     = r1.data || [];
-    state.persone   = r2.data || [];
-    state.categorie = r3.data || [];
+    state.cicli   = r1.data || [];
+    state.persone = r2.data || [];
   } catch (e) {
     showToast('Errore Supabase: ' + e.message, 'error');
   }
+
+  try {
+    const { data, error } = await db.from('categorie').select('*').order('ordine');
+    if (!error) state.categorie = data || [];
+  } catch (_) { state.categorie = []; }
 
   state.loading = false;
   render();
