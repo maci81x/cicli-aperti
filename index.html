@@ -33,7 +33,7 @@ body.light header { background: rgba(245,246,248,0.96); }
 header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(14,15,17,0.96); backdrop-filter: blur(12px); z-index: 100; gap: 12px; }
 .logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; white-space: nowrap; }
 .logo span { color: var(--lavoro); }
-.week-nav { display: flex; align-items: center; gap: 8px; }
+.week-nav { display: flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
 .week-nav button { background: var(--bg3); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .week-nav button:hover { background: var(--border); }
 .week-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); min-width: 120px; text-align: center; }
@@ -905,6 +905,14 @@ function updateHeader() {
   document.getElementById('ctx-lavoro').className  = state.ctx === 'lavoro'   ? 'active-lavoro' : '';
   document.getElementById('ctx-personale').className = state.ctx === 'personale' ? 'active-personale' : '';
   document.getElementById('addBtn').className = 'btn-primary' + (state.ctx === 'personale' ? ' personale-ctx' : '');
+
+  const weekNav = document.querySelector('.week-nav');
+  const weekActive = state.view === 'list' || state.searchQuery;
+  if (weekNav) {
+    weekNav.style.opacity = weekActive ? '1' : '0.4';
+    weekNav.style.pointerEvents = weekActive ? '' : 'auto';
+    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo solo nella vista Lista';
+  }
 }
 
 function updateMobileNav() {
@@ -942,13 +950,19 @@ function renderViews() {
 
   const allCtx  = state.cicli.filter(c => c.ctx === state.ctx);
   const weekCtx = allCtx.filter(c => c.week === state.week && c.year === state.year);
-  const filtered = applyFilters(weekCtx);
+
+  // Matrice: tutti i cicli aperti del contesto, senza filtro settimana
+  const matrixBase   = applyFilters(allCtx.filter(c => !c.done));
+  // Lista: solo cicli della settimana selezionata
+  const listFiltered = applyFilters(weekCtx);
+
+  const filtered = state.view === 'list' ? listFiltered : matrixBase;
 
   renderSummary(filtered);
   renderEscalationNotices(filtered);
 
-  if (state.view === 'matrix')  renderMatrix(filtered);
-  if (state.view === 'list')    renderList(filtered);
+  if (state.view === 'matrix')  renderMatrix(matrixBase);
+  if (state.view === 'list')    renderList(listFiltered);
   if (state.view === 'persone') renderPersone();
   if (state.view === 'storico') renderStorico(allCtx);
 }
