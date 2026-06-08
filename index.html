@@ -298,12 +298,82 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ── SEARCH BAR ── */
+.search-bar { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; flex: 1; max-width: 300px; transition: border-color 0.15s; }
+.search-bar:focus-within { border-color: var(--lavoro); }
+.search-icon { font-size: 13px; color: var(--text-dim); flex-shrink: 0; }
+#searchInput { background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; width: 100%; padding: 7px 0; }
+#searchInput::placeholder { color: var(--text-dim); }
+.search-clear { background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 3px; transition: color 0.12s; flex-shrink: 0; line-height: 1; }
+.search-clear:hover { color: var(--text); }
+.search-result-header { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.search-result-header strong { color: var(--text); }
+mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 2px; padding: 0 1px; font-style: normal; }
+
+/* ── PERSONA DETAIL ── */
+.persona-back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; transition: all 0.12s; margin-bottom: 18px; }
+.persona-back-btn:hover { background: var(--border); color: var(--text); }
+.persona-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.persona-avatar-lg { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 24px; flex-shrink: 0; }
+.persona-detail-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1.5px; margin-bottom: 2px; }
+.persona-detail-info .p-ruolo { font-size: 12px; color: var(--text-muted); }
+.persona-detail-info .p-cicli-cnt { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.persona-q-section { margin-bottom: 20px; }
+.persona-q-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
+.persona-ruolo-tag { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.ciclo-ctx-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.ciclo-ctx-tag.lavoro { background: var(--lavoro-dim); color: var(--lavoro); }
+.ciclo-ctx-tag.personale { background: var(--personale-dim); color: var(--personale); }
+
+/* ── ADD PERSONA ── */
+.add-persona-btn { display: flex; align-items: center; gap: 8px; width: 100%; background: transparent; border: 1px dashed var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.12s; margin-bottom: 16px; }
+.add-persona-btn:hover { border-color: var(--border-light); color: var(--text); background: var(--bg3); }
+.add-persona-form { background: var(--bg2); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.color-picker-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
+.color-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; flex-shrink: 0; }
+.color-swatch.selected { border-color: white; transform: scale(1.18); box-shadow: 0 0 0 1px rgba(255,255,255,0.4); }
+
+/* ── PERSONA CHIPS IN MODAL ── */
+.persona-chips-wrap { position: relative; }
+.persona-chips-box { min-height: 40px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; cursor: text; transition: border-color 0.12s; }
+.persona-chips-box:focus-within { border-color: var(--lavoro); }
+.pchip { display: inline-flex; align-items: center; gap: 4px; border-radius: 20px; padding: 2px 8px 2px 4px; font-size: 11px; font-weight: 500; }
+.pchip-av { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex-shrink: 0; }
+.pchip-rm { cursor: pointer; opacity: 0.65; font-size: 12px; }
+.pchip-rm:hover { opacity: 1; }
+.pchip-input { border: none; outline: none; background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; min-width: 100px; flex: 1; padding: 2px 2px; }
+.persona-dd { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 350; background: var(--bg2); border: 1px solid var(--border-light); border-radius: var(--radius-sm); box-shadow: 0 6px 20px rgba(0,0,0,0.35); max-height: 200px; overflow-y: auto; }
+.persona-dd-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; font-size: 13px; transition: background 0.1s; }
+.persona-dd-item:hover, .persona-dd-item.focused { background: var(--bg3); }
+.persona-dd-av { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.persona-dd-create { color: var(--lavoro); font-style: italic; }
+
+/* ── CATEGORY FORM ── */
+.cat-add-btn { display: flex; align-items: center; gap: 6px; width: calc(100% - 36px); margin: 4px 18px; background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 6px 10px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.12s; }
+.cat-add-btn:hover { border-color: var(--border-light); color: var(--text-muted); }
+.cat-inline-form { margin: 4px 18px 8px; background: var(--bg); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; }
+.emoji-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 6px 0 8px; }
+.emoji-btn { background: transparent; border: 1px solid transparent; border-radius: 4px; font-size: 15px; padding: 3px; cursor: pointer; transition: all 0.1s; text-align: center; line-height: 1.3; }
+.emoji-btn:hover { background: var(--bg3); }
+.emoji-btn.sel { background: var(--lavoro-dim); border-color: var(--lavoro); }
+.cat-ctx-toggle { display: flex; gap: 6px; margin: 6px 0; }
+.cat-ctx-btn { flex: 1; padding: 5px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--text-muted); transition: all 0.12s; }
+.cat-ctx-btn.lavoro.sel { background: var(--lavoro-dim); border-color: var(--lavoro); color: var(--lavoro); }
+.cat-ctx-btn.personale.sel { background: var(--personale-dim); border-color: var(--personale); color: var(--personale); }
+.cat-form-actions { display: flex; gap: 6px; margin-top: 8px; }
+.cat-form-save { background: #22c55e; border: none; color: white; padding: 6px 14px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.12s; }
+.cat-form-save:hover { opacity: 0.88; }
+.cat-form-cancel { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
+.sidebar-edit-icon { font-size: 10px; opacity: 0; transition: opacity 0.1s; margin-left: 2px; cursor: pointer; color: var(--text-dim); }
+.sidebar-item:hover .sidebar-edit-icon { opacity: 1; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   header { padding: 12px 16px; gap: 8px; }
   .logo { font-size: 20px; }
   .week-label { min-width: 90px; font-size: 11px; }
   .btn-plaud span, .btn-primary span { display: none; }
+  .search-bar { display: none; }
   .app-body { grid-template-columns: 1fr; }
   .sidebar { display: none; }
   .content { padding: 16px 16px 100px; }
@@ -328,7 +398,7 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 
 <!-- HEADER -->
 <header>
-  <div class="logo">CICLI<span>.</span>ROBY</div>
+  <div class="logo">CICLI <span>APERTI</span></div>
   <div class="week-nav">
     <button onclick="changeWeek(-1)" title="Settimana precedente (←)">‹</button>
     <div class="week-label" id="weekLabel">Sett. 00</div>
@@ -337,6 +407,11 @@ header { display: flex; align-items: center; justify-content: space-between; pad
   <div class="ctx-switch">
     <button id="ctx-lavoro" onclick="switchCtx('lavoro')">💼 Lavoro</button>
     <button id="ctx-personale" onclick="switchCtx('personale')">🌿 Personale</button>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Cerca cicli, persone..." autocomplete="off" oninput="onSearchInput(this.value)">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none" title="Svuota ricerca">✕</button>
   </div>
   <div class="header-actions">
     <button class="btn-plaud" onclick="openPlaudModal()" title="Importa da Plaud (Cmd+P)">🎙 <span>Plaud</span></button>
@@ -505,8 +580,15 @@ header { display: flex; align-items: center; justify-content: space-between; pad
         <input type="number" class="form-input" id="f-week" min="1" max="53" placeholder="Es. 24">
       </div>
       <div class="form-group">
-        <label class="form-label">Persone coinvolte</label>
-        <input type="text" class="form-input" id="f-persone" placeholder="Mario, Anna (separati da virgola)">
+        <label class="form-label">Con chi</label>
+        <div class="persona-chips-wrap">
+          <div class="persona-chips-box" id="personaChipsBox" onclick="document.getElementById('personaChipInput').focus()">
+            <input type="text" class="pchip-input" id="personaChipInput" placeholder="Cerca persona..." autocomplete="off"
+              oninput="onPersonaChipInput(this.value)"
+              onkeydown="onPersonaChipKey(event)">
+          </div>
+          <div class="persona-dd" id="personaDd" style="display:none"></div>
+        </div>
       </div>
     </div>
     <div class="modal-actions">
@@ -634,15 +716,18 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 // STATE
 // ══════════════════════════════════════════════════════════════
 let state = {
-  ctx:            localStorage.getItem(LS.CTX)  || 'lavoro',
-  week:           parseInt(localStorage.getItem(LS.WEEK)) || getWeekNumber(new Date()),
-  year:           new Date().getFullYear(),
-  view:           localStorage.getItem(LS.VIEW) || 'matrix',
-  filter_cat:     localStorage.getItem(LS.CAT_FILTER) || null,
-  filter_persona: null,
-  cicli:          [],
-  persone:        [],
-  loading:        true
+  ctx:              localStorage.getItem(LS.CTX)  || 'lavoro',
+  week:             parseInt(localStorage.getItem(LS.WEEK)) || getWeekNumber(new Date()),
+  year:             new Date().getFullYear(),
+  view:             localStorage.getItem(LS.VIEW) || 'matrix',
+  filter_cat:       localStorage.getItem(LS.CAT_FILTER) || null,
+  filter_persona:   null,
+  cicli:            [],
+  persone:          [],
+  categorie:        [],
+  loading:          true,
+  searchQuery:      '',
+  personaDetailId:  null
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -712,14 +797,16 @@ async function loadAll() {
   if (state.view === 'matrix') renderSkeleton();
 
   try {
-    const [r1, r2] = await Promise.all([
+    const [r1, r2, r3] = await Promise.all([
       db.from('cicli').select('*').order('created_at', { ascending: false }),
-      db.from('persone').select('*').order('nome')
+      db.from('persone').select('*').order('nome'),
+      db.from('categorie').select('*').order('ordine').catch(() => ({ data: [], error: null }))
     ]);
     if (r1.error) throw r1.error;
     if (r2.error) throw r2.error;
-    state.cicli   = r1.data || [];
-    state.persone = r2.data || [];
+    state.cicli     = r1.data || [];
+    state.persone   = r2.data || [];
+    state.categorie = r3.data || [];
   } catch (e) {
     showToast('Errore Supabase: ' + e.message, 'error');
   }
@@ -755,8 +842,9 @@ async function flipDone(id, currentDone) {
 // REALTIME
 // ══════════════════════════════════════════════════════════════
 db.channel('cicli-changes')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'cicli' },   () => loadAll())
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'persone' }, () => loadAll())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'cicli' },     () => loadAll())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'persone' },   () => loadAll())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'categorie' }, () => loadAll())
   .subscribe(status => {
     if (status === 'SUBSCRIBED') console.log('[Realtime] connesso');
   });
@@ -833,8 +921,19 @@ function renderViews() {
   });
 
   const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA' };
+  document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
+
+  if (state.searchQuery) {
+    document.getElementById('viewTitle').textContent = 'RICERCA';
+    views.forEach(v => { const el = document.getElementById('view-' + v); if (el) el.style.display = 'none'; });
+    document.getElementById('view-list').style.display = 'block';
+    renderSearchResults();
+    renderSummary([]);
+    renderEscalationNotices([]);
+    return;
+  }
+
   document.getElementById('viewTitle').textContent = titles[state.view] || '';
-  document.getElementById('legend-bar').style.display = state.view === 'matrix' ? 'flex' : 'none';
 
   if (state.view === 'guida') { renderGuida(); return; }
 
@@ -847,7 +946,7 @@ function renderViews() {
 
   if (state.view === 'matrix')  renderMatrix(filtered);
   if (state.view === 'list')    renderList(filtered);
-  if (state.view === 'persone') renderPersone(allCtx);
+  if (state.view === 'persone') renderPersone();
   if (state.view === 'storico') renderStorico(allCtx);
 }
 
@@ -902,50 +1001,164 @@ function renderList(filtered) {
   sorted.forEach(c => lv.appendChild(makeCicloCard(c, 'list')));
 }
 
-function renderPersone(allCtx) {
+function personColor(p) {
+  if (p && p.colore) return p.colore;
+  const colors = ['#3d7fff','#a855f7','#ec4899','#22c55e','#f59e0b','#14b8a6','#6366f1','#ef4444','#f97316','#0ea5e9'];
+  const nome = (p && p.nome) ? p.nome : (p || '');
+  let h = 0; for (const c of nome) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
+  return colors[Math.abs(h) % colors.length];
+}
+
+function cicliForPersona(nome) {
+  return state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(nome));
+}
+
+function renderPersone() {
   const pv = document.getElementById('view-persone');
   if (!pv) return;
   pv.innerHTML = '';
 
-  const map = {};
-  allCtx.filter(c => !c.done).forEach(c => {
-    (c.persone_menzionate || []).forEach(nome => {
-      if (!nome) return;
-      if (!map[nome]) map[nome] = [];
-      map[nome].push(c);
-    });
-  });
-
-  const nomi = Object.keys(map).sort();
-  if (!nomi.length) {
-    pv.innerHTML = '<div class="empty-state">Nessuna persona menzionata nei cicli attivi.<br>Importa da Plaud o aggiungi persone nei cicli.</div>';
+  if (state.personaDetailId !== null) {
+    renderPersonaDetail(pv);
     return;
   }
 
-  nomi.forEach(nome => {
-    const card = document.createElement('div');
-    card.className = 'persona-card' + (state.filter_persona === nome ? ' active' : '');
-    card.onclick = () => filterByPersona(nome);
+  // Add person button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-persona-btn';
+  addBtn.innerHTML = '+ Aggiungi persona';
+  addBtn.onclick = () => renderAddPersonaForm(pv);
+  pv.appendChild(addBtn);
 
+  const persone = state.persone;
+  if (!persone.length) {
+    pv.innerHTML += '<div class="empty-state">Nessuna persona salvata.<br>Aggiungi persone con il pulsante sopra o importa da Plaud.</div>';
+    return;
+  }
+
+  persone.forEach(p => {
+    const cicli = cicliForPersona(p.nome);
+    const col = personColor(p);
+    const card = document.createElement('div');
+    card.className = 'persona-card';
+    card.style.cursor = 'pointer';
+    card.onclick = () => { state.personaDetailId = p.id; render(); };
     card.innerHTML = `
       <div class="persona-header">
-        <div class="persona-avatar">${escHtml(nome.charAt(0).toUpperCase())}</div>
-        <div>
-          <div class="persona-nome">${escHtml(nome)}</div>
-          <div class="persona-count">${map[nome].length} ciclo/i aperti</div>
+        <div class="persona-avatar" style="background:${col}22;color:${col}">${escHtml((p.nome||'?').charAt(0).toUpperCase())}</div>
+        <div style="flex:1">
+          <div class="persona-nome">${escHtml(p.nome)}</div>
+          ${p.ruolo ? `<div class="persona-ruolo-tag">${escHtml(p.ruolo)}</div>` : ''}
+          <div class="persona-count">${cicli.length} ciclo/i aperti</div>
         </div>
-      </div>
-    `;
-
-    if (state.filter_persona === nome) {
-      const listEl = document.createElement('div');
-      listEl.className = 'persona-cicli';
-      map[nome].forEach(c => listEl.appendChild(makeCicloCard(c, 'list')));
-      card.appendChild(listEl);
-    }
-
+      </div>`;
     pv.appendChild(card);
   });
+}
+
+function renderPersonaDetail(pv) {
+  const p = state.persone.find(x => x.id === state.personaDetailId);
+  if (!p) { state.personaDetailId = null; renderPersone(); return; }
+
+  const col = personColor(p);
+  const allCicli = state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(p.nome));
+
+  const back = document.createElement('button');
+  back.className = 'persona-back-btn';
+  back.innerHTML = '← Torna alle persone';
+  back.onclick = () => { state.personaDetailId = null; render(); };
+  pv.appendChild(back);
+
+  const header = document.createElement('div');
+  header.className = 'persona-detail-header';
+  header.innerHTML = `
+    <div class="persona-avatar-lg" style="background:${col}22;color:${col}">${escHtml((p.nome||'?').charAt(0).toUpperCase())}</div>
+    <div class="persona-detail-info" style="flex:1">
+      <h2>${escHtml(p.nome)}</h2>
+      ${p.ruolo ? `<div class="p-ruolo">${escHtml(p.ruolo)}</div>` : ''}
+      <div class="p-cicli-cnt">${allCicli.length} cicli aperti totali</div>
+    </div>`;
+  pv.appendChild(header);
+
+  if (!allCicli.length) {
+    pv.innerHTML += '<div class="empty-state">Nessun ciclo aperto associato a questa persona.</div>';
+    return;
+  }
+
+  const byQ = { 1: [], 2: [], 3: [], 4: [] };
+  allCicli.forEach(c => { const q = computeEffectiveQ(c); if (byQ[q]) byQ[q].push(c); });
+  const qLabels = { 1:'🔥 Q1 — Crisi', 2:'📌 Q2 — Qualità', 3:'📋 Q3 — Inganno', 4:'🗑 Q4 — Spreco' };
+  const qColors = { 1:'var(--q1)', 2:'var(--q2)', 3:'var(--q3)', 4:'var(--q4)' };
+
+  [1,2,3,4].forEach(q => {
+    if (!byQ[q].length) return;
+    const sec = document.createElement('div');
+    sec.className = 'persona-q-section';
+    const title = document.createElement('div');
+    title.className = 'persona-q-title';
+    title.style.color = qColors[q];
+    title.textContent = qLabels[q];
+    sec.appendChild(title);
+    byQ[q].forEach(c => {
+      const card = makeCicloCard(c, 'list');
+      // add ctx tag to the card
+      const ctxTag = document.createElement('span');
+      ctxTag.className = `ciclo-ctx-tag ${c.ctx}`;
+      ctxTag.textContent = c.ctx === 'lavoro' ? '💼' : '🌿';
+      card.appendChild(ctxTag);
+      sec.appendChild(card);
+    });
+    pv.appendChild(sec);
+  });
+}
+
+function renderAddPersonaForm(pv) {
+  if (document.getElementById('addPersonaForm')) return;
+  const COLORS = ['#3d7fff','#a855f7','#ec4899','#22c55e','#f59e0b','#14b8a6','#6366f1','#ef4444','#f97316','#0ea5e9'];
+  let selColor = COLORS[0];
+
+  const form = document.createElement('div');
+  form.className = 'add-persona-form';
+  form.id = 'addPersonaForm';
+  form.innerHTML = `
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Nome</label>
+      <input type="text" class="form-input" id="apf-nome" placeholder="Nome persona..." autocomplete="off">
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Ruolo (opzionale)</label>
+      <input type="text" class="form-input" id="apf-ruolo" placeholder="Es. Collega, Cliente...">
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Colore avatar</label>
+      <div class="color-picker-row" id="apf-colors">
+        ${COLORS.map((c,i) => `<div class="color-swatch${i===0?' selected':''}" style="background:${c}" data-color="${c}" onclick="apfSelectColor(this,'${c}')"></div>`).join('')}
+      </div>
+    </div>
+    <div class="cat-form-actions">
+      <button class="cat-form-save" onclick="saveNewPersona()">Salva</button>
+      <button class="cat-form-cancel" onclick="document.getElementById('addPersonaForm').remove()">Annulla</button>
+    </div>`;
+  pv.insertBefore(form, pv.firstChild.nextSibling);
+}
+
+function apfSelectColor(el, color) {
+  document.querySelectorAll('#apf-colors .color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  el._selColor = color;
+}
+
+async function saveNewPersona() {
+  const nome = (document.getElementById('apf-nome')?.value || '').trim();
+  if (!nome) { showToast('Inserisci un nome', 'warn'); return; }
+  const ruolo = (document.getElementById('apf-ruolo')?.value || '').trim();
+  const selSwatch = document.querySelector('#apf-colors .color-swatch.selected');
+  const colore = selSwatch ? selSwatch.dataset.color : '#3d7fff';
+  try {
+    const { error } = await db.from('persone').insert({ nome, ruolo: ruolo||null, colore, created_at: new Date().toISOString() });
+    if (error) throw error;
+    showToast('Persona aggiunta ✓', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 
 function renderStorico(allCtx) {
@@ -981,6 +1194,73 @@ function renderStorico(allCtx) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════════════════════
+let _searchDebounce = null;
+
+function onSearchInput(val) {
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => {
+    state.searchQuery = val.trim();
+    const clearBtn = document.getElementById('searchClear');
+    if (clearBtn) clearBtn.style.display = state.searchQuery ? 'flex' : 'none';
+    render();
+  }, 300);
+}
+
+function clearSearch() {
+  const inp = document.getElementById('searchInput');
+  if (inp) inp.value = '';
+  const clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  state.searchQuery = '';
+  render();
+}
+
+function highlightTerm(text, term) {
+  if (!term || !text) return escHtml(text || '');
+  const escaped = escHtml(text);
+  const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return escaped.replace(re, '<mark class="hl">$1</mark>');
+}
+
+function renderSearchResults() {
+  const lv = document.getElementById('view-list');
+  if (!lv) return;
+  lv.innerHTML = '';
+  const q = state.searchQuery.toLowerCase();
+
+  const results = state.cicli.filter(c => !c.done && (
+    (c.title || '').toLowerCase().includes(q) ||
+    (c.note  || '').toLowerCase().includes(q) ||
+    (c.cat   || '').toLowerCase().includes(q) ||
+    (CAT_LABELS[c.cat] || '').toLowerCase().includes(q) ||
+    (c.persone_menzionate || []).some(n => n.toLowerCase().includes(q))
+  ));
+
+  const header = document.createElement('div');
+  header.className = 'search-result-header';
+  header.innerHTML = results.length
+    ? `<strong>${results.length}</strong> ciclo/i trovati per "<strong>${escHtml(state.searchQuery)}</strong>"`
+    : `Nessun ciclo trovato per "<strong>${escHtml(state.searchQuery)}</strong>"`;
+  lv.appendChild(header);
+
+  if (!results.length) {
+    lv.innerHTML += '<div class="empty-state">Prova con un termine diverso.</div>';
+    return;
+  }
+
+  const sorted = [...results].sort((a, b) => computeEffectiveQ(a) - computeEffectiveQ(b));
+  sorted.forEach(c => {
+    const card = makeCicloCard(c, 'list');
+    // Highlight matching title
+    const titleEl = card.querySelector('div[style*="text-overflow"]');
+    if (titleEl) titleEl.innerHTML = highlightTerm(c.title, state.searchQuery);
+    lv.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
 // SIDEBAR
 // ══════════════════════════════════════════════════════════════
 function renderSidebar() {
@@ -989,9 +1269,10 @@ function renderSidebar() {
 
   const isP = state.ctx === 'personale';
   const allCtx = state.cicli.filter(c => c.ctx === state.ctx);
-  const cats = isP
+  const builtinCats = isP
     ? ['salute','relazioni','finanze','crescita','hobbies','spiritualita','casa','idee']
     : ['management','hr','marketing','vendite','amministrazione','produzione','rnd','da-delegare','idee'];
+  const customCats = state.categorie.filter(c => c.ctx === state.ctx);
 
   const VIEW_TIPS = {
     matrix:  'Visualizza i cicli nella matrice di Eisenhower divisi per urgenza e priorità',
@@ -1011,13 +1292,24 @@ function renderSidebar() {
     </div>`;
   }).join('');
 
-  const catItems = cats.map(cat => {
+  const builtinItems = builtinCats.map(cat => {
     const cnt = allCtx.filter(c => c.cat === cat && !c.done).length;
     const active = state.filter_cat === cat;
     return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('${cat}')">
       <span>${CAT_EMOJIS[cat]||'•'}</span>${CAT_LABELS[cat]||cat}
       <span class="sidebar-count">${cnt||0}</span>
-      <span class="tip-icon" data-tip="Filtra i cicli per la categoria ${CAT_LABELS[cat]||cat}">i</span>
+    </div>`;
+  }).join('');
+
+  const customItems = customCats.map(cat => {
+    const cnt = allCtx.filter(c => c.cat === 'custom_'+cat.id && !c.done).length;
+    const active = state.filter_cat === 'custom_'+cat.id;
+    const canDel = cnt === 0;
+    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('custom_${cat.id}')">
+      <span>${cat.emoji||'•'}</span>${escHtml(cat.nome)}
+      <span class="sidebar-count">${cnt}</span>
+      <span class="sidebar-edit-icon" onclick="event.stopPropagation();editCatInline(${cat.id})" title="Modifica">✏️</span>
+      ${canDel ? `<span class="sidebar-edit-icon" onclick="event.stopPropagation();deleteCat(${cat.id})" title="Elimina">🗑</span>` : ''}
     </div>`;
   }).join('');
 
@@ -1035,8 +1327,11 @@ function renderSidebar() {
         <div class="cat-dot" style="background:var(--${isP?'personale':'lavoro'})"></div>Tutti
         <span class="sidebar-count">${totalActive}</span>
       </div>
-      ${catItems}
+      ${builtinItems}
+      ${customItems}
     </div>
+    <button class="cat-add-btn" id="catAddBtn" onclick="toggleCatForm()">+ Categoria</button>
+    <div id="catInlineForm" style="display:none"></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Stato</div>
       <div class="sidebar-item" onclick="switchView('storico')">
@@ -1185,6 +1480,190 @@ function makeCicloCard(c, mode) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// CATEGORIE CUSTOM
+// ══════════════════════════════════════════════════════════════
+const CAT_EMOJIS_LIST = ['🔥','📋','🗂','💼','💰','📝','📅','🤝','🏢','⚙️','🧘','🐉','🛡','📊','✅','❤️','💪','💶','📚','🌙','🏡','⚽','📈','💡','🎯','👥','📣','🔬','📤','⭐'];
+let _catFormCtx = 'lavoro';
+let _catFormEmoji = '📋';
+let _catEditId = null;
+
+function toggleCatForm(editData) {
+  const wrap = document.getElementById('catInlineForm');
+  const btn  = document.getElementById('catAddBtn');
+  if (!wrap) return;
+  if (wrap.style.display !== 'none' && !editData) { wrap.style.display = 'none'; return; }
+  _catFormCtx   = editData?.ctx   || state.ctx;
+  _catFormEmoji = editData?.emoji || '📋';
+  _catEditId    = editData?.id    || null;
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <div class="cat-inline-form">
+      <div style="margin-bottom:6px">
+        <label class="form-label" style="font-size:10px">Nome</label>
+        <input type="text" class="form-input" id="catf-nome" value="${escHtml(editData?.nome||'')}" placeholder="Nome categoria..." autocomplete="off" style="font-size:12px;padding:7px 10px">
+      </div>
+      <label class="form-label" style="font-size:10px">Emoji</label>
+      <div class="emoji-grid" id="catf-emojis">
+        ${CAT_EMOJIS_LIST.map(e => `<button type="button" class="emoji-btn${e===_catFormEmoji?' sel':''}" onclick="selectCatEmoji('${e}',this)">${e}</button>`).join('')}
+      </div>
+      <label class="form-label" style="font-size:10px">Contesto</label>
+      <div class="cat-ctx-toggle">
+        <button type="button" class="cat-ctx-btn lavoro${_catFormCtx==='lavoro'?' sel':''}" id="catf-ctx-lav" onclick="setCatCtx('lavoro')">💼 Lavoro</button>
+        <button type="button" class="cat-ctx-btn personale${_catFormCtx==='personale'?' sel':''}" id="catf-ctx-per" onclick="setCatCtx('personale')">🌿 Personale</button>
+      </div>
+      <div class="cat-form-actions">
+        <button class="cat-form-save" onclick="saveCatForm()">Salva</button>
+        <button class="cat-form-cancel" onclick="document.getElementById('catInlineForm').style.display='none'">Annulla</button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('catf-nome')?.focus(), 100);
+}
+
+function selectCatEmoji(e, btn) {
+  _catFormEmoji = e;
+  document.querySelectorAll('#catf-emojis .emoji-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function setCatCtx(ctx) {
+  _catFormCtx = ctx;
+  document.getElementById('catf-ctx-lav')?.classList.toggle('sel', ctx==='lavoro');
+  document.getElementById('catf-ctx-per')?.classList.toggle('sel', ctx==='personale');
+}
+
+async function saveCatForm() {
+  const nome = (document.getElementById('catf-nome')?.value||'').trim();
+  if (!nome) { showToast('Inserisci un nome', 'warn'); return; }
+  const ordine = state.categorie.length;
+  try {
+    if (_catEditId) {
+      const { error } = await db.from('categorie').update({ nome, emoji:_catFormEmoji, ctx:_catFormCtx }).eq('id', _catEditId);
+      if (error) throw error;
+    } else {
+      const { error } = await db.from('categorie').insert({ nome, emoji:_catFormEmoji, ctx:_catFormCtx, ordine, created_at: new Date().toISOString() });
+      if (error) throw error;
+    }
+    document.getElementById('catInlineForm').style.display = 'none';
+    showToast(_catEditId ? 'Categoria aggiornata ✓' : 'Categoria aggiunta ✓', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+async function deleteCat(id) {
+  if (!confirm('Eliminare questa categoria?')) return;
+  try {
+    const { error } = await db.from('categorie').delete().eq('id', id);
+    if (error) throw error;
+    showToast('Categoria eliminata', 'info');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+function editCatInline(id) {
+  const cat = state.categorie.find(c => c.id === id);
+  if (!cat) return;
+  toggleCatForm(cat);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PERSONA CHIPS IN MODAL
+// ══════════════════════════════════════════════════════════════
+let _modalPersone = [];  // array of {id, nome, colore}
+
+function initPersonaChips(persone_menzionate) {
+  _modalPersone = [];
+  (persone_menzionate || []).forEach(nome => {
+    const p = state.persone.find(x => x.nome === nome);
+    _modalPersone.push(p ? { id: p.id, nome: p.nome, colore: personColor(p) } : { id: null, nome, colore: personColor({nome}) });
+  });
+  renderPersonaChips();
+}
+
+function renderPersonaChips() {
+  const box = document.getElementById('personaChipsBox');
+  const input = document.getElementById('personaChipInput');
+  if (!box || !input) return;
+  const chips = _modalPersone.map(p => {
+    const col = p.colore || '#3d7fff';
+    return `<span class="pchip" style="background:${col}22;color:${col}">
+      <span class="pchip-av" style="background:${col};color:white">${escHtml((p.nome||'').charAt(0).toUpperCase())}</span>
+      ${escHtml(p.nome)}
+      <span class="pchip-rm" onclick="removePersonaChip('${escHtml(p.nome)}')">✕</span>
+    </span>`;
+  }).join('');
+  // Rebuild box preserving input
+  const existing = box.querySelectorAll('.pchip');
+  existing.forEach(el => el.remove());
+  box.insertAdjacentHTML('afterbegin', chips);
+}
+
+function removePersonaChip(nome) {
+  _modalPersone = _modalPersone.filter(p => p.nome !== nome);
+  renderPersonaChips();
+}
+
+function onPersonaChipInput(val) {
+  const dd = document.getElementById('personaDd');
+  if (!val.trim()) { if (dd) dd.style.display = 'none'; return; }
+  const q = val.toLowerCase();
+  const already = _modalPersone.map(p => p.nome);
+  const matches = state.persone.filter(p => p.nome.toLowerCase().includes(q) && !already.includes(p.nome));
+  const showCreate = !state.persone.some(p => p.nome.toLowerCase() === q);
+  if (!dd) return;
+  if (!matches.length && !showCreate) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = matches.slice(0,6).map(p => {
+    const col = personColor(p);
+    return `<div class="persona-dd-item" onclick="selectPersonaFromDd('${escHtml(p.nome)}')">
+      <div class="persona-dd-av" style="background:${col};color:white">${escHtml(p.nome.charAt(0).toUpperCase())}</div>
+      <span>${escHtml(p.nome)}</span>${p.ruolo ? `<span style="font-size:10px;color:var(--text-dim)">${escHtml(p.ruolo)}</span>` : ''}
+    </div>`;
+  }).join('') + (showCreate ? `<div class="persona-dd-item persona-dd-create" onclick="createAndSelectPersona('${escHtml(val.trim())}')">+ Crea "${escHtml(val.trim())}"</div>` : '');
+}
+
+function selectPersonaFromDd(nome) {
+  const p = state.persone.find(x => x.nome === nome);
+  if (!_modalPersone.some(x => x.nome === nome)) {
+    _modalPersone.push(p ? { id: p.id, nome: p.nome, colore: personColor(p) } : { id: null, nome, colore: personColor({nome}) });
+    renderPersonaChips();
+  }
+  const inp = document.getElementById('personaChipInput');
+  if (inp) { inp.value = ''; }
+  const dd = document.getElementById('personaDd');
+  if (dd) dd.style.display = 'none';
+}
+
+async function createAndSelectPersona(nome) {
+  try {
+    const colore = personColor({nome});
+    const { data, error } = await db.from('persone').insert({ nome, colore, created_at: new Date().toISOString() }).select().single();
+    if (error) throw error;
+    state.persone.push(data);
+    selectPersonaFromDd(nome);
+    showToast(`Persona "${nome}" creata ✓`, 'success');
+  } catch (e) {
+    selectPersonaFromDd(nome);
+  }
+}
+
+function onPersonaChipKey(e) {
+  if (e.key === 'Backspace' && !e.target.value && _modalPersone.length) {
+    _modalPersone = _modalPersone.slice(0, -1);
+    renderPersonaChips();
+  }
+  if (e.key === 'Escape') {
+    const dd = document.getElementById('personaDd');
+    if (dd) dd.style.display = 'none';
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.persona-chips-wrap')) {
+    const dd = document.getElementById('personaDd');
+    if (dd) dd.style.display = 'none';
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
 // MODAL NUOVO/MODIFICA CICLO
 // ══════════════════════════════════════════════════════════════
 let editingId  = null;
@@ -1207,24 +1686,24 @@ function openModal(defaultQ, editId) {
     const c = state.cicli.find(x => x.id === editId);
     if (!c) return;
     title.textContent = 'MODIFICA CICLO';
-    document.getElementById('f-title').value   = c.title || '';
-    document.getElementById('f-note').value    = c.note  || '';
-    document.getElementById('f-cat').value     = c.cat   || 'management';
-    document.getElementById('f-date').value    = c.due_date || '';
-    document.getElementById('f-week').value    = c.week  || state.week;
-    document.getElementById('f-persone').value = (c.persone_menzionate || []).join(', ');
+    document.getElementById('f-title').value = c.title || '';
+    document.getElementById('f-note').value  = c.note  || '';
+    document.getElementById('f-cat').value   = c.cat   || 'management';
+    document.getElementById('f-date').value  = c.due_date || '';
+    document.getElementById('f-week').value  = c.week  || state.week;
     selectedQ = c.q || 2;
     modalCtx  = c.ctx || state.ctx;
     btnDel.style.display = 'block';
+    initPersonaChips(c.persone_menzionate || []);
   } else {
     title.textContent = 'NUOVO CICLO APERTO';
-    document.getElementById('f-title').value   = '';
-    document.getElementById('f-note').value    = '';
-    document.getElementById('f-cat').value     = state.ctx === 'personale' ? 'salute' : 'management';
-    document.getElementById('f-date').value    = '';
-    document.getElementById('f-week').value    = state.week;
-    document.getElementById('f-persone').value = '';
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-note').value  = '';
+    document.getElementById('f-cat').value   = state.ctx === 'personale' ? 'salute' : 'management';
+    document.getElementById('f-date').value  = '';
+    document.getElementById('f-week').value  = state.week;
     btnDel.style.display = 'none';
+    initPersonaChips([]);
   }
 
   setModalCtx(modalCtx);
@@ -1265,8 +1744,7 @@ async function saveCiclo() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { showToast('Inserisci un titolo', 'warn'); return; }
 
-  const personeRaw = document.getElementById('f-persone').value.trim();
-  const persone_menzionate = personeRaw ? personeRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const persone_menzionate = _modalPersone.map(p => p.nome).filter(Boolean);
 
   const data = {
     title,
@@ -1702,6 +2180,7 @@ const GUIDA_SECTIONS = [
     content: `
       <ul>
         <li><span class="guida-kbd">Cmd+K</span> / <span class="guida-kbd">Ctrl+K</span> — Nuovo ciclo</li>
+        <li><span class="guida-kbd">Cmd+F</span> / <span class="guida-kbd">Ctrl+F</span> — Ricerca globale</li>
         <li><span class="guida-kbd">Cmd+P</span> / <span class="guida-kbd">Ctrl+P</span> — Import Plaud</li>
         <li><span class="guida-kbd">←</span> / <span class="guida-kbd">→</span> — Settimana precedente / successiva</li>
         <li><span class="guida-kbd">Escape</span> — Chiudi modale aperto</li>
@@ -1761,6 +2240,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') { e.preventDefault(); changeWeek(1); }
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
   if ((e.metaKey || e.ctrlKey) && e.key === 'p') { e.preventDefault(); openPlaudModal(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); const si = document.getElementById('searchInput'); if (si) { si.focus(); si.select(); } }
 });
 
 document.addEventListener('keydown', e => {
