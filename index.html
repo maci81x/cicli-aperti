@@ -956,7 +956,7 @@ function renderViews() {
   if (state.filter_cat) {
     const hasMatch = nonDoneCtx.some(c => c.cat === state.filter_cat);
     if (!hasMatch) {
-      console.warn('[cicli] filter_cat stale "' + state.filter_cat + '" azzerato (0 match su ' + nonDoneCtx.length + ' cicli)');
+
       state.filter_cat = null;
       state.filter_persona = null;
       localStorage.setItem(LS.CAT_FILTER, '');
@@ -967,8 +967,6 @@ function renderViews() {
   const matrixBase   = applyFilters(nonDoneCtx);
   // Lista: solo cicli della settimana selezionata
   const listFiltered = applyFilters(weekCtx);
-
-  console.log('[cicli] ctx=' + state.ctx + ' filter_cat=' + state.filter_cat + ' | totale non-done=' + nonDoneCtx.length + ' | matrixBase=' + matrixBase.length + ' | listFiltered=' + listFiltered.length);
 
   const filtered = state.view === 'list' ? listFiltered : matrixBase;
 
@@ -1007,12 +1005,10 @@ function renderEscalationNotices(filtered) {
 }
 
 function renderMatrix(filtered) {
-  console.log('[cicli] renderMatrix input=' + filtered.length, filtered.map(c => 'Q'+c.q+':'+c.title));
   for (let q = 1; q <= 4; q++) {
     const items = filtered.filter(c => computeEffectiveQ(c) === q);
-    console.log('[cicli] Q' + q + ' → ' + items.length + ' item/s');
     const el = document.getElementById('q'+q+'-list');
-    if (!el) { console.error('[cicli] q'+q+'-list element NOT FOUND'); continue; }
+    if (!el) continue;
     el.innerHTML = '';
     if (!items.length) { el.innerHTML = '<div class="empty-state">Nessun ciclo</div>'; continue; }
     items.forEach(c => el.appendChild(makeCicloCard(c, 'matrix')));
