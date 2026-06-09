@@ -1,2293 +1,549 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cicli Aperti — Roby</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --bg: #0e0f11; --bg2: #161719; --bg3: #1e2023;
-  --border: #2a2d32; --border-light: #363a40;
-  --text: #e8eaed; --text-muted: #7a8290; --text-dim: #4a5060;
-  --lavoro: #3d7fff; --lavoro-dim: rgba(61,127,255,0.12);
-  --personale: #a855f7; --personale-dim: rgba(168,85,247,0.12);
-  --q1: #ef4444; --q1-dim: rgba(239,68,68,0.12);
-  --q2: #3d7fff; --q2-dim: rgba(61,127,255,0.12);
-  --q3: #f59e0b; --q3-dim: rgba(245,158,11,0.12);
-  --q4: #4a5060; --q4-dim: rgba(74,80,96,0.12);
-  --escalation1: #f97316; --escalation2: #ef4444;
-  --radius: 10px; --radius-sm: 6px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background-color 0.2s, color 0.2s; }
-body * { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
-
-/* ── LIGHT MODE ── */
-body.light { --bg: #f5f6f8; --bg2: #ffffff; --bg3: #eef0f4; --border: #e2e6ed; --border-light: #cdd3dc; --text: #1a1d23; --text-muted: #6b7280; --text-dim: #9ca3af; }
-body.light header { background: rgba(245,246,248,0.96); }
-
-/* ── HEADER ── */
-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(14,15,17,0.96); backdrop-filter: blur(12px); z-index: 100; gap: 12px; }
-.logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; white-space: nowrap; }
-.logo span { color: var(--lavoro); }
-.week-nav { display: flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
-.week-nav button { background: var(--bg3); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.week-nav button:hover { background: var(--border); }
-.week-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); min-width: 120px; text-align: center; }
-.ctx-switch { display: flex; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.ctx-switch button { padding: 7px 14px; background: transparent; border: none; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.ctx-switch button.active-lavoro { background: var(--lavoro-dim); color: var(--lavoro); border-right: 1px solid var(--border); }
-.ctx-switch button.active-personale { background: var(--personale-dim); color: var(--personale); }
-.header-actions { display: flex; gap: 8px; align-items: center; }
-.btn-primary { background: var(--lavoro); color: white; border: none; padding: 8px 14px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-.btn-primary.personale-ctx { background: var(--personale); }
-.btn-plaud { background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 14px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
-.btn-plaud:hover { background: var(--border); color: var(--text); }
-
-/* ── LAYOUT ── */
-.app-body { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 65px); }
-.sidebar { border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 65px; height: calc(100vh - 65px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); padding: 8px 18px 4px; }
-.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 18px; cursor: pointer; font-size: 13px; color: var(--text-muted); transition: all 0.12s; border-left: 2px solid transparent; }
-.sidebar-item:hover { background: var(--bg3); color: var(--text); }
-.sidebar-item.active { background: var(--bg3); color: var(--text); border-left-color: var(--lavoro); }
-.sidebar-item.active.personale { border-left-color: var(--personale); }
-.cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.sidebar-count { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg); padding: 1px 6px; border-radius: 20px; border: 1px solid var(--border); }
-.content { padding: 28px; overflow-y: auto; }
-
-/* ── SUMMARY ── */
-.week-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-.summary-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
-.summary-card .s-num { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; margin-bottom: 4px; }
-.summary-card .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); }
-.summary-card.q1 .s-num { color: var(--q1); } .summary-card.q2 .s-num { color: var(--q2); }
-.summary-card.q3 .s-num { color: var(--q3); } .summary-card.q4 .s-num { color: var(--q4); }
-
-/* ── ESCALATION ── */
-.escalation-notice { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: var(--escalation1); display: flex; align-items: center; gap: 8px; }
-.escalation-notice.crit { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); color: var(--q1); }
-.escalation-notice.hidden { display: none; }
-
-/* ── VIEW HEADER ── */
-.view-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
-.view-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1.5px; }
-.view-controls { display: flex; gap: 6px; flex-wrap: wrap; }
-.view-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
-.view-btn:hover { background: var(--border); color: var(--text); }
-.view-btn.active { background: var(--lavoro); color: white; border-color: var(--lavoro); }
-.view-btn.active.personale { background: var(--personale); border-color: var(--personale); }
-
-/* ── LEGEND ── */
-.legend { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
-.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-
-/* ── MATRIX ── */
-.matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-.matrix-axes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 6px; }
-.axis-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); text-align: center; }
-.quadrant { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; min-height: 200px; transition: border-color 0.15s; position: relative; overflow: hidden; }
-.quadrant::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-.quadrant.q1::before { background: var(--q1); } .quadrant.q2::before { background: var(--q2); }
-.quadrant.q3::before { background: var(--q3); } .quadrant.q4::before { background: var(--q4); }
-.quadrant:hover { border-color: var(--border-light); }
-.q-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
-.q-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-.q1 .q-title { color: var(--q1); } .q2 .q-title { color: var(--q2); }
-.q3 .q-title { color: var(--q3); } .q4 .q-title { color: var(--q4); }
-.q-subtitle { font-size: 10px; color: var(--text-dim); margin-top: 2px; font-style: italic; }
-.q-count { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--text-dim); line-height: 1; }
-.q1 .q-count { color: var(--q1); } .q2 .q-count { color: var(--q2); } .q3 .q-count { color: var(--q3); }
-.q-add { width: 100%; background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 8px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; margin-top: 10px; text-align: left; display: flex; align-items: center; gap: 6px; }
-.q-add:hover { border-color: var(--border-light); color: var(--text-muted); background: var(--bg3); }
-
-/* ── CICLO CARD ── */
-.ciclo-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.12s; position: relative; overflow: hidden; }
-.ciclo-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
-.ciclo-card.done { opacity: 0.4; }
-.escalation-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-.ciclo-card.esc-warn .escalation-bar { background: var(--escalation1); }
-.ciclo-card.esc-crit .escalation-bar { background: var(--escalation2); }
-.esc-pill { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
-.ciclo-card.esc-warn .esc-pill { background: rgba(249,115,22,0.18); color: var(--escalation1); }
-.ciclo-card.esc-crit .esc-pill { background: rgba(239,68,68,0.18); color: var(--escalation2); }
-.ciclo-top { display: flex; align-items: flex-start; gap: 8px; }
-.ciclo-check { width: 16px; height: 16px; border: 1.5px solid var(--border-light); border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.12s; }
-.ciclo-check:hover { border-color: var(--text-muted); }
-.ciclo-check.checked { background: #22c55e; border-color: #22c55e; }
-.ciclo-check.checked::after { content: '✓'; color: white; font-size: 10px; }
-.ciclo-title { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.4; }
-.ciclo-meta { display: flex; align-items: center; gap: 8px; margin-top: 7px; flex-wrap: wrap; }
-.meta-tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 500; white-space: nowrap; }
-.ciclo-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-left: auto; }
-.ciclo-date.near { color: var(--escalation1); }
-.ciclo-date.urgent { color: var(--escalation2); font-weight: 700; }
-
-/* ── LIST ITEM ── */
-.list-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; transition: all 0.12s; }
-.list-item:hover { border-color: var(--border-light); background: var(--bg3); }
-.list-item.done { opacity: 0.4; }
-.q-badge { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-.q-badge.q1 { background: var(--q1-dim); color: var(--q1); }
-.q-badge.q2 { background: var(--q2-dim); color: var(--q2); }
-.q-badge.q3 { background: var(--q3-dim); color: var(--q3); }
-.q-badge.q4 { background: var(--q4-dim); color: var(--q4); }
-
-/* ── PERSONE VIEW ── */
-.persona-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s; }
-.persona-card:hover { border-color: var(--border-light); }
-.persona-card.active { border-color: var(--lavoro); background: var(--bg3); }
-.persona-header { display: flex; align-items: center; gap: 14px; }
-.persona-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--lavoro-dim); color: var(--lavoro); font-family: 'Bebas Neue', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.persona-nome { font-size: 14px; font-weight: 600; color: var(--text); }
-.persona-count { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.persona-cicli { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
-
-/* ── STORICO VIEW ── */
-.storico-section { margin-bottom: 28px; }
-.storico-week-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); padding: 6px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-
-/* ── SKELETON ── */
-@keyframes shimmer { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
-.skeleton-card { height: 60px; background: var(--bg3); border-radius: var(--radius-sm); margin-bottom: 8px; animation: shimmer 1.4s infinite; width: 100%; }
-
-/* ── MODAL ── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--bg2); border: 1px solid var(--border-light); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; transform: translateY(16px); transition: transform 0.2s; max-height: 92vh; overflow-y: auto; }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1.5px; margin-bottom: 22px; }
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; }
-.form-input, .form-select, .form-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; transition: border-color 0.12s; outline: none; }
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--lavoro); }
-.form-select option { background: var(--bg3); }
-.form-textarea { resize: vertical; min-height: 80px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.q-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.q-pick-btn { padding: 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg3); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.12s; text-align: left; }
-.q-pick-btn .q-pick-label { font-size: 10px; font-weight: 400; color: var(--text-muted); margin-top: 2px; font-style: italic; }
-.q-pick-btn[data-q="1"] { color: var(--q1); } .q-pick-btn[data-q="2"] { color: var(--q2); }
-.q-pick-btn[data-q="3"] { color: var(--q3); } .q-pick-btn[data-q="4"] { color: var(--q4); }
-.q-pick-btn[data-q="1"].selected { background: var(--q1-dim); border-color: var(--q1); }
-.q-pick-btn[data-q="2"].selected { background: var(--q2-dim); border-color: var(--q2); }
-.q-pick-btn[data-q="3"].selected { background: var(--q3-dim); border-color: var(--q3); }
-.q-pick-btn[data-q="4"].selected { background: var(--q4-dim); border-color: var(--q4); }
-.ctx-picker { display: flex; gap: 8px; }
-.ctx-pick-btn { flex: 1; padding: 9px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg3); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; text-align: center; transition: all 0.12s; color: var(--text-muted); }
-.ctx-pick-btn.lavoro.selected { background: var(--lavoro-dim); border-color: var(--lavoro); color: var(--lavoro); }
-.ctx-pick-btn.personale.selected { background: var(--personale-dim); border-color: var(--personale); color: var(--personale); }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
-.btn-cancel { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 9px 20px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.12s; }
-.btn-cancel:hover { background: var(--border); }
-.btn-save { background: var(--lavoro); border: none; color: white; padding: 9px 24px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.12s; }
-.btn-save:hover { opacity: 0.88; }
-.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-save.personale { background: var(--personale); }
-.btn-danger { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: var(--q1); padding: 9px 16px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-right: auto; transition: all 0.12s; }
-.btn-danger:hover { background: rgba(239,68,68,0.1); }
-
-/* ── PLAUD MODAL ── */
-.plaud-modal { max-width: 580px; }
-.step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
-.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.2s; }
-.step-dot.active { background: var(--lavoro); width: 10px; height: 10px; }
-.step-dot.done { background: #22c55e; }
-.step-label { font-size: 11px; color: var(--text-dim); margin-left: auto; }
-.plaud-spinner { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; gap: 16px; }
-.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--lavoro); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.plaud-analyzing-text { font-size: 13px; color: var(--text-muted); }
-.plaud-summary { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-.plaud-summary strong { color: var(--text); }
-.plaud-item { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 10px; }
-.plaud-item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.plaud-check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1; }
-.plaud-item-check { width: 15px; height: 15px; accent-color: var(--lavoro); cursor: pointer; flex-shrink: 0; }
-.plaud-item-title { font-size: 13px; font-weight: 500; color: var(--text); }
-.plaud-item-note { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; padding-left: 23px; font-style: italic; }
-.plaud-item-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-left: 23px; }
-.plaud-date-input { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 6px; outline: none; }
-.plaud-date-input:focus { border-color: var(--lavoro); }
-.plaud-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-.btn-analyze { background: var(--lavoro); border: none; color: white; padding: 10px 24px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 12px; transition: all 0.15s; }
-.btn-analyze:hover { opacity: 0.88; }
-.btn-import { background: #22c55e; border: none; color: white; padding: 9px 24px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.12s; }
-.btn-import:hover { opacity: 0.88; }
-.btn-import:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ── API KEY MODAL ── */
-.apikey-info { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6; }
-.apikey-info a { color: var(--lavoro); text-decoration: none; }
-.apikey-info a:hover { text-decoration: underline; }
-
-/* ── TOAST ── */
-#toast-container { position: fixed; bottom: 80px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-@media (min-width: 769px) { #toast-container { bottom: 24px; } }
-.toast { background: var(--bg3); border: 1px solid var(--border-light); color: var(--text); padding: 12px 18px; border-radius: var(--radius); font-size: 13px; max-width: 320px; transform: translateX(120%); opacity: 0; transition: all 0.25s; pointer-events: all; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-.toast.show { transform: translateX(0); opacity: 1; }
-.toast.success { border-left: 3px solid #22c55e; }
-.toast.error { border-left: 3px solid var(--q1); }
-.toast.warn { border-left: 3px solid var(--escalation1); }
-.toast.info { border-left: 3px solid var(--q2); }
-
-/* ── CATEGORY COLORS ── */
-.cat-management { background: rgba(61,127,255,0.15); color: #7baeff; }
-.cat-hr { background: rgba(168,85,247,0.15); color: #c084fc; }
-.cat-marketing { background: rgba(236,72,153,0.15); color: #f472b6; }
-.cat-vendite { background: rgba(34,197,94,0.15); color: #4ade80; }
-.cat-amministrazione { background: rgba(245,158,11,0.15); color: #fcd34d; }
-.cat-produzione { background: rgba(20,184,166,0.15); color: #2dd4bf; }
-.cat-rnd { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-.cat-da-delegare { background: rgba(148,163,184,0.15); color: #94a3b8; }
-.cat-salute { background: rgba(239,68,68,0.15); color: #f87171; }
-.cat-relazioni { background: rgba(236,72,153,0.15); color: #f9a8d4; }
-.cat-finanze { background: rgba(234,179,8,0.15); color: #facc15; }
-.cat-crescita { background: rgba(34,197,94,0.15); color: #86efac; }
-.cat-hobbies { background: rgba(14,165,233,0.15); color: #38bdf8; }
-.cat-spiritualita { background: rgba(168,85,247,0.15); color: #d8b4fe; }
-.cat-casa { background: rgba(245,158,11,0.15); color: #fde68a; }
-.cat-idee { background: rgba(148,163,184,0.15); color: #cbd5e1; }
-
-/* ── GUIDA ── */
-.guida-header { margin-bottom: 24px; }
-.guida-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1.5px; color: var(--text); margin-bottom: 4px; }
-.guida-header p { font-size: 13px; color: var(--text-muted); }
-.guida-section { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
-.guida-section-title { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); background: var(--bg2); user-select: none; }
-.guida-section-title:hover { background: var(--bg3); }
-.guida-icon { font-size: 16px; margin-right: 10px; }
-.guida-chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.2s !important; }
-.guida-section.open .guida-chevron { transform: rotate(90deg); }
-.guida-section-body { display: none; padding: 16px 18px; font-size: 13px; color: var(--text-muted); line-height: 1.8; border-top: 1px solid var(--border); background: var(--bg2); }
-.guida-section.open .guida-section-body { display: block; }
-.guida-section-body strong { color: var(--text); font-weight: 600; }
-.guida-section-body p { margin-bottom: 10px; }
-.guida-section-body ul { margin: 6px 0 10px 18px; }
-.guida-section-body li { margin-bottom: 5px; }
-.guida-kbd { display: inline-block; background: var(--bg3); border: 1px solid var(--border-light); border-radius: 4px; padding: 2px 7px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); margin: 0 2px; }
-.guida-q-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 10px 0; align-items: start; }
-.guida-q-badge { padding: 3px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; display: inline-block; white-space: nowrap; }
-.guida-q-badge.q1 { background: var(--q1-dim); color: var(--q1); }
-.guida-q-badge.q2 { background: var(--q2-dim); color: var(--q2); }
-.guida-q-badge.q3 { background: var(--q3-dim); color: var(--q3); }
-.guida-q-badge.q4 { background: var(--q4-dim); color: var(--q4); }
-
-/* ── TOOLTIP ── */
-#tooltip { position: fixed; z-index: 9999; background: var(--bg3); border: 1px solid var(--border-light); border-radius: 6px; padding: 7px 11px; font-size: 12px; color: var(--text-muted); font-family: 'DM Sans', sans-serif; max-width: 240px; line-height: 1.45; pointer-events: none; opacity: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.28); white-space: normal; }
-#tooltip.visible { opacity: 1; }
-.tip-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); font-size: 9px; font-weight: 700; cursor: default; flex-shrink: 0; margin-left: auto; }
-.sidebar-item .tip-icon { margin-left: auto; }
-
-/* ── MOBILE BOTTOM NAV ── */
-.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(14,15,17,0.97); border-top: 1px solid var(--border); z-index: 150; padding: 8px 0 env(safe-area-inset-bottom, 8px); }
-.mobile-nav-inner { display: flex; justify-content: space-around; }
-.mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 12px; background: transparent; border: none; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 10px; cursor: pointer; transition: all 0.15s; border-radius: var(--radius-sm); min-width: 56px; }
-.mobile-nav-btn .mnav-icon { font-size: 20px; }
-.mobile-nav-btn.active { color: var(--lavoro); }
-.mobile-nav-btn.active .mnav-icon { transform: scale(1.1); }
-
-/* ── EMPTY STATE ── */
-.empty-state { text-align: center; padding: 28px 16px; color: var(--text-dim); font-size: 12px; font-style: italic; line-height: 1.7; }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-/* ── SEARCH BAR ── */
-.search-bar { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; flex: 1; max-width: 300px; transition: border-color 0.15s; }
-.search-bar:focus-within { border-color: var(--lavoro); }
-.search-icon { font-size: 13px; color: var(--text-dim); flex-shrink: 0; }
-#searchInput { background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; width: 100%; padding: 7px 0; }
-#searchInput::placeholder { color: var(--text-dim); }
-.search-clear { background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 3px; transition: color 0.12s; flex-shrink: 0; line-height: 1; }
-.search-clear:hover { color: var(--text); }
-.search-result-header { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-.search-result-header strong { color: var(--text); }
-mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 2px; padding: 0 1px; font-style: normal; }
-
-/* ── PERSONA DETAIL ── */
-.persona-back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; transition: all 0.12s; margin-bottom: 18px; }
-.persona-back-btn:hover { background: var(--border); color: var(--text); }
-.persona-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.persona-avatar-lg { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 24px; flex-shrink: 0; }
-.persona-detail-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1.5px; margin-bottom: 2px; }
-.persona-detail-info .p-ruolo { font-size: 12px; color: var(--text-muted); }
-.persona-detail-info .p-cicli-cnt { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-.persona-q-section { margin-bottom: 20px; }
-.persona-q-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
-.persona-ruolo-tag { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-.ciclo-ctx-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-.ciclo-ctx-tag.lavoro { background: var(--lavoro-dim); color: var(--lavoro); }
-.ciclo-ctx-tag.personale { background: var(--personale-dim); color: var(--personale); }
-
-/* ── ADD PERSONA ── */
-.add-persona-btn { display: flex; align-items: center; gap: 8px; width: 100%; background: transparent; border: 1px dashed var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.12s; margin-bottom: 16px; }
-.add-persona-btn:hover { border-color: var(--border-light); color: var(--text); background: var(--bg3); }
-.add-persona-form { background: var(--bg2); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
-.color-picker-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
-.color-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; flex-shrink: 0; }
-.color-swatch.selected { border-color: white; transform: scale(1.18); box-shadow: 0 0 0 1px rgba(255,255,255,0.4); }
-
-/* ── PERSONA CHIPS IN MODAL ── */
-.persona-chips-wrap { position: relative; }
-.persona-chips-box { min-height: 40px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; cursor: text; transition: border-color 0.12s; }
-.persona-chips-box:focus-within { border-color: var(--lavoro); }
-.pchip { display: inline-flex; align-items: center; gap: 4px; border-radius: 20px; padding: 2px 8px 2px 4px; font-size: 11px; font-weight: 500; }
-.pchip-av { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex-shrink: 0; }
-.pchip-rm { cursor: pointer; opacity: 0.65; font-size: 12px; }
-.pchip-rm:hover { opacity: 1; }
-.pchip-input { border: none; outline: none; background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; min-width: 100px; flex: 1; padding: 2px 2px; }
-.persona-dd { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 350; background: var(--bg2); border: 1px solid var(--border-light); border-radius: var(--radius-sm); box-shadow: 0 6px 20px rgba(0,0,0,0.35); max-height: 200px; overflow-y: auto; }
-.persona-dd-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; font-size: 13px; transition: background 0.1s; }
-.persona-dd-item:hover, .persona-dd-item.focused { background: var(--bg3); }
-.persona-dd-av { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-.persona-dd-create { color: var(--lavoro); font-style: italic; }
-
-/* ── CATEGORY FORM ── */
-.cat-add-btn { display: flex; align-items: center; gap: 6px; width: calc(100% - 36px); margin: 4px 18px; background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 6px 10px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.12s; }
-.cat-add-btn:hover { border-color: var(--border-light); color: var(--text-muted); }
-.cat-inline-form { margin: 4px 18px 8px; background: var(--bg); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; }
-.emoji-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 6px 0 8px; }
-.emoji-btn { background: transparent; border: 1px solid transparent; border-radius: 4px; font-size: 15px; padding: 3px; cursor: pointer; transition: all 0.1s; text-align: center; line-height: 1.3; }
-.emoji-btn:hover { background: var(--bg3); }
-.emoji-btn.sel { background: var(--lavoro-dim); border-color: var(--lavoro); }
-.cat-ctx-toggle { display: flex; gap: 6px; margin: 6px 0; }
-.cat-ctx-btn { flex: 1; padding: 5px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--text-muted); transition: all 0.12s; }
-.cat-ctx-btn.lavoro.sel { background: var(--lavoro-dim); border-color: var(--lavoro); color: var(--lavoro); }
-.cat-ctx-btn.personale.sel { background: var(--personale-dim); border-color: var(--personale); color: var(--personale); }
-.cat-form-actions { display: flex; gap: 6px; margin-top: 8px; }
-.cat-form-save { background: #22c55e; border: none; color: white; padding: 6px 14px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.12s; }
-.cat-form-save:hover { opacity: 0.88; }
-.cat-form-cancel { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
-.sidebar-edit-icon { font-size: 10px; opacity: 0; transition: opacity 0.1s; margin-left: 2px; cursor: pointer; color: var(--text-dim); }
-.sidebar-item:hover .sidebar-edit-icon { opacity: 1; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  header { padding: 12px 16px; gap: 8px; }
-  .logo { font-size: 20px; }
-  .week-label { min-width: 90px; font-size: 11px; }
-  .btn-plaud span, .btn-primary span { display: none; }
-  .search-bar { display: none; }
-  .app-body { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .content { padding: 16px 16px 100px; }
-  .matrix { grid-template-columns: 1fr; }
-  .week-summary { grid-template-columns: 1fr 1fr; }
-  .form-row { grid-template-columns: 1fr; }
-  .mobile-nav { display: block; }
-  .modal { border-radius: 18px 18px 0 0; max-width: 100%; position: fixed; bottom: 0; left: 0; right: 0; margin: 0; transform: translateY(100%); }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-overlay { align-items: flex-end; padding: 0; }
-  .view-controls { gap: 4px; }
-  .view-btn { padding: 5px 10px; font-size: 11px; }
-}
-@media (max-width: 480px) {
-  .week-summary { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .summary-card .s-num { font-size: 24px; }
-  .ctx-switch button { padding: 7px 10px; font-size: 11px; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Cicli Aperti — Roby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .done-anim { animation: slideOut 0.3s ease forwards; }
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateX(60px); max-height: 0; padding: 0; margin: 0; }
+    }
+    .spin { animation: spin 0.6s linear; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
-<body>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
 
-<!-- HEADER -->
-<header>
-  <div class="logo">CICLI <span>APERTI</span></div>
-  <div class="week-nav">
-    <button onclick="changeWeek(-1)" title="Settimana precedente (←)">‹</button>
-    <div class="week-label" id="weekLabel">Sett. 00</div>
-    <button onclick="changeWeek(1)" title="Settimana successiva (→)">›</button>
-  </div>
-  <div class="ctx-switch">
-    <button id="ctx-lavoro" onclick="switchCtx('lavoro')">💼 Lavoro</button>
-    <button id="ctx-personale" onclick="switchCtx('personale')">🌿 Personale</button>
-  </div>
-  <div class="search-bar" id="searchBar">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Cerca cicli, persone..." autocomplete="off" oninput="onSearchInput(this.value)">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none" title="Svuota ricerca">✕</button>
-  </div>
-  <div class="header-actions">
-    <button class="btn-plaud" onclick="openPlaudModal()" title="Importa da Plaud (Cmd+P)">🎙 <span>Plaud</span></button>
-    <button class="btn-primary" id="addBtn" onclick="openModal()" title="Nuovo ciclo (Cmd+K)">+ <span>Nuovo Ciclo</span></button>
-    <button class="btn-plaud" id="themeBtn" onclick="toggleTheme()" title="Tema chiaro/scuro" style="font-size:16px;padding:8px 10px">🌙</button>
-    <button class="btn-plaud" onclick="openApiKeyModal()" title="Impostazioni Claude API" style="font-size:16px;padding:8px 10px">⚙️</button>
-  </div>
-</header>
+  <div class="max-w-xl mx-auto px-4 pb-28">
 
-<!-- APP BODY -->
-<div class="app-body">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar"></div>
-
-  <!-- CONTENT -->
-  <div class="content">
-    <!-- WEEK SUMMARY -->
-    <div class="week-summary">
-      <div class="summary-card q1"><div class="s-num" id="cnt-q1">0</div><div class="s-label">🔥 Da fare ora</div></div>
-      <div class="summary-card q2"><div class="s-num" id="cnt-q2">0</div><div class="s-label">📌 Pianifica</div></div>
-      <div class="summary-card q3"><div class="s-num" id="cnt-q3">0</div><div class="s-label">📋 Delega</div></div>
-      <div class="summary-card q4"><div class="s-num" id="cnt-q4">0</div><div class="s-label">🗑 Elimina</div></div>
-    </div>
-
-    <!-- ESCALATION NOTICES -->
-    <div class="escalation-notice crit hidden" id="notice-crit">⚠️ <strong>Attenzione:</strong> <span id="notice-crit-text"></span> ciclo/i in scadenza entro 14 giorni!</div>
-    <div class="escalation-notice hidden" id="notice-warn">🕐 <span id="notice-warn-text"></span> ciclo/i con scadenza entro 30 giorni — valuta la priorità.</div>
-
-    <!-- VIEW HEADER -->
-    <div class="view-header">
-      <div class="view-title" id="viewTitle">MATRICE EISENHOWER</div>
-      <div class="view-controls">
-        <button class="view-btn active" id="vbtn-matrix" onclick="switchView('matrix')">🔲 Matrice</button>
-        <button class="view-btn" id="vbtn-list" onclick="switchView('list')">📋 Lista</button>
-        <button class="view-btn" id="vbtn-persone" onclick="switchView('persone')">👥 Persone</button>
-        <button class="view-btn" id="vbtn-storico" onclick="switchView('storico')">🕐 Storico</button>
-      </div>
-    </div>
-
-    <!-- LEGEND (only matrix view) -->
-    <div class="legend" id="legend-bar">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--q1)"></div>Q1 — Fa subito</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--q2)"></div>Q2 — Pianifica</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--q3)"></div>Q3 — Delega</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--q4)"></div>Q4 — Elimina</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--escalation1)"></div>Scad. 30gg</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--escalation2)"></div>Scad. 14gg</div>
-    </div>
-
-    <!-- MATRIX VIEW -->
-    <div id="view-matrix">
-      <div class="matrix-axes"><div class="axis-label">⚡ URGENTE</div><div class="axis-label">– NON URGENTE</div></div>
-      <div class="matrix">
-        <div class="quadrant q1">
-          <div class="q-header"><div><div class="q-title">🔥 Q1 — Crisi</div><div class="q-subtitle">Urgente + Prioritario</div></div><div class="q-count" id="q1c">0</div></div>
-          <div id="q1-list"></div>
-          <button class="q-add" onclick="openModal(1)">+ Aggiungi</button>
+    <!-- Header -->
+    <header class="sticky top-0 bg-gray-950/95 backdrop-blur pt-5 pb-3 z-10 border-b border-gray-800/60">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">Cicli Aperti</h1>
+          <p id="week-label" class="text-xs text-gray-500 mt-0.5"></p>
         </div>
-        <div class="quadrant q2">
-          <div class="q-header"><div><div class="q-title">📌 Q2 — Qualità</div><div class="q-subtitle">Prioritario, non urgente</div></div><div class="q-count" id="q2c">0</div></div>
-          <div id="q2-list"></div>
-          <button class="q-add" onclick="openModal(2)">+ Aggiungi</button>
-        </div>
-        <div class="quadrant q3">
-          <div class="q-header"><div><div class="q-title">📋 Q3 — Inganno</div><div class="q-subtitle">Urgente, non prioritario</div></div><div class="q-count" id="q3c">0</div></div>
-          <div id="q3-list"></div>
-          <button class="q-add" onclick="openModal(3)">+ Aggiungi</button>
-        </div>
-        <div class="quadrant q4">
-          <div class="q-header"><div><div class="q-title">🗑 Q4 — Spreco</div><div class="q-subtitle">Non urgente, non prioritario</div></div><div class="q-count" id="q4c">0</div></div>
-          <div id="q4-list"></div>
-          <button class="q-add" onclick="openModal(4)">+ Aggiungi</button>
-        </div>
+        <button id="btn-add"
+          class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm px-3.5 py-1.5 rounded-xl font-semibold transition-colors shadow">
+          + Nuovo
+        </button>
       </div>
+      <!-- Context switcher -->
+      <div class="flex gap-1.5">
+        <button data-ctx="lavoro" class="ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors">🏢 Lavoro</button>
+        <button data-ctx="personale" class="ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors">🏠 Personale</button>
+      </div>
+    </header>
+
+    <!-- Stats bar -->
+    <div id="stats-bar" class="flex gap-3 mt-4 mb-1 text-xs text-gray-500"></div>
+
+    <!-- Cicli list -->
+    <main id="cicli-list" class="mt-3 space-y-4"></main>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden text-center py-20 text-gray-600">
+      <div class="text-5xl mb-3 opacity-50">✓</div>
+      <div class="text-sm font-medium">Nessun ciclo aperto</div>
+      <div class="text-xs mt-1">Ottimo lavoro!</div>
     </div>
 
-    <!-- LIST VIEW -->
-    <div id="view-list" style="display:none"></div>
-
-    <!-- PERSONE VIEW -->
-    <div id="view-persone" style="display:none"></div>
-
-    <!-- STORICO VIEW -->
-    <div id="view-storico" style="display:none"></div>
-
-    <!-- GUIDA VIEW -->
-    <div id="view-guida" style="display:none"></div>
+    <!-- Loading -->
+    <div id="loading" class="text-center py-20 text-gray-600 text-sm">Caricamento…</div>
   </div>
-</div>
 
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn active" id="mnav-matrix" onclick="switchView('matrix')"><span class="mnav-icon">🔲</span>Matrice</button>
-    <button class="mobile-nav-btn" id="mnav-list" onclick="switchView('list')"><span class="mnav-icon">📋</span>Lista</button>
-    <button class="mobile-nav-btn" id="mnav-persone" onclick="switchView('persone')"><span class="mnav-icon">👥</span>Persone</button>
-    <button class="mobile-nav-btn" id="mnav-storico" onclick="switchView('storico')"><span class="mnav-icon">🕐</span>Storico</button>
-    <button class="mobile-nav-btn" id="mnav-guida" onclick="switchView('guida')"><span class="mnav-icon">📖</span>Guida</button>
-  </div>
-</nav>
+  <!-- FAB mobile -->
+  <button id="btn-add-fab"
+    class="fixed bottom-6 right-6 sm:hidden w-14 h-14 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-full shadow-xl flex items-center justify-center text-2xl font-light transition-colors z-20">
+    +
+  </button>
 
-<!-- MODAL NUOVO/MODIFICA CICLO -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event,'modalOverlay')">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">NUOVO CICLO APERTO</div>
-    <div class="form-group">
-      <label class="form-label">Contesto</label>
-      <div class="ctx-picker">
-        <button class="ctx-pick-btn lavoro selected" id="cpk-lavoro" onclick="setModalCtx('lavoro')">💼 Lavoro</button>
-        <button class="ctx-pick-btn personale" id="cpk-personale" onclick="setModalCtx('personale')">🌿 Personale</button>
+  <!-- Modal add/edit -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-gray-900 border border-gray-800 w-full max-w-lg rounded-t-2xl sm:rounded-2xl px-5 pt-5 pb-8 sm:pb-5 max-h-[92vh] overflow-y-auto shadow-2xl">
+
+      <!-- drag handle -->
+      <div class="sm:hidden w-10 h-1 bg-gray-700 rounded-full mx-auto mb-4"></div>
+
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="modal-title" class="text-base font-bold">Nuovo Ciclo</h2>
+        <button id="modal-close" class="text-gray-500 hover:text-gray-300 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition">✕</button>
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Ciclo / Idea</label>
-      <input type="text" class="form-input" id="f-title" placeholder="Descrivi brevemente il ciclo aperto..." autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Note / Dettagli</label>
-      <textarea class="form-textarea" id="f-note" placeholder="Contesto, azioni, riferimenti..."></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Categoria</label>
-        <select class="form-select" id="f-cat">
-          <optgroup label="Lavoro" id="cat-lavoro-group">
-            <option value="management">Management</option>
-            <option value="hr">HR</option>
-            <option value="marketing">Marketing</option>
-            <option value="vendite">Vendite</option>
-            <option value="amministrazione">Amministrazione</option>
-            <option value="produzione">Produzione</option>
-            <option value="rnd">R&amp;D</option>
-            <option value="da-delegare">Da Delegare</option>
-            <option value="idee">Idee</option>
-          </optgroup>
-          <optgroup label="Personale" id="cat-personale-group" style="display:none">
-            <option value="salute">Salute &amp; Fitness</option>
-            <option value="relazioni">Relazioni</option>
-            <option value="finanze">Finanze Personali</option>
-            <option value="crescita">Crescita Personale</option>
-            <option value="hobbies">Hobbies &amp; Sport</option>
-            <option value="spiritualita">Spiritualità</option>
-            <option value="casa">Casa &amp; Famiglia</option>
-            <option value="idee">Idee</option>
-          </optgroup>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Scadenza (opzionale)</label>
-        <input type="date" class="form-input" id="f-date">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Quadrante Eisenhower</label>
-      <div class="q-picker">
-        <button class="q-pick-btn" data-q="1" onclick="selectQ(1)">🔥 Q1 — Crisi<div class="q-pick-label">Urgente + Prioritario</div></button>
-        <button class="q-pick-btn selected" data-q="2" onclick="selectQ(2)">📌 Q2 — Qualità<div class="q-pick-label">Prioritario, non urgente</div></button>
-        <button class="q-pick-btn" data-q="3" onclick="selectQ(3)">📋 Q3 — Inganno<div class="q-pick-label">Urgente, non prioritario</div></button>
-        <button class="q-pick-btn" data-q="4" onclick="selectQ(4)">🗑 Q4 — Spreco<div class="q-pick-label">Non urgente, non prioritario</div></button>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Settimana di riferimento</label>
-        <input type="number" class="form-input" id="f-week" min="1" max="53" placeholder="Es. 24">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Con chi</label>
-        <div class="persona-chips-wrap">
-          <div class="persona-chips-box" id="personaChipsBox" onclick="document.getElementById('personaChipInput').focus()">
-            <input type="text" class="pchip-input" id="personaChipInput" placeholder="Cerca persona..." autocomplete="off"
-              oninput="onPersonaChipInput(this.value)"
-              onkeydown="onPersonaChipKey(event)">
+
+      <form id="ciclo-form" class="space-y-3.5">
+        <input type="hidden" id="f-id">
+
+        <!-- Titolo -->
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block font-medium">Titolo *</label>
+          <input id="f-title" type="text" autocomplete="off"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 placeholder-gray-600"
+            placeholder="Cosa devi fare?">
+        </div>
+
+        <!-- Cat + Priorità -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block font-medium">Categoria</label>
+            <input id="f-cat" type="text" autocomplete="off" list="cat-suggestions"
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 placeholder-gray-600"
+              placeholder="vendite, casa…">
+            <datalist id="cat-suggestions"></datalist>
           </div>
-          <div class="persona-dd" id="personaDd" style="display:none"></div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block font-medium">Priorità</label>
+            <select id="f-q"
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30">
+              <option value="1">🔴 Urgente</option>
+              <option value="2" selected>🟡 Normale</option>
+              <option value="3">🔵 Bassa</option>
+              <option value="4">⚫ Un giorno</option>
+            </select>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-danger" id="btn-delete" onclick="deleteCurrent()" style="display:none">Elimina</button>
-      <button class="btn-cancel" onclick="closeModal('modalOverlay')">Annulla</button>
-      <button class="btn-save" id="btn-save" onclick="saveCiclo()">Salva</button>
-    </div>
-  </div>
-</div>
 
-<!-- MODAL IMPORT PLAUD -->
-<div class="modal-overlay" id="plaudOverlay" onclick="closeModalOnBg(event,'plaudOverlay')">
-  <div class="modal plaud-modal">
-    <div class="modal-title">🎙 IMPORT DA PLAUD</div>
-    <div class="step-indicator">
-      <div class="step-dot active" id="plaud-dot-1"></div>
-      <div class="step-dot" id="plaud-dot-2"></div>
-      <div class="step-dot" id="plaud-dot-3"></div>
-      <span class="step-label" id="plaud-step-label">Incolla trascrizione</span>
-    </div>
+        <!-- Scadenza -->
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block font-medium">Scadenza</label>
+          <input id="f-due" type="date"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 text-gray-300">
+        </div>
 
-    <!-- Step 1: Incolla -->
-    <div id="plaud-step-1">
-      <div class="form-group">
-        <label class="form-label">Trascrizione Plaud</label>
-        <textarea class="form-textarea" id="plaud-transcript" placeholder="Incolla qui il testo della registrazione Plaud..." style="min-height:180px"></textarea>
-      </div>
-      <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px">Claude analizzerà il testo ed estrarrà automaticamente tutti i cicli aperti, impegni e promesse.</p>
-      <button class="btn-analyze" onclick="analyzePlaud()">🤖 Analizza con Claude</button>
-    </div>
+        <!-- Note -->
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block font-medium">Note</label>
+          <textarea id="f-note" rows="2"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 resize-none placeholder-gray-600"
+            placeholder="Dettagli, contesto…"></textarea>
+        </div>
 
-    <!-- Step 2: Loading -->
-    <div id="plaud-step-2" style="display:none">
-      <div class="plaud-spinner">
-        <div class="spinner"></div>
-        <div class="plaud-analyzing-text">Claude sta analizzando la trascrizione...</div>
-        <div style="font-size:11px;color:var(--text-dim)">Estraggo cicli aperti, impegni e promesse</div>
-      </div>
-    </div>
+        <!-- Ricorrenza -->
+        <div class="bg-gray-800/50 border border-gray-700/60 rounded-xl p-3.5">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-medium">🔄 Ricorrenza</span>
+              <p class="text-xs text-gray-500 mt-0.5">Si ricrea al completamento</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="f-ricorrente" class="sr-only peer">
+              <div class="w-10 h-6 bg-gray-700 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all peer-checked:after:translate-x-4"></div>
+            </label>
+          </div>
+          <div id="ricorrenza-opts" class="hidden mt-3.5 grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block font-medium">Tipo</label>
+              <select id="f-ric-tipo"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                <option value="settimanale">Settimanale</option>
+                <option value="mensile">Mensile (~4 sett.)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block font-medium">Ogni</label>
+              <select id="f-ric-ogni"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-    <!-- Step 3: Conferma -->
-    <div id="plaud-step-3" style="display:none">
-      <div class="plaud-summary">Trovati <strong><span id="plaud-count">0</span> cicli</strong> — seleziona quelli da importare:</div>
-      <div id="plaud-items" style="max-height:360px;overflow-y:auto"></div>
-      <div class="plaud-actions">
-        <button class="btn-cancel" onclick="setPlaudStep(1)">← Indietro</button>
-        <button class="btn-import" id="btn-import-plaud" onclick="importPlaudSelected()">Importa selezionati</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CLAUDE API KEY -->
-<div class="modal-overlay" id="apikeyOverlay" onclick="closeModalOnBg(event,'apikeyOverlay')">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-title">⚙️ CLAUDE API KEY</div>
-    <p class="apikey-info">
-      Per usare l'import Plaud serve una chiave API Anthropic.<br>
-      Ottienila su <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys.<br>
-      La chiave è salvata solo nel tuo browser (localStorage).
-    </p>
-    <div class="form-group">
-      <label class="form-label">Chiave API (sk-ant-...)</label>
-      <input type="password" class="form-input" id="claude-key-input" placeholder="sk-ant-api03-...">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('apikeyOverlay')">Annulla</button>
-      <button class="btn-save" onclick="saveApiKey()">Salva chiave</button>
+        <!-- Actions -->
+        <div class="flex gap-3 pt-1">
+          <button type="button" id="modal-cancel"
+            class="flex-1 bg-gray-800 hover:bg-gray-700 active:bg-gray-900 text-sm py-2.5 rounded-xl font-medium transition-colors">
+            Annulla
+          </button>
+          <button type="submit" id="btn-save"
+            class="flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-sm py-2.5 rounded-xl font-semibold transition-colors">
+            Salva
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-</div>
 
-<!-- TOOLTIP SINGLETON -->
-<div id="tooltip"></div>
+  <script>
+    const { createClient } = supabase;
+    const db = createClient(
+      'https://qujxbvootvollmziaqrd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1anhidm9vdHZvbGxtemlhcXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzAyNjksImV4cCI6MjA5NjQ0NjI2OX0.WkUak4mQP-lwdaH-LIRV4unP6PljlcguiDXxjCkBEyE'
+    );
 
-<!-- TOAST CONTAINER -->
-<div id="toast-container"></div>
+    // ── State ──────────────────────────────────────────────────────
+    let currentCtx = 'lavoro';
+    let cicli = [];
+    let allCats = [];
+    let editingId = null;
+    let saving = false;
 
-<script>
-// ══════════════════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════════════════
-const SUPABASE_URL  = 'https://qujxbvootvollmziaqrd.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1anhidm9vdHZvbGxtemlhcXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzAyNjksImV4cCI6MjA5NjQ0NjI2OX0.WkUak4mQP-lwdaH-LIRV4unP6PljlcguiDXxjCkBEyE';
-
-const LS = {
-  CLAUDE_KEY: 'cicli_claude_key',
-  CTX:        'cicli_ctx',
-  VIEW:       'cicli_view',
-  WEEK:       'cicli_week',
-  CAT_FILTER: 'cicli_cat_filter',
-  THEME:      'cicli_theme'
-};
-
-const CAT_COLORS = {
-  management:'cat-management', hr:'cat-hr', marketing:'cat-marketing',
-  vendite:'cat-vendite', amministrazione:'cat-amministrazione',
-  produzione:'cat-produzione', rnd:'cat-rnd', 'da-delegare':'cat-da-delegare',
-  salute:'cat-salute', relazioni:'cat-relazioni', finanze:'cat-finanze',
-  crescita:'cat-crescita', hobbies:'cat-hobbies', spiritualita:'cat-spiritualita',
-  casa:'cat-casa', idee:'cat-idee'
-};
-
-const CAT_LABELS = {
-  management:'Management', hr:'HR', marketing:'Marketing', vendite:'Vendite',
-  amministrazione:'Amm.', produzione:'Produzione', rnd:'R&D', 'da-delegare':'Delega',
-  salute:'Salute', relazioni:'Relazioni', finanze:'Finanze', crescita:'Crescita',
-  hobbies:'Hobbies', spiritualita:'Spiritualità', casa:'Casa', idee:'Idee'
-};
-
-const CAT_EMOJIS = {
-  management:'🎯', hr:'👥', marketing:'📣', vendite:'💰',
-  amministrazione:'📋', produzione:'⚙️', rnd:'🔬', 'da-delegare':'📤',
-  salute:'💪', relazioni:'❤️', finanze:'💶', crescita:'📚',
-  hobbies:'⚽', spiritualita:'🌙', casa:'🏡', idee:'💡'
-};
-
-// ══════════════════════════════════════════════════════════════
-// INIT SUPABASE
-// ══════════════════════════════════════════════════════════════
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
-
-// ══════════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════════
-let state = {
-  ctx:              localStorage.getItem(LS.CTX)  || 'lavoro',
-  week:             parseInt(localStorage.getItem(LS.WEEK)) || getWeekNumber(new Date()),
-  year:             new Date().getFullYear(),
-  view:             localStorage.getItem(LS.VIEW) || 'matrix',
-  filter_cat:       localStorage.getItem(LS.CAT_FILTER) || null,
-  filter_persona:   null,
-  cicli:            [],
-  persone:          [],
-  categorie:        [],
-  loading:          true,
-  searchQuery:      '',
-  personaDetailId:  null
-};
-
-// ══════════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════════
-function getWeekNumber(d) {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-}
-
-function getWeekStart(week, year) {
-  const simple = new Date(year, 0, 1 + (week - 1) * 7);
-  const iso = new Date(simple);
-  const dow = simple.getDay();
-  if (dow <= 4) iso.setDate(simple.getDate() - simple.getDay() + 1);
-  else iso.setDate(simple.getDate() + 8 - simple.getDay());
-  return iso;
-}
-
-function formatWeekLabel(week, year) {
-  const start = getWeekStart(week, year);
-  const end = new Date(start); end.setDate(start.getDate() + 6);
-  const fmt = d => `${d.getDate()}/${d.getMonth()+1}`;
-  return `Sett. ${week} — ${fmt(start)}–${fmt(end)}`;
-}
-
-function getEscalation(c) {
-  if (!c.due_date) return null;
-  const days = Math.ceil((new Date(c.due_date) - new Date()) / 86400000);
-  if (days <= 14) return 'crit';
-  if (days <= 30) return 'warn';
-  return null;
-}
-
-function getDaysLeft(due_date) {
-  if (!due_date) return null;
-  return Math.ceil((new Date(due_date) - new Date()) / 86400000);
-}
-
-function formatDaysLeft(n) {
-  if (n < 0) return `${Math.abs(n)}gg fa`;
-  if (n === 0) return 'Oggi';
-  if (n === 1) return 'Domani';
-  return `${n}gg`;
-}
-
-function computeEffectiveQ(c) {
-  const esc = getEscalation(c);
-  if (!esc) return c.q;
-  if (c.q === 2 && (esc === 'crit' || esc === 'warn')) return 1;
-  if (c.q === 4 && esc === 'crit') return 3;
-  return c.q;
-}
-
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ══════════════════════════════════════════════════════════════
-// SUPABASE CRUD
-// ══════════════════════════════════════════════════════════════
-async function loadAll() {
-  state.loading = true;
-  if (state.view === 'matrix') renderSkeleton();
-
-  try {
-    const [r1, r2] = await Promise.all([
-      db.from('cicli').select('*').order('created_at', { ascending: false }),
-      db.from('persone').select('*').order('nome')
-    ]);
-    if (r1.error) throw r1.error;
-    if (r2.error) throw r2.error;
-    state.cicli   = r1.data || [];
-    state.persone = r2.data || [];
-  } catch (e) {
-    showToast('Errore Supabase: ' + e.message, 'error');
-  }
-
-  try {
-    const { data, error } = await db.from('categorie').select('*').order('ordine');
-    if (!error) state.categorie = data || [];
-  } catch (_) { state.categorie = []; }
-
-  state.loading = false;
-  render();
-}
-
-async function upsertCiclo(data) {
-  const now = new Date().toISOString();
-  if (data.id) {
-    const { error } = await db.from('cicli').update({ ...data, updated_at: now }).eq('id', data.id);
-    if (error) throw error;
-  } else {
-    const { error } = await db.from('cicli').insert({ ...data, created_at: now, updated_at: now });
-    if (error) throw error;
-  }
-}
-
-async function removeCiclo(id) {
-  const { error } = await db.from('cicli').delete().eq('id', id);
-  if (error) throw error;
-}
-
-async function flipDone(id, currentDone) {
-  const { error } = await db.from('cicli')
-    .update({ done: !currentDone, updated_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) throw error;
-}
-
-// ══════════════════════════════════════════════════════════════
-// REALTIME
-// ══════════════════════════════════════════════════════════════
-db.channel('cicli-changes')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'cicli' },     () => loadAll())
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'persone' },   () => loadAll())
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'categorie' }, () => loadAll())
-  .subscribe(status => {
-    if (status === 'SUBSCRIBED') console.log('[Realtime] connesso');
-  });
-
-// ══════════════════════════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════════════════════════
-function changeWeek(dir) {
-  state.week += dir;
-  if (state.week < 1)  { state.week = 52; state.year--; }
-  if (state.week > 52) { state.week = 1;  state.year++; }
-  localStorage.setItem(LS.WEEK, state.week);
-  render();
-}
-
-function switchCtx(ctx) {
-  state.ctx = ctx;
-  state.filter_cat = null;
-  state.filter_persona = null;
-  localStorage.setItem(LS.CTX, ctx);
-  localStorage.setItem(LS.CAT_FILTER, '');
-  render();
-}
-
-function switchView(v) {
-  state.view = v;
-  localStorage.setItem(LS.VIEW, v);
-  render();
-}
-
-function filterByCat(cat) {
-  state.filter_cat = cat || null;
-  state.filter_persona = null;
-  localStorage.setItem(LS.CAT_FILTER, cat || '');
-  render();
-}
-
-function filterByPersona(nome) {
-  state.filter_persona = state.filter_persona === nome ? null : nome;
-  render();
-}
-
-// ══════════════════════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════════════════════
-function render() {
-  updateHeader();
-  renderSidebar();
-  renderViews();
-  updateMobileNav();
-}
-
-function updateHeader() {
-  document.getElementById('weekLabel').textContent = formatWeekLabel(state.week, state.year);
-  document.getElementById('ctx-lavoro').className  = state.ctx === 'lavoro'   ? 'active-lavoro' : '';
-  document.getElementById('ctx-personale').className = state.ctx === 'personale' ? 'active-personale' : '';
-  document.getElementById('addBtn').className = 'btn-primary' + (state.ctx === 'personale' ? ' personale-ctx' : '');
-
-  const weekNav = document.querySelector('.week-nav');
-  const weekActive = state.view === 'list' || state.searchQuery;
-  if (weekNav) {
-    weekNav.style.opacity = weekActive ? '1' : '0.4';
-    weekNav.style.pointerEvents = weekActive ? '' : 'auto';
-    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo solo nella vista Lista';
-  }
-}
-
-function updateMobileNav() {
-  ['matrix','list','persone','storico','guida'].forEach(v => {
-    const btn = document.getElementById('mnav-' + v);
-    if (btn) btn.classList.toggle('active', state.view === v);
-  });
-}
-
-function renderViews() {
-  const views = ['matrix','list','persone','storico','guida'];
-  views.forEach(v => {
-    const el = document.getElementById('view-' + v);
-    if (el) el.style.display = state.view === v ? 'block' : 'none';
-    const btn = document.getElementById('vbtn-' + v);
-    if (btn) btn.className = 'view-btn' + (state.view === v ? ' active' + (state.ctx === 'personale' ? ' personale' : '') : '');
-  });
-
-  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA' };
-  document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
-
-  if (state.searchQuery) {
-    document.getElementById('viewTitle').textContent = 'RICERCA';
-    views.forEach(v => { const el = document.getElementById('view-' + v); if (el) el.style.display = 'none'; });
-    document.getElementById('view-list').style.display = 'block';
-    renderSearchResults();
-    renderSummary([]);
-    renderEscalationNotices([]);
-    return;
-  }
-
-  document.getElementById('viewTitle').textContent = titles[state.view] || '';
-
-  if (state.view === 'guida') { renderGuida(); return; }
-
-  const allCtx    = state.cicli.filter(c => c.ctx === state.ctx);
-  const nonDoneCtx = allCtx.filter(c => !c.done);
-  const weekCtx   = allCtx.filter(c => c.week === state.week && c.year === state.year);
-
-  // Se filter_cat è stale (non corrisponde ad alcun ciclo del contesto corrente) lo azzeriamo
-  if (state.filter_cat) {
-    const hasMatch = nonDoneCtx.some(c => c.cat === state.filter_cat);
-    if (!hasMatch) {
-
-      state.filter_cat = null;
-      state.filter_persona = null;
-      localStorage.setItem(LS.CAT_FILTER, '');
+    // ── Date utils ────────────────────────────────────────────────
+    function getISOWeek(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      return {
+        week: Math.ceil((((d - yearStart) / 86400000) + 1) / 7),
+        year: d.getFullYear(),
+      };
     }
-  }
 
-  // Matrice: tutti i cicli aperti del contesto, senza filtro settimana
-  const matrixBase   = applyFilters(nonDoneCtx);
-  // Lista: solo cicli della settimana selezionata
-  const listFiltered = applyFilters(weekCtx);
+    function weeksInYear(y) {
+      return getISOWeek(new Date(y, 11, 28)).week;
+    }
 
-  const filtered = state.view === 'list' ? listFiltered : matrixBase;
+    function addWeeks(week, year, n) {
+      let w = week + n;
+      let y = year;
+      const max = weeksInYear(y);
+      if (w > max) { w -= max; y += 1; }
+      return { week: w, year: y };
+    }
 
-  renderSummary(filtered);
-  renderEscalationNotices(filtered);
+    function nextPeriod(ciclo) {
+      const w = ciclo.week || today.week;
+      const y = ciclo.year || today.year;
+      const ogni = ciclo.ricorrenza_ogni || 1;
+      if (ciclo.ricorrenza_tipo === 'mensile') return addWeeks(w, y, ogni * 4);
+      return addWeeks(w, y, ogni);
+    }
 
-  if (state.view === 'matrix')  renderMatrix(matrixBase);
-  if (state.view === 'list')    renderList(listFiltered);
-  if (state.view === 'persone') renderPersone();
-  if (state.view === 'storico') renderStorico(allCtx);
-}
+    function fmtDate(iso) {
+      if (!iso) return '';
+      return new Date(iso + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+    }
 
-function applyFilters(cicli) {
-  let result = cicli;
-  if (state.filter_cat)     result = result.filter(c => c.cat === state.filter_cat);
-  if (state.filter_persona) result = result.filter(c => (c.persone_menzionate || []).includes(state.filter_persona));
-  return result;
-}
+    function isOverdue(iso) {
+      if (!iso) return false;
+      return new Date(iso + 'T23:59:59') < new Date();
+    }
 
-function renderSummary(filtered) {
-  const qs = [0,0,0,0];
-  filtered.filter(c => !c.done).forEach(c => { const q = computeEffectiveQ(c); if (q>=1&&q<=4) qs[q-1]++; });
-  for (let i = 1; i <= 4; i++) {
-    const a = document.getElementById('cnt-q'+i); if (a) a.textContent = qs[i-1];
-    const b = document.getElementById('q'+i+'c'); if (b) b.textContent = qs[i-1];
-  }
-}
+    const today = getISOWeek(new Date());
 
-function renderEscalationNotices(filtered) {
-  const crit = filtered.filter(c => !c.done && getEscalation(c) === 'crit');
-  const warn = filtered.filter(c => !c.done && getEscalation(c) === 'warn');
-  const nc = document.getElementById('notice-crit'); if (nc) nc.classList.toggle('hidden', !crit.length);
-  const nw = document.getElementById('notice-warn'); if (nw) nw.classList.toggle('hidden', !warn.length);
-  const nct = document.getElementById('notice-crit-text'); if (nct) nct.textContent = crit.length;
-  const nwt = document.getElementById('notice-warn-text'); if (nwt) nwt.textContent = warn.length;
-}
-
-function renderMatrix(filtered) {
-  for (let q = 1; q <= 4; q++) {
-    const items = filtered.filter(c => computeEffectiveQ(c) === q);
-    const el = document.getElementById('q'+q+'-list');
-    if (!el) continue;
-    el.innerHTML = '';
-    if (!items.length) { el.innerHTML = '<div class="empty-state">Nessun ciclo</div>'; continue; }
-    items.forEach(c => el.appendChild(makeCicloCard(c, 'matrix')));
-  }
-}
-
-function renderList(filtered) {
-  const lv = document.getElementById('view-list');
-  if (!lv) return;
-  lv.innerHTML = '';
-  const sorted = [...filtered].sort((a, b) => {
-    const qa = computeEffectiveQ(a), qb = computeEffectiveQ(b);
-    if (qa !== qb) return qa - qb;
-    const da = a.due_date ? new Date(a.due_date) : new Date(9999,0,1);
-    const db2 = b.due_date ? new Date(b.due_date) : new Date(9999,0,1);
-    return da - db2;
-  });
-  if (!sorted.length) { lv.innerHTML = '<div class="empty-state">Nessun ciclo per questa settimana</div>'; return; }
-  sorted.forEach(c => lv.appendChild(makeCicloCard(c, 'list')));
-}
-
-function personColor(p) {
-  if (p && p.colore) return p.colore;
-  const colors = ['#3d7fff','#a855f7','#ec4899','#22c55e','#f59e0b','#14b8a6','#6366f1','#ef4444','#f97316','#0ea5e9'];
-  const nome = (p && p.nome) ? p.nome : (p || '');
-  let h = 0; for (const c of nome) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
-  return colors[Math.abs(h) % colors.length];
-}
-
-function cicliForPersona(nome) {
-  return state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(nome));
-}
-
-function renderPersone() {
-  const pv = document.getElementById('view-persone');
-  if (!pv) return;
-  pv.innerHTML = '';
-
-  if (state.personaDetailId !== null) {
-    renderPersonaDetail(pv);
-    return;
-  }
-
-  // Add person button
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-persona-btn';
-  addBtn.innerHTML = '+ Aggiungi persona';
-  addBtn.onclick = () => renderAddPersonaForm(pv);
-  pv.appendChild(addBtn);
-
-  const persone = state.persone;
-  if (!persone.length) {
-    pv.innerHTML += '<div class="empty-state">Nessuna persona salvata.<br>Aggiungi persone con il pulsante sopra o importa da Plaud.</div>';
-    return;
-  }
-
-  persone.forEach(p => {
-    const cicli = cicliForPersona(p.nome);
-    const col = personColor(p);
-    const card = document.createElement('div');
-    card.className = 'persona-card';
-    card.style.cursor = 'pointer';
-    card.onclick = () => { state.personaDetailId = p.id; render(); };
-    card.innerHTML = `
-      <div class="persona-header">
-        <div class="persona-avatar" style="background:${col}22;color:${col}">${escHtml((p.nome||'?').charAt(0).toUpperCase())}</div>
-        <div style="flex:1">
-          <div class="persona-nome">${escHtml(p.nome)}</div>
-          ${p.ruolo ? `<div class="persona-ruolo-tag">${escHtml(p.ruolo)}</div>` : ''}
-          <div class="persona-count">${cicli.length} ciclo/i aperti</div>
-        </div>
-      </div>`;
-    pv.appendChild(card);
-  });
-}
-
-function renderPersonaDetail(pv) {
-  const p = state.persone.find(x => x.id === state.personaDetailId);
-  if (!p) { state.personaDetailId = null; renderPersone(); return; }
-
-  const col = personColor(p);
-  const allCicli = state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(p.nome));
-
-  const back = document.createElement('button');
-  back.className = 'persona-back-btn';
-  back.innerHTML = '← Torna alle persone';
-  back.onclick = () => { state.personaDetailId = null; render(); };
-  pv.appendChild(back);
-
-  const header = document.createElement('div');
-  header.className = 'persona-detail-header';
-  header.innerHTML = `
-    <div class="persona-avatar-lg" style="background:${col}22;color:${col}">${escHtml((p.nome||'?').charAt(0).toUpperCase())}</div>
-    <div class="persona-detail-info" style="flex:1">
-      <h2>${escHtml(p.nome)}</h2>
-      ${p.ruolo ? `<div class="p-ruolo">${escHtml(p.ruolo)}</div>` : ''}
-      <div class="p-cicli-cnt">${allCicli.length} cicli aperti totali</div>
-    </div>`;
-  pv.appendChild(header);
-
-  if (!allCicli.length) {
-    pv.innerHTML += '<div class="empty-state">Nessun ciclo aperto associato a questa persona.</div>';
-    return;
-  }
-
-  const byQ = { 1: [], 2: [], 3: [], 4: [] };
-  allCicli.forEach(c => { const q = computeEffectiveQ(c); if (byQ[q]) byQ[q].push(c); });
-  const qLabels = { 1:'🔥 Q1 — Crisi', 2:'📌 Q2 — Qualità', 3:'📋 Q3 — Inganno', 4:'🗑 Q4 — Spreco' };
-  const qColors = { 1:'var(--q1)', 2:'var(--q2)', 3:'var(--q3)', 4:'var(--q4)' };
-
-  [1,2,3,4].forEach(q => {
-    if (!byQ[q].length) return;
-    const sec = document.createElement('div');
-    sec.className = 'persona-q-section';
-    const title = document.createElement('div');
-    title.className = 'persona-q-title';
-    title.style.color = qColors[q];
-    title.textContent = qLabels[q];
-    sec.appendChild(title);
-    byQ[q].forEach(c => {
-      const card = makeCicloCard(c, 'list');
-      // add ctx tag to the card
-      const ctxTag = document.createElement('span');
-      ctxTag.className = `ciclo-ctx-tag ${c.ctx}`;
-      ctxTag.textContent = c.ctx === 'lavoro' ? '💼' : '🌿';
-      card.appendChild(ctxTag);
-      sec.appendChild(card);
-    });
-    pv.appendChild(sec);
-  });
-}
-
-function renderAddPersonaForm(pv) {
-  if (document.getElementById('addPersonaForm')) return;
-  const COLORS = ['#3d7fff','#a855f7','#ec4899','#22c55e','#f59e0b','#14b8a6','#6366f1','#ef4444','#f97316','#0ea5e9'];
-  let selColor = COLORS[0];
-
-  const form = document.createElement('div');
-  form.className = 'add-persona-form';
-  form.id = 'addPersonaForm';
-  form.innerHTML = `
-    <div class="form-group" style="margin-bottom:10px">
-      <label class="form-label">Nome</label>
-      <input type="text" class="form-input" id="apf-nome" placeholder="Nome persona..." autocomplete="off">
-    </div>
-    <div class="form-group" style="margin-bottom:10px">
-      <label class="form-label">Ruolo (opzionale)</label>
-      <input type="text" class="form-input" id="apf-ruolo" placeholder="Es. Collega, Cliente...">
-    </div>
-    <div class="form-group" style="margin-bottom:10px">
-      <label class="form-label">Colore avatar</label>
-      <div class="color-picker-row" id="apf-colors">
-        ${COLORS.map((c,i) => `<div class="color-swatch${i===0?' selected':''}" style="background:${c}" data-color="${c}" onclick="apfSelectColor(this,'${c}')"></div>`).join('')}
-      </div>
-    </div>
-    <div class="cat-form-actions">
-      <button class="cat-form-save" onclick="saveNewPersona()">Salva</button>
-      <button class="cat-form-cancel" onclick="document.getElementById('addPersonaForm').remove()">Annulla</button>
-    </div>`;
-  pv.insertBefore(form, pv.firstChild.nextSibling);
-}
-
-function apfSelectColor(el, color) {
-  document.querySelectorAll('#apf-colors .color-swatch').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
-  el._selColor = color;
-}
-
-async function saveNewPersona() {
-  const nome = (document.getElementById('apf-nome')?.value || '').trim();
-  if (!nome) { showToast('Inserisci un nome', 'warn'); return; }
-  const ruolo = (document.getElementById('apf-ruolo')?.value || '').trim();
-  const selSwatch = document.querySelector('#apf-colors .color-swatch.selected');
-  const colore = selSwatch ? selSwatch.dataset.color : '#3d7fff';
-  try {
-    const { error } = await db.from('persone').insert({ nome, ruolo: ruolo||null, colore, created_at: new Date().toISOString() });
-    if (error) throw error;
-    showToast('Persona aggiunta ✓', 'success');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
-}
-
-function renderStorico(allCtx) {
-  const sv = document.getElementById('view-storico');
-  if (!sv) return;
-  sv.innerHTML = '';
-
-  const past = allCtx.filter(c => {
-    if (c.done) return true;
-    if (c.year < state.year) return true;
-    if (c.year === state.year && c.week < state.week) return true;
-    return false;
-  }).sort((a, b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
-
-  if (!past.length) { sv.innerHTML = '<div class="empty-state">Nessun ciclo nello storico</div>'; return; }
-
-  const byWeek = {};
-  past.forEach(c => {
-    const key = `${c.year}-W${String(c.week||0).padStart(2,'0')}`;
-    if (!byWeek[key]) byWeek[key] = { week: c.week, year: c.year, items: [] };
-    byWeek[key].items.push(c);
-  });
-
-  Object.values(byWeek)
-    .sort((a,b) => b.year !== a.year ? b.year - a.year : b.week - a.week)
-    .forEach(({ week, year, items }) => {
-      const sec = document.createElement('div');
-      sec.className = 'storico-section';
-      sec.innerHTML = `<div class="storico-week-label">${week ? formatWeekLabel(week, year) : 'Senza settimana'}</div>`;
-      items.forEach(c => sec.appendChild(makeCicloCard(c, 'list')));
-      sv.appendChild(sec);
-    });
-}
-
-// ══════════════════════════════════════════════════════════════
-// SEARCH
-// ══════════════════════════════════════════════════════════════
-let _searchDebounce = null;
-
-function onSearchInput(val) {
-  clearTimeout(_searchDebounce);
-  _searchDebounce = setTimeout(() => {
-    state.searchQuery = val.trim();
-    const clearBtn = document.getElementById('searchClear');
-    if (clearBtn) clearBtn.style.display = state.searchQuery ? 'flex' : 'none';
-    render();
-  }, 300);
-}
-
-function clearSearch() {
-  const inp = document.getElementById('searchInput');
-  if (inp) inp.value = '';
-  const clearBtn = document.getElementById('searchClear');
-  if (clearBtn) clearBtn.style.display = 'none';
-  state.searchQuery = '';
-  render();
-}
-
-function highlightTerm(text, term) {
-  if (!term || !text) return escHtml(text || '');
-  const escaped = escHtml(text);
-  const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-  return escaped.replace(re, '<mark class="hl">$1</mark>');
-}
-
-function renderSearchResults() {
-  const lv = document.getElementById('view-list');
-  if (!lv) return;
-  lv.innerHTML = '';
-  const q = state.searchQuery.toLowerCase();
-
-  const results = state.cicli.filter(c => !c.done && (
-    (c.title || '').toLowerCase().includes(q) ||
-    (c.note  || '').toLowerCase().includes(q) ||
-    (c.cat   || '').toLowerCase().includes(q) ||
-    (CAT_LABELS[c.cat] || '').toLowerCase().includes(q) ||
-    (c.persone_menzionate || []).some(n => n.toLowerCase().includes(q))
-  ));
-
-  const header = document.createElement('div');
-  header.className = 'search-result-header';
-  header.innerHTML = results.length
-    ? `<strong>${results.length}</strong> ciclo/i trovati per "<strong>${escHtml(state.searchQuery)}</strong>"`
-    : `Nessun ciclo trovato per "<strong>${escHtml(state.searchQuery)}</strong>"`;
-  lv.appendChild(header);
-
-  if (!results.length) {
-    lv.innerHTML += '<div class="empty-state">Prova con un termine diverso.</div>';
-    return;
-  }
-
-  const sorted = [...results].sort((a, b) => computeEffectiveQ(a) - computeEffectiveQ(b));
-  sorted.forEach(c => {
-    const card = makeCicloCard(c, 'list');
-    // Highlight matching title
-    const titleEl = card.querySelector('div[style*="text-overflow"]');
-    if (titleEl) titleEl.innerHTML = highlightTerm(c.title, state.searchQuery);
-    lv.appendChild(card);
-  });
-}
-
-// ══════════════════════════════════════════════════════════════
-// SIDEBAR
-// ══════════════════════════════════════════════════════════════
-function renderSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (!sidebar) return;
-
-  const isP = state.ctx === 'personale';
-  const allCtx = state.cicli.filter(c => c.ctx === state.ctx);
-  const builtinCats = isP
-    ? ['salute','relazioni','finanze','crescita','hobbies','spiritualita','casa','idee']
-    : ['management','hr','marketing','vendite','amministrazione','produzione','rnd','da-delegare','idee'];
-  const customCats = state.categorie.filter(c => c.ctx === state.ctx);
-
-  const VIEW_TIPS = {
-    matrix:  'Visualizza i cicli nella matrice di Eisenhower divisi per urgenza e priorità',
-    list:    'Tutti i cicli della settimana in ordine di priorità',
-    persone: 'Vedi tutti i cicli associati a una persona — utile prima di una riunione',
-    storico: 'Archivio cicli chiusi con possibilità di riapertura',
-    guida:   'Istruzioni complete per usare CICLI APERTI'
-  };
-
-  const viewItems = ['matrix','list','persone','storico','guida'].map(v => {
-    const icons  = { matrix:'🔲', list:'📋', persone:'👥', storico:'🕐', guida:'📖' };
-    const labels = { matrix:'Matrice', list:'Lista settimana', persone:'Persone', storico:'Storico', guida:'Guida' };
-    const active = state.view === v;
-    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="switchView('${v}')">
-      <span>${icons[v]}</span>${labels[v]}
-      <span class="tip-icon" data-tip="${VIEW_TIPS[v]}">i</span>
-    </div>`;
-  }).join('');
-
-  const builtinItems = builtinCats.map(cat => {
-    const cnt = allCtx.filter(c => c.cat === cat && !c.done).length;
-    const active = state.filter_cat === cat;
-    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('${cat}')">
-      <span>${CAT_EMOJIS[cat]||'•'}</span>${CAT_LABELS[cat]||cat}
-      <span class="sidebar-count">${cnt||0}</span>
-    </div>`;
-  }).join('');
-
-  const customItems = customCats.map(cat => {
-    const cnt = allCtx.filter(c => c.cat === 'custom_'+cat.id && !c.done).length;
-    const active = state.filter_cat === 'custom_'+cat.id;
-    const canDel = cnt === 0;
-    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('custom_${cat.id}')">
-      <span>${cat.emoji||'•'}</span>${escHtml(cat.nome)}
-      <span class="sidebar-count">${cnt}</span>
-      <span class="sidebar-edit-icon" onclick="event.stopPropagation();editCatInline(${cat.id})" title="Modifica">✏️</span>
-      ${canDel ? `<span class="sidebar-edit-icon" onclick="event.stopPropagation();deleteCat(${cat.id})" title="Elimina">🗑</span>` : ''}
-    </div>`;
-  }).join('');
-
-  const totalActive = allCtx.filter(c=>!c.done).length;
-  const totalDone   = allCtx.filter(c=>c.done).length;
-
-  sidebar.innerHTML = `
-    <div class="sidebar-section">
-      <div class="sidebar-label">Viste</div>
-      ${viewItems}
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Categorie</div>
-      <div class="sidebar-item ${!state.filter_cat ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat(null)">
-        <div class="cat-dot" style="background:var(--${isP?'personale':'lavoro'})"></div>Tutti
-        <span class="sidebar-count">${totalActive}</span>
-      </div>
-      ${builtinItems}
-      ${customItems}
-    </div>
-    <button class="cat-add-btn" id="catAddBtn" onclick="toggleCatForm()">+ Categoria</button>
-    <div id="catInlineForm" style="display:none"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Stato</div>
-      <div class="sidebar-item" onclick="switchView('storico')">
-        <span>✓</span>Completati<span class="sidebar-count">${totalDone}</span>
-      </div>
-    </div>
-    <div style="padding:16px 18px;border-top:1px solid var(--border);margin-top:8px">
-      <button onclick="openPlaudModal()" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text-muted);padding:8px;border-radius:var(--radius-sm);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px;text-align:center">
-        🎙 Import Plaud
-      </button>
-    </div>
-  `;
-}
-
-// ══════════════════════════════════════════════════════════════
-// CARD BUILDER
-// ══════════════════════════════════════════════════════════════
-function makeCicloCard(c, mode) {
-  const esc = getEscalation(c);
-  const effQ = computeEffectiveQ(c);
-  const daysLeft = getDaysLeft(c.due_date);
-
-  if (mode === 'list') {
-    const div = document.createElement('div');
-    div.className = 'list-item' + (c.done ? ' done' : '');
-    div.onclick = () => openModal(null, c.id);
-
-    const badge = document.createElement('div');
-    badge.className = 'q-badge q' + effQ;
-    badge.textContent = 'Q' + effQ;
-    div.appendChild(badge);
-
-    const check = document.createElement('div');
-    check.className = 'ciclo-check' + (c.done ? ' checked' : '');
-    check.onclick = async e => {
-      e.stopPropagation();
-      try { await flipDone(c.id, c.done); showToast(c.done ? 'Ciclo riaperto' : 'Ciclo chiuso ✓', c.done ? 'info' : 'success'); }
-      catch (err) { showToast('Errore: ' + err.message, 'error'); }
+    // ── Priority config ──────────────────────────────────────────
+    const PRIO = {
+      1: { label: 'Urgente',  dot: 'bg-red-500',    border: 'border-l-red-500',    badge: 'bg-red-900/40 text-red-300' },
+      2: { label: 'Normale',  dot: 'bg-yellow-400',  border: 'border-l-yellow-500', badge: 'bg-yellow-900/30 text-yellow-300' },
+      3: { label: 'Bassa',    dot: 'bg-blue-500',    border: 'border-l-blue-500',   badge: 'bg-blue-900/30 text-blue-300' },
+      4: { label: 'Un giorno',dot: 'bg-gray-600',    border: 'border-l-gray-600',   badge: 'bg-gray-800 text-gray-400' },
     };
-    div.appendChild(check);
 
-    const info = document.createElement('div');
-    info.style.cssText = 'flex:1;min-width:0';
+    // ── Load ──────────────────────────────────────────────────────
+    async function loadCicli() {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('cicli-list').innerHTML = '';
+      document.getElementById('empty-state').classList.add('hidden');
 
-    const title = document.createElement('div');
-    title.style.cssText = 'font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    title.textContent = c.title;
-    if (c.da_plaud) {
-      const p = document.createElement('span');
-      p.style.cssText = 'font-size:9px;padding:1px 5px;background:rgba(168,85,247,0.2);color:#c084fc;border-radius:3px;margin-left:6px;vertical-align:middle';
-      p.textContent = '🎙 Plaud';
-      title.appendChild(p);
+      const { data, error } = await db
+        .from('cicli')
+        .select('*')
+        .eq('ctx', currentCtx)
+        .eq('done', false)
+        .order('q', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      document.getElementById('loading').classList.add('hidden');
+      if (error) { console.error(error); return; }
+
+      cicli = data || [];
+
+      // Build cat suggestions from all existing cats
+      allCats = [...new Set(cicli.map(c => c.cat).filter(Boolean))];
+      const ds = document.getElementById('cat-suggestions');
+      ds.innerHTML = allCats.map(c => `<option value="${c}">`).join('');
+
+      render();
     }
-    info.appendChild(title);
 
-    const meta = document.createElement('div');
-    meta.className = 'ciclo-meta';
-    meta.style.marginTop = '4px';
-    if (c.cat) {
-      const tag = document.createElement('span');
-      tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
-      tag.textContent = CAT_LABELS[c.cat] || c.cat;
-      meta.appendChild(tag);
+    // ── Mark done ─────────────────────────────────────────────────
+    async function markDone(id) {
+      const ciclo = cicli.find(c => c.id === id);
+      if (!ciclo) return;
+
+      // Animate
+      const el = document.querySelector(`[data-id="${id}"]`);
+      if (el) el.classList.add('done-anim');
+
+      // DB: mark done
+      await db.from('cicli').update({ done: true, updated_at: new Date().toISOString() }).eq('id', id);
+
+      // Se ricorrente → crea il prossimo
+      if (ciclo.ricorrente) {
+        const next = nextPeriod(ciclo);
+        await db.from('cicli').insert({
+          title: ciclo.title,
+          cat: ciclo.cat,
+          note: ciclo.note,
+          q: ciclo.q,
+          ctx: ciclo.ctx,
+          week: next.week,
+          year: next.year,
+          ricorrente: true,
+          ricorrenza_tipo: ciclo.ricorrenza_tipo,
+          ricorrenza_ogni: ciclo.ricorrenza_ogni,
+          done: false,
+          da_plaud: false,
+          persone_menzionate: ciclo.persone_menzionate || [],
+        });
+      }
+
+      setTimeout(() => loadCicli(), 300);
     }
-    if (c.week) {
-      const wt = document.createElement('span');
-      wt.style.cssText = 'font-size:10px;color:var(--text-dim);font-family:DM Mono,monospace';
-      wt.textContent = 'Sett.' + c.week;
-      meta.appendChild(wt);
+
+    // ── Delete ────────────────────────────────────────────────────
+    async function deleteCiclo(id) {
+      if (!confirm('Eliminare questo ciclo?')) return;
+      await db.from('cicli').delete().eq('id', id);
+      loadCicli();
     }
-    const pm = c.persone_menzionate;
-    if (pm && pm.length) {
-      const pt = document.createElement('span');
-      pt.style.cssText = 'font-size:10px;color:var(--text-muted)';
-      pt.textContent = '👤 ' + pm.join(', ');
-      meta.appendChild(pt);
+
+    // ── Save ──────────────────────────────────────────────────────
+    async function saveCiclo(payload) {
+      if (editingId) {
+        await db.from('cicli')
+          .update({ ...payload, updated_at: new Date().toISOString() })
+          .eq('id', editingId);
+      } else {
+        await db.from('cicli').insert({
+          ...payload,
+          ctx: currentCtx,
+          week: today.week,
+          year: today.year,
+          done: false,
+          da_plaud: false,
+          persone_menzionate: [],
+        });
+      }
+      closeModal();
+      loadCicli();
     }
-    info.appendChild(meta);
-    div.appendChild(info);
 
-    if (daysLeft !== null) {
-      const dt = document.createElement('div');
-      dt.className = 'ciclo-date' + (esc==='crit' ? ' urgent' : esc==='warn' ? ' near' : '');
-      dt.textContent = formatDaysLeft(daysLeft);
-      div.appendChild(dt);
+    // ── Render ────────────────────────────────────────────────────
+    function render() {
+      // Week label
+      document.getElementById('week-label').textContent =
+        `Settimana ${today.week} · ${today.year}`;
+
+      // Ctx buttons
+      document.querySelectorAll('.ctx-btn').forEach(btn => {
+        const active = btn.dataset.ctx === currentCtx;
+        btn.className = `ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors ${
+          active
+            ? 'bg-blue-600 text-white shadow'
+            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+        }`;
+      });
+
+      const list = document.getElementById('cicli-list');
+      const empty = document.getElementById('empty-state');
+
+      if (cicli.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        renderStats();
+        return;
+      }
+      empty.classList.add('hidden');
+
+      // Group by category, sort cats by min q
+      const grouped = {};
+      cicli.forEach(c => {
+        const cat = c.cat || '—';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(c);
+      });
+
+      const sortedCats = Object.keys(grouped).sort((a, b) => {
+        const minA = Math.min(...grouped[a].map(c => c.q));
+        const minB = Math.min(...grouped[b].map(c => c.q));
+        return minA - minB;
+      });
+
+      list.innerHTML = sortedCats.map(cat => `
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs uppercase tracking-widest text-gray-500 font-semibold">${cat}</span>
+            <span class="text-xs text-gray-700">${grouped[cat].length}</span>
+          </div>
+          <div class="space-y-1.5">
+            ${grouped[cat].map(renderCiclo).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      renderStats();
     }
-    if (esc) {
-      const pill = document.createElement('span');
-      pill.className = 'esc-pill';
-      pill.style.cssText = esc==='crit'
-        ? 'background:rgba(239,68,68,0.18);color:var(--q1)'
-        : 'background:rgba(249,115,22,0.18);color:var(--escalation1)';
-      pill.textContent = esc==='crit' ? '⚠ CRITICO' : '🕐 PRESTO';
-      div.appendChild(pill);
+
+    function renderCiclo(c) {
+      const p = PRIO[c.q] || PRIO[2];
+      const overdue = isOverdue(c.due_date);
+      const dueStr = fmtDate(c.due_date);
+      const ricLabel = c.ricorrente
+        ? `ogni ${c.ricorrenza_ogni} ${c.ricorrenza_tipo === 'mensile' ? 'mesi' : c.ricorrenza_ogni === 1 ? 'sett.' : 'settimane'}`
+        : '';
+
+      return `
+        <div data-id="${c.id}"
+          class="group bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl border-l-4 ${p.border} px-3 py-2.5 flex items-start gap-3 transition-colors">
+
+          <!-- Done button -->
+          <button onclick="markDone('${c.id}')"
+            class="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 border-gray-600 hover:border-green-400 hover:bg-green-500/10 transition-colors flex items-center justify-center text-xs">
+            <span class="hidden group-hover:block text-green-400 leading-none">✓</span>
+          </button>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-sm font-medium leading-snug">${escHtml(c.title)}</span>
+              ${c.ricorrente ? `<span class="text-xs text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded-md font-medium" title="${ricLabel}">🔄 ${ricLabel}</span>` : ''}
+            </div>
+            <div class="flex items-center gap-2.5 mt-1 flex-wrap">
+              ${dueStr ? `<span class="text-xs ${overdue ? 'text-red-400 font-medium' : 'text-gray-500'}">${overdue ? '⚠️ ' : '📅 '}${dueStr}</span>` : ''}
+              ${c.persone_menzionate && c.persone_menzionate.length
+                ? `<span class="text-xs text-gray-600">👤 ${c.persone_menzionate.join(', ')}</span>`
+                : ''}
+              ${c.note ? `<span class="text-xs text-gray-600 truncate max-w-[180px]">${escHtml(c.note.substring(0, 40))}${c.note.length > 40 ? '…' : ''}</span>` : ''}
+            </div>
+          </div>
+
+          <!-- Actions (visible on hover) -->
+          <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
+            <button onclick="openEdit('${c.id}')"
+              class="text-gray-600 hover:text-blue-400 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-sm">
+              ✏️
+            </button>
+            <button onclick="deleteCiclo('${c.id}')"
+              class="text-gray-600 hover:text-red-400 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-sm">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
     }
-    return div;
-  }
 
-  // Matrix card
-  const div = document.createElement('div');
-  div.className = 'ciclo-card' + (c.done ? ' done' : '') + (esc ? ' esc-'+esc : '');
-  div.onclick = () => openModal(null, c.id);
+    function renderStats() {
+      const bar = document.getElementById('stats-bar');
+      if (cicli.length === 0) { bar.innerHTML = ''; return; }
 
-  div.appendChild(Object.assign(document.createElement('div'), { className: 'escalation-bar' }));
+      const urgenti = cicli.filter(c => c.q === 1).length;
+      const ricorrenti = cicli.filter(c => c.ricorrente).length;
+      const scaduti = cicli.filter(c => isOverdue(c.due_date)).length;
 
-  const top = document.createElement('div');
-  top.className = 'ciclo-top';
-
-  const check = document.createElement('div');
-  check.className = 'ciclo-check' + (c.done ? ' checked' : '');
-  check.onclick = async e => {
-    e.stopPropagation();
-    try { await flipDone(c.id, c.done); showToast(c.done ? 'Ciclo riaperto' : 'Ciclo chiuso ✓', c.done ? 'info' : 'success'); }
-    catch (err) { showToast('Errore: ' + err.message, 'error'); }
-  };
-  top.appendChild(check);
-
-  const titleEl = document.createElement('div');
-  titleEl.className = 'ciclo-title';
-  titleEl.textContent = c.title;
-  if (esc) {
-    const p = document.createElement('span');
-    p.className = 'esc-pill';
-    p.textContent = esc==='crit' ? '⚠ CRITICO' : '🕐 PRESTO';
-    titleEl.appendChild(p);
-  }
-  top.appendChild(titleEl);
-  div.appendChild(top);
-
-  const meta = document.createElement('div');
-  meta.className = 'ciclo-meta';
-  if (c.cat) {
-    const tag = document.createElement('span');
-    tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
-    tag.textContent = CAT_LABELS[c.cat] || c.cat;
-    meta.appendChild(tag);
-  }
-  if (daysLeft !== null) {
-    const dt = document.createElement('div');
-    dt.className = 'ciclo-date' + (esc==='crit' ? ' urgent' : esc==='warn' ? ' near' : '');
-    dt.textContent = '📅 ' + formatDaysLeft(daysLeft);
-    meta.appendChild(dt);
-  }
-  div.appendChild(meta);
-  return div;
-}
-
-// ══════════════════════════════════════════════════════════════
-// CATEGORIE CUSTOM
-// ══════════════════════════════════════════════════════════════
-const CAT_EMOJIS_LIST = ['🔥','📋','🗂','💼','💰','📝','📅','🤝','🏢','⚙️','🧘','🐉','🛡','📊','✅','❤️','💪','💶','📚','🌙','🏡','⚽','📈','💡','🎯','👥','📣','🔬','📤','⭐'];
-let _catFormCtx = 'lavoro';
-let _catFormEmoji = '📋';
-let _catEditId = null;
-
-function toggleCatForm(editData) {
-  const wrap = document.getElementById('catInlineForm');
-  const btn  = document.getElementById('catAddBtn');
-  if (!wrap) return;
-  if (wrap.style.display !== 'none' && !editData) { wrap.style.display = 'none'; return; }
-  _catFormCtx   = editData?.ctx   || state.ctx;
-  _catFormEmoji = editData?.emoji || '📋';
-  _catEditId    = editData?.id    || null;
-  wrap.style.display = 'block';
-  wrap.innerHTML = `
-    <div class="cat-inline-form">
-      <div style="margin-bottom:6px">
-        <label class="form-label" style="font-size:10px">Nome</label>
-        <input type="text" class="form-input" id="catf-nome" value="${escHtml(editData?.nome||'')}" placeholder="Nome categoria..." autocomplete="off" style="font-size:12px;padding:7px 10px">
-      </div>
-      <label class="form-label" style="font-size:10px">Emoji</label>
-      <div class="emoji-grid" id="catf-emojis">
-        ${CAT_EMOJIS_LIST.map(e => `<button type="button" class="emoji-btn${e===_catFormEmoji?' sel':''}" onclick="selectCatEmoji('${e}',this)">${e}</button>`).join('')}
-      </div>
-      <label class="form-label" style="font-size:10px">Contesto</label>
-      <div class="cat-ctx-toggle">
-        <button type="button" class="cat-ctx-btn lavoro${_catFormCtx==='lavoro'?' sel':''}" id="catf-ctx-lav" onclick="setCatCtx('lavoro')">💼 Lavoro</button>
-        <button type="button" class="cat-ctx-btn personale${_catFormCtx==='personale'?' sel':''}" id="catf-ctx-per" onclick="setCatCtx('personale')">🌿 Personale</button>
-      </div>
-      <div class="cat-form-actions">
-        <button class="cat-form-save" onclick="saveCatForm()">Salva</button>
-        <button class="cat-form-cancel" onclick="document.getElementById('catInlineForm').style.display='none'">Annulla</button>
-      </div>
-    </div>`;
-  setTimeout(() => document.getElementById('catf-nome')?.focus(), 100);
-}
-
-function selectCatEmoji(e, btn) {
-  _catFormEmoji = e;
-  document.querySelectorAll('#catf-emojis .emoji-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-}
-
-function setCatCtx(ctx) {
-  _catFormCtx = ctx;
-  document.getElementById('catf-ctx-lav')?.classList.toggle('sel', ctx==='lavoro');
-  document.getElementById('catf-ctx-per')?.classList.toggle('sel', ctx==='personale');
-}
-
-async function saveCatForm() {
-  const nome = (document.getElementById('catf-nome')?.value||'').trim();
-  if (!nome) { showToast('Inserisci un nome', 'warn'); return; }
-  const ordine = state.categorie.length;
-  try {
-    if (_catEditId) {
-      const { error } = await db.from('categorie').update({ nome, emoji:_catFormEmoji, ctx:_catFormCtx }).eq('id', _catEditId);
-      if (error) throw error;
-    } else {
-      const { error } = await db.from('categorie').insert({ nome, emoji:_catFormEmoji, ctx:_catFormCtx, ordine, created_at: new Date().toISOString() });
-      if (error) throw error;
+      bar.innerHTML = [
+        cicli.length ? `<span>${cicli.length} aperti</span>` : '',
+        urgenti ? `<span class="text-red-400">🔴 ${urgenti} urgenti</span>` : '',
+        ricorrenti ? `<span class="text-blue-400">🔄 ${ricorrenti} ricorrenti</span>` : '',
+        scaduti ? `<span class="text-orange-400">⚠️ ${scaduti} scaduti</span>` : '',
+      ].filter(Boolean).join('<span class="text-gray-700">·</span>');
     }
-    document.getElementById('catInlineForm').style.display = 'none';
-    showToast(_catEditId ? 'Categoria aggiornata ✓' : 'Categoria aggiunta ✓', 'success');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
-}
 
-async function deleteCat(id) {
-  if (!confirm('Eliminare questa categoria?')) return;
-  try {
-    const { error } = await db.from('categorie').delete().eq('id', id);
-    if (error) throw error;
-    showToast('Categoria eliminata', 'info');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
-}
-
-function editCatInline(id) {
-  const cat = state.categorie.find(c => c.id === id);
-  if (!cat) return;
-  toggleCatForm(cat);
-}
-
-// ══════════════════════════════════════════════════════════════
-// PERSONA CHIPS IN MODAL
-// ══════════════════════════════════════════════════════════════
-let _modalPersone = [];  // array of {id, nome, colore}
-
-function initPersonaChips(persone_menzionate) {
-  _modalPersone = [];
-  (persone_menzionate || []).forEach(nome => {
-    const p = state.persone.find(x => x.nome === nome);
-    _modalPersone.push(p ? { id: p.id, nome: p.nome, colore: personColor(p) } : { id: null, nome, colore: personColor({nome}) });
-  });
-  renderPersonaChips();
-}
-
-function renderPersonaChips() {
-  const box = document.getElementById('personaChipsBox');
-  const input = document.getElementById('personaChipInput');
-  if (!box || !input) return;
-  const chips = _modalPersone.map(p => {
-    const col = p.colore || '#3d7fff';
-    return `<span class="pchip" style="background:${col}22;color:${col}">
-      <span class="pchip-av" style="background:${col};color:white">${escHtml((p.nome||'').charAt(0).toUpperCase())}</span>
-      ${escHtml(p.nome)}
-      <span class="pchip-rm" onclick="removePersonaChip('${escHtml(p.nome)}')">✕</span>
-    </span>`;
-  }).join('');
-  // Rebuild box preserving input
-  const existing = box.querySelectorAll('.pchip');
-  existing.forEach(el => el.remove());
-  box.insertAdjacentHTML('afterbegin', chips);
-}
-
-function removePersonaChip(nome) {
-  _modalPersone = _modalPersone.filter(p => p.nome !== nome);
-  renderPersonaChips();
-}
-
-function onPersonaChipInput(val) {
-  const dd = document.getElementById('personaDd');
-  if (!val.trim()) { if (dd) dd.style.display = 'none'; return; }
-  const q = val.toLowerCase();
-  const already = _modalPersone.map(p => p.nome);
-  const matches = state.persone.filter(p => p.nome.toLowerCase().includes(q) && !already.includes(p.nome));
-  const showCreate = !state.persone.some(p => p.nome.toLowerCase() === q);
-  if (!dd) return;
-  if (!matches.length && !showCreate) { dd.style.display = 'none'; return; }
-  dd.style.display = 'block';
-  dd.innerHTML = matches.slice(0,6).map(p => {
-    const col = personColor(p);
-    return `<div class="persona-dd-item" onclick="selectPersonaFromDd('${escHtml(p.nome)}')">
-      <div class="persona-dd-av" style="background:${col};color:white">${escHtml(p.nome.charAt(0).toUpperCase())}</div>
-      <span>${escHtml(p.nome)}</span>${p.ruolo ? `<span style="font-size:10px;color:var(--text-dim)">${escHtml(p.ruolo)}</span>` : ''}
-    </div>`;
-  }).join('') + (showCreate ? `<div class="persona-dd-item persona-dd-create" onclick="createAndSelectPersona('${escHtml(val.trim())}')">+ Crea "${escHtml(val.trim())}"</div>` : '');
-}
-
-function selectPersonaFromDd(nome) {
-  const p = state.persone.find(x => x.nome === nome);
-  if (!_modalPersone.some(x => x.nome === nome)) {
-    _modalPersone.push(p ? { id: p.id, nome: p.nome, colore: personColor(p) } : { id: null, nome, colore: personColor({nome}) });
-    renderPersonaChips();
-  }
-  const inp = document.getElementById('personaChipInput');
-  if (inp) { inp.value = ''; }
-  const dd = document.getElementById('personaDd');
-  if (dd) dd.style.display = 'none';
-}
-
-async function createAndSelectPersona(nome) {
-  try {
-    const colore = personColor({nome});
-    const { data, error } = await db.from('persone').insert({ nome, colore, created_at: new Date().toISOString() }).select().single();
-    if (error) throw error;
-    state.persone.push(data);
-    selectPersonaFromDd(nome);
-    showToast(`Persona "${nome}" creata ✓`, 'success');
-  } catch (e) {
-    selectPersonaFromDd(nome);
-  }
-}
-
-function onPersonaChipKey(e) {
-  if (e.key === 'Backspace' && !e.target.value && _modalPersone.length) {
-    _modalPersone = _modalPersone.slice(0, -1);
-    renderPersonaChips();
-  }
-  if (e.key === 'Escape') {
-    const dd = document.getElementById('personaDd');
-    if (dd) dd.style.display = 'none';
-  }
-}
-
-// Close dropdown on outside click
-document.addEventListener('click', e => {
-  if (!e.target.closest('.persona-chips-wrap')) {
-    const dd = document.getElementById('personaDd');
-    if (dd) dd.style.display = 'none';
-  }
-});
-
-// ══════════════════════════════════════════════════════════════
-// MODAL NUOVO/MODIFICA CICLO
-// ══════════════════════════════════════════════════════════════
-let editingId  = null;
-let selectedQ  = 2;
-let modalCtx   = 'lavoro';
-
-function openModal(defaultQ, editId) {
-  editingId = editId || null;
-  selectedQ = defaultQ || 2;
-  modalCtx  = state.ctx;
-
-  const overlay = document.getElementById('modalOverlay');
-  const title   = document.getElementById('modalTitle');
-  const btnDel  = document.getElementById('btn-delete');
-  const btnSave = document.getElementById('btn-save');
-  btnSave.textContent = 'Salva';
-  btnSave.disabled = false;
-
-  if (editId) {
-    const c = state.cicli.find(x => x.id === editId);
-    if (!c) return;
-    title.textContent = 'MODIFICA CICLO';
-    document.getElementById('f-title').value = c.title || '';
-    document.getElementById('f-note').value  = c.note  || '';
-    document.getElementById('f-cat').value   = c.cat   || 'management';
-    document.getElementById('f-date').value  = c.due_date || '';
-    document.getElementById('f-week').value  = c.week  || state.week;
-    selectedQ = c.q || 2;
-    modalCtx  = c.ctx || state.ctx;
-    btnDel.style.display = 'block';
-    initPersonaChips(c.persone_menzionate || []);
-  } else {
-    title.textContent = 'NUOVO CICLO APERTO';
-    document.getElementById('f-title').value = '';
-    document.getElementById('f-note').value  = '';
-    document.getElementById('f-cat').value   = state.ctx === 'personale' ? 'salute' : 'management';
-    document.getElementById('f-date').value  = '';
-    document.getElementById('f-week').value  = state.week;
-    btnDel.style.display = 'none';
-    initPersonaChips([]);
-  }
-
-  setModalCtx(modalCtx);
-  selectQ(selectedQ);
-  overlay.classList.add('open');
-  setTimeout(() => document.getElementById('f-title').focus(), 200);
-}
-
-function closeModal(overlayId) {
-  const id = overlayId || 'modalOverlay';
-  document.getElementById(id).classList.remove('open');
-  if (id === 'modalOverlay') editingId = null;
-}
-
-function closeModalOnBg(e, id) {
-  if (e.target === document.getElementById(id)) closeModal(id);
-}
-
-function setModalCtx(ctx) {
-  modalCtx = ctx;
-  document.getElementById('cpk-lavoro').classList.toggle('selected', ctx === 'lavoro');
-  document.getElementById('cpk-personale').classList.toggle('selected', ctx === 'personale');
-  document.getElementById('cat-lavoro-group').style.display   = ctx === 'lavoro'    ? '' : 'none';
-  document.getElementById('cat-personale-group').style.display = ctx === 'personale' ? '' : 'none';
-  if (ctx === 'personale') document.getElementById('f-cat').value = 'salute';
-  else                     document.getElementById('f-cat').value = 'management';
-  document.getElementById('btn-save').className = 'btn-save' + (ctx === 'personale' ? ' personale' : '');
-}
-
-function selectQ(q) {
-  selectedQ = q;
-  document.querySelectorAll('.q-pick-btn').forEach(btn => {
-    btn.classList.toggle('selected', parseInt(btn.dataset.q) === q);
-  });
-}
-
-async function saveCiclo() {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) { showToast('Inserisci un titolo', 'warn'); return; }
-
-  const persone_menzionate = _modalPersone.map(p => p.nome).filter(Boolean);
-
-  const data = {
-    title,
-    note:  document.getElementById('f-note').value.trim() || null,
-    cat:   document.getElementById('f-cat').value,
-    due_date: document.getElementById('f-date').value || null,
-    week:  parseInt(document.getElementById('f-week').value) || state.week,
-    year:  state.year,
-    q:     selectedQ,
-    ctx:   modalCtx,
-    persone_menzionate,
-    done:  false,
-    da_plaud: false
-  };
-
-  if (editingId) {
-    const existing = state.cicli.find(c => c.id === editingId);
-    data.id       = editingId;
-    data.done     = existing?.done     || false;
-    data.da_plaud = existing?.da_plaud || false;
-  }
-
-  const btn = document.getElementById('btn-save');
-  btn.textContent = 'Salvataggio...';
-  btn.disabled = true;
-
-  try {
-    await upsertCiclo(data);
-    closeModal('modalOverlay');
-    showToast(editingId ? 'Ciclo aggiornato ✓' : 'Ciclo aggiunto ✓', 'success');
-  } catch (e) {
-    showToast('Errore: ' + e.message, 'error');
-    btn.textContent = 'Salva';
-    btn.disabled = false;
-  }
-}
-
-async function deleteCurrent() {
-  if (!editingId) return;
-  if (!confirm('Eliminare questo ciclo? Operazione irreversibile.')) return;
-  try {
-    await removeCiclo(editingId);
-    closeModal('modalOverlay');
-    showToast('Ciclo eliminato', 'info');
-  } catch (e) {
-    showToast('Errore eliminazione: ' + e.message, 'error');
-  }
-}
-
-// ══════════════════════════════════════════════════════════════
-// PLAUD IMPORT (3 step)
-// ══════════════════════════════════════════════════════════════
-let plaudStep      = 1;
-let plaudExtracted = [];
-
-function openPlaudModal() {
-  plaudStep = 1;
-  plaudExtracted = [];
-  setPlaudStep(1);
-  const ta = document.getElementById('plaud-transcript');
-  if (ta) ta.value = '';
-  document.getElementById('plaudOverlay').classList.add('open');
-}
-
-function closePlaudModal() {
-  document.getElementById('plaudOverlay').classList.remove('open');
-}
-
-function setPlaudStep(n) {
-  plaudStep = n;
-  const labels = { 1:'Incolla trascrizione', 2:'Analisi in corso...', 3:'Conferma importazione' };
-  const labelEl = document.getElementById('plaud-step-label');
-  if (labelEl) labelEl.textContent = labels[n] || '';
-  for (let i = 1; i <= 3; i++) {
-    const step = document.getElementById('plaud-step-' + i);
-    if (step) step.style.display = i === n ? 'block' : 'none';
-    const dot  = document.getElementById('plaud-dot-' + i);
-    if (dot) dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
-  }
-}
-
-async function analyzePlaud() {
-  const transcript = (document.getElementById('plaud-transcript')?.value || '').trim();
-  if (!transcript) { showToast('Incolla il testo della registrazione Plaud', 'warn'); return; }
-
-  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
-  if (!apiKey) {
-    closePlaudModal();
-    openApiKeyModal();
-    return;
-  }
-
-  setPlaudStep(2);
-
-  try {
-    plaudExtracted = await callClaude(transcript, apiKey);
-    if (!Array.isArray(plaudExtracted) || !plaudExtracted.length) {
-      showToast('Nessun ciclo trovato nella trascrizione', 'warn');
-      setPlaudStep(1);
-      return;
+    // ── Modal ─────────────────────────────────────────────────────
+    function openAdd() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = 'Nuovo Ciclo';
+      document.getElementById('ciclo-form').reset();
+      document.getElementById('f-id').value = '';
+      document.getElementById('f-q').value = '2';
+      document.getElementById('ricorrenza-opts').classList.add('hidden');
+      showModal();
+      setTimeout(() => document.getElementById('f-title').focus(), 100);
     }
-    renderPlaudItems(plaudExtracted);
-    setPlaudStep(3);
-  } catch (e) {
-    showToast('Errore Claude API: ' + e.message, 'error');
-    setPlaudStep(1);
-  }
-}
 
-async function callClaude(transcript, apiKey) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-allow-browser': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: buildPrompt(transcript) }]
-    })
-  });
+    function openEdit(id) {
+      const c = cicli.find(x => x.id === id);
+      if (!c) return;
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Modifica Ciclo';
+      document.getElementById('f-id').value = id;
+      document.getElementById('f-title').value = c.title || '';
+      document.getElementById('f-cat').value = c.cat || '';
+      document.getElementById('f-q').value = c.q || 2;
+      document.getElementById('f-due').value = c.due_date || '';
+      document.getElementById('f-note').value = c.note || '';
+      document.getElementById('f-ricorrente').checked = !!c.ricorrente;
+      document.getElementById('f-ric-tipo').value = c.ricorrenza_tipo || 'settimanale';
+      document.getElementById('f-ric-ogni').value = c.ricorrenza_ogni || 1;
+      document.getElementById('ricorrenza-opts').classList.toggle('hidden', !c.ricorrente);
+      showModal();
+    }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || 'HTTP ' + res.status);
-  }
+    function showModal() {
+      document.getElementById('modal').classList.remove('hidden');
+    }
 
-  const data = await res.json();
-  const text = (data.content?.[0]?.text || '').trim();
-  const match = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, text];
-  return JSON.parse((match[1] || text).trim());
-}
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      editingId = null;
+    }
 
-function buildPrompt(transcript) {
-  return `Analizza questa trascrizione vocale italiana e identifica TUTTI i "cicli aperti": impegni, task, promesse, cose da fare, follow-up, decisioni pendenti.
+    // ── Escape HTML ───────────────────────────────────────────────
+    function escHtml(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
-Restituisci SOLO un array JSON valido (nessun altro testo):
-[{
-  "title": "titolo breve e chiaro (max 60 caratteri)",
-  "note": "dettagli opzionali o null",
-  "q": 2,
-  "cat": "management",
-  "ctx": "lavoro",
-  "due_date": null,
-  "persone_menzionate": []
-}]
-
-Legenda quadranti q: 1=urgente+prioritario, 2=prioritario non urgente, 3=urgente non prioritario, 4=bassa priorità
-Categorie valide cat: management, hr, marketing, vendite, amministrazione, produzione, rnd, da-delegare, salute, relazioni, finanze, crescita, hobbies, spiritualita, casa, idee
-ctx: "lavoro" o "personale"
-due_date: "YYYY-MM-DD" se menzionata, altrimenti null
-persone_menzionate: array di nomi propri di persone menzionate, [] se nessuna
-
-TRASCRIZIONE:
-${transcript}`;
-}
-
-function renderPlaudItems(items) {
-  const container = document.getElementById('plaud-items');
-  const countEl   = document.getElementById('plaud-count');
-  if (!container) return;
-  if (countEl) countEl.textContent = items.length;
-  container.innerHTML = '';
-
-  items.forEach((item, idx) => {
-    const card = document.createElement('div');
-    card.className = 'plaud-item';
-    const dateVal = item.due_date || '';
-    const noteHtml = item.note ? `<div class="plaud-item-note">${escHtml(item.note)}</div>` : '';
-    const personeHtml = item.persone_menzionate?.length
-      ? `<span style="font-size:10px;color:var(--text-muted)">👤 ${escHtml(item.persone_menzionate.join(', '))}</span>`
-      : '';
-
-    card.innerHTML = `
-      <div class="plaud-item-header">
-        <label class="plaud-check-label">
-          <input type="checkbox" class="plaud-item-check" data-idx="${idx}" checked>
-          <span class="plaud-item-title">${escHtml(item.title)}</span>
-        </label>
-        <span class="q-badge q${item.q||2}">Q${item.q||2}</span>
-      </div>
-      ${noteHtml}
-      <div class="plaud-item-meta">
-        <span class="meta-tag ${CAT_COLORS[item.cat]||''}">${CAT_LABELS[item.cat]||item.cat||'—'}</span>
-        ${personeHtml}
-        <input type="date" id="plaud-date-${idx}" value="${dateVal}" class="plaud-date-input" title="Scadenza">
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-async function importPlaudSelected() {
-  const checks = document.querySelectorAll('.plaud-item-check:checked');
-  if (!checks.length) { showToast('Seleziona almeno un ciclo', 'warn'); return; }
-
-  const toImport = [];
-  checks.forEach(cb => {
-    const idx  = parseInt(cb.dataset.idx);
-    const item = plaudExtracted[idx];
-    const dateEl = document.getElementById('plaud-date-' + idx);
-    toImport.push({
-      title:              item.title,
-      note:               item.note || null,
-      q:                  item.q    || 2,
-      cat:                item.cat  || 'management',
-      ctx:                item.ctx  || state.ctx,
-      due_date:           dateEl?.value || item.due_date || null,
-      persone_menzionate: item.persone_menzionate || [],
-      week:               state.week,
-      year:               state.year,
-      done:               false,
-      da_plaud:           true,
-      created_at:         new Date().toISOString(),
-      updated_at:         new Date().toISOString()
+    // ── Events ────────────────────────────────────────────────────
+    document.getElementById('btn-add').addEventListener('click', openAdd);
+    document.getElementById('btn-add-fab').addEventListener('click', openAdd);
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal')) closeModal();
     });
-  });
 
-  const btn = document.getElementById('btn-import-plaud');
-  btn.textContent = 'Importazione...';
-  btn.disabled = true;
+    document.querySelectorAll('.ctx-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCtx = btn.dataset.ctx;
+        loadCicli();
+      });
+    });
 
-  try {
-    const { error } = await db.from('cicli').insert(toImport);
-    if (error) throw error;
-    closePlaudModal();
-    showToast(`${toImport.length} cicli importati da Plaud ✓`, 'success');
-  } catch (e) {
-    showToast('Errore importazione: ' + e.message, 'error');
-    btn.textContent = 'Importa selezionati';
-    btn.disabled = false;
-  }
-}
+    document.getElementById('f-ricorrente').addEventListener('change', e => {
+      document.getElementById('ricorrenza-opts').classList.toggle('hidden', !e.target.checked);
+    });
 
-// ══════════════════════════════════════════════════════════════
-// API KEY MODAL
-// ══════════════════════════════════════════════════════════════
-function openApiKeyModal() {
-  const inp = document.getElementById('claude-key-input');
-  if (inp) inp.value = localStorage.getItem(LS.CLAUDE_KEY) || '';
-  document.getElementById('apikeyOverlay').classList.add('open');
-}
+    document.getElementById('ciclo-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      if (saving) return;
+      const title = document.getElementById('f-title').value.trim();
+      if (!title) {
+        document.getElementById('f-title').focus();
+        return;
+      }
+      saving = true;
+      const btn = document.getElementById('btn-save');
+      btn.textContent = '…';
+      btn.disabled = true;
 
-function saveApiKey() {
-  const key = (document.getElementById('claude-key-input')?.value || '').trim();
-  if (!key.startsWith('sk-ant-')) { showToast('Chiave non valida (deve iniziare con sk-ant-)', 'warn'); return; }
-  localStorage.setItem(LS.CLAUDE_KEY, key);
-  closeModal('apikeyOverlay');
-  showToast('Chiave Claude salvata ✓', 'success');
-  setTimeout(openPlaudModal, 300);
-}
+      const ricorrente = document.getElementById('f-ricorrente').checked;
 
-// ══════════════════════════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════════════════════════
-let _toastId = 0;
-function showToast(msg, type) {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const id = 'toast-' + (++_toastId);
-  const el = document.createElement('div');
-  el.id = id;
-  el.className = 'toast' + (type ? ' ' + type : '');
-  el.textContent = msg;
-  el.onclick = () => _dismissToast(id);
-  container.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => _dismissToast(id), 3200);
-}
+      await saveCiclo({
+        title,
+        cat: document.getElementById('f-cat').value.trim() || null,
+        q: parseInt(document.getElementById('f-q').value),
+        due_date: document.getElementById('f-due').value || null,
+        note: document.getElementById('f-note').value.trim() || null,
+        ricorrente,
+        ricorrenza_tipo: ricorrente ? document.getElementById('f-ric-tipo').value : null,
+        ricorrenza_ogni: ricorrente ? parseInt(document.getElementById('f-ric-ogni').value) : null,
+      });
 
-function _dismissToast(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove('show');
-  setTimeout(() => el.remove(), 300);
-}
+      saving = false;
+      btn.textContent = 'Salva';
+      btn.disabled = false;
+    });
 
-// ══════════════════════════════════════════════════════════════
-// DARK / LIGHT THEME
-// ══════════════════════════════════════════════════════════════
-function applyTheme() {
-  const saved = localStorage.getItem(LS.THEME) || 'dark';
-  document.body.classList.toggle('light', saved === 'light');
-  const btn = document.getElementById('themeBtn');
-  if (btn) btn.textContent = saved === 'light' ? '☀️' : '🌙';
-}
-
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem(LS.THEME, isLight ? 'light' : 'dark');
-  const btn = document.getElementById('themeBtn');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
-}
-
-// ══════════════════════════════════════════════════════════════
-// TOOLTIP
-// ══════════════════════════════════════════════════════════════
-let _tipTimer = null;
-const _tip = () => document.getElementById('tooltip');
-
-document.addEventListener('mouseover', e => {
-  const el = e.target.closest('[data-tip]');
-  if (!el) return;
-  clearTimeout(_tipTimer);
-  _tipTimer = setTimeout(() => {
-    const tip = _tip(); if (!tip) return;
-    tip.textContent = el.dataset.tip;
-    tip.classList.add('visible');
-    positionTooltip(tip, el);
-  }, 400);
-});
-
-document.addEventListener('mouseout', e => {
-  const el = e.target.closest('[data-tip]');
-  if (!el) return;
-  clearTimeout(_tipTimer);
-  const tip = _tip(); if (tip) tip.classList.remove('visible');
-});
-
-function positionTooltip(tip, anchor) {
-  const r = anchor.getBoundingClientRect();
-  const tw = 240, th = 60;
-  let left = r.right + 10;
-  let top  = r.top + (r.height - th) / 2;
-  if (left + tw > window.innerWidth - 8)  left = r.left - tw - 10;
-  if (left < 8) left = 8;
-  if (top < 8)  top  = 8;
-  if (top + th > window.innerHeight - 8)  top = window.innerHeight - th - 8;
-  tip.style.left = left + 'px';
-  tip.style.top  = top  + 'px';
-}
-
-// ══════════════════════════════════════════════════════════════
-// GUIDA
-// ══════════════════════════════════════════════════════════════
-const GUIDA_SECTIONS = [
-  {
-    icon: '🧠',
-    title: 'Cos\'è CICLI APERTI',
-    content: `
-      <p>Un <strong>ciclo aperto</strong> è qualsiasi cosa incompiuta che tiene occupata la tua mente: una promessa fatta, un'email da rispondere, una decisione in sospeso, un progetto avviato ma non concluso.</p>
-      <p>Secondo la metodologia <strong>OSM</strong>, ogni ciclo aperto consuma energia mentale — anche quando non ci stai pensando consciamente. Raccoglierli in un unico sistema libera la mente e permette di agire con chiarezza.</p>
-      <p>L'obiettivo non è avere zero cicli, ma avere <strong>cicli consapevoli</strong>: sai cosa hai aperto, quando lo chiudi e perché.</p>
-    `
-  },
-  {
-    icon: '🔲',
-    title: 'La Matrice di Eisenhower',
-    content: `
-      <p>Ogni ciclo va collocato in uno dei 4 quadranti in base a <strong>urgenza</strong> e <strong>priorità</strong>:</p>
-      <div class="guida-q-grid">
-        <span class="guida-q-badge q1">Q1 🔥</span><span><strong>Crisi — FA SUBITO.</strong> Urgente e prioritario: clienti in attesa, scadenze oggi, emergenze.</span>
-        <span class="guida-q-badge q2">Q2 📌</span><span><strong>Qualità — PIANIFICA.</strong> Prioritario ma non urgente: strategia, formazione, relazioni importanti. È il quadrante della crescita.</span>
-        <span class="guida-q-badge q3">Q3 📋</span><span><strong>Inganno — DELEGA.</strong> Urgente ma non prioritario: interruzioni, alcune riunioni, compiti di altri.</span>
-        <span class="guida-q-badge q4">Q4 🗑</span><span><strong>Spreco — ELIMINA.</strong> Né urgente né prioritario. Valuta se vale davvero la pena tenerlo aperto.</span>
-      </div>
-    `
-  },
-  {
-    icon: '⚡',
-    title: 'Escalation automatica',
-    content: `
-      <p>L'app monitora le scadenze e riclassifica i cicli automaticamente:</p>
-      <ul>
-        <li>Un ciclo in <strong>Q2</strong> con scadenza entro <strong>30 giorni</strong> → passa a Q1 (diventa urgente)</li>
-        <li>Un ciclo in <strong>Q4</strong> con scadenza entro <strong>14 giorni</strong> → passa a Q3 (diventa urgente)</li>
-      </ul>
-      <p>Visivamente: la barra laterale arancione segnala <em>"presto"</em> (30gg), quella rossa <em>"critico"</em> (14gg). All'apertura dell'app ricevi un avviso se ci sono cicli auto-escalati.</p>
-    `
-  },
-  {
-    icon: '📅',
-    title: 'Navigazione settimanale',
-    content: `
-      <p>I cicli sono organizzati per <strong>settimana di riferimento</strong>. Usa le frecce <span class="guida-kbd">←</span> <span class="guida-kbd">→</span> nell'header (o da tastiera) per navigare tra le settimane.</p>
-      <p>La settimana di un ciclo indica <em>quando intendi occupartene</em>, non necessariamente la sua scadenza. Puoi spostare un ciclo a una settimana futura modificandolo.</p>
-      <p>La vista <strong>Storico</strong> raccoglie tutte le settimane passate e i cicli completati.</p>
-    `
-  },
-  {
-    icon: '👥',
-    title: 'Con chi — rubrica persone',
-    content: `
-      <p>Ogni ciclo può avere una o più <strong>persone coinvolte</strong>. Aggiungile nel campo "Persone coinvolte" del modale, separate da virgola.</p>
-      <p>La vista <strong>Persone</strong> raggruppa tutti i cicli aperti per persona — utilissima prima di una riunione: vedi in un colpo d'occhio tutto ciò di cui parlare con un collaboratore.</p>
-      <p>L'import da Plaud estrae automaticamente i nomi delle persone menzionate nella registrazione.</p>
-    `
-  },
-  {
-    icon: '📝',
-    title: 'Log note progressive',
-    content: `
-      <p>Il campo <strong>Note / Dettagli</strong> di ogni ciclo è il posto giusto per tenere un log progressivo degli aggiornamenti.</p>
-      <p>Esempio:</p>
-      <ul>
-        <li><em>2024-03-10: chiamato Mario, in attesa di preventivo</em></li>
-        <li><em>2024-03-15: preventivo ricevuto, da approvare</em></li>
-        <li><em>2024-03-18: approvato, inviato a ufficio acquisti</em></li>
-      </ul>
-      <p>In questo modo il ciclo diventa anche un <strong>diario delle azioni</strong> e puoi recuperare il contesto anche dopo settimane.</p>
-    `
-  },
-  {
-    icon: '🎙',
-    title: 'Import da Plaud',
-    content: `
-      <p>Plaud è un dispositivo che trascrive le riunioni. Con questo import puoi trasformare una trascrizione in cicli aperti in 3 clic:</p>
-      <ul>
-        <li><strong>1.</strong> Premi <span class="guida-kbd">🎙 Plaud</span> in header o <span class="guida-kbd">Cmd+P</span></li>
-        <li><strong>2.</strong> Incolla il testo della trascrizione</li>
-        <li><strong>3.</strong> Claude (AI) estrae automaticamente tutti gli impegni, promesse e task</li>
-        <li><strong>4.</strong> Rivedi l'elenco, modifica le scadenze, deseleziona quelli da non importare</li>
-        <li><strong>5.</strong> Premi "Importa selezionati"</li>
-      </ul>
-      <p>Richiede una <strong>Claude API Key</strong> (gratuita per uso personale limitato). Configurala premendo ⚙️ in header.</p>
-    `
-  },
-  {
-    icon: '🕐',
-    title: 'Storico',
-    content: `
-      <p>Lo <strong>Storico</strong> raccoglie tutti i cicli completati (spunta verde) e i cicli di settimane passate, organizzati per settimana.</p>
-      <p>Puoi <strong>riaprire</strong> un ciclo completato cliccando sulla spunta verde — tornerà nella settimana corrente come ciclo attivo.</p>
-      <p>Lo storico è utile per i <strong>check-in settimanali</strong>: guarda cos'hai chiuso la settimana scorsa e cosa è rimasto in sospeso.</p>
-    `
-  },
-  {
-    icon: '⌨️',
-    title: 'Scorciatoie tastiera',
-    content: `
-      <ul>
-        <li><span class="guida-kbd">Cmd+K</span> / <span class="guida-kbd">Ctrl+K</span> — Nuovo ciclo</li>
-        <li><span class="guida-kbd">Cmd+F</span> / <span class="guida-kbd">Ctrl+F</span> — Ricerca globale</li>
-        <li><span class="guida-kbd">Cmd+P</span> / <span class="guida-kbd">Ctrl+P</span> — Import Plaud</li>
-        <li><span class="guida-kbd">←</span> / <span class="guida-kbd">→</span> — Settimana precedente / successiva</li>
-        <li><span class="guida-kbd">Escape</span> — Chiudi modale aperto</li>
-        <li><span class="guida-kbd">Enter</span> — Salva ciclo (quando il modale è aperto)</li>
-      </ul>
-    `
-  }
-];
-
-function renderGuida() {
-  const gv = document.getElementById('view-guida');
-  if (!gv) return;
-  if (gv.innerHTML) return; // già renderizzata
-
-  let html = `<div class="guida-header">
-    <h2>📖 GUIDA A CICLI APERTI</h2>
-    <p>Tutto quello che serve per usare l'app con la metodologia OSM.</p>
-  </div>`;
-
-  GUIDA_SECTIONS.forEach((s, i) => {
-    html += `
-    <div class="guida-section" id="guida-sec-${i}">
-      <div class="guida-section-title" onclick="toggleGuidaSection(${i})">
-        <span><span class="guida-icon">${s.icon}</span>${s.title}</span>
-        <span class="guida-chevron">▶</span>
-      </div>
-      <div class="guida-section-body">${s.content}</div>
-    </div>`;
-  });
-
-  gv.innerHTML = html;
-}
-
-function toggleGuidaSection(i) {
-  const sec = document.getElementById('guida-sec-' + i);
-  if (sec) sec.classList.toggle('open');
-}
-
-// ══════════════════════════════════════════════════════════════
-// SKELETON
-// ══════════════════════════════════════════════════════════════
-function renderSkeleton() {
-  ['q1-list','q2-list','q3-list','q4-list'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card" style="width:82%"></div><div class="skeleton-card" style="width:65%"></div>';
-  });
-}
-
-// ══════════════════════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ══════════════════════════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  const anyOpen = document.querySelector('.modal-overlay.open');
-  if (e.key === 'Escape' && anyOpen) { anyOpen.classList.remove('open'); return; }
-  if (anyOpen) return;
-  if (e.key === 'ArrowLeft')  { e.preventDefault(); changeWeek(-1); }
-  if (e.key === 'ArrowRight') { e.preventDefault(); changeWeek(1); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'p') { e.preventDefault(); openPlaudModal(); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); const si = document.getElementById('searchInput'); if (si) { si.focus(); si.select(); } }
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('modalOverlay')?.classList.contains('open')) {
-    if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') { e.preventDefault(); saveCiclo(); }
-  }
-});
-
-// ══════════════════════════════════════════════════════════════
-// AVVIO
-// ══════════════════════════════════════════════════════════════
-applyTheme();
-loadAll().then(() => {
-  const autoEsc = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
-  if (autoEsc.length > 0) {
-    setTimeout(() => showToast(`⚡ ${autoEsc.length} ciclo/i auto-escalati per scadenza`, 'warn'), 1200);
-  }
-});
-</script>
+    // ── Init ──────────────────────────────────────────────────────
+    loadCicli();
+  </script>
 </body>
 </html>
