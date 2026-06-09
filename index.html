@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#0a0b0d;--bg2:#111316;--bg3:#181b1f;--bg4:#1e2227;
@@ -523,6 +523,10 @@ body.ctx-per .bnb.active{color:var(--per);}
 // ═══════════════════════════════════════════════════
 // SUPABASE
 // ═══════════════════════════════════════════════════
+if (typeof supabase === 'undefined') {
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0b0d;color:#ff4d4d;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-size:16px;font-weight:600;margin-bottom:8px">Supabase non caricato</div><div style="font-size:13px;color:#8a94a6;margin-bottom:16px">Controlla la connessione e ricarica</div><button onclick="location.reload()" style="background:#4f8eff;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px">Ricarica</button></div></div>';
+  throw new Error('supabase CDN not loaded');
+}
 const { createClient } = supabase;
 const db = createClient(
   'https://qujxbvootvollmziaqrd.supabase.co',
@@ -684,7 +688,7 @@ async function loadPersone() {
 }
 
 async function loadCategorie() {
-  const { data } = await db.from('categorie').select('*').order('ordine').order('nome');
+  const { data } = await db.from('categorie').select('*').order('ordine', { ascending: true });
   S.categorie = data || [];
 }
 
@@ -798,8 +802,7 @@ function setView(v) {
   document.getElementById('nav-' + v)?.classList.add('active');
   document.querySelectorAll('.bnb').forEach(el => el.classList.remove('active'));
   document.getElementById('bnb-' + v)?.classList.add('active');
-  const wn = document.getElementById('week-nav');
-  wn.classList.toggle('dim', v !== 'lista');
+  document.getElementById('week-nav')?.classList.toggle('dim', v !== 'lista');
   renderView();
 }
 
@@ -834,13 +837,14 @@ function filterRicorrenti() {
 // RENDER
 // ═══════════════════════════════════════════════════
 function render() {
-  document.getElementById('week-lbl').textContent = fmtWeekNav(S.week, S.year);
+  const wl = document.getElementById('week-lbl');
+  if (wl) wl.textContent = fmtWeekNav(S.week, S.year);
   renderSidebar();
   renderView();
-  // Update badges
-  const open = S.cicli.filter(c => c.done && c.ctx === S.ctx);
-  document.getElementById('nb-done').textContent = S.cicli.filter(c => c.done && c.ctx === S.ctx).length;
-  document.getElementById('nb-ric').textContent = S.cicli.filter(c => !c.done && c.ctx === S.ctx && c.ricorrenza && c.ricorrenza !== 'nessuna').length;
+  const elDone = document.getElementById('nb-done');
+  const elRic = document.getElementById('nb-ric');
+  if (elDone) elDone.textContent = S.cicli.filter(c => c.done && c.ctx === S.ctx).length;
+  if (elRic) elRic.textContent = S.cicli.filter(c => !c.done && c.ctx === S.ctx && c.ricorrenza && c.ricorrenza !== 'nessuna').length;
 }
 
 function renderSidebar() {
@@ -1678,7 +1682,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     ['ciclo','plaud','settings'].forEach(m => {
       const el = document.getElementById('mo-' + m);
-      if (!el.hasAttribute('hidden')) closeModal(m);
+      if (el && !el.hasAttribute('hidden')) closeModal(m);
     });
   }
   if (inInput) return;
@@ -1713,17 +1717,54 @@ function setupRealtime() {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
-async function init() {
-  document.getElementById('view-matrice').innerHTML =
-    `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-      ${[1,2,3].map(()=>`<div class="skel" style="height:80px"></div>`).join('')}
+function showInitError(msg) {
+  const el = document.getElementById('view-matrice');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:300px;text-align:center;padding:40px 20px;color:var(--muted)">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Errore di caricamento</div>
+      <div style="font-size:12px;margin-bottom:20px;max-width:320px;line-height:1.5">${msg}</div>
+      <button onclick="location.reload()"
+        style="background:var(--lav);color:#fff;border:none;padding:10px 20px;
+        border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
+        🔄 Ricarica
+      </button>
     </div>`;
-  await loadAll();
-  setView(S.view);
+}
+
+async function init() {
+  const skeleton = `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+    <div class="skel" style="height:60px"></div>
+    <div class="skel" style="height:60px"></div>
+    <div class="skel" style="height:60px"></div>
+  </div>`;
+  const matEl = document.getElementById('view-matrice');
+  if (matEl) matEl.innerHTML = skeleton;
+
+  try {
+    await loadAll();
+  } catch(e) {
+    console.error('[init] loadAll failed:', e);
+    showInitError(e?.message || 'Impossibile connettersi al database Supabase. Controlla la connessione.');
+    return;
+  }
+
+  try {
+    setView(S.view);
+  } catch(e) {
+    console.error('[init] setView failed:', e);
+    setView('matrice');
+  }
+
   setupRealtime();
 }
 
-init();
+init().catch(e => {
+  console.error('[init] unhandled:', e);
+  showInitError(e?.message || 'Errore imprevisto.');
+});
 </script>
 </body>
 </html>
