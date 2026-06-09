@@ -1,549 +1,1729 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Cicli Aperti — Roby</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { -webkit-tap-highlight-color: transparent; }
-    .done-anim { animation: slideOut 0.3s ease forwards; }
-    @keyframes slideOut {
-      to { opacity: 0; transform: translateX(60px); max-height: 0; padding: 0; margin: 0; }
-    }
-    .spin { animation: spin 0.6s linear; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Cicli Aperti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0a0b0d;--bg2:#111316;--bg3:#181b1f;--bg4:#1e2227;
+  --line:#232830;--line2:#2d3340;--muted:#5a6272;--sub:#8a94a6;
+  --text:#dce3ed;--white:#f0f4fa;
+  --lav:#4f8eff;--lav2:rgba(79,142,255,.13);
+  --per:#a259ff;--per2:rgba(162,89,255,.13);
+  --q1c:#ff4d4d;--q1b:rgba(255,77,77,.1);
+  --q2c:#4f8eff;--q2b:rgba(79,142,255,.1);
+  --q3c:#ffaa00;--q3b:rgba(255,170,0,.1);
+  --q4c:#3d4555;--q4b:rgba(61,69,85,.15);
+  --green:#34d058;--orange:#ff8c00;--red:#ff4d4d;
+  --acc:var(--lav);--acc2:var(--lav2);
+  --hh:56px;--sw:220px;--r:10px;--r2:14px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+body.light{
+  --bg:#f5f6f8;--bg2:#fff;--bg3:#eef0f4;--bg4:#e4e7ed;
+  --line:#e2e6ed;--line2:#cdd3dc;--muted:#6b7280;
+  --sub:#4b5563;--text:#1a1d23;--white:#0a0b0d;
+}
+body.ctx-per{--acc:var(--per);--acc2:var(--per2);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+  height:100vh;overflow:hidden;font-size:14px;-webkit-tap-highlight-color:transparent;}
+button{font-family:'Inter',sans-serif;cursor:pointer;}
+input,textarea,select{font-family:'Inter',sans-serif;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px;}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--hh);
+  background:rgba(10,11,13,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;
+  gap:8px;padding:0 14px;z-index:100;}
+body.light .app-header{background:rgba(245,246,248,.92);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;
+  letter-spacing:-.3px;white-space:nowrap;color:var(--text);flex-shrink:0;}
+.logo span{color:var(--acc);}
+
+.week-nav{display:flex;align-items:center;gap:1px;background:var(--bg3);
+  border:1px solid var(--line);border-radius:20px;padding:2px 3px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sub);white-space:nowrap;}
+.week-nav.dim{opacity:.5;}
+.wn-btn{background:none;border:none;color:var(--muted);padding:3px 6px;
+  border-radius:12px;font-size:12px;line-height:1;transition:background .15s;}
+.wn-btn:hover{background:var(--line);color:var(--text);}
+#week-lbl{padding:0 3px;}
+
+.ctx-toggle{display:flex;background:var(--bg3);border:1px solid var(--line);
+  border-radius:20px;padding:2px;gap:2px;flex-shrink:0;}
+.ctx-btn{border:none;background:none;color:var(--muted);padding:3px 10px;
+  border-radius:16px;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap;}
+.ctx-btn.active{background:var(--acc);color:#fff;}
+
+.search-wrap{flex:1;max-width:220px;position:relative;}
+.search-inp{width:100%;background:var(--bg3);border:1px solid var(--line);
+  border-radius:20px;padding:5px 26px;font-size:12px;color:var(--text);outline:none;transition:border .15s;}
+.search-inp::placeholder{color:var(--muted);}
+.search-inp:focus{border-color:var(--acc);}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:11px;pointer-events:none;}
+.sc{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:var(--muted);font-size:12px;display:none;}
+.sc.v{display:block;}
+
+.h-actions{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.icon-btn{background:none;border:1px solid var(--line);color:var(--sub);width:32px;height:32px;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;}
+.icon-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--line2);}
+.btn-new{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:6px 12px;
+  font-size:12px;font-weight:600;white-space:nowrap;transition:opacity .15s;}
+.btn-new:hover{opacity:.85;}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;height:calc(100vh - var(--hh));margin-top:var(--hh);overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sw);flex-shrink:0;overflow-y:auto;
+  border-right:1px solid var(--line);padding:12px 0;background:var(--bg2);}
+.sb-sec-title{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:8px 14px 3px;}
+.nav-item{display:flex;align-items:center;gap:7px;padding:7px 14px;color:var(--sub);
+  font-size:13px;font-weight:500;border:none;background:none;width:100%;
+  text-align:left;transition:all .12s;position:relative;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:var(--lav2);color:var(--lav);}
+body.ctx-per .nav-item.active{background:var(--per2);color:var(--per);}
+.nb{margin-left:auto;background:var(--bg4);color:var(--muted);font-size:10px;
+  padding:1px 6px;border-radius:8px;font-family:'JetBrains Mono',monospace;}
+.nav-item.active .nb{background:var(--acc);color:#fff;}
+.ni{color:var(--muted);font-size:11px;margin-left:auto;padding:1px 3px;}
+.ni:hover{color:var(--sub);}
+.sb-div{border:none;border-top:1px solid var(--line);margin:6px 0;}
+.cat-row{display:flex;align-items:center;gap:6px;padding:5px 14px;
+  font-size:12px;color:var(--sub);cursor:pointer;transition:all .12s;}
+.cat-row:hover{background:var(--bg3);color:var(--text);}
+.cat-row.active{color:var(--acc);}
+.cat-cnt{margin-left:auto;color:var(--muted);font-size:10px;font-family:'JetBrains Mono',monospace;}
+.btn-addcat{display:flex;align-items:center;gap:5px;padding:6px 14px;color:var(--muted);
+  font-size:12px;background:none;border:none;width:100%;text-align:left;transition:color .12s;}
+.btn-addcat:hover{color:var(--acc);}
+
+/* ── MAIN ── */
+.main-content{flex:1;overflow-y:auto;padding:18px 22px;background:var(--bg);}
+.view{display:none;}.view.active{display:block;}
+.view-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.view-head h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
+
+/* ── SUMMARY BAR ── */
+.sum-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.sum-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);
+  padding:10px 12px;cursor:pointer;transition:border-color .15s;}
+.sum-card:hover{border-color:var(--line2);}
+.sum-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.sum-n{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;line-height:1;}
+.sq1 .sum-lbl,.sq1 .sum-n{color:var(--q1c);}
+.sq2 .sum-lbl,.sq2 .sum-n{color:var(--q2c);}
+.sq3 .sum-lbl,.sq3 .sum-n{color:var(--q3c);}
+.sq4 .sum-lbl{color:var(--muted);}.sq4 .sum-n{color:var(--sub);}
+
+/* ── NOTICE ── */
+.notice-bar{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.notice{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;}
+.notice.crit{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.2);color:var(--q1c);}
+.notice.warn{background:rgba(255,138,0,.1);border:1px solid rgba(255,138,0,.2);color:var(--orange);}
+
+/* ── MATRIX ── */
+.mat-axes{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ax{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);}
+.ax-line{flex:1;height:1px;background:var(--line);}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.quadrant{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;min-height:100px;}
+.q-hd{border-top:2px solid;padding:9px 12px 7px;display:flex;align-items:center;gap:5px;}
+.q-icon{font-size:13px;}
+.q-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.q-cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.qQ1 .q-hd{border-color:var(--q1c);}.qQ1 .q-title{color:var(--q1c);}
+.qQ2 .q-hd{border-color:var(--q2c);}.qQ2 .q-title{color:var(--q2c);}
+.qQ3 .q-hd{border-color:var(--q3c);}.qQ3 .q-title{color:var(--q3c);}
+.qQ4 .q-hd{border-color:var(--q4c);}.qQ4 .q-title{color:var(--muted);}
+.q-cards{padding:0 8px 8px;display:flex;flex-direction:column;gap:4px;}
+.btn-addq{display:flex;align-items:center;gap:4px;padding:5px 4px;color:var(--muted);font-size:11px;
+  background:none;border:none;width:100%;transition:color .12s;margin-top:2px;}
+.btn-addq:hover{color:var(--acc);}
+
+/* ── CICLO CARD ── */
+.ciclo-card{background:var(--bg3);border:1px solid var(--line);border-radius:8px;
+  padding:8px 10px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;}
+.ciclo-card:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.22);border-color:var(--line2);}
+.ciclo-card.crit{border-left:2px solid var(--q1c);}
+.ciclo-card.warn{border-left:2px solid var(--orange);}
+.card-top{display:flex;align-items:flex-start;gap:7px;}
+.chk{flex-shrink:0;width:16px;height:16px;border:1.5px solid var(--muted);border-radius:50%;
+  background:none;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  transition:all .15s;font-size:9px;color:transparent;}
+.chk:hover{border-color:var(--green);background:rgba(52,208,88,.15);color:var(--green);}
+.chk.doing{border-color:var(--green);background:var(--green);color:#fff;}
+.card-title{font-size:12px;font-weight:500;line-height:1.4;flex:1;color:var(--text);}
+.card-ft{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.cat-pill{background:var(--bg4);color:var(--sub);font-size:10px;padding:1px 6px;border-radius:6px;font-weight:500;}
+.due-ok{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);background:rgba(52,208,88,.1);padding:1px 5px;border-radius:4px;}
+.due-warn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange);background:rgba(255,138,0,.1);padding:1px 5px;border-radius:4px;}
+.due-crit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--q1c);background:var(--q1b);padding:1px 5px;border-radius:4px;}
+.esc-w{font-size:9px;padding:1px 4px;border-radius:4px;font-weight:600;background:rgba(255,138,0,.15);color:var(--orange);}
+.esc-c{font-size:9px;padding:1px 4px;border-radius:4px;font-weight:600;background:var(--q1b);color:var(--q1c);}
+.ric-ic{font-size:11px;}
+.avatars{display:flex;}
+.av{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--bg3);display:flex;align-items:center;
+  justify-content:center;font-size:8px;font-weight:700;color:#fff;margin-left:-5px;}
+.avatars .av:first-child{margin-left:0;}
+.av-more{background:var(--bg4);color:var(--muted);font-size:7px;}
+@keyframes doneOut{0%{opacity:1;transform:scale(1);}70%{opacity:.4;transform:scale(.95);}100%{opacity:0;max-height:0;padding:0;margin:0;border:none;}}
+.done-anim{animation:doneOut .35s ease forwards;}
+
+/* ── LISTA ── */
+.lista-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);
+  border:1px solid var(--line);border-radius:var(--r);margin-bottom:5px;cursor:pointer;transition:border-color .15s,transform .1s;}
+.lista-row:hover{border-color:var(--line2);transform:translateX(2px);}
+.lista-row.crit{border-left:2px solid var(--q1c);}
+.lista-row.warn{border-left:2px solid var(--orange);}
+.q-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.qd1{background:var(--q1c);}.qd2{background:var(--q2c);}.qd3{background:var(--q3c);}.qd4{background:var(--q4c);}
+.lr-title{flex:1;font-size:13px;font-weight:500;}
+.lr-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* ── PERSONE ── */
+.persone-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+.pcard{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);padding:16px;
+  cursor:pointer;transition:border-color .15s,transform .1s;}
+.pcard:hover{border-color:var(--line2);transform:translateY(-2px);}
+.pav-lg{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;font-family:'Syne',sans-serif;color:#fff;margin-bottom:10px;flex-shrink:0;}
+.p-nome{font-size:14px;font-weight:600;margin-bottom:2px;}
+.p-ruolo{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.p-cnt{font-size:11px;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+
+/* ── STORICO ── */
+.sto-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg2);
+  border:1px solid var(--line);border-radius:var(--r);margin-bottom:5px;}
+.sto-title{font-size:13px;font-weight:500;flex:1;}
+.sto-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ── GUIDA ── */
+details.gd{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:6px;overflow:hidden;}
+details.gd summary{padding:12px 16px;cursor:pointer;font-weight:500;font-size:14px;list-style:none;
+  display:flex;align-items:center;justify-content:space-between;}
+details.gd summary::-webkit-details-marker{display:none;}
+details.gd summary .arr{font-size:10px;color:var(--muted);transition:transform .2s;}
+details.gd[open] summary .arr{transform:rotate(90deg);}
+.gd-body{padding:0 16px 16px;color:var(--sub);font-size:13px;line-height:1.65;}
+.gd-body p{margin-bottom:8px;}.gd-body ul{padding-left:18px;}
+.gd-body li{margin-bottom:4px;}
+.gd-body code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);padding:1px 5px;border-radius:3px;color:var(--text);}
+.gd-body strong{color:var(--text);font-weight:600;}
+.kbd{display:inline-block;background:var(--bg4);border:1px solid var(--line2);border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:1px 6px;color:var(--text);}
+
+/* ── EMPTY / SKELETON ── */
+.empty{text-align:center;padding:36px 20px;color:var(--muted);}
+.empty .ei{font-size:32px;margin-bottom:8px;opacity:.45;}
+.empty .et{font-size:13px;}
+.skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+  background-size:200% 100%;animation:shim 1.5s infinite;border-radius:var(--r);}
+@keyframes shim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── MODAL ── */
+.m-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+@media(min-width:768px){.m-overlay{align-items:center;}}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r2) var(--r2) 0 0;
+  width:100%;max-width:540px;max-height:92vh;overflow-y:auto;}
+@media(min-width:768px){.modal{border-radius:var(--r2);}}
+.m-drag{width:34px;height:3px;background:var(--line2);border-radius:2px;margin:10px auto 0;}
+@media(min-width:768px){.m-drag{display:none;}}
+.m-hd{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg2);z-index:1;}
+.m-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.m-x{width:28px;height:28px;background:var(--bg3);border:none;border-radius:7px;color:var(--sub);
+  display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.m-x:hover{background:var(--bg4);color:var(--text);}
+.m-body{padding:16px 18px;}
+.m-ft{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:7px;flex-wrap:wrap;}
+.btn{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--line);transition:all .15s;}
+.btn-ghost{background:var(--bg3);color:var(--sub);}
+.btn-ghost:hover{background:var(--bg4);color:var(--text);}
+.btn-primary{background:var(--acc);color:#fff;border-color:var(--acc);flex:1;font-weight:600;}
+.btn-primary:hover{opacity:.85;}
+.btn-success{background:rgba(52,208,88,.12);color:var(--green);border-color:rgba(52,208,88,.25);}
+.btn-success:hover{background:rgba(52,208,88,.2);}
+.btn-danger{background:rgba(255,77,77,.1);color:var(--red);border-color:rgba(255,77,77,.2);}
+.btn-danger:hover{background:rgba(255,77,77,.18);}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;}
+
+/* ── FORM ── */
+.fr{margin-bottom:13px;}
+.fl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block;}
+.fi,.fs,.fta{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:8px;
+  padding:8px 10px;font-size:13px;color:var(--text);outline:none;transition:border .15s;}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--acc);}
+.fta{resize:vertical;min-height:56px;}
+.fs option{background:var(--bg2);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.days-hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sub);margin-top:3px;}
+
+.ctx-tog-m{display:flex;gap:5px;margin-bottom:14px;}
+.ctx-tog-m .cb{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--line);
+  font-size:13px;background:var(--bg3);color:var(--sub);transition:all .15s;}
+.ctx-tog-m .cb.al{border-color:var(--lav);background:var(--lav2);color:var(--lav);}
+.ctx-tog-m .cb.ap{border-color:var(--per);background:var(--per2);color:var(--per);}
+
+/* Q PICKER */
+.qpick{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.qpb{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1.5px solid var(--line);
+  border-radius:8px;background:var(--bg3);font-size:12px;font-weight:500;color:var(--sub);transition:all .15s;}
+.qpb:hover{border-color:var(--line2);color:var(--text);}
+.qpb.sq1{border-color:var(--q1c);background:var(--q1b);color:var(--q1c);}
+.qpb.sq2{border-color:var(--q2c);background:var(--q2b);color:var(--q2c);}
+.qpb.sq3{border-color:var(--q3c);background:var(--q3b);color:var(--q3c);}
+.qpb.sq4{border-color:var(--q4c);background:var(--q4b);color:var(--sub);}
+
+/* PERSON PICKER */
+.pp-wrap{position:relative;}
+.pp-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:36px;padding:6px 8px;
+  background:var(--bg3);border:1px solid var(--line);border-radius:8px;align-items:center;cursor:text;transition:border .15s;}
+.pp-chips:focus-within{border-color:var(--acc);}
+.pchip{display:flex;align-items:center;gap:3px;padding:2px 8px 2px 4px;border-radius:20px;font-size:11px;font-weight:500;color:#fff;}
+.pchip-av{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;}
+.pchip-x{background:none;border:none;color:rgba(255,255,255,.6);font-size:10px;padding:0 0 0 1px;line-height:1;}
+.pchip-x:hover{color:#fff;}
+.pp-inp{border:none;background:none;outline:none;font-size:12px;color:var(--text);min-width:80px;flex:1;}
+.pp-inp::placeholder{color:var(--muted);}
+.pp-dd{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--line2);
+  border-radius:8px;margin-top:2px;z-index:10;max-height:150px;overflow-y:auto;box-shadow:var(--shadow);}
+.pp-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;font-size:12px;transition:background .1s;}
+.pp-opt:hover{background:var(--bg3);}
+.pp-opt-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.pp-new{padding:7px 10px;font-size:12px;color:var(--acc);cursor:pointer;border-top:1px solid var(--line);}
+.pp-new:hover{background:var(--bg3);}
+
+/* NOTE LOG */
+.nl-list{display:flex;flex-direction:column;gap:5px;max-height:140px;overflow-y:auto;margin-bottom:6px;}
+.nl-item{background:var(--bg3);border-radius:7px;padding:7px 10px;}
+.nl-txt{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:2px;}
+.nl-ts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.nl-add{display:flex;gap:6px;}
+.nl-add .fi{padding:6px 8px;font-size:12px;}
+.btn-nota{padding:6px 10px;border-radius:6px;background:var(--bg4);border:1px solid var(--line2);
+  color:var(--sub);font-size:11px;white-space:nowrap;transition:all .15s;}
+.btn-nota:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
+
+/* RIC INFO */
+.ric-info{background:rgba(79,142,255,.07);border:1px solid rgba(79,142,255,.18);
+  border-radius:7px;padding:7px 10px;font-size:12px;color:var(--sub);margin-top:5px;}
+
+/* PLAUD STEPS */
+.plaud-steps{display:flex;gap:5px;margin-bottom:14px;}
+.ps{flex:1;text-align:center;padding:6px;border-radius:6px;font-size:11px;font-weight:500;background:var(--bg3);color:var(--muted);}
+.ps.active{background:var(--lav2);color:var(--lav);}
+.plaud-preview{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;}
+.pp-card{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:10px;}
+.pp-card-title{font-size:13px;font-weight:500;margin-bottom:4px;}
+.pp-card-meta{font-size:11px;color:var(--muted);}
+
+/* SETTINGS TABS */
+.st-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:14px;}
+.st-tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;
+  background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;}
+.st-tab.active{color:var(--acc);border-bottom-color:var(--acc);}
+
+/* PERSONA DETAIL */
+.pd-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.back-btn{background:none;border:1px solid var(--line);color:var(--sub);border-radius:8px;
+  padding:5px 10px;font-size:12px;transition:all .15s;margin-bottom:12px;}
+.back-btn:hover{background:var(--bg3);color:var(--text);}
+
+/* TOAST */
+#tc{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;
+  display:flex;flex-direction:column;gap:5px;align-items:center;pointer-events:none;}
+.toast{background:var(--bg4);border:1px solid var(--line2);color:var(--text);padding:9px 16px;
+  border-radius:20px;font-size:13px;font-weight:500;box-shadow:var(--shadow);
+  pointer-events:auto;max-width:320px;text-align:center;}
+.toast.s{border-color:rgba(52,208,88,.3);}
+.toast.e{border-color:rgba(255,77,77,.3);color:var(--q1c);}
+.toast.w{border-color:rgba(255,138,0,.3);color:var(--orange);}
+@keyframes tin{from{opacity:0;transform:translateY(10px);}}
+@keyframes tout{to{opacity:0;transform:translateY(10px);}}
+.toast{animation:tin .22s ease;}
+.toast.out{animation:tout .22s ease forwards;}
+
+/* MOBILE BOTTOM NAV */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--bg2);
+  border-top:1px solid var(--line);z-index:100;align-items:center;justify-content:space-around;}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:none;color:var(--muted);padding:8px 0;font-size:10px;transition:color .15s;}
+.bnb.active{color:var(--acc);}
+body.ctx-per .bnb.active{color:var(--per);}
+.bnb-ic{font-size:20px;line-height:1;}
+
+/* RESPONSIVE */
+@media(max-width:767px){
+  .sidebar{display:none;}.bnav{display:flex;}
+  .main-content{padding:10px 10px 80px;}
+  .sum-bar{grid-template-columns:1fr 1fr;}
+  .matrix-grid{grid-template-columns:1fr;}
+  .search-wrap{max-width:130px;}
+  .logo{font-size:13px;}
+  .week-nav{font-size:10px;}
+  .btn-new{padding:5px 8px;font-size:11px;}
+}
+</style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen">
+<body>
 
-  <div class="max-w-xl mx-auto px-4 pb-28">
+<!-- HEADER -->
+<header class="app-header">
+  <span class="logo">CICLI <span>APERTI</span></span>
 
-    <!-- Header -->
-    <header class="sticky top-0 bg-gray-950/95 backdrop-blur pt-5 pb-3 z-10 border-b border-gray-800/60">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <h1 class="text-lg font-bold tracking-tight">Cicli Aperti</h1>
-          <p id="week-label" class="text-xs text-gray-500 mt-0.5"></p>
-        </div>
-        <button id="btn-add"
-          class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm px-3.5 py-1.5 rounded-xl font-semibold transition-colors shadow">
-          + Nuovo
-        </button>
-      </div>
-      <!-- Context switcher -->
-      <div class="flex gap-1.5">
-        <button data-ctx="lavoro" class="ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors">🏢 Lavoro</button>
-        <button data-ctx="personale" class="ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors">🏠 Personale</button>
-      </div>
-    </header>
-
-    <!-- Stats bar -->
-    <div id="stats-bar" class="flex gap-3 mt-4 mb-1 text-xs text-gray-500"></div>
-
-    <!-- Cicli list -->
-    <main id="cicli-list" class="mt-3 space-y-4"></main>
-
-    <!-- Empty state -->
-    <div id="empty-state" class="hidden text-center py-20 text-gray-600">
-      <div class="text-5xl mb-3 opacity-50">✓</div>
-      <div class="text-sm font-medium">Nessun ciclo aperto</div>
-      <div class="text-xs mt-1">Ottimo lavoro!</div>
-    </div>
-
-    <!-- Loading -->
-    <div id="loading" class="text-center py-20 text-gray-600 text-sm">Caricamento…</div>
+  <div class="week-nav dim" id="week-nav">
+    <button class="wn-btn" onclick="shiftWeek(-1)">‹</button>
+    <span id="week-lbl"></span>
+    <button class="wn-btn" onclick="shiftWeek(1)">›</button>
   </div>
 
-  <!-- FAB mobile -->
-  <button id="btn-add-fab"
-    class="fixed bottom-6 right-6 sm:hidden w-14 h-14 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-full shadow-xl flex items-center justify-center text-2xl font-light transition-colors z-20">
-    +
+  <div class="ctx-toggle">
+    <button class="ctx-btn active" id="cb-lav" onclick="setCtx('lavoro')">🏢 Lavoro</button>
+    <button class="ctx-btn" id="cb-per" onclick="setCtx('personale')">🏠 Personale</button>
+  </div>
+
+  <div class="search-wrap">
+    <span class="si">🔍</span>
+    <input class="search-inp" id="search-inp" type="text" placeholder="Cerca…"
+      oninput="onSearch(this.value)">
+    <button class="sc" id="sc-btn" onclick="clearSearch()">✕</button>
+  </div>
+
+  <div class="h-actions">
+    <button class="icon-btn" onclick="openPlaud()" title="Import Plaud (⌘P)">🎙</button>
+    <button class="btn-new" onclick="openModalNew()" id="btn-new">+ Nuovo Ciclo</button>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Tema"></button>
+    <button class="icon-btn" onclick="openSettings()" title="Impostazioni">⚙️</button>
+  </div>
+</header>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-sec-title">Viste</div>
+    <button class="nav-item active" id="nav-matrice" onclick="setView('matrice')" data-tip="Tutti i cicli in griglia Eisenhower">
+      🔲 Matrice <span class="ni">ⓘ</span>
+    </button>
+    <button class="nav-item" id="nav-lista" onclick="setView('lista')" data-tip="Cicli della settimana corrente">
+      📋 Lista settimana <span class="ni">ⓘ</span>
+    </button>
+    <button class="nav-item" id="nav-persone" onclick="setView('persone')" data-tip="Rubrica e cicli per persona">
+      👥 Persone <span class="ni">ⓘ</span>
+    </button>
+    <button class="nav-item" id="nav-storico" onclick="setView('storico')" data-tip="Cicli chiusi">
+      🕐 Storico <span class="ni">ⓘ</span>
+    </button>
+    <button class="nav-item" id="nav-guida" onclick="setView('guida')" data-tip="Come usare l'app">
+      📖 Guida <span class="ni">ⓘ</span>
+    </button>
+
+    <hr class="sb-div">
+    <div class="sb-sec-title">Categorie</div>
+    <div id="sb-cats"></div>
+    <button class="btn-addcat" onclick="addCategoriaInline()">+ Categoria</button>
+
+    <hr class="sb-div">
+    <div class="sb-sec-title">Stato</div>
+    <button class="nav-item" onclick="setView('storico')">✓ Completati <span class="nb" id="nb-done">0</span></button>
+    <button class="nav-item" onclick="filterRicorrenti()">🔄 Ricorrenti <span class="nb" id="nb-ric">0</span></button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="view active" id="view-matrice"></div>
+    <div class="view" id="view-lista"></div>
+    <div class="view" id="view-persone"></div>
+    <div class="view" id="view-storico"></div>
+    <div class="view" id="view-guida"></div>
+  </main>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bnb active" id="bnb-matrice" onclick="setView('matrice')">
+    <span class="bnb-ic">🔲</span>Matrice
   </button>
+  <button class="bnb" id="bnb-lista" onclick="setView('lista')">
+    <span class="bnb-ic">📋</span>Lista
+  </button>
+  <button class="bnb" id="bnb-persone" onclick="setView('persone')">
+    <span class="bnb-ic">👥</span>Persone
+  </button>
+  <button class="bnb" id="bnb-storico" onclick="setView('storico')">
+    <span class="bnb-ic">🕐</span>Storico
+  </button>
+</nav>
 
-  <!-- Modal add/edit -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-gray-900 border border-gray-800 w-full max-w-lg rounded-t-2xl sm:rounded-2xl px-5 pt-5 pb-8 sm:pb-5 max-h-[92vh] overflow-y-auto shadow-2xl">
-
-      <!-- drag handle -->
-      <div class="sm:hidden w-10 h-1 bg-gray-700 rounded-full mx-auto mb-4"></div>
-
-      <div class="flex items-center justify-between mb-4">
-        <h2 id="modal-title" class="text-base font-bold">Nuovo Ciclo</h2>
-        <button id="modal-close" class="text-gray-500 hover:text-gray-300 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition">✕</button>
-      </div>
-
-      <form id="ciclo-form" class="space-y-3.5">
-        <input type="hidden" id="f-id">
-
-        <!-- Titolo -->
-        <div>
-          <label class="text-xs text-gray-400 mb-1 block font-medium">Titolo *</label>
-          <input id="f-title" type="text" autocomplete="off"
-            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 placeholder-gray-600"
-            placeholder="Cosa devi fare?">
-        </div>
-
-        <!-- Cat + Priorità -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block font-medium">Categoria</label>
-            <input id="f-cat" type="text" autocomplete="off" list="cat-suggestions"
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 placeholder-gray-600"
-              placeholder="vendite, casa…">
-            <datalist id="cat-suggestions"></datalist>
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block font-medium">Priorità</label>
-            <select id="f-q"
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30">
-              <option value="1">🔴 Urgente</option>
-              <option value="2" selected>🟡 Normale</option>
-              <option value="3">🔵 Bassa</option>
-              <option value="4">⚫ Un giorno</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Scadenza -->
-        <div>
-          <label class="text-xs text-gray-400 mb-1 block font-medium">Scadenza</label>
-          <input id="f-due" type="date"
-            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 text-gray-300">
-        </div>
-
-        <!-- Note -->
-        <div>
-          <label class="text-xs text-gray-400 mb-1 block font-medium">Note</label>
-          <textarea id="f-note" rows="2"
-            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 resize-none placeholder-gray-600"
-            placeholder="Dettagli, contesto…"></textarea>
-        </div>
-
-        <!-- Ricorrenza -->
-        <div class="bg-gray-800/50 border border-gray-700/60 rounded-xl p-3.5">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-sm font-medium">🔄 Ricorrenza</span>
-              <p class="text-xs text-gray-500 mt-0.5">Si ricrea al completamento</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="f-ricorrente" class="sr-only peer">
-              <div class="w-10 h-6 bg-gray-700 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all peer-checked:after:translate-x-4"></div>
-            </label>
-          </div>
-          <div id="ricorrenza-opts" class="hidden mt-3.5 grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block font-medium">Tipo</label>
-              <select id="f-ric-tipo"
-                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                <option value="settimanale">Settimanale</option>
-                <option value="mensile">Mensile (~4 sett.)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block font-medium">Ogni</label>
-              <select id="f-ric-ogni"
-                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="6">6</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex gap-3 pt-1">
-          <button type="button" id="modal-cancel"
-            class="flex-1 bg-gray-800 hover:bg-gray-700 active:bg-gray-900 text-sm py-2.5 rounded-xl font-medium transition-colors">
-            Annulla
-          </button>
-          <button type="submit" id="btn-save"
-            class="flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-sm py-2.5 rounded-xl font-semibold transition-colors">
-            Salva
-          </button>
-        </div>
-      </form>
+<!-- MODAL CICLO -->
+<div class="m-overlay" id="mo-ciclo" hidden onclick="if(event.target===this)closeModal('ciclo')">
+  <div class="modal">
+    <div class="m-drag"></div>
+    <div class="m-hd">
+      <span class="m-title" id="mc-title">Nuovo Ciclo</span>
+      <button class="m-x" onclick="closeModal('ciclo')">✕</button>
+    </div>
+    <div class="m-body" id="mc-body"></div>
+    <div class="m-ft">
+      <button class="btn btn-danger btn-sm" id="mc-del" style="display:none" onclick="deleteCurrent()">Elimina</button>
+      <button class="btn btn-success btn-sm" id="mc-close" style="display:none" onclick="closeCurrent()">✓ Chiudi ciclo</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('ciclo')">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="submitCiclo()">Salva</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const { createClient } = supabase;
-    const db = createClient(
-      'https://qujxbvootvollmziaqrd.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1anhidm9vdHZvbGxtemlhcXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzAyNjksImV4cCI6MjA5NjQ0NjI2OX0.WkUak4mQP-lwdaH-LIRV4unP6PljlcguiDXxjCkBEyE'
-    );
+<!-- MODAL PLAUD -->
+<div class="m-overlay" id="mo-plaud" hidden onclick="if(event.target===this)closeModal('plaud')">
+  <div class="modal">
+    <div class="m-drag"></div>
+    <div class="m-hd">
+      <span class="m-title">🎙 Import da Plaud</span>
+      <button class="m-x" onclick="closeModal('plaud')">✕</button>
+    </div>
+    <div class="m-body" id="mp-body"></div>
+    <div class="m-ft" id="mp-ft"></div>
+  </div>
+</div>
 
-    // ── State ──────────────────────────────────────────────────────
-    let currentCtx = 'lavoro';
-    let cicli = [];
-    let allCats = [];
-    let editingId = null;
-    let saving = false;
+<!-- MODAL SETTINGS -->
+<div class="m-overlay" id="mo-settings" hidden onclick="if(event.target===this)closeModal('settings')">
+  <div class="modal">
+    <div class="m-drag"></div>
+    <div class="m-hd">
+      <span class="m-title">⚙️ Impostazioni</span>
+      <button class="m-x" onclick="closeModal('settings')">✕</button>
+    </div>
+    <div class="m-body" id="ms-body"></div>
+  </div>
+</div>
 
-    // ── Date utils ────────────────────────────────────────────────
-    function getISOWeek(date) {
-      const d = new Date(date);
-      d.setHours(0, 0, 0, 0);
-      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-      const yearStart = new Date(d.getFullYear(), 0, 1);
-      return {
-        week: Math.ceil((((d - yearStart) / 86400000) + 1) / 7),
-        year: d.getFullYear(),
-      };
+<!-- TOAST -->
+<div id="tc"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════
+const { createClient } = supabase;
+const db = createClient(
+  'https://qujxbvootvollmziaqrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1anhidm9vdHZvbGxtemlhcXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzAyNjksImV4cCI6MjA5NjQ0NjI2OX0.WkUak4mQP-lwdaH-LIRV4unP6PljlcguiDXxjCkBEyE'
+);
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+function ls(k, v) {
+  if (v !== undefined) { localStorage.setItem(k, String(v)); return v; }
+  return localStorage.getItem(k);
+}
+
+function getISOWeek(d) {
+  const dt = new Date(d);
+  dt.setHours(0,0,0,0);
+  dt.setDate(dt.getDate() + 4 - (dt.getDay() || 7));
+  const y1 = new Date(dt.getFullYear(), 0, 1);
+  return { week: Math.ceil((((dt - y1) / 86400000) + 1) / 7), year: dt.getFullYear() };
+}
+
+function getWeekBounds(week, year) {
+  const jan4 = new Date(year, 0, 4);
+  const dow = jan4.getDay() || 7;
+  const mon = new Date(jan4);
+  mon.setDate(jan4.getDate() - dow + 1 + (week - 1) * 7);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return { start: mon, end: sun };
+}
+
+function weeksInYear(y) { return getISOWeek(new Date(y, 11, 28)).week; }
+
+function fmtWeekNav(w, y) {
+  const { start, end } = getWeekBounds(w, y);
+  const f = d => `${d.getDate()}/${d.getMonth()+1}`;
+  return `Sett.${w} · ${f(start)}–${f(end)}`;
+}
+
+function daysLeft(due) {
+  if (!due) return 999;
+  return Math.ceil((new Date(due + 'T23:59:59') - new Date()) / 86400000);
+}
+
+function effQ(c) {
+  const dl = daysLeft(c.due_date);
+  if (c.q === 2 && dl <= 30 && dl >= 0) return 1;
+  if (c.q === 4 && dl <= 14 && dl >= 0) return 3;
+  return c.q;
+}
+
+function escCls(c) {
+  if (!c.due_date) return '';
+  const dl = daysLeft(c.due_date);
+  if (dl <= 14) return 'crit';
+  if (dl <= 30) return 'warn';
+  return '';
+}
+
+function dueBadge(due) {
+  if (!due) return '';
+  const dl = daysLeft(due);
+  if (dl < 0) return `<span class="due-crit">${Math.abs(dl)}gg fa</span>`;
+  if (dl === 0) return `<span class="due-crit">oggi</span>`;
+  if (dl <= 14) return `<span class="due-crit">${dl}gg</span>`;
+  if (dl <= 30) return `<span class="due-warn">${dl}gg</span>`;
+  return `<span class="due-ok">${dl}gg</span>`;
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso + 'T12:00:00').toLocaleDateString('it-IT', { day:'numeric', month:'short' });
+}
+
+function fmtTs(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('it-IT', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function H(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function pColor(p) { return p?.colore || '#4f8eff'; }
+function pInit(n) { return (n||'?').charAt(0).toUpperCase(); }
+function pById(id) { return S.persone.find(p => p.id === id); }
+
+function calcNextDue(due, ric) {
+  const d = new Date((due || new Date().toISOString().split('T')[0]) + 'T12:00:00');
+  if (ric === 'settimanale') d.setDate(d.getDate() + 7);
+  else if (ric === 'mensile') d.setMonth(d.getMonth() + 1);
+  else if (ric === 'trimestrale') d.setMonth(d.getMonth() + 3);
+  else if (ric === 'annuale') d.setFullYear(d.getFullYear() + 1);
+  else return null;
+  return d.toISOString().split('T')[0];
+}
+
+function cicloPersoneResolved(cicloId) {
+  const ids = S.cpMap[cicloId] || [];
+  if (ids.length) return ids.map(id => pById(id)).filter(Boolean);
+  const c = S.cicli.find(x => x.id === cicloId);
+  return (c?.persone_menzionate || [])
+    .map(nome => S.persone.find(p => p.nome.toLowerCase() === nome.toLowerCase()))
+    .filter(Boolean);
+}
+
+function renderAvatars(persons, max = 3) {
+  if (!persons?.length) return '';
+  const show = persons.slice(0, max);
+  const extra = persons.length - max;
+  return `<div class="avatars">
+    ${show.map(p => `<div class="av" style="background:${pColor(p)}" title="${H(p.nome)}">${pInit(p.nome)}</div>`).join('')}
+    ${extra > 0 ? `<div class="av av-more">+${extra}</div>` : ''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const TD = getISOWeek(new Date());
+const S = {
+  ctx: ls('cicli_ctx') || 'lavoro',
+  view: ls('cicli_view') || 'matrice',
+  week: parseInt(ls('cicli_week')) || TD.week,
+  year: parseInt(ls('cicli_year')) || TD.year,
+  catFilter: ls('cicli_cat_filter') || null,
+  onlyRic: false,
+  search: '',
+  cicli: [],
+  persone: [],
+  categorie: [],
+  cpMap: {},     // ciclo_id → [persona_id]
+  nlMap: {},     // ciclo_id → [note]
+};
+
+// Apply saved theme
+if (ls('cicli_theme') === 'light') document.body.classList.add('light');
+document.body.classList.toggle('ctx-per', S.ctx === 'personale');
+
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+async function loadAll() {
+  await Promise.all([loadCicli(), loadPersone(), loadCategorie()]);
+  await loadCicloPersone();
+  render();
+  checkEscalation();
+}
+
+async function loadCicli() {
+  const { data } = await db.from('cicli').select('*').order('created_at', { ascending: false });
+  S.cicli = data || [];
+}
+
+async function loadPersone() {
+  const { data } = await db.from('persone').select('*').order('nome');
+  S.persone = data || [];
+}
+
+async function loadCategorie() {
+  const { data } = await db.from('categorie').select('*').order('ordine').order('nome');
+  S.categorie = data || [];
+}
+
+async function loadCicloPersone() {
+  const ids = S.cicli.map(c => c.id);
+  if (!ids.length) { S.cpMap = {}; return; }
+  const { data } = await db.from('ciclo_persone').select('ciclo_id,persona_id').in('ciclo_id', ids);
+  S.cpMap = {};
+  (data || []).forEach(r => {
+    if (!S.cpMap[r.ciclo_id]) S.cpMap[r.ciclo_id] = [];
+    S.cpMap[r.ciclo_id].push(r.persona_id);
+  });
+}
+
+async function loadNoteForCiclo(id) {
+  if (S.nlMap[id]) return S.nlMap[id];
+  const { data } = await db.from('note_log').select('*').eq('ciclo_id', id).order('created_at');
+  S.nlMap[id] = data || [];
+  return S.nlMap[id];
+}
+
+function checkEscalation() {
+  const open = S.cicli.filter(c => !c.done && c.ctx === S.ctx);
+  const auto = open.filter(c => effQ(c) !== c.q);
+  if (auto.length) toast(`⚡ ${auto.length} cicl${auto.length>1?'i':'o'} auto-escalat${auto.length>1?'i':'o'} per scadenza`, 'w');
+}
+
+// ═══════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════
+async function saveCiclo(payload, id) {
+  if (id) {
+    await db.from('cicli').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', id);
+  } else {
+    const { data } = await db.from('cicli').insert({ ...payload, done: false, da_plaud: false,
+      persone_menzionate: [] }).select().single();
+    id = data?.id;
+  }
+  return id;
+}
+
+async function saveCicloPersone(cicloId, personaIds) {
+  await db.from('ciclo_persone').delete().eq('ciclo_id', cicloId);
+  if (personaIds.length) {
+    await db.from('ciclo_persone').insert(personaIds.map(pid => ({ ciclo_id: cicloId, persona_id: pid })));
+  }
+  S.cpMap[cicloId] = personaIds;
+  // Update persone_menzionate[]
+  const nomi = personaIds.map(pid => pById(pid)?.nome).filter(Boolean);
+  await db.from('cicli').update({ persone_menzionate: nomi }).eq('id', cicloId);
+}
+
+async function closeCicloById(id) {
+  const c = S.cicli.find(x => x.id === id);
+  if (!c) return;
+  await db.from('cicli').update({ done: true, chiuso_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id);
+  let msg = 'Ciclo chiuso ✓';
+  if (c.ricorrenza && c.ricorrenza !== 'nessuna') {
+    const nextDue = calcNextDue(c.due_date, c.ricorrenza);
+    const { data: newC } = await db.from('cicli').insert({
+      title: c.title, cat: c.cat, note: c.note, q: c.q, ctx: c.ctx,
+      week: TD.week, year: TD.year, due_date: nextDue,
+      ricorrenza: c.ricorrenza, ricorrenza_parent_id: id,
+      done: false, da_plaud: false, persone_menzionate: c.persone_menzionate || [],
+    }).select().single();
+    if (newC) {
+      const pids = S.cpMap[id] || [];
+      if (pids.length) await db.from('ciclo_persone').insert(pids.map(pid => ({ ciclo_id: newC.id, persona_id: pid })));
+      S.cpMap[newC.id] = pids;
     }
+    msg = `Ciclo chiuso ✓ — ricreato per ${nextDue ? fmtDate(nextDue) : 'prossimo periodo'}`;
+  }
+  toast(msg, 's');
+  await loadCicli();
+  await loadCicloPersone();
+  render();
+}
 
-    function weeksInYear(y) {
-      return getISOWeek(new Date(y, 11, 28)).week;
+async function deleteCicloById(id) {
+  await db.from('cicli').delete().eq('id', id);
+  toast('Ciclo eliminato', 'w');
+  await loadCicli();
+  await loadCicloPersone();
+  render();
+}
+
+async function riapriciCiclo(id) {
+  await db.from('cicli').update({ done: false, chiuso_at: null, updated_at: new Date().toISOString() }).eq('id', id);
+  toast('Ciclo riaperto', 's');
+  await loadCicli();
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// NAV / CONTEXT / WEEK
+// ═══════════════════════════════════════════════════
+function setCtx(ctx) {
+  S.ctx = ctx; S.catFilter = null; S.onlyRic = false;
+  ls('cicli_ctx', ctx); ls('cicli_cat_filter', '');
+  document.body.classList.toggle('ctx-per', ctx === 'personale');
+  document.getElementById('cb-lav').classList.toggle('active', ctx === 'lavoro');
+  document.getElementById('cb-per').classList.toggle('active', ctx === 'personale');
+  render();
+}
+
+function setView(v) {
+  S.view = v; ls('cicli_view', v);
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v)?.classList.add('active');
+  document.querySelectorAll('.nav-item[id^=nav-]').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + v)?.classList.add('active');
+  document.querySelectorAll('.bnb').forEach(el => el.classList.remove('active'));
+  document.getElementById('bnb-' + v)?.classList.add('active');
+  const wn = document.getElementById('week-nav');
+  wn.classList.toggle('dim', v !== 'lista');
+  renderView();
+}
+
+function shiftWeek(d) {
+  S.week += d;
+  if (S.week < 1) { S.year--; S.week = weeksInYear(S.year); }
+  if (S.week > weeksInYear(S.year)) { S.week = 1; S.year++; }
+  ls('cicli_week', S.week); ls('cicli_year', S.year);
+  document.getElementById('week-lbl').textContent = fmtWeekNav(S.week, S.year);
+  if (S.view === 'lista') renderView();
+}
+
+function onSearch(v) {
+  S.search = v;
+  document.getElementById('sc-btn').classList.toggle('v', !!v);
+  renderView();
+}
+
+function clearSearch() {
+  S.search = '';
+  document.getElementById('search-inp').value = '';
+  document.getElementById('sc-btn').classList.remove('v');
+  renderView();
+}
+
+function filterRicorrenti() {
+  S.onlyRic = !S.onlyRic;
+  setView('matrice');
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render() {
+  document.getElementById('week-lbl').textContent = fmtWeekNav(S.week, S.year);
+  renderSidebar();
+  renderView();
+  // Update badges
+  const open = S.cicli.filter(c => c.done && c.ctx === S.ctx);
+  document.getElementById('nb-done').textContent = S.cicli.filter(c => c.done && c.ctx === S.ctx).length;
+  document.getElementById('nb-ric').textContent = S.cicli.filter(c => !c.done && c.ctx === S.ctx && c.ricorrenza && c.ricorrenza !== 'nessuna').length;
+}
+
+function renderSidebar() {
+  const cats = getCatsForCtx();
+  document.getElementById('sb-cats').innerHTML = cats.map(cat => {
+    const cnt = S.cicli.filter(c => !c.done && c.ctx === S.ctx && c.cat === cat.nome).length;
+    return `<div class="cat-row ${S.catFilter === cat.nome ? 'active' : ''}" onclick="setCatFilter('${H(cat.nome)}')">
+      <span>${cat.emoji || '📋'}</span>
+      <span>${H(cat.nome)}</span>
+      <span class="cat-cnt">${cnt}</span>
+    </div>`;
+  }).join('') + (S.catFilter ? `<div class="cat-row" onclick="setCatFilter(null)" style="color:var(--muted);font-size:11px;padding-left:22px">✕ rimuovi filtro</div>` : '');
+}
+
+function getCatsForCtx() {
+  const fromCicli = [...new Set(S.cicli.filter(c => c.ctx === S.ctx && !c.done && c.cat).map(c => c.cat))];
+  const fromCat = S.categorie.filter(c => c.ctx === S.ctx).map(c => c.nome);
+  const all = [...new Set([...fromCat, ...fromCicli])];
+  return all.map(nome => {
+    const saved = S.categorie.find(c => c.nome === nome && c.ctx === S.ctx);
+    return { nome, emoji: saved?.emoji || '📋' };
+  });
+}
+
+function setCatFilter(cat) {
+  S.catFilter = cat === S.catFilter ? null : cat;
+  ls('cicli_cat_filter', S.catFilter || '');
+  renderSidebar();
+  renderView();
+}
+
+function renderView() {
+  const v = S.view;
+  if (v === 'matrice') renderMatrice();
+  else if (v === 'lista') renderLista();
+  else if (v === 'persone') renderPersone();
+  else if (v === 'storico') renderStorico();
+  else if (v === 'guida') renderGuida();
+}
+
+// ─── MATRICE ────────────────────────────────────────
+function getFilteredOpen() {
+  return S.cicli.filter(c =>
+    !c.done &&
+    c.ctx === S.ctx &&
+    (!S.catFilter || c.cat === S.catFilter) &&
+    (!S.onlyRic || (c.ricorrenza && c.ricorrenza !== 'nessuna')) &&
+    (!S.search || c.title.toLowerCase().includes(S.search.toLowerCase()))
+  );
+}
+
+function renderMatrice() {
+  const el = document.getElementById('view-matrice');
+  const cicli = getFilteredOpen();
+  const byQ = { 1:[], 2:[], 3:[], 4:[] };
+  cicli.forEach(c => { const q = effQ(c); (byQ[q] = byQ[q]||[]).push(c); });
+  [1,2,3,4].forEach(q => byQ[q].sort((a,b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1; if (!b.due_date) return -1;
+    return new Date(a.due_date) - new Date(b.due_date);
+  }));
+  const crit = cicli.filter(c => escCls(c) === 'crit');
+  const warn = cicli.filter(c => escCls(c) === 'warn');
+  const QI = {
+    1:{icon:'🔥',label:'Crisi'},2:{icon:'📌',label:'Qualità'},
+    3:{icon:'📋',label:'Inganno'},4:{icon:'🗑️',label:'Spreco'}
+  };
+  el.innerHTML = `
+    <div class="sum-bar">
+      ${[1,2,3,4].map(q=>`
+        <div class="sum-card sq${q}" onclick="setCatFilter(null)">
+          <div class="sum-lbl">Q${q} ${QI[q].label}</div>
+          <div class="sum-n">${byQ[q].length}</div>
+        </div>`).join('')}
+    </div>
+    ${(crit.length||warn.length)?`<div class="notice-bar">
+      ${crit.length?`<div class="notice crit">⚡ ${crit.length} cicl${crit.length>1?'i':'o'} in scadenza critica (≤14gg)</div>`:''}
+      ${warn.length?`<div class="notice warn">⚠️ ${warn.length} cicl${warn.length>1?'i':'o'} con scadenza entro 30gg</div>`:''}
+    </div>`:''}
+    <div class="mat-axes">
+      <span class="ax">⚡ Urgente</span>
+      <div class="ax-line"></div>
+      <span class="ax">— Non urgente</span>
+    </div>
+    <div class="matrix-grid">
+      ${[1,2,3,4].map(q=>`
+        <div class="quadrant qQ${q}">
+          <div class="q-hd">
+            <span class="q-icon">${QI[q].icon}</span>
+            <span class="q-title">Q${q} ${QI[q].label}</span>
+            <span class="q-cnt">${byQ[q].length}</span>
+          </div>
+          <div class="q-cards">
+            ${byQ[q].map(c=>renderCard(c)).join('')}
+            ${byQ[q].length===0?`<div class="empty" style="padding:14px 8px"><div class="et" style="font-size:11px">—</div></div>`:''}
+            <button class="btn-addq" onclick="openModalNew(${q})">+ Aggiungi</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function renderCard(c) {
+  const esc = escCls(c);
+  const persons = cicloPersoneResolved(c.id);
+  const isRic = c.ricorrenza && c.ricorrenza !== 'nessuna';
+  return `
+    <div class="ciclo-card ${esc}" data-id="${c.id}" onclick="openModalEdit('${c.id}')">
+      <div class="card-top">
+        <button class="chk" id="chk-${c.id}" onclick="event.stopPropagation();doClose('${c.id}',this)" title="Chiudi">✓</button>
+        <span class="card-title">${H(c.title)}</span>
+      </div>
+      <div class="card-ft">
+        ${c.cat?`<span class="cat-pill">${H(c.cat)}</span>`:''}
+        ${renderAvatars(persons)}
+        ${dueBadge(c.due_date)}
+        ${esc==='crit'?`<span class="esc-c">⚡</span>`:esc==='warn'?`<span class="esc-w">⚠</span>`:''}
+        ${isRic?`<span class="ric-ic" title="${c.ricorrenza}">🔄</span>`:''}
+      </div>
+    </div>`;
+}
+
+// ─── LISTA ──────────────────────────────────────────
+function renderLista() {
+  const el = document.getElementById('view-lista');
+  const cicli = S.cicli.filter(c =>
+    !c.done && c.ctx === S.ctx &&
+    c.week === S.week && c.year === S.year &&
+    (!S.catFilter || c.cat === S.catFilter) &&
+    (!S.search || c.title.toLowerCase().includes(S.search.toLowerCase()))
+  ).sort((a,b) => effQ(a) - effQ(b) || (daysLeft(a.due_date) - daysLeft(b.due_date)));
+
+  el.innerHTML = `
+    <div class="view-head">
+      <h2>Lista ${fmtWeekNav(S.week, S.year)}</h2>
+      <span style="color:var(--muted);font-size:13px">${cicli.length} cicli</span>
+    </div>
+    ${cicli.length===0?`<div class="empty"><div class="ei">📋</div><div class="et">Nessun ciclo questa settimana</div></div>`:''}
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${cicli.map(c=>{
+        const esc=escCls(c); const persons=cicloPersoneResolved(c.id);
+        const isRic=c.ricorrenza&&c.ricorrenza!=='nessuna';
+        return `<div class="lista-row ${esc}" onclick="openModalEdit('${c.id}')">
+          <button class="chk" onclick="event.stopPropagation();doClose('${c.id}',this)">✓</button>
+          <div class="q-dot qd${effQ(c)}"></div>
+          <span class="lr-title">${H(c.title)}</span>
+          <div class="lr-meta">
+            ${c.cat?`<span class="cat-pill">${H(c.cat)}</span>`:''}
+            ${renderAvatars(persons,2)}
+            ${dueBadge(c.due_date)}
+            ${isRic?`<span class="ric-ic">🔄</span>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ─── PERSONE ────────────────────────────────────────
+let personaDetailId = null;
+
+function renderPersone() {
+  const el = document.getElementById('view-persone');
+  if (personaDetailId) { renderPersonaDetail(el); return; }
+
+  const open = S.cicli.filter(c => !c.done);
+  function cntForPersona(pid) {
+    return S.cicli.filter(c => !c.done && (S.cpMap[c.id]||[]).includes(pid)).length;
+  }
+
+  el.innerHTML = `
+    <div class="view-head">
+      <h2>Persone</h2>
+      <button class="btn btn-ghost btn-sm" onclick="openAddPersona()">+ Aggiungi</button>
+    </div>
+    ${S.persone.length===0?`<div class="empty"><div class="ei">👥</div><div class="et">Nessuna persona</div></div>`:''}
+    <div class="persone-grid">
+      ${S.persone.map(p=>{
+        const cnt=cntForPersona(p.id);
+        return `<div class="pcard" onclick="showPersonaDetail('${p.id}')">
+          <div class="pav-lg" style="background:${pColor(p)}">${pInit(p.nome)}</div>
+          <div class="p-nome">${H(p.nome)}</div>
+          <div class="p-ruolo">${H(p.ruolo||p.contesto||'')}</div>
+          <div class="p-cnt">${cnt} cicl${cnt===1?'o':'i'} aperti</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function showPersonaDetail(pid) {
+  personaDetailId = pid;
+  renderPersone();
+}
+
+function renderPersonaDetail(el) {
+  const p = S.persone.find(x => x.id === personaDetailId);
+  if (!p) { personaDetailId = null; renderPersone(); return; }
+  const cicli = S.cicli.filter(c => (S.cpMap[c.id]||[]).includes(p.id) || (c.persone_menzionate||[]).some(n=>n.toLowerCase()===p.nome.toLowerCase()));
+  const open = cicli.filter(c=>!c.done).sort((a,b)=>effQ(a)-effQ(b));
+  const chiusi = cicli.filter(c=>c.done);
+  const QI={1:'🔥 Crisi',2:'📌 Qualità',3:'📋 Inganno',4:'🗑️ Spreco'};
+
+  el.innerHTML = `
+    <button class="back-btn" onclick="personaDetailId=null;renderPersone()">← Torna alle persone</button>
+    <div class="pd-hd">
+      <div class="pav-lg" style="background:${pColor(p)}">${pInit(p.nome)}</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700">${H(p.nome)}</div>
+        <div style="color:var(--muted);font-size:13px">${H(p.ruolo||p.contesto||'')}</div>
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px">${open.length} cicli aperti</div>
+    ${open.length===0?`<div class="empty" style="padding:20px"><div class="et">Nessun ciclo aperto con ${H(p.nome)}</div></div>`:''}
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">
+      ${open.map(c=>`
+        <div class="lista-row ${escCls(c)}" onclick="openModalEdit('${c.id}')">
+          <div class="q-dot qd${effQ(c)}"></div>
+          <span class="lr-title">${H(c.title)}</span>
+          <div class="lr-meta">
+            ${c.cat?`<span class="cat-pill">${H(c.cat)}</span>`:''}
+            ${dueBadge(c.due_date)}
+          </div>
+        </div>`).join('')}
+    </div>
+    ${chiusi.length?`<div style="font-size:13px;color:var(--muted);margin-bottom:8px">✓ ${chiusi.length} chiusi</div>`:''}
+  `;
+}
+
+// ─── STORICO ────────────────────────────────────────
+function renderStorico() {
+  const el = document.getElementById('view-storico');
+  const chiusi = S.cicli.filter(c => c.done && c.ctx === S.ctx &&
+    (!S.search || c.title.toLowerCase().includes(S.search.toLowerCase()))
+  ).sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
+
+  el.innerHTML = `
+    <div class="view-head">
+      <h2>Storico</h2>
+      <span style="color:var(--muted);font-size:13px">${chiusi.length} chiusi</span>
+    </div>
+    ${chiusi.length===0?`<div class="empty"><div class="ei">📭</div><div class="et">Nessun ciclo chiuso</div></div>`:''}
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${chiusi.map(c=>{
+        const persons=cicloPersoneResolved(c.id);
+        const days=c.chiuso_at&&c.created_at?Math.max(0,Math.ceil((new Date(c.chiuso_at)-new Date(c.created_at))/86400000)):null;
+        const isRic=c.ricorrenza&&c.ricorrenza!=='nessuna';
+        return `<div class="sto-row">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <span class="sto-title">${H(c.title)}</span>
+              ${isRic?`<span class="ric-ic">🔄</span>`:''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              ${c.cat?`<span class="cat-pill">${H(c.cat)}</span>`:''}
+              ${renderAvatars(persons,2)}
+              ${days!==null?`<span class="sto-meta">${days}gg aperto</span>`:''}
+              <span class="sto-meta">${fmtTs(c.chiuso_at||c.updated_at)}</span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="riapriciCiclo('${c.id}')">Riapri</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ─── GUIDA ──────────────────────────────────────────
+function renderGuida() {
+  document.getElementById('view-guida').innerHTML = `
+    <div class="view-head"><h2>📖 Guida</h2></div>
+    ${[
+      ['Cos\'è Cicli Aperti', `<p><strong>Cicli Aperti</strong> è il tuo sistema personale per tracciare azioni aperte secondo la filosofia OSM (On Sale Mode): ogni impegno non chiuso è un ciclo aperto che consuma energia mentale.</p><p>L'obiettivo è avere il minor numero possibile di cicli aperti, con priorità chiara.</p>`],
+      ['Matrice di Eisenhower (Q1–Q4)', `<ul><li><strong>Q1 🔥 Crisi</strong> — Urgente + Importante: fallo subito</li><li><strong>Q2 📌 Qualità</strong> — Non urgente + Importante: pianifica e proteggi questo tempo</li><li><strong>Q3 📋 Inganno</strong> — Urgente + Non importante: delega se possibile</li><li><strong>Q4 🗑️ Spreco</strong> — Non urgente + Non importante: elimina o ignora</li></ul>`],
+      ['Escalation automatica', `<p>Il sistema monitora le scadenze e scala automaticamente la priorità:</p><ul><li>Un ciclo <strong>Q2</strong> con ≤30gg alla scadenza viene trattato come <strong>Q1</strong></li><li>Un ciclo <strong>Q4</strong> con ≤14gg alla scadenza viene trattato come <strong>Q3</strong></li></ul><p>I badge <span style="background:rgba(255,77,77,.15);color:#ff4d4d;padding:1px 5px;border-radius:4px;font-size:11px">⚡</span> e <span style="background:rgba(255,138,0,.12);color:#ff8c00;padding:1px 5px;border-radius:4px;font-size:11px">⚠</span> indicano i cicli in escalation.</p>`],
+      ['Ricorrenza', `<p>Attiva la ricorrenza su un ciclo per ricrearlo automaticamente al completamento:</p><ul><li><strong>Settimanale</strong> → +7 giorni alla scadenza</li><li><strong>Mensile</strong> → +1 mese</li><li><strong>Trimestrale</strong> → +3 mesi</li><li><strong>Annuale</strong> → +1 anno</li></ul><p>Il badge 🔄 identifica i cicli ricorrenti.</p>`],
+      ['Con chi — Rubrica persone', `<p>La tab <strong>Persone</strong> è la rubrica di tutti i tuoi contatti. Cliccando su una persona vedi tutti i cicli aperti che la coinvolgono — utile prima di una riunione.</p><p>Aggiungi persone ai cicli tramite il campo <em>Con chi</em> nel form.</p>`],
+      ['Import da Plaud', `<p>Clicca il pulsante <strong>🎙 Plaud</strong> nell'header per importare cicli da una trascrizione vocale. Claude AI estrae automaticamente titolo, priorità, persone e scadenza suggerita.</p><p>Configura la tua chiave API Claude nelle ⚙️ Impostazioni.</p>`],
+      ['Scorciatoie tastiera', `<ul><li><span class="kbd">⌘K</span> — Nuovo ciclo</li><li><span class="kbd">⌘P</span> — Import Plaud</li><li><span class="kbd">⌘F</span> — Focus ricerca</li><li><span class="kbd">←</span> <span class="kbd">→</span> — Naviga settimane (in vista Lista)</li><li><span class="kbd">Esc</span> — Chiudi modale</li></ul>`],
+    ].map(([titolo,corpo])=>`
+      <details class="gd">
+        <summary>${titolo} <span class="arr">›</span></summary>
+        <div class="gd-body">${corpo}</div>
+      </details>`).join('')}
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// MODAL CICLO
+// ═══════════════════════════════════════════════════
+let mId = null;       // editing id
+let mCtx = 'lavoro';
+let mQ = 2;
+let mPersone = [];    // [{id,nome,colore}]
+let mNoteLog = [];
+let mSaving = false;
+
+function openModalNew(q = 2) {
+  mId = null; mCtx = S.ctx; mQ = q; mPersone = []; mNoteLog = [];
+  document.getElementById('mc-title').textContent = 'Nuovo Ciclo';
+  document.getElementById('mc-del').style.display = 'none';
+  document.getElementById('mc-close').style.display = 'none';
+  buildModalBody(null);
+  document.getElementById('mo-ciclo').removeAttribute('hidden');
+  document.getElementById('mf-title').focus();
+}
+
+function openModalEdit(id) {
+  const c = S.cicli.find(x => x.id === id);
+  if (!c) return;
+  mId = id; mCtx = c.ctx; mQ = c.q;
+  mPersone = cicloPersoneResolved(id).map(p=>({id:p.id,nome:p.nome,colore:p.colore||'#4f8eff'}));
+  mNoteLog = S.nlMap[id] || [];
+  document.getElementById('mc-title').textContent = 'Modifica Ciclo';
+  document.getElementById('mc-del').style.display = '';
+  document.getElementById('mc-close').style.display = c.done ? 'none' : '';
+  buildModalBody(c);
+  document.getElementById('mo-ciclo').removeAttribute('hidden');
+  loadNoteForCiclo(id).then(notes => { mNoteLog = notes; renderNoteLog(); });
+}
+
+function buildModalBody(c) {
+  document.getElementById('mc-body').innerHTML = `
+    <div class="ctx-tog-m">
+      <button type="button" class="cb ${mCtx==='lavoro'?'al':''}" id="mcb-lav" onclick="setMCtx('lavoro')">🏢 Lavoro</button>
+      <button type="button" class="cb ${mCtx==='personale'?'ap':''}" id="mcb-per" onclick="setMCtx('personale')">🏠 Personale</button>
+    </div>
+    <div class="fr">
+      <label class="fl">Titolo *</label>
+      <textarea class="fi" id="mf-title" rows="2" style="resize:vertical" placeholder="Cosa devi fare?">${H(c?.title||'')}</textarea>
+    </div>
+    <div class="fg">
+      <div class="fr">
+        <label class="fl">Categoria</label>
+        <input class="fi" id="mf-cat" type="text" list="mf-cat-dl" placeholder="es. vendite" value="${H(c?.cat||'')}">
+        <datalist id="mf-cat-dl">${getCatsForCtx().map(x=>`<option value="${H(x.nome)}">`).join('')}</datalist>
+      </div>
+      <div class="fr">
+        <label class="fl">Settimana</label>
+        <input class="fi" id="mf-week" type="number" min="1" max="53" value="${c?.week||S.week}" style="width:100%">
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Quadrante</label>
+      <div class="qpick" id="qpick">
+        ${[1,2,3,4].map(q=>{
+          const qi={1:'🔥 Q1 Crisi',2:'📌 Q2 Qualità',3:'📋 Q3 Inganno',4:'🗑️ Q4 Spreco'};
+          return `<button type="button" class="qpb ${mQ===q?'sq'+q:''}" onclick="setMQ(${q})">${qi[q]}</button>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Scadenza</label>
+      <input class="fi" id="mf-due" type="date" value="${c?.due_date||''}" oninput="updateDaysHint()">
+      <div class="days-hint" id="dh"></div>
+    </div>
+    <div class="fr">
+      <label class="fl">Ricorrenza</label>
+      <select class="fs" id="mf-ric" onchange="toggleRicInfo()">
+        ${['nessuna','settimanale','mensile','trimestrale','annuale'].map(r=>
+          `<option value="${r}" ${(c?.ricorrenza||'nessuna')===r?'selected':''}>${r.charAt(0).toUpperCase()+r.slice(1)}</option>`
+        ).join('')}
+      </select>
+      <div class="ric-info" id="ric-inf" style="display:${c?.ricorrenza&&c.ricorrenza!=='nessuna'?'block':'none'}">
+        🔄 Alla chiusura verrà ricreato per il periodo successivo
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Con chi</label>
+      <div class="pp-wrap">
+        <div class="pp-chips" id="pp-chips" onclick="document.getElementById('pp-inp').focus()">
+          <span id="chips-inner">${renderChips()}</span>
+          <input class="pp-inp" id="pp-inp" type="text" placeholder="${mPersone.length===0?'Digita nome…':''}"
+            oninput="searchPersoneDD(this.value)" onkeydown="ppKeydown(event)" autocomplete="off">
+        </div>
+        <div class="pp-dd" id="pp-dd" style="display:none"></div>
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Note progressive</label>
+      <div class="nl-list" id="nl-list">${renderNoteItems()}</div>
+      <div class="nl-add">
+        <input class="fi" id="nl-inp" type="text" placeholder="Aggiungi nota…"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addNota();}">
+        <button class="btn-nota" onclick="addNota()">Aggiungi</button>
+      </div>
+    </div>
+  `;
+  if (c?.due_date) updateDaysHint();
+}
+
+function setMCtx(ctx) {
+  mCtx = ctx;
+  document.getElementById('mcb-lav').classList.toggle('al', ctx==='lavoro');
+  document.getElementById('mcb-per').classList.toggle('ap', ctx==='personale');
+}
+
+function setMQ(q) {
+  mQ = q;
+  document.querySelectorAll('.qpb').forEach((b,i)=>{
+    b.className='qpb'+(mQ===i+1?' sq'+(i+1):'');
+  });
+}
+
+function updateDaysHint() {
+  const due = document.getElementById('mf-due')?.value;
+  const el = document.getElementById('dh');
+  if (!el) return;
+  if (!due) { el.textContent=''; return; }
+  const dl = daysLeft(due);
+  el.textContent = dl < 0 ? `${Math.abs(dl)}gg fa` : dl === 0 ? 'Oggi!' : `${dl} giorni rimanenti`;
+  el.style.color = dl <= 14 ? 'var(--q1c)' : dl <= 30 ? 'var(--orange)' : 'var(--sub)';
+}
+
+function toggleRicInfo() {
+  const v = document.getElementById('mf-ric')?.value;
+  const el = document.getElementById('ric-inf');
+  if (el) el.style.display = v && v !== 'nessuna' ? 'block' : 'none';
+}
+
+// Person picker
+function renderChips() {
+  return mPersone.map((p,i)=>`
+    <span class="pchip" style="background:${p.colore||'#4f8eff'}">
+      <span class="pchip-av">${pInit(p.nome)}</span>
+      ${H(p.nome)}
+      <button class="pchip-x" onclick="removeChip(${i})">✕</button>
+    </span>`).join('');
+}
+
+function removeChip(i) {
+  mPersone.splice(i,1);
+  document.getElementById('chips-inner').innerHTML = renderChips();
+}
+
+function searchPersoneDD(q) {
+  const dd = document.getElementById('pp-dd');
+  if (!q.trim()) { dd.style.display='none'; return; }
+  const matches = S.persone.filter(p =>
+    p.nome.toLowerCase().includes(q.toLowerCase()) &&
+    !mPersone.find(mp => mp.id === p.id)
+  );
+  if (!matches.length && !q.trim()) { dd.style.display='none'; return; }
+  dd.innerHTML = matches.map(p=>`
+    <div class="pp-opt" onclick="addChip('${p.id}')">
+      <div class="pp-opt-av" style="background:${pColor(p)}">${pInit(p.nome)}</div>
+      ${H(p.nome)} ${p.ruolo?`<span style="color:var(--muted);font-size:11px">${H(p.ruolo)}</span>`:''}
+    </div>`).join('') +
+    `<div class="pp-new" onclick="createPersonaInline('${H(q)}')">+ Crea "${H(q)}"</div>`;
+  dd.style.display = 'block';
+}
+
+function addChip(pid) {
+  const p = pById(pid);
+  if (!p || mPersone.find(x=>x.id===pid)) return;
+  mPersone.push({id:p.id, nome:p.nome, colore:p.colore||'#4f8eff'});
+  document.getElementById('chips-inner').innerHTML = renderChips();
+  const inp = document.getElementById('pp-inp');
+  inp.value=''; inp.placeholder='';
+  document.getElementById('pp-dd').style.display='none';
+}
+
+function ppKeydown(e) {
+  if (e.key === 'Backspace' && !e.target.value && mPersone.length) {
+    mPersone.pop();
+    document.getElementById('chips-inner').innerHTML = renderChips();
+  }
+}
+
+async function createPersonaInline(nome) {
+  const { data } = await db.from('persone').insert({ nome, contesto: mCtx, colore: '#4f8eff' }).select().single();
+  if (data) {
+    S.persone.push(data);
+    addChip(data.id);
+  }
+  document.getElementById('pp-dd').style.display='none';
+}
+
+// Note log
+function renderNoteItems() {
+  if (!mNoteLog.length) return `<div style="color:var(--muted);font-size:12px;padding:4px 0">Nessuna nota ancora</div>`;
+  return mNoteLog.map(n=>`
+    <div class="nl-item">
+      <div class="nl-txt">${H(n.testo)}</div>
+      <div class="nl-ts">${fmtTs(n.created_at)}</div>
+    </div>`).join('');
+}
+
+function renderNoteLog() {
+  const el = document.getElementById('nl-list');
+  if (el) el.innerHTML = renderNoteItems();
+}
+
+async function addNota() {
+  const inp = document.getElementById('nl-inp');
+  if (!inp) return;
+  const testo = inp.value.trim();
+  if (!testo) return;
+  if (mId) {
+    const { data } = await db.from('note_log').insert({ ciclo_id: mId, testo }).select().single();
+    if (data) { mNoteLog.push(data); S.nlMap[mId] = mNoteLog; renderNoteLog(); }
+  } else {
+    mNoteLog.push({ testo, created_at: new Date().toISOString(), temp: true });
+    renderNoteLog();
+  }
+  inp.value = '';
+}
+
+// Submit
+async function submitCiclo() {
+  if (mSaving) return;
+  const title = document.getElementById('mf-title')?.value.trim();
+  if (!title) { toast('Titolo obbligatorio', 'e'); return; }
+  mSaving = true;
+  const btn = document.querySelector('#mo-ciclo .btn-primary');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+
+  const payload = {
+    title,
+    cat: document.getElementById('mf-cat')?.value.trim() || null,
+    q: mQ,
+    ctx: mCtx,
+    week: parseInt(document.getElementById('mf-week')?.value) || S.week,
+    year: S.year,
+    due_date: document.getElementById('mf-due')?.value || null,
+    ricorrenza: document.getElementById('mf-ric')?.value || 'nessuna',
+  };
+
+  const id = await saveCiclo(payload, mId);
+  // Save note log if new + temp notes
+  if (!mId) {
+    for (const n of mNoteLog.filter(x=>x.temp)) {
+      await db.from('note_log').insert({ ciclo_id: id, testo: n.testo });
     }
+  }
+  await saveCicloPersone(id, mPersone.map(p=>p.id));
+  closeModal('ciclo');
+  await loadCicli();
+  await loadCicloPersone();
+  render();
+  toast(mId ? 'Ciclo aggiornato' : 'Ciclo creato ✓', 's');
+  mSaving = false;
+}
 
-    function addWeeks(week, year, n) {
-      let w = week + n;
-      let y = year;
-      const max = weeksInYear(y);
-      if (w > max) { w -= max; y += 1; }
-      return { week: w, year: y };
-    }
+async function closeCurrent() {
+  if (!mId) return;
+  closeModal('ciclo');
+  const el = document.querySelector(`[data-id="${mId}"]`);
+  if (el) el.classList.add('done-anim');
+  await closeCicloById(mId);
+}
 
-    function nextPeriod(ciclo) {
-      const w = ciclo.week || today.week;
-      const y = ciclo.year || today.year;
-      const ogni = ciclo.ricorrenza_ogni || 1;
-      if (ciclo.ricorrenza_tipo === 'mensile') return addWeeks(w, y, ogni * 4);
-      return addWeeks(w, y, ogni);
-    }
+async function deleteCurrent() {
+  if (!mId || !confirm('Eliminare questo ciclo?')) return;
+  closeModal('ciclo');
+  await deleteCicloById(mId);
+}
 
-    function fmtDate(iso) {
-      if (!iso) return '';
-      return new Date(iso + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-    }
+async function doClose(id, btn) {
+  btn.classList.add('doing');
+  const el = btn.closest('[data-id]');
+  if (el) setTimeout(()=>el.classList.add('done-anim'), 100);
+  await closeCicloById(id);
+}
 
-    function isOverdue(iso) {
-      if (!iso) return false;
-      return new Date(iso + 'T23:59:59') < new Date();
-    }
+function closeModal(which) {
+  document.getElementById('mo-' + which).setAttribute('hidden','');
+  mSaving = false;
+}
 
-    const today = getISOWeek(new Date());
+// ═══════════════════════════════════════════════════
+// PLAUD IMPORT
+// ═══════════════════════════════════════════════════
+let plaudStep = 1;
+let plaudCicli = [];
 
-    // ── Priority config ──────────────────────────────────────────
-    const PRIO = {
-      1: { label: 'Urgente',  dot: 'bg-red-500',    border: 'border-l-red-500',    badge: 'bg-red-900/40 text-red-300' },
-      2: { label: 'Normale',  dot: 'bg-yellow-400',  border: 'border-l-yellow-500', badge: 'bg-yellow-900/30 text-yellow-300' },
-      3: { label: 'Bassa',    dot: 'bg-blue-500',    border: 'border-l-blue-500',   badge: 'bg-blue-900/30 text-blue-300' },
-      4: { label: 'Un giorno',dot: 'bg-gray-600',    border: 'border-l-gray-600',   badge: 'bg-gray-800 text-gray-400' },
-    };
+function openPlaud() {
+  plaudStep = 1; plaudCicli = [];
+  renderPlaud();
+  document.getElementById('mo-plaud').removeAttribute('hidden');
+}
 
-    // ── Load ──────────────────────────────────────────────────────
-    async function loadCicli() {
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('cicli-list').innerHTML = '';
-      document.getElementById('empty-state').classList.add('hidden');
+function renderPlaud() {
+  const body = document.getElementById('mp-body');
+  const ft = document.getElementById('mp-ft');
+  const steps = ['Incolla testo','Anteprima','Salva'];
 
-      const { data, error } = await db
-        .from('cicli')
-        .select('*')
-        .eq('ctx', currentCtx)
-        .eq('done', false)
-        .order('q', { ascending: true })
-        .order('created_at', { ascending: true });
+  body.innerHTML = `<div class="plaud-steps">${steps.map((s,i)=>`<div class="ps ${plaudStep===i+1?'active':''}">${i+1}. ${s}</div>`).join('')}</div>`;
 
-      document.getElementById('loading').classList.add('hidden');
-      if (error) { console.error(error); return; }
+  if (plaudStep === 1) {
+    body.innerHTML += `<div class="fr"><label class="fl">Testo da Plaud (trascrizione)</label>
+      <textarea class="fta" id="plaud-txt" rows="8" placeholder="Incolla qui la trascrizione…"></textarea></div>`;
+    ft.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="closeModal('plaud')">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="runPlaud()">Estrai con Claude →</button>`;
+  } else if (plaudStep === 2) {
+    const preview = plaudCicli.map((c,i)=>`
+      <div class="pp-card">
+        <div class="pp-card-title">${H(c.titolo)}</div>
+        <div class="pp-card-meta">
+          Q${c.quadrante||2} · ${H(c.contesto||'lavoro')} · ${c.scadenza_suggerita||'nessuna scadenza'}
+          ${c.persone?.length?` · 👤 ${c.persone.join(', ')}`:''}<br>
+          ${c.note?`💬 ${H(c.note)}`:''}
+        </div>
+      </div>`).join('');
+    body.innerHTML += `<div class="plaud-preview">${preview}</div>`;
+    ft.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="plaudStep=1;renderPlaud()">← Indietro</button>
+      <span style="flex:1;text-align:center;font-size:12px;color:var(--muted)">${plaudCicli.length} cicli estratti</span>
+      <button class="btn btn-primary btn-sm" onclick="savePlaud()">Salva tutti →</button>`;
+  } else {
+    body.innerHTML += `<div class="empty"><div class="ei">✅</div><div class="et">Importazione completata!</div></div>`;
+    ft.innerHTML = `<button class="btn btn-primary btn-sm" onclick="closeModal('plaud')">Chiudi</button>`;
+  }
+}
 
-      cicli = data || [];
+async function runPlaud() {
+  const txt = document.getElementById('plaud-txt')?.value.trim();
+  if (!txt) { toast('Incolla prima il testo', 'w'); return; }
+  const apiKey = ls('cicli_claude_key');
+  if (!apiKey) { toast('Configura la chiave Claude API nelle Impostazioni ⚙️', 'w'); return; }
+  const btn = document.querySelector('#mp-ft .btn-primary');
+  if (btn) { btn.textContent = 'Elaborazione…'; btn.disabled = true; }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:2048,
+        messages:[{role:'user',content:`Estrai da questo testo registrato i cicli aperti (azioni, compiti, follow-up).
+Rispondi SOLO con un JSON array puro, senza markdown, con questi campi:
+[{"titolo":"...","contesto":"lavoro|personale","quadrante":1-4,"note":"...","persone":["nome1"],"scadenza_suggerita":"YYYY-MM-DD o null"}]
 
-      // Build cat suggestions from all existing cats
-      allCats = [...new Set(cicli.map(c => c.cat).filter(Boolean))];
-      const ds = document.getElementById('cat-suggestions');
-      ds.innerHTML = allCats.map(c => `<option value="${c}">`).join('');
+Testo:\n${txt}`}]
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const raw = data.content[0].text;
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('Risposta non valida');
+    plaudCicli = JSON.parse(match[0]);
+    plaudStep = 2;
+  } catch(e) {
+    toast('Errore Claude: ' + e.message, 'e');
+    if (btn) { btn.textContent = 'Estrai con Claude →'; btn.disabled = false; }
+    return;
+  }
+  renderPlaud();
+}
 
+async function savePlaud() {
+  let saved = 0;
+  for (const c of plaudCicli) {
+    try {
+      await db.from('cicli').insert({
+        title: c.titolo, ctx: c.contesto||'lavoro', q: c.quadrante||2,
+        due_date: c.scadenza_suggerita||null, note: c.note||null,
+        week: TD.week, year: TD.year, done: false, da_plaud: true,
+        ricorrenza: 'nessuna', persone_menzionate: c.persone||[],
+      });
+      saved++;
+    } catch(e) { console.error(e); }
+  }
+  plaudStep = 3;
+  renderPlaud();
+  toast(`${saved} cicli importati da Plaud ✓`, 's');
+  await loadCicli();
+  await loadCicloPersone();
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════
+let stTab = 'api';
+
+function openSettings() {
+  renderSettings();
+  document.getElementById('mo-settings').removeAttribute('hidden');
+}
+
+function renderSettings() {
+  const el = document.getElementById('ms-body');
+  const cats = S.categorie.filter(c => c.ctx === S.ctx);
+  el.innerHTML = `
+    <div class="st-tabs">
+      <button class="st-tab ${stTab==='api'?'active':''}" onclick="stTab='api';renderSettings()">API Claude</button>
+      <button class="st-tab ${stTab==='cat'?'active':''}" onclick="stTab='cat';renderSettings()">Categorie</button>
+      <button class="st-tab ${stTab==='per'?'active':''}" onclick="stTab='per';renderSettings()">Persone</button>
+    </div>
+    ${stTab==='api'?`
+      <div class="fr">
+        <label class="fl">Chiave API Claude</label>
+        <input class="fi" id="st-apikey" type="password" placeholder="sk-ant-…" value="${ls('cicli_claude_key')||''}">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Usata per l'import Plaud. Salvata solo in localStorage.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="testClaude()">Testa connessione</button>
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Salva chiave</button>
+      </div>
+    `:stTab==='cat'?`
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm ${S.ctx==='lavoro'?'active':''}" onclick="setCtx('lavoro');renderSettings()">🏢 Lavoro</button>
+        <button class="btn btn-ghost btn-sm ${S.ctx==='personale'?'active':''}" onclick="setCtx('personale');renderSettings()">🏠 Personale</button>
+      </div>
+      <div id="cat-list-st">
+        ${cats.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)">
+          <span style="font-size:18px">${c.emoji||'📋'}</span>
+          <span style="flex:1;font-size:13px">${H(c.nome)}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteCat(${c.id})">✕</button>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <input class="fi" id="new-cat-nome" type="text" placeholder="Nome categoria">
+        <input class="fi" id="new-cat-emoji" type="text" placeholder="📋" style="width:50px">
+        <button class="btn btn-primary btn-sm" onclick="addCat()">Aggiungi</button>
+      </div>
+    `:`
+      <div id="per-list-st">
+        ${S.persone.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)">
+          <div class="pav-lg" style="width:28px;height:28px;font-size:12px;background:${pColor(p)}">${pInit(p.nome)}</div>
+          <span style="flex:1;font-size:13px">${H(p.nome)} ${p.ruolo?`<span style="color:var(--muted)">${H(p.ruolo)}</span>`:''}</span>
+          <button class="btn btn-danger btn-sm" onclick="deletePersona('${p.id}')">✕</button>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <input class="fi" id="new-per-nome" type="text" placeholder="Nome">
+        <input class="fi" id="new-per-ruolo" type="text" placeholder="Ruolo">
+        <button class="btn btn-primary btn-sm" onclick="addPersonaSt()">Aggiungi</button>
+      </div>
+    `}
+  `;
+}
+
+function saveApiKey() {
+  const k = document.getElementById('st-apikey')?.value.trim();
+  ls('cicli_claude_key', k);
+  toast('Chiave salvata ✓', 's');
+}
+
+async function testClaude() {
+  const k = document.getElementById('st-apikey')?.value.trim() || ls('cicli_claude_key');
+  if (!k) { toast('Inserisci prima la chiave', 'w'); return; }
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'ping'}]})
+    });
+    if (r.ok) toast('Connessione Claude OK ✓', 's'); else throw new Error(r.status);
+  } catch(e) { toast('Errore connessione: '+e.message,'e'); }
+}
+
+async function addCat() {
+  const nome = document.getElementById('new-cat-nome')?.value.trim();
+  if (!nome) return;
+  const emoji = document.getElementById('new-cat-emoji')?.value.trim() || '📋';
+  await db.from('categorie').insert({ nome, emoji, ctx: S.ctx, ordine: S.categorie.length });
+  await loadCategorie();
+  renderSettings();
+  render();
+  toast('Categoria aggiunta', 's');
+}
+
+async function deleteCat(id) {
+  if (!confirm('Eliminare categoria?')) return;
+  await db.from('categorie').delete().eq('id', id);
+  await loadCategorie();
+  renderSettings();
+  render();
+}
+
+async function addPersonaSt() {
+  const nome = document.getElementById('new-per-nome')?.value.trim();
+  if (!nome) return;
+  const ruolo = document.getElementById('new-per-ruolo')?.value.trim() || '';
+  await db.from('persone').insert({ nome, ruolo, contesto: S.ctx, colore: '#4f8eff' });
+  await loadPersone();
+  renderSettings();
+}
+
+async function deletePersona(id) {
+  if (!confirm('Eliminare persona?')) return;
+  await db.from('persone').delete().eq('id', id);
+  await loadPersone();
+  renderSettings();
+}
+
+async function addCategoriaInline() {
+  const nome = prompt('Nome categoria:');
+  if (!nome?.trim()) return;
+  await db.from('categorie').insert({ nome:nome.trim(), emoji:'📋', ctx: S.ctx, ordine: S.categorie.length });
+  await loadCategorie();
+  render();
+}
+
+async function openAddPersona() {
+  const nome = prompt('Nome persona:');
+  if (!nome?.trim()) return;
+  const ruolo = prompt('Ruolo (opzionale):') || '';
+  await db.from('persone').insert({ nome:nome.trim(), ruolo, contesto: S.ctx, colore: '#4f8eff' });
+  await loadPersone();
+  renderPersone();
+}
+
+// ═══════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════
+function toggleTheme() {
+  const light = document.body.classList.toggle('light');
+  ls('cicli_theme', light ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = light ? '☀️' : '🌙';
+}
+document.getElementById('theme-btn').textContent = ls('cicli_theme') === 'light' ? '☀️' : '🌙';
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg, type = 's') {
+  const tc = document.getElementById('tc');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  tc.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 250);
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName;
+  const inInput = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+  if (e.key === 'Escape') {
+    ['ciclo','plaud','settings'].forEach(m => {
+      const el = document.getElementById('mo-' + m);
+      if (!el.hasAttribute('hidden')) closeModal(m);
+    });
+  }
+  if (inInput) return;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModalNew(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'p') { e.preventDefault(); openPlaud(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); document.getElementById('search-inp').focus(); }
+  if (e.key === 'ArrowLeft' && S.view === 'lista') shiftWeek(-1);
+  if (e.key === 'ArrowRight' && S.view === 'lista') shiftWeek(1);
+});
+
+// Close person dropdown on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('pp-dd');
+  if (dd && !dd.contains(e.target) && !document.getElementById('pp-chips')?.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// REALTIME
+// ═══════════════════════════════════════════════════
+function setupRealtime() {
+  db.channel('cicli-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cicli' }, async () => {
+      await loadCicli();
+      await loadCicloPersone();
       render();
-    }
+    })
+    .subscribe();
+}
 
-    // ── Mark done ─────────────────────────────────────────────────
-    async function markDone(id) {
-      const ciclo = cicli.find(c => c.id === id);
-      if (!ciclo) return;
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+async function init() {
+  document.getElementById('view-matrice').innerHTML =
+    `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      ${[1,2,3].map(()=>`<div class="skel" style="height:80px"></div>`).join('')}
+    </div>`;
+  await loadAll();
+  setView(S.view);
+  setupRealtime();
+}
 
-      // Animate
-      const el = document.querySelector(`[data-id="${id}"]`);
-      if (el) el.classList.add('done-anim');
-
-      // DB: mark done
-      await db.from('cicli').update({ done: true, updated_at: new Date().toISOString() }).eq('id', id);
-
-      // Se ricorrente → crea il prossimo
-      if (ciclo.ricorrente) {
-        const next = nextPeriod(ciclo);
-        await db.from('cicli').insert({
-          title: ciclo.title,
-          cat: ciclo.cat,
-          note: ciclo.note,
-          q: ciclo.q,
-          ctx: ciclo.ctx,
-          week: next.week,
-          year: next.year,
-          ricorrente: true,
-          ricorrenza_tipo: ciclo.ricorrenza_tipo,
-          ricorrenza_ogni: ciclo.ricorrenza_ogni,
-          done: false,
-          da_plaud: false,
-          persone_menzionate: ciclo.persone_menzionate || [],
-        });
-      }
-
-      setTimeout(() => loadCicli(), 300);
-    }
-
-    // ── Delete ────────────────────────────────────────────────────
-    async function deleteCiclo(id) {
-      if (!confirm('Eliminare questo ciclo?')) return;
-      await db.from('cicli').delete().eq('id', id);
-      loadCicli();
-    }
-
-    // ── Save ──────────────────────────────────────────────────────
-    async function saveCiclo(payload) {
-      if (editingId) {
-        await db.from('cicli')
-          .update({ ...payload, updated_at: new Date().toISOString() })
-          .eq('id', editingId);
-      } else {
-        await db.from('cicli').insert({
-          ...payload,
-          ctx: currentCtx,
-          week: today.week,
-          year: today.year,
-          done: false,
-          da_plaud: false,
-          persone_menzionate: [],
-        });
-      }
-      closeModal();
-      loadCicli();
-    }
-
-    // ── Render ────────────────────────────────────────────────────
-    function render() {
-      // Week label
-      document.getElementById('week-label').textContent =
-        `Settimana ${today.week} · ${today.year}`;
-
-      // Ctx buttons
-      document.querySelectorAll('.ctx-btn').forEach(btn => {
-        const active = btn.dataset.ctx === currentCtx;
-        btn.className = `ctx-btn flex-1 py-1.5 text-sm rounded-xl font-medium transition-colors ${
-          active
-            ? 'bg-blue-600 text-white shadow'
-            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-        }`;
-      });
-
-      const list = document.getElementById('cicli-list');
-      const empty = document.getElementById('empty-state');
-
-      if (cicli.length === 0) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        renderStats();
-        return;
-      }
-      empty.classList.add('hidden');
-
-      // Group by category, sort cats by min q
-      const grouped = {};
-      cicli.forEach(c => {
-        const cat = c.cat || '—';
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(c);
-      });
-
-      const sortedCats = Object.keys(grouped).sort((a, b) => {
-        const minA = Math.min(...grouped[a].map(c => c.q));
-        const minB = Math.min(...grouped[b].map(c => c.q));
-        return minA - minB;
-      });
-
-      list.innerHTML = sortedCats.map(cat => `
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-xs uppercase tracking-widest text-gray-500 font-semibold">${cat}</span>
-            <span class="text-xs text-gray-700">${grouped[cat].length}</span>
-          </div>
-          <div class="space-y-1.5">
-            ${grouped[cat].map(renderCiclo).join('')}
-          </div>
-        </div>
-      `).join('');
-
-      renderStats();
-    }
-
-    function renderCiclo(c) {
-      const p = PRIO[c.q] || PRIO[2];
-      const overdue = isOverdue(c.due_date);
-      const dueStr = fmtDate(c.due_date);
-      const ricLabel = c.ricorrente
-        ? `ogni ${c.ricorrenza_ogni} ${c.ricorrenza_tipo === 'mensile' ? 'mesi' : c.ricorrenza_ogni === 1 ? 'sett.' : 'settimane'}`
-        : '';
-
-      return `
-        <div data-id="${c.id}"
-          class="group bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl border-l-4 ${p.border} px-3 py-2.5 flex items-start gap-3 transition-colors">
-
-          <!-- Done button -->
-          <button onclick="markDone('${c.id}')"
-            class="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 border-gray-600 hover:border-green-400 hover:bg-green-500/10 transition-colors flex items-center justify-center text-xs">
-            <span class="hidden group-hover:block text-green-400 leading-none">✓</span>
-          </button>
-
-          <!-- Content -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-sm font-medium leading-snug">${escHtml(c.title)}</span>
-              ${c.ricorrente ? `<span class="text-xs text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded-md font-medium" title="${ricLabel}">🔄 ${ricLabel}</span>` : ''}
-            </div>
-            <div class="flex items-center gap-2.5 mt-1 flex-wrap">
-              ${dueStr ? `<span class="text-xs ${overdue ? 'text-red-400 font-medium' : 'text-gray-500'}">${overdue ? '⚠️ ' : '📅 '}${dueStr}</span>` : ''}
-              ${c.persone_menzionate && c.persone_menzionate.length
-                ? `<span class="text-xs text-gray-600">👤 ${c.persone_menzionate.join(', ')}</span>`
-                : ''}
-              ${c.note ? `<span class="text-xs text-gray-600 truncate max-w-[180px]">${escHtml(c.note.substring(0, 40))}${c.note.length > 40 ? '…' : ''}</span>` : ''}
-            </div>
-          </div>
-
-          <!-- Actions (visible on hover) -->
-          <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
-            <button onclick="openEdit('${c.id}')"
-              class="text-gray-600 hover:text-blue-400 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-sm">
-              ✏️
-            </button>
-            <button onclick="deleteCiclo('${c.id}')"
-              class="text-gray-600 hover:text-red-400 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-sm">
-              🗑️
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderStats() {
-      const bar = document.getElementById('stats-bar');
-      if (cicli.length === 0) { bar.innerHTML = ''; return; }
-
-      const urgenti = cicli.filter(c => c.q === 1).length;
-      const ricorrenti = cicli.filter(c => c.ricorrente).length;
-      const scaduti = cicli.filter(c => isOverdue(c.due_date)).length;
-
-      bar.innerHTML = [
-        cicli.length ? `<span>${cicli.length} aperti</span>` : '',
-        urgenti ? `<span class="text-red-400">🔴 ${urgenti} urgenti</span>` : '',
-        ricorrenti ? `<span class="text-blue-400">🔄 ${ricorrenti} ricorrenti</span>` : '',
-        scaduti ? `<span class="text-orange-400">⚠️ ${scaduti} scaduti</span>` : '',
-      ].filter(Boolean).join('<span class="text-gray-700">·</span>');
-    }
-
-    // ── Modal ─────────────────────────────────────────────────────
-    function openAdd() {
-      editingId = null;
-      document.getElementById('modal-title').textContent = 'Nuovo Ciclo';
-      document.getElementById('ciclo-form').reset();
-      document.getElementById('f-id').value = '';
-      document.getElementById('f-q').value = '2';
-      document.getElementById('ricorrenza-opts').classList.add('hidden');
-      showModal();
-      setTimeout(() => document.getElementById('f-title').focus(), 100);
-    }
-
-    function openEdit(id) {
-      const c = cicli.find(x => x.id === id);
-      if (!c) return;
-      editingId = id;
-      document.getElementById('modal-title').textContent = 'Modifica Ciclo';
-      document.getElementById('f-id').value = id;
-      document.getElementById('f-title').value = c.title || '';
-      document.getElementById('f-cat').value = c.cat || '';
-      document.getElementById('f-q').value = c.q || 2;
-      document.getElementById('f-due').value = c.due_date || '';
-      document.getElementById('f-note').value = c.note || '';
-      document.getElementById('f-ricorrente').checked = !!c.ricorrente;
-      document.getElementById('f-ric-tipo').value = c.ricorrenza_tipo || 'settimanale';
-      document.getElementById('f-ric-ogni').value = c.ricorrenza_ogni || 1;
-      document.getElementById('ricorrenza-opts').classList.toggle('hidden', !c.ricorrente);
-      showModal();
-    }
-
-    function showModal() {
-      document.getElementById('modal').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      editingId = null;
-    }
-
-    // ── Escape HTML ───────────────────────────────────────────────
-    function escHtml(str) {
-      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── Events ────────────────────────────────────────────────────
-    document.getElementById('btn-add').addEventListener('click', openAdd);
-    document.getElementById('btn-add-fab').addEventListener('click', openAdd);
-    document.getElementById('modal-close').addEventListener('click', closeModal);
-    document.getElementById('modal-cancel').addEventListener('click', closeModal);
-    document.getElementById('modal').addEventListener('click', e => {
-      if (e.target === document.getElementById('modal')) closeModal();
-    });
-
-    document.querySelectorAll('.ctx-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentCtx = btn.dataset.ctx;
-        loadCicli();
-      });
-    });
-
-    document.getElementById('f-ricorrente').addEventListener('change', e => {
-      document.getElementById('ricorrenza-opts').classList.toggle('hidden', !e.target.checked);
-    });
-
-    document.getElementById('ciclo-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      if (saving) return;
-      const title = document.getElementById('f-title').value.trim();
-      if (!title) {
-        document.getElementById('f-title').focus();
-        return;
-      }
-      saving = true;
-      const btn = document.getElementById('btn-save');
-      btn.textContent = '…';
-      btn.disabled = true;
-
-      const ricorrente = document.getElementById('f-ricorrente').checked;
-
-      await saveCiclo({
-        title,
-        cat: document.getElementById('f-cat').value.trim() || null,
-        q: parseInt(document.getElementById('f-q').value),
-        due_date: document.getElementById('f-due').value || null,
-        note: document.getElementById('f-note').value.trim() || null,
-        ricorrente,
-        ricorrenza_tipo: ricorrente ? document.getElementById('f-ric-tipo').value : null,
-        ricorrenza_ogni: ricorrente ? parseInt(document.getElementById('f-ric-ogni').value) : null,
-      });
-
-      saving = false;
-      btn.textContent = 'Salva';
-      btn.disabled = false;
-    });
-
-    // ── Init ──────────────────────────────────────────────────────
-    loadCicli();
-  </script>
+init();
+</script>
 </body>
 </html>
