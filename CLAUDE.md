@@ -114,11 +114,22 @@ Auto-assegnate via Claude Haiku alla creazione di ogni ciclo di tipo `lavoro`.
 | Storico | Cicli completati e passati | — |
 | Guida | Documentazione OSM | — |
 
+## Mobile redesign v2 (2026-06-29)
+
+- Header mobile: 56px, solo logo + hamburger ≡
+- **Drawer** (`#drawer`): slide-in 250ms sinistra (80vw) con contesto, settimana nav, viste, GCal, strumenti, impostazioni
+- Nav mobile: **3 tab** — ☀️ Oggi | 📅 Settimana | 🔲 Matrice (Mese/Aree/Persone nel drawer)
+- **Compact card** (`makeCompactCard`): 48px altezza, riga [dot Q][titolo][area pill][orario], tap=expand inline, swipe threshold 60px
+- **Matrix mobile**: 2×2 grid compact boxes (`renderMatrixMobile`), tap box=espandi full-width
+- **Modal semplificato**: Contesto+Titolo+DataPianificata sempre visibili; "Più opzioni ▼" collassa il resto (solo mobile; desktop mostra tutto)
+- **Cache-Control**: meta tags no-cache su header HTML
+
 ## Gesti mobile
 
-- **Swipe destra** → completato (verde, animazione out)
-- **Swipe sinistra** → apre modal posticipa (+1g, +2g, +7g, data custom)
-- **Long press** → apre modal modifica completa
+- **Swipe destra >60px** → completato (verde, animazione out) — compact card row
+- **Swipe sinistra >60px** → posticipa +1g diretto (compact card) o apre modal
+- **Tap compact card** → espande inline (note + azioni: Fatto / +1g / Modifica)
+- **Long press 600ms** → apre modal modifica completa
 - **Pull-to-refresh** → ricarica dati da Supabase
 
 ## localStorage keys
