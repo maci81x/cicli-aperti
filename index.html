@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #0e0f11; --bg2: #161719; --bg3: #1e2023;
@@ -367,6 +368,111 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
 .sidebar-edit-icon { font-size: 10px; opacity: 0; transition: opacity 0.1s; margin-left: 2px; cursor: pointer; color: var(--text-dim); }
 .sidebar-item:hover .sidebar-edit-icon { opacity: 1; }
 
+/* ── FAB ── */
+.fab { position:fixed; bottom:82px; left:50%; transform:translateX(-50%); width:56px; height:56px; border-radius:50%; background:var(--lavoro); color:white; border:none; font-size:30px; line-height:1; cursor:pointer; z-index:160; box-shadow:0 4px 18px rgba(61,127,255,0.42); display:none; align-items:center; justify-content:center; transition:transform 0.15s, box-shadow 0.15s; }
+.fab:active { transform:translateX(-50%) scale(0.92); }
+@media (max-width:768px) { .fab { display:flex; } }
+
+/* ── MOBILE CARD (swipeable) ── */
+.mobile-card { background:var(--bg2); border-radius:12px; padding:14px 16px; margin-bottom:10px; position:relative; overflow:hidden; touch-action:pan-y; box-shadow:0 1px 4px rgba(0,0,0,0.15); transition:transform 0.08s; user-select:none; }
+.mobile-card-inner { position:relative; z-index:1; }
+.swipe-bg { position:absolute; inset:0; display:flex; align-items:center; pointer-events:none; opacity:0; transition:opacity 0.1s; }
+.swipe-bg.done-bg { background:#22c55e; justify-content:flex-start; padding-left:18px; font-size:20px; }
+.swipe-bg.postpone-bg { background:var(--escalation1); justify-content:flex-end; padding-right:18px; font-size:20px; }
+.mobile-card-title { font-size:14px; font-weight:600; color:var(--text); line-height:1.4; margin-bottom:7px; padding-right:26px; }
+.mobile-card-meta { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.mobile-card-time { font-family:'DM Mono',monospace; font-size:11px; color:var(--lavoro); font-weight:600; background:var(--lavoro-dim); padding:2px 7px; border-radius:4px; }
+.mobile-card-check { position:absolute; top:14px; right:14px; width:20px; height:20px; border-radius:50%; border:2px solid var(--border-light); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.12s; font-size:10px; z-index:2; }
+.mobile-card-check.done { background:#22c55e; border-color:#22c55e; color:white; }
+.sync-warn { font-size:11px; cursor:help; }
+.ma-tag { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:600; white-space:nowrap; }
+
+/* ── PULL TO REFRESH ── */
+.ptr-spinner { display:flex; align-items:center; justify-content:center; gap:6px; height:0; overflow:hidden; transition:height 0.2s; color:var(--text-muted); font-size:11px; }
+.ptr-spinner.visible { height:40px; }
+.ptr-dot { width:6px; height:6px; border-radius:50%; background:var(--lavoro); animation:ptrbounce 0.7s infinite alternate; }
+.ptr-dot:nth-child(2){animation-delay:0.15s} .ptr-dot:nth-child(3){animation-delay:0.3s}
+@keyframes ptrbounce { from{opacity:0.3;transform:scale(0.7)} to{opacity:1;transform:scale(1.1)} }
+
+/* ── OGGI VIEW ── */
+.oggi-header { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; display:flex; align-items:center; gap:14px; }
+.oggi-date-big { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--lavoro); letter-spacing:1px; line-height:1; }
+.oggi-day-name { font-size:11px; color:var(--text-muted); margin-top:2px; text-transform:uppercase; letter-spacing:1px; }
+.oggi-count-wrap { margin-left:auto; text-align:right; }
+.oggi-count-num { font-family:'DM Mono',monospace; font-size:26px; font-weight:700; color:var(--text); }
+.oggi-count-lbl { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.8px; }
+
+/* ── SETTIMANA MOBILE VIEW ── */
+.week-mobile-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; }
+.week-mobile-lbl { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1px; }
+.wk-nav-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text); width:30px; height:30px; border-radius:var(--radius-sm); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.day-group { margin-bottom:18px; }
+.day-group-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.day-group-lbl.is-today { color:var(--lavoro); }
+
+/* ── MESE VIEW ── */
+.mese-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.mese-label { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; }
+.mese-nav-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text); width:32px; height:32px; border-radius:var(--radius-sm); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.mese-grid-hd { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:3px; }
+.mese-hd-cell { text-align:center; font-size:9px; font-weight:700; color:var(--text-dim); padding:2px 0; text-transform:uppercase; }
+.mese-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:16px; }
+.mese-day { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:4px 5px; min-height:46px; cursor:pointer; transition:border-color 0.1s; }
+.mese-day:hover { border-color:var(--border-light); }
+.mese-day.is-today { border-color:var(--lavoro); }
+.mese-day.other-month { opacity:0.35; }
+.mese-day-num { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-muted); }
+.mese-day.is-today .mese-day-num { color:var(--lavoro); font-weight:700; }
+.mese-dots { display:flex; gap:2px; flex-wrap:wrap; margin-top:3px; }
+.mese-dot { width:5px; height:5px; border-radius:50%; }
+
+/* ── AREE VIEW ── */
+.aree-header-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.aree-week-lbl { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; }
+.aree-nav-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text); width:30px; height:30px; border-radius:var(--radius-sm); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.aree-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:var(--radius); }
+.aree-table { display:grid; grid-template-columns:repeat(9,minmax(120px,1fr)); min-width:1080px; }
+.aree-th { background:var(--bg2); border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:10px; position:sticky; top:0; z-index:5; }
+.aree-th:last-child { border-right:none; }
+.aree-th-name { font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+.aree-th-cnt { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:2px; }
+.aree-cell { border-right:1px solid var(--border); padding:8px; min-height:60px; background:var(--bg); }
+.aree-cell:last-child { border-right:none; }
+.aree-pill { border-left:3px solid; border-radius:4px; padding:5px 7px; margin-bottom:5px; cursor:pointer; background:var(--bg2); transition:background 0.1s; }
+.aree-pill:hover { background:var(--bg3); }
+.aree-pill-title { font-size:11px; font-weight:500; color:var(--text); line-height:1.3; }
+.aree-pill-date { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-dim); margin-top:2px; }
+.aree-cell-empty { font-size:10px; color:var(--text-dim); text-align:center; padding:8px 0; font-style:italic; }
+
+/* ── MACRO AREA COLORS ── */
+.ma-Management{background:rgba(124,58,237,0.15);color:#a78bfa}
+.ma-Marketing{background:rgba(236,72,153,0.15);color:#f472b6}
+.ma-Vendite{background:rgba(16,185,129,0.15);color:#34d399}
+.ma-Amministrazione{background:rgba(245,158,11,0.15);color:#fcd34d}
+.ma-Produzione{background:rgba(59,130,246,0.15);color:#60a5fa}
+.ma-HR{background:rgba(239,68,68,0.15);color:#f87171}
+.ma-RD{background:rgba(6,182,212,0.15);color:#22d3ee}
+.ma-Personale{background:rgba(139,92,246,0.15);color:#c4b5fd}
+.ma-Delegare{background:rgba(100,116,139,0.15);color:#94a3b8}
+
+/* ── GOOGLE CONNECT ── */
+.btn-gcal { background:var(--bg3); color:var(--text-muted); border:1px solid var(--border); padding:8px 10px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:5px; transition:all 0.15s; white-space:nowrap; }
+.btn-gcal:hover { background:var(--border); color:var(--text); }
+.btn-gcal.connected { border-color:#22c55e; color:#22c55e; }
+.gcal-conn-box { background:rgba(34,197,94,0.07); border:1px solid rgba(34,197,94,0.2); border-radius:var(--radius-sm); padding:12px; font-size:12px; color:#22c55e; margin-bottom:16px; }
+
+/* ── POSTPONE / BATCH ── */
+.postpone-opts { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.postpone-opt { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; cursor:pointer; font-size:13px; color:var(--text-muted); text-align:left; transition:all 0.12s; }
+.postpone-opt:hover { background:var(--border); color:var(--text); }
+.postpone-custom { display:flex; gap:8px; align-items:center; }
+
+/* ── AUTO-CAT INDICATOR ── */
+.auto-cat-row { display:flex; align-items:center; gap:8px; margin-top:5px; }
+.auto-cat-spin { width:10px; height:10px; border:1.5px solid var(--border); border-top-color:var(--lavoro); border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+.auto-cat-spin.active { display:block; }
+.auto-cat-hint { font-size:10px; color:var(--text-dim); }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   header { padding: 12px 16px; gap: 8px; }
@@ -416,6 +522,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
   <div class="header-actions">
     <button class="btn-plaud" onclick="openPlaudModal()" title="Importa da Plaud (Cmd+P)">🎙 <span>Plaud</span></button>
     <button class="btn-primary" id="addBtn" onclick="openModal()" title="Nuovo ciclo (Cmd+K)">+ <span>Nuovo Ciclo</span></button>
+    <button class="btn-gcal" id="gcalBtn" onclick="openGcalModal()" title="Connetti Google Calendar">📅 <span id="gcal-btn-label">Connetti</span></button>
     <button class="btn-plaud" id="themeBtn" onclick="toggleTheme()" title="Tema chiaro/scuro" style="font-size:16px;padding:8px 10px">🌙</button>
     <button class="btn-plaud" onclick="openApiKeyModal()" title="Impostazioni Claude API" style="font-size:16px;padding:8px 10px">⚙️</button>
   </div>
@@ -445,10 +552,14 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div class="view-header">
       <div class="view-title" id="viewTitle">MATRICE EISENHOWER</div>
       <div class="view-controls">
+        <button class="view-btn" id="vbtn-oggi" onclick="switchView('oggi')">☀️ Oggi</button>
+        <button class="view-btn" id="vbtn-settimana" onclick="switchView('settimana')">📅 Sett.</button>
+        <button class="view-btn" id="vbtn-mese" onclick="switchView('mese')">🗓 Mese</button>
         <button class="view-btn active" id="vbtn-matrix" onclick="switchView('matrix')">🔲 Matrice</button>
         <button class="view-btn" id="vbtn-list" onclick="switchView('list')">📋 Lista</button>
         <button class="view-btn" id="vbtn-persone" onclick="switchView('persone')">👥 Persone</button>
         <button class="view-btn" id="vbtn-storico" onclick="switchView('storico')">🕐 Storico</button>
+        <button class="view-btn" id="vbtn-aree" onclick="switchView('aree')">🏢 Aree</button>
       </div>
     </div>
 
@@ -500,19 +611,27 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
 
     <!-- GUIDA VIEW -->
     <div id="view-guida" style="display:none"></div>
+    <!-- BATTLE PLAN VIEWS -->
+    <div id="view-oggi" style="display:none"></div>
+    <div id="view-settimana" style="display:none"></div>
+    <div id="view-mese" style="display:none"></div>
+    <div id="view-aree" style="display:none"></div>
   </div>
 </div>
 
-<!-- MOBILE BOTTOM NAV -->
+<!-- MOBILE BOTTOM NAV — 5 TAB BATTLE PLAN -->
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn" id="mnav-oggi" onclick="switchView('oggi')"><span class="mnav-icon">☀️</span>Oggi</button>
+    <button class="mobile-nav-btn" id="mnav-settimana" onclick="switchView('settimana')"><span class="mnav-icon">📅</span>Settim.</button>
+    <button class="mobile-nav-btn" id="mnav-mese" onclick="switchView('mese')"><span class="mnav-icon">🗓</span>Mese</button>
     <button class="mobile-nav-btn active" id="mnav-matrix" onclick="switchView('matrix')"><span class="mnav-icon">🔲</span>Matrice</button>
-    <button class="mobile-nav-btn" id="mnav-list" onclick="switchView('list')"><span class="mnav-icon">📋</span>Lista</button>
-    <button class="mobile-nav-btn" id="mnav-persone" onclick="switchView('persone')"><span class="mnav-icon">👥</span>Persone</button>
-    <button class="mobile-nav-btn" id="mnav-storico" onclick="switchView('storico')"><span class="mnav-icon">🕐</span>Storico</button>
-    <button class="mobile-nav-btn" id="mnav-guida" onclick="switchView('guida')"><span class="mnav-icon">📖</span>Guida</button>
+    <button class="mobile-nav-btn" id="mnav-aree" onclick="switchView('aree')"><span class="mnav-icon">🏢</span>Aree</button>
   </div>
 </nav>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openModal()" title="Nuovo ciclo (Cmd+K)">+</button>
 
 <!-- MODAL NUOVO/MODIFICA CICLO -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event,'modalOverlay')">
@@ -532,6 +651,32 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div class="form-group">
       <label class="form-label">Note / Dettagli</label>
       <textarea class="form-textarea" id="f-note" placeholder="Contesto, azioni, riferimenti..."></textarea>
+    </div>
+    <!-- BATTLE PLAN FIELDS -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">📅 Data pianificata <span style="color:var(--q1)">*</span></label>
+        <input type="date" class="form-input" id="f-scheduled-date" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">⏰ Ora inizio</label>
+        <input type="time" class="form-input" id="f-scheduled-time">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">🏢 Macro Area <span style="font-size:10px;color:var(--text-dim);font-weight:400">(auto-classifica)</span></label>
+      <div class="auto-cat-wrap">
+        <select class="macro-area-select" id="f-macro-area">
+          <option value="">— Auto-classifica —</option>
+          <option>Management</option><option>Marketing</option><option>Vendite</option>
+          <option>Amministrazione</option><option>Produzione</option><option>HR</option>
+          <option>R&amp;D</option><option>Personale</option><option>Da Delegare</option>
+        </select>
+        <div class="auto-cat-row">
+          <div class="auto-cat-spin" id="auto-cat-spin"></div>
+          <span class="auto-cat-hint" id="auto-cat-hint">Digita titolo per auto-classificare</span>
+        </div>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -565,6 +710,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
         <input type="date" class="form-input" id="f-date">
       </div>
     </div>
+    <!-- END BATTLE PLAN FIELDS -->
     <div class="form-group">
       <label class="form-label">Quadrante Eisenhower</label>
       <div class="q-picker">
@@ -657,6 +803,39 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('apikeyOverlay')">Annulla</button>
       <button class="btn-save" onclick="saveApiKey()">Salva chiave</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GOOGLE CALENDAR -->
+<div class="modal-overlay" id="gcalOverlay" onclick="closeModalOnBg(event,'gcalOverlay')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">📅 GOOGLE CALENDAR</div>
+    <div id="gcal-modal-body">
+      <p class="apikey-info">Connetti Google Calendar per sincronizzare automaticamente i cicli pianificati.<br>Il calendario <strong>"Cicli Aperti — Battle Plan"</strong> verrà creato nel tuo account.</p>
+    </div>
+    <div class="modal-actions" id="gcal-modal-actions">
+      <button class="btn-cancel" onclick="closeModal('gcalOverlay')">Annulla</button>
+      <button class="btn-save" onclick="connectGoogleCalendar()">🔗 Connetti Google</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL POSTICIPA -->
+<div class="modal-overlay" id="postponeOverlay" onclick="closeModalOnBg(event,'postponeOverlay')">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">📅 POSTICIPA</div>
+    <div class="postpone-opts">
+      <button class="postpone-opt" onclick="doPostpone(1)">➡️ Domani</button>
+      <button class="postpone-opt" onclick="doPostpone(2)">⏭ Dopodomani</button>
+      <button class="postpone-opt" onclick="doPostpone(7)">📅 +1 settimana</button>
+    </div>
+    <div class="postpone-custom">
+      <input type="date" class="form-input" id="postpone-custom-date" placeholder="Data personalizzata">
+      <button class="btn-save" onclick="doPostponeCustom()" style="white-space:nowrap">Sposta</button>
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closeModal('postponeOverlay')">Annulla</button>
     </div>
   </div>
 </div>
@@ -835,10 +1014,15 @@ async function removeCiclo(id) {
 }
 
 async function flipDone(id, currentDone) {
+  const newDone  = !currentDone;
+  const newStatus = newDone ? 'done' : 'planned';
   const { error } = await db.from('cicli')
-    .update({ done: !currentDone, updated_at: new Date().toISOString() })
+    .update({ done: newDone, execution_status: newStatus, sync_status: 'pending', updated_at: new Date().toISOString() })
     .eq('id', id);
   if (error) throw error;
+  // Sync to Google Calendar in background
+  const ciclo = state.cicli.find(c => c.id === id);
+  if (ciclo) syncCicloToGcal({ ...ciclo, done: newDone, execution_status: newStatus }).catch(() => {});
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -916,14 +1100,14 @@ function updateHeader() {
 }
 
 function updateMobileNav() {
-  ['matrix','list','persone','storico','guida'].forEach(v => {
+  ['oggi','settimana','mese','matrix','aree'].forEach(v => {
     const btn = document.getElementById('mnav-' + v);
     if (btn) btn.classList.toggle('active', state.view === v);
   });
 }
 
 function renderViews() {
-  const views = ['matrix','list','persone','storico','guida'];
+  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree'];
   views.forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = state.view === v ? 'block' : 'none';
@@ -931,7 +1115,7 @@ function renderViews() {
     if (btn) btn.className = 'view-btn' + (state.view === v ? ' active' + (state.ctx === 'personale' ? ' personale' : '') : '');
   });
 
-  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA' };
+  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE' };
   document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
 
   if (state.searchQuery) {
@@ -973,10 +1157,14 @@ function renderViews() {
   renderSummary(filtered);
   renderEscalationNotices(filtered);
 
-  if (state.view === 'matrix')  renderMatrix(matrixBase);
-  if (state.view === 'list')    renderList(listFiltered);
-  if (state.view === 'persone') renderPersone();
-  if (state.view === 'storico') renderStorico(allCtx);
+  if (state.view === 'matrix')   renderMatrix(matrixBase);
+  if (state.view === 'list')     renderList(listFiltered);
+  if (state.view === 'persone')  renderPersone();
+  if (state.view === 'storico')  renderStorico(allCtx);
+  if (state.view === 'oggi')     renderOggi();
+  if (state.view === 'settimana') renderSettimana();
+  if (state.view === 'mese')     renderMese();
+  if (state.view === 'aree')     renderAree();
 }
 
 function applyFilters(cicli) {
@@ -1367,9 +1555,12 @@ function renderSidebar() {
         <span>✓</span>Completati<span class="sidebar-count">${totalDone}</span>
       </div>
     </div>
-    <div style="padding:16px 18px;border-top:1px solid var(--border);margin-top:8px">
+    <div style="padding:12px 18px;border-top:1px solid var(--border);margin-top:8px;display:flex;flex-direction:column;gap:6px">
       <button onclick="openPlaudModal()" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text-muted);padding:8px;border-radius:var(--radius-sm);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px;text-align:center">
         🎙 Import Plaud
+      </button>
+      <button onclick="batchMigrateAree()" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text-muted);padding:8px;border-radius:var(--radius-sm);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px;text-align:center">
+        🏢 Assegna Macro Aree
       </button>
     </div>
   `;
@@ -1408,6 +1599,13 @@ function makeCicloCard(c, mode) {
     const title = document.createElement('div');
     title.style.cssText = 'font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     title.textContent = c.title;
+    if (c.sync_status === 'failed') {
+      const sw = document.createElement('span');
+      sw.className = 'sync-warn';
+      sw.title = 'Sync Google Calendar fallita';
+      sw.textContent = ' ⚠️';
+      title.appendChild(sw);
+    }
     if (c.da_plaud) {
       const p = document.createElement('span');
       p.style.cssText = 'font-size:9px;padding:1px 5px;background:rgba(168,85,247,0.2);color:#c084fc;border-radius:3px;margin-left:6px;vertical-align:middle';
@@ -1715,22 +1913,28 @@ function openModal(defaultQ, editId) {
     const c = state.cicli.find(x => x.id === editId);
     if (!c) return;
     title.textContent = 'MODIFICA CICLO';
-    document.getElementById('f-title').value = c.title || '';
-    document.getElementById('f-note').value  = c.note  || '';
-    document.getElementById('f-cat').value   = c.cat   || 'management';
-    document.getElementById('f-date').value  = c.due_date || '';
-    document.getElementById('f-week').value  = c.week  || state.week;
+    document.getElementById('f-title').value          = c.title || '';
+    document.getElementById('f-note').value           = c.note  || '';
+    document.getElementById('f-cat').value            = c.cat   || 'management';
+    document.getElementById('f-date').value           = c.due_date || '';
+    document.getElementById('f-week').value           = c.week  || state.week;
+    document.getElementById('f-scheduled-date').value = c.scheduled_date || todayISO();
+    document.getElementById('f-scheduled-time').value = c.scheduled_time || '';
+    document.getElementById('f-macro-area').value     = c.macro_area || '';
     selectedQ = c.q || 2;
     modalCtx  = c.ctx || state.ctx;
     btnDel.style.display = 'block';
     initPersonaChips(c.persone_menzionate || []);
   } else {
     title.textContent = 'NUOVO CICLO APERTO';
-    document.getElementById('f-title').value = '';
-    document.getElementById('f-note').value  = '';
-    document.getElementById('f-cat').value   = state.ctx === 'personale' ? 'salute' : 'management';
-    document.getElementById('f-date').value  = '';
-    document.getElementById('f-week').value  = state.week;
+    document.getElementById('f-title').value          = '';
+    document.getElementById('f-note').value           = '';
+    document.getElementById('f-cat').value            = state.ctx === 'personale' ? 'salute' : 'management';
+    document.getElementById('f-date').value           = '';
+    document.getElementById('f-week').value           = state.week;
+    document.getElementById('f-scheduled-date').value = todayISO();
+    document.getElementById('f-scheduled-time').value = '';
+    document.getElementById('f-macro-area').value     = '';
     btnDel.style.display = 'none';
     initPersonaChips([]);
   }
@@ -1773,27 +1977,39 @@ async function saveCiclo() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { showToast('Inserisci un titolo', 'warn'); return; }
 
+  const scheduledDate = document.getElementById('f-scheduled-date').value || todayISO();
+  if (!scheduledDate) { showToast('La data pianificata è obbligatoria', 'warn'); return; }
+
   const persone_menzionate = _modalPersone.map(p => p.nome).filter(Boolean);
+  const macroArea = document.getElementById('f-macro-area').value || null;
 
   const data = {
     title,
-    note:  document.getElementById('f-note').value.trim() || null,
-    cat:   document.getElementById('f-cat').value,
-    due_date: document.getElementById('f-date').value || null,
-    week:  parseInt(document.getElementById('f-week').value) || state.week,
-    year:  state.year,
-    q:     selectedQ,
-    ctx:   modalCtx,
+    note:             document.getElementById('f-note').value.trim() || null,
+    cat:              document.getElementById('f-cat').value,
+    due_date:         document.getElementById('f-date').value || null,
+    week:             parseInt(document.getElementById('f-week').value) || state.week,
+    year:             state.year,
+    q:                selectedQ,
+    ctx:              modalCtx,
     persone_menzionate,
-    done:  false,
-    da_plaud: false
+    done:             false,
+    da_plaud:         false,
+    scheduled_date:   scheduledDate,
+    scheduled_time:   document.getElementById('f-scheduled-time').value || null,
+    macro_area:       macroArea,
+    execution_status: 'planned',
+    sync_status:      'pending',
+    settimana_anno:   isoWeekStr(new Date(scheduledDate))
   };
 
   if (editingId) {
     const existing = state.cicli.find(c => c.id === editingId);
-    data.id       = editingId;
-    data.done     = existing?.done     || false;
-    data.da_plaud = existing?.da_plaud || false;
+    data.id            = editingId;
+    data.done          = existing?.done       || false;
+    data.da_plaud      = existing?.da_plaud   || false;
+    data.execution_status = existing?.execution_status || 'planned';
+    data.google_event_id  = existing?.google_event_id || null;
   }
 
   const btn = document.getElementById('btn-save');
@@ -1804,6 +2020,9 @@ async function saveCiclo() {
     await upsertCiclo(data);
     closeModal('modalOverlay');
     showToast(editingId ? 'Ciclo aggiornato ✓' : 'Ciclo aggiunto ✓', 'success');
+    // Sync to Google Calendar in background
+    const saved = state.cicli.find(c => c.id === (editingId || undefined));
+    syncCicloToGcal({ ...data }).catch(() => {});
   } catch (e) {
     showToast('Errore: ' + e.message, 'error');
     btn.textContent = 'Salva';
@@ -2287,7 +2506,942 @@ loadAll().then(() => {
   if (autoEsc.length > 0) {
     setTimeout(() => showToast(`⚡ ${autoEsc.length} ciclo/i auto-escalati per scadenza`, 'warn'), 1200);
   }
+  initGcal();
+  initPullToRefresh();
 });
+
+// ══════════════════════════════════════════════════════════════
+// BATTLE PLAN — COSTANTI E STATO
+// ══════════════════════════════════════════════════════════════
+const GOOGLE_CLIENT_ID = '257619503185-gqh4iv9f8rkq6uhe9ihlfb394pq1p681.apps.googleusercontent.com';
+const GCAL_SCOPE       = 'https://www.googleapis.com/auth/calendar';
+const GCAL_CAL_NAME    = 'Cicli Aperti — Battle Plan';
+const APP_URL          = 'https://maci81x.github.io/cicli-aperti/';
+const GCAL_USER_EMAIL  = 'r.macinai@sisoluzioniimpresa.it';
+
+const MACRO_AREE_LIST = ['Management','Marketing','Vendite','Amministrazione','Produzione','HR','R&D','Personale','Da Delegare'];
+
+const MACRO_AREA_COLORS = {
+  'Management':'#7c3aed','Marketing':'#ec4899','Vendite':'#10b981',
+  'Amministrazione':'#f59e0b','Produzione':'#3b82f6','HR':'#ef4444',
+  'R&D':'#06b6d4','Personale':'#8b5cf6','Da Delegare':'#64748b'
+};
+
+const MACRO_AREA_EMOJIS = {
+  'Management':'👑','Marketing':'📣','Vendite':'📈','Amministrazione':'📋',
+  'Produzione':'🏭','HR':'👥','R&D':'🔬','Personale':'❤️','Da Delegare':'➡️'
+};
+
+// gcal runtime state (not in app state to avoid Supabase realtime loops)
+const gcal = {
+  token:      localStorage.getItem('gcal_token') || null,
+  calendarId: localStorage.getItem('gcal_cal_id') || null,
+  email:      localStorage.getItem('gcal_email') || null,
+  expiresAt:  parseInt(localStorage.getItem('gcal_expires') || '0'),
+  client:     null   // GIS token client
+};
+
+let areesWeekOffset  = 0;
+let settimanaOffset  = 0;
+let meseOffset       = 0;
+let _postponeId      = null;
+let _autoCatTimer    = null;
+let _syncRetryTimer  = null;
+
+// ══════════════════════════════════════════════════════════════
+// DATE UTILS
+// ══════════════════════════════════════════════════════════════
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isoWeekStr(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day  = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  return `${date.getUTCFullYear()}-W${String(wk).padStart(2, '0')}`;
+}
+
+function addDays(isoDate, n) {
+  const d = new Date(isoDate);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function dayName(isoDate) {
+  return new Date(isoDate).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
+}
+
+function monthName(offset) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + offset);
+  return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+}
+
+// ══════════════════════════════════════════════════════════════
+// MACRO AREA HELPERS
+// ══════════════════════════════════════════════════════════════
+function getMaCssClass(area) {
+  if (!area) return '';
+  const k = area.replace('&','').replace(' ','').replace('Da Delegare','Delegare').replace('R&D','RD').replace('R/D','RD');
+  return 'ma-' + k;
+}
+
+function getMaColor(area) { return MACRO_AREA_COLORS[area] || '#64748b'; }
+function getMaEmoji(area) { return MACRO_AREA_EMOJIS[area] || '📂'; }
+
+// ══════════════════════════════════════════════════════════════
+// AUTO-CATEGORIZZAZIONE CLAUDE
+// ══════════════════════════════════════════════════════════════
+async function autoCategoria(title, note) {
+  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
+  if (!apiKey || !title) return null;
+
+  const prompt = `Classifica questa attività SSI (consulenza sicurezza sul lavoro) in UNA delle macro aree: Management, Marketing, Vendite, Amministrazione, Produzione, HR, R&D, Personale, Da Delegare. Rispondi SOLO con il nome esatto, nient'altro. Titolo: ${title}. Note: ${note || ''}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-allow-browser': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 30,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  const area = (data.content?.[0]?.text || '').trim();
+  return MACRO_AREE_LIST.includes(area) ? area : null;
+}
+
+// Hook auto-cat al blur del titolo nel modal
+document.addEventListener('DOMContentLoaded', () => {
+  const titleInput = document.getElementById('f-title');
+  if (!titleInput) return;
+  titleInput.addEventListener('blur', async () => {
+    const title = titleInput.value.trim();
+    const current = document.getElementById('f-macro-area')?.value;
+    if (!title || current) return;
+    const spin = document.getElementById('auto-cat-spin');
+    const hint = document.getElementById('auto-cat-hint');
+    if (spin) spin.classList.add('active');
+    if (hint) hint.textContent = 'Classificando...';
+    try {
+      const area = await autoCategoria(title, document.getElementById('f-note')?.value || '');
+      if (area) {
+        const sel = document.getElementById('f-macro-area');
+        if (sel && !sel.value) { sel.value = area; }
+        if (hint) hint.textContent = `Area suggerita: ${area}`;
+      } else {
+        if (hint) hint.textContent = 'Nessuna key Claude — seleziona manualmente';
+      }
+    } catch (_) {
+      if (hint) hint.textContent = 'Auto-classifica non disponibile';
+    }
+    if (spin) spin.classList.remove('active');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+// GOOGLE CALENDAR — OAUTH + SYNC
+// ══════════════════════════════════════════════════════════════
+function isGcalTokenValid() {
+  return gcal.token && gcal.expiresAt > (Date.now() + 60000);
+}
+
+function initGcal() {
+  // Carica token da DB se non in localStorage
+  loadGcalTokenFromDB();
+  updateGcalButton();
+  // Schedule retry ogni 5 min per sync falliti
+  _syncRetryTimer = setInterval(retryFailedSyncs, 5 * 60 * 1000);
+  // Init GIS quando è disponibile
+  _tryInitGis();
+}
+
+function _tryInitGis() {
+  if (typeof google !== 'undefined' && google.accounts) {
+    gcal.client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GCAL_SCOPE,
+      callback: _handleGcalToken
+    });
+  } else {
+    setTimeout(_tryInitGis, 800);
+  }
+}
+
+async function _handleGcalToken(resp) {
+  if (resp.error) { showToast('Errore Google: ' + resp.error, 'error'); return; }
+  gcal.token     = resp.access_token;
+  gcal.expiresAt = Date.now() + (resp.expires_in * 1000);
+  gcal.email     = GCAL_USER_EMAIL;
+  localStorage.setItem('gcal_token',   gcal.token);
+  localStorage.setItem('gcal_expires', gcal.expiresAt);
+  localStorage.setItem('gcal_email',   gcal.email);
+  await saveGcalTokenToDB();
+  updateGcalButton();
+  await ensureGcalCalendar();
+  showToast('Google Calendar connesso ✓', 'success');
+  closeModal('gcalOverlay');
+}
+
+function connectGoogleCalendar() {
+  if (gcal.client) {
+    gcal.client.requestAccessToken();
+  } else {
+    // Fallback: redirect implicit flow
+    const params = new URLSearchParams({
+      client_id:     GOOGLE_CLIENT_ID,
+      redirect_uri:  APP_URL,
+      response_type: 'token',
+      scope:         GCAL_SCOPE,
+      state:         'gcal_connect'
+    });
+    window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+  }
+}
+
+function checkImplicitCallback() {
+  const hash = window.location.hash.substring(1);
+  if (!hash) return;
+  const p = new URLSearchParams(hash);
+  if (p.get('state') !== 'gcal_connect') return;
+  const token = p.get('access_token');
+  if (!token) return;
+  gcal.token     = token;
+  gcal.expiresAt = Date.now() + parseInt(p.get('expires_in') || '3600') * 1000;
+  gcal.email     = GCAL_USER_EMAIL;
+  localStorage.setItem('gcal_token',   gcal.token);
+  localStorage.setItem('gcal_expires', gcal.expiresAt);
+  localStorage.setItem('gcal_email',   gcal.email);
+  history.replaceState(null, '', window.location.pathname);
+  saveGcalTokenToDB().then(() => {
+    updateGcalButton();
+    ensureGcalCalendar().then(() => showToast('Google Calendar connesso ✓', 'success'));
+  });
+}
+checkImplicitCallback();
+
+async function loadGcalTokenFromDB() {
+  try {
+    const { data } = await db.from('user_tokens').select('*').eq('user_email', GCAL_USER_EMAIL).single();
+    if (!data) return;
+    if (!gcal.token && data.google_access_token) {
+      gcal.token      = data.google_access_token;
+      gcal.expiresAt  = new Date(data.expires_at).getTime();
+      gcal.calendarId = data.google_calendar_id;
+      gcal.email      = data.user_email;
+      localStorage.setItem('gcal_token',   gcal.token);
+      localStorage.setItem('gcal_expires', gcal.expiresAt);
+      localStorage.setItem('gcal_cal_id',  gcal.calendarId || '');
+      localStorage.setItem('gcal_email',   gcal.email);
+      updateGcalButton();
+    }
+  } catch (_) {}
+}
+
+async function saveGcalTokenToDB() {
+  try {
+    await db.from('user_tokens').upsert({
+      user_email:           GCAL_USER_EMAIL,
+      google_access_token:  gcal.token,
+      google_refresh_token: null,
+      google_calendar_id:   gcal.calendarId,
+      expires_at:           new Date(gcal.expiresAt).toISOString()
+    }, { onConflict: 'user_email' });
+  } catch (_) {}
+}
+
+async function ensureGcalCalendar() {
+  if (!isGcalTokenValid()) return;
+  if (gcal.calendarId) return;
+  try {
+    // Cerca calendario esistente
+    const listRes = await gcalFetch('/users/me/calendarList', 'GET');
+    const existing = listRes?.items?.find(c => c.summary === GCAL_CAL_NAME);
+    if (existing) {
+      gcal.calendarId = existing.id;
+    } else {
+      const created = await gcalFetch('/calendars', 'POST', { summary: GCAL_CAL_NAME, timeZone: 'Europe/Rome' });
+      gcal.calendarId = created.id;
+    }
+    localStorage.setItem('gcal_cal_id', gcal.calendarId);
+    await saveGcalTokenToDB();
+  } catch (e) {
+    console.warn('[GCal] ensureCalendar:', e.message);
+  }
+}
+
+async function gcalFetch(path, method, body) {
+  if (!isGcalTokenValid()) {
+    if (gcal.client) { gcal.client.requestAccessToken(); return null; }
+    return null;
+  }
+  const base = 'https://www.googleapis.com/calendar/v3';
+  const res = await fetch(base + path, {
+    method,
+    headers: {
+      'Authorization': 'Bearer ' + gcal.token,
+      'Content-Type':  'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'HTTP ' + res.status);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+function buildGcalEvent(ciclo) {
+  const date   = ciclo.scheduled_date || todayISO();
+  const time   = ciclo.scheduled_time;
+  const area   = ciclo.macro_area ? `[${ciclo.macro_area}] ` : '';
+  const done   = ciclo.done ? '[DONE] ' : '';
+  const title  = done + area + (ciclo.title || '');
+  const people = (ciclo.persone_menzionate || []).join(', ');
+  const link   = `${APP_URL}#ciclo=${ciclo.id}`;
+  const desc   = [ciclo.note, people ? 'Persone: ' + people : '', link].filter(Boolean).join('\n\n');
+
+  const startDT = time ? { dateTime: `${date}T${time}:00`, timeZone: 'Europe/Rome' } : { date };
+  let endDT;
+  if (time) {
+    const [h, m] = time.split(':').map(Number);
+    const endH   = String(h + 1).padStart(2, '0');
+    endDT = { dateTime: `${date}T${endH}:${String(m).padStart(2,'0')}:00`, timeZone: 'Europe/Rome' };
+  } else {
+    endDT = { date };
+  }
+
+  return { summary: title, description: desc, start: startDT, end: endDT };
+}
+
+async function syncCicloToGcal(ciclo) {
+  if (!isGcalTokenValid() || !gcal.calendarId) return;
+  if (!ciclo.scheduled_date) return;
+
+  const calPath = `/calendars/${encodeURIComponent(gcal.calendarId)}/events`;
+  try {
+    let eventId = ciclo.google_event_id;
+
+    if (ciclo.done && eventId) {
+      // Marca [DONE] nel titolo e poi elimina
+      const ev = buildGcalEvent(ciclo);
+      await gcalFetch(`${calPath}/${eventId}`, 'PATCH', { summary: ev.summary });
+      await gcalFetch(`${calPath}/${eventId}`, 'DELETE');
+      await db.from('cicli').update({ google_event_id: null, sync_status: 'synced' }).eq('id', ciclo.id);
+      return;
+    }
+
+    if (eventId) {
+      await gcalFetch(`${calPath}/${eventId}`, 'PATCH', buildGcalEvent(ciclo));
+    } else {
+      const created = await gcalFetch(calPath, 'POST', buildGcalEvent(ciclo));
+      eventId = created?.id;
+      if (eventId) {
+        await db.from('cicli').update({ google_event_id: eventId, sync_status: 'synced', updated_at: new Date().toISOString() }).eq('id', ciclo.id);
+        return;
+      }
+    }
+    await db.from('cicli').update({ sync_status: 'synced', updated_at: new Date().toISOString() }).eq('id', ciclo.id);
+  } catch (e) {
+    console.warn('[GCal] sync error:', e.message);
+    if (ciclo.id) {
+      await db.from('cicli').update({ sync_status: 'failed', updated_at: new Date().toISOString() }).eq('id', ciclo.id).catch(() => {});
+    }
+  }
+}
+
+async function retryFailedSyncs() {
+  if (!isGcalTokenValid()) return;
+  const failed = state.cicli.filter(c => c.sync_status === 'failed' && !c.done);
+  for (const c of failed.slice(0, 5)) {
+    await syncCicloToGcal(c);
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+function updateGcalButton() {
+  const btn   = document.getElementById('gcalBtn');
+  const label = document.getElementById('gcal-btn-label');
+  if (!btn) return;
+  if (isGcalTokenValid()) {
+    btn.classList.add('connected');
+    if (label) label.textContent = 'GCal ✓';
+  } else {
+    btn.classList.remove('connected');
+    if (label) label.textContent = 'Connetti';
+  }
+}
+
+function openGcalModal() {
+  const body    = document.getElementById('gcal-modal-body');
+  const actions = document.getElementById('gcal-modal-actions');
+  if (isGcalTokenValid()) {
+    if (body) body.innerHTML = `<div class="gcal-conn-box">✅ Connesso come <strong>${escHtml(gcal.email || GCAL_USER_EMAIL)}</strong><br>Calendario: <em>${GCAL_CAL_NAME}</em></div>
+      <p class="apikey-info">La sincronizzazione è attiva. I cicli con data pianificata vengono creati automaticamente su Google Calendar.</p>
+      <button class="btn-danger" onclick="disconnectGcal()" style="margin-bottom:8px;width:100%">Disconnetti</button>
+      <button class="btn-primary" onclick="batchSyncAll()" style="width:100%;margin-bottom:0">🔄 Ri-sincronizza tutti</button>`;
+    if (actions) actions.innerHTML = `<button class="btn-cancel" onclick="closeModal('gcalOverlay')">Chiudi</button>`;
+  } else {
+    if (body) body.innerHTML = `<p class="apikey-info">Connetti Google Calendar per sincronizzare automaticamente i cicli pianificati.<br>Il calendario <strong>"${GCAL_CAL_NAME}"</strong> verrà creato nel tuo account.</p>`;
+    if (actions) actions.innerHTML = `<button class="btn-cancel" onclick="closeModal('gcalOverlay')">Annulla</button><button class="btn-save" onclick="connectGoogleCalendar()">🔗 Connetti Google</button>`;
+  }
+  document.getElementById('gcalOverlay').classList.add('open');
+}
+
+function disconnectGcal() {
+  gcal.token = null; gcal.calendarId = null; gcal.email = null; gcal.expiresAt = 0;
+  ['gcal_token','gcal_expires','gcal_cal_id','gcal_email'].forEach(k => localStorage.removeItem(k));
+  db.from('user_tokens').delete().eq('user_email', GCAL_USER_EMAIL).then(() => {});
+  updateGcalButton();
+  closeModal('gcalOverlay');
+  showToast('Google Calendar disconnesso', 'info');
+}
+
+async function batchSyncAll() {
+  const toSync = state.cicli.filter(c => !c.done && c.scheduled_date);
+  showToast(`Sincronizzando ${toSync.length} cicli...`, 'info');
+  let ok = 0;
+  for (const c of toSync) {
+    await syncCicloToGcal(c).then(() => ok++).catch(() => {});
+    await new Promise(r => setTimeout(r, 200));
+  }
+  showToast(`${ok}/${toSync.length} cicli sincronizzati ✓`, 'success');
+  closeModal('gcalOverlay');
+}
+
+// ══════════════════════════════════════════════════════════════
+// VISTA OGGI
+// ══════════════════════════════════════════════════════════════
+function renderOggi() {
+  const el = document.getElementById('view-oggi');
+  if (!el) return;
+  const today = todayISO();
+  const todayItems = state.cicli.filter(c => !c.done && c.scheduled_date === today)
+    .sort((a, b) => (a.scheduled_time || '23:59').localeCompare(b.scheduled_time || '23:59'));
+
+  const DAYS = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  const d     = new Date();
+  const fmt   = d.toLocaleDateString('it-IT', { day:'numeric', month:'long' });
+
+  el.innerHTML = '';
+
+  // Header con la data
+  const hdr = document.createElement('div');
+  hdr.className = 'oggi-header';
+  hdr.innerHTML = `
+    <div>
+      <div class="oggi-date-big">${fmt.split(' ')[0]} ${fmt.split(' ')[1].toUpperCase()}</div>
+      <div class="oggi-day-name">${DAYS[d.getDay()]}</div>
+    </div>
+    <div class="oggi-count-wrap">
+      <div class="oggi-count-num">${todayItems.length}</div>
+      <div class="oggi-count-lbl">attività</div>
+    </div>`;
+  el.appendChild(hdr);
+
+  // PTR spinner
+  const ptr = document.createElement('div');
+  ptr.className = 'ptr-spinner';
+  ptr.id = 'ptr-oggi';
+  ptr.innerHTML = '<div class="ptr-dot"></div><div class="ptr-dot"></div><div class="ptr-dot"></div>';
+  el.appendChild(ptr);
+
+  if (!todayItems.length) {
+    el.innerHTML += '<div class="empty-state">Nessun ciclo pianificato per oggi 🎉<br><small>Usa il + per aggiungerne uno</small></div>';
+    return;
+  }
+
+  todayItems.forEach(c => el.appendChild(makeMobileCard(c)));
+}
+
+// ══════════════════════════════════════════════════════════════
+// VISTA SETTIMANA (mobile cards per giorno)
+// ══════════════════════════════════════════════════════════════
+function renderSettimana() {
+  const el = document.getElementById('view-settimana');
+  if (!el) return;
+  el.innerHTML = '';
+
+  // Calcola inizio settimana (lunedì)
+  const today   = new Date();
+  const baseDay = new Date(today);
+  baseDay.setDate(today.getDate() - (today.getDay() || 7) + 1 + settimanaOffset * 7);
+  baseDay.setHours(0, 0, 0, 0);
+
+  const startISO = baseDay.toISOString().slice(0, 10);
+  const endDate  = new Date(baseDay); endDate.setDate(baseDay.getDate() + 6);
+  const endISO   = endDate.toISOString().slice(0, 10);
+
+  const label  = `${baseDay.toLocaleDateString('it-IT',{day:'numeric',month:'short'})} – ${endDate.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}`;
+  const todayISO_ = todayISO();
+
+  // Nav
+  const nav = document.createElement('div');
+  nav.className = 'week-mobile-nav';
+  nav.innerHTML = `
+    <button class="wk-nav-btn" onclick="settimanaOffset--;render()">‹</button>
+    <div class="week-mobile-lbl">${label}</div>
+    <button class="wk-nav-btn" onclick="settimanaOffset++;render()">›</button>`;
+  el.appendChild(nav);
+
+  // PTR
+  const ptr = document.createElement('div');
+  ptr.className = 'ptr-spinner'; ptr.id = 'ptr-settimana';
+  ptr.innerHTML = '<div class="ptr-dot"></div><div class="ptr-dot"></div><div class="ptr-dot"></div>';
+  el.appendChild(ptr);
+
+  // Raggruppa cicli per giorno
+  const cicliSett = state.cicli.filter(c => !c.done && c.scheduled_date >= startISO && c.scheduled_date <= endISO);
+  const byDay = {};
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(baseDay); d.setDate(baseDay.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    byDay[iso] = [];
+  }
+  cicliSett.forEach(c => { if (byDay[c.scheduled_date]) byDay[c.scheduled_date].push(c); });
+
+  let hasAny = false;
+  Object.entries(byDay).forEach(([iso, items]) => {
+    const grp = document.createElement('div');
+    grp.className = 'day-group';
+    const lbl = document.createElement('div');
+    lbl.className = 'day-group-lbl' + (iso === todayISO_ ? ' is-today' : '');
+    lbl.textContent = dayName(iso).charAt(0).toUpperCase() + dayName(iso).slice(1);
+    grp.appendChild(lbl);
+    if (items.length) {
+      hasAny = true;
+      items.sort((a,b) => (a.scheduled_time||'23:59').localeCompare(b.scheduled_time||'23:59'))
+        .forEach(c => grp.appendChild(makeMobileCard(c)));
+    } else {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:11px;color:var(--text-dim);padding:4px 0 8px;font-style:italic';
+      empty.textContent = 'Nessuna attività';
+      grp.appendChild(empty);
+    }
+    el.appendChild(grp);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// VISTA MESE
+// ══════════════════════════════════════════════════════════════
+function renderMese() {
+  const el = document.getElementById('view-mese');
+  if (!el) return;
+  el.innerHTML = '';
+
+  const today = new Date();
+  const ref   = new Date(today.getFullYear(), today.getMonth() + meseOffset, 1);
+  const year  = ref.getFullYear();
+  const month = ref.getMonth();
+  const todayISO_ = todayISO();
+
+  // Nav
+  const nav = document.createElement('div');
+  nav.className = 'mese-nav';
+  nav.innerHTML = `
+    <button class="mese-nav-btn" onclick="meseOffset--;render()">‹</button>
+    <div class="mese-label">${ref.toLocaleDateString('it-IT',{month:'long',year:'numeric'}).toUpperCase()}</div>
+    <button class="mese-nav-btn" onclick="meseOffset++;render()">›</button>`;
+  el.appendChild(nav);
+
+  // Header giorni
+  const hd = document.createElement('div');
+  hd.className = 'mese-grid-hd';
+  ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].forEach(d => {
+    const c = document.createElement('div'); c.className='mese-hd-cell'; c.textContent=d; hd.appendChild(c);
+  });
+  el.appendChild(hd);
+
+  // Griglia
+  const grid  = document.createElement('div');
+  grid.className = 'mese-grid';
+
+  const firstDay = new Date(year, month, 1).getDay() || 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays    = new Date(year, month, 0).getDate();
+
+  // Prepara mappa cicli per giorno
+  const cicliMap = {};
+  state.cicli.filter(c => !c.done && c.scheduled_date).forEach(c => {
+    const [y, m] = c.scheduled_date.split('-').map(Number);
+    if (y === year && m === month + 1) {
+      const d = parseInt(c.scheduled_date.slice(8));
+      if (!cicliMap[d]) cicliMap[d] = [];
+      cicliMap[d].push(c);
+    }
+  });
+
+  // Celle giorni precedenti
+  for (let i = firstDay - 1; i > 0; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'mese-day other-month';
+    cell.innerHTML = `<div class="mese-day-num">${prevDays - i + 1}</div>`;
+    grid.appendChild(cell);
+  }
+  // Celle mese corrente
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isoD = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const items = cicliMap[d] || [];
+    const cell  = document.createElement('div');
+    cell.className = 'mese-day' + (isoD === todayISO_ ? ' is-today' : '');
+    cell.onclick   = () => { settimanaOffset = 0; state.view = 'settimana'; /* find offset */ switchView('settimana'); };
+    const dots = items.slice(0, 6).map(c => `<div class="mese-dot" style="background:${getMaColor(c.macro_area) || 'var(--lavoro)'}"></div>`).join('');
+    cell.innerHTML = `<div class="mese-day-num">${d}</div><div class="mese-dots">${dots}</div>`;
+    grid.appendChild(cell);
+  }
+  // Celle mese successivo
+  const total = (firstDay - 1) + daysInMonth;
+  const remainder = total % 7 ? 7 - (total % 7) : 0;
+  for (let d = 1; d <= remainder; d++) {
+    const cell = document.createElement('div'); cell.className='mese-day other-month';
+    cell.innerHTML=`<div class="mese-day-num">${d}</div>`; grid.appendChild(cell);
+  }
+
+  el.appendChild(grid);
+
+  // Mini legenda macro aree usate
+  const used = [...new Set(state.cicli.filter(c=>!c.done&&c.macro_area).map(c=>c.macro_area))].slice(0,5);
+  if (used.length) {
+    const leg = document.createElement('div');
+    leg.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:8px';
+    used.forEach(a => {
+      const s = document.createElement('div');
+      s.style.cssText='display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)';
+      s.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${getMaColor(a)}"></div>${escHtml(a)}`;
+      leg.appendChild(s);
+    });
+    el.appendChild(leg);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// VISTA AREE — Griglia 9 macro aree per settimana
+// ══════════════════════════════════════════════════════════════
+function renderAree() {
+  const el = document.getElementById('view-aree');
+  if (!el) return;
+  el.innerHTML = '';
+
+  // Calcola settimana
+  const today   = new Date();
+  const baseDay = new Date(today);
+  baseDay.setDate(today.getDate() - (today.getDay() || 7) + 1 + areesWeekOffset * 7);
+  const endDay  = new Date(baseDay); endDay.setDate(baseDay.getDate() + 6);
+  const startISO = baseDay.toISOString().slice(0, 10);
+  const endISO   = endDay.toISOString().slice(0, 10);
+  const wkLabel  = `Sett. ${getWeekNumber(baseDay)} — ${baseDay.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}–${endDay.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}`;
+
+  // Nav
+  const nav = document.createElement('div');
+  nav.className = 'aree-header-nav';
+  nav.innerHTML = `
+    <button class="aree-nav-btn" onclick="areesWeekOffset--;render()">‹</button>
+    <div class="aree-week-lbl">${wkLabel}</div>
+    <button class="aree-nav-btn" onclick="areesWeekOffset++;render()">›</button>`;
+  el.appendChild(nav);
+
+  // Filtra cicli della settimana (per scheduled_date o week/year)
+  const cicliSett = state.cicli.filter(c => !c.done && (
+    (c.scheduled_date && c.scheduled_date >= startISO && c.scheduled_date <= endISO) ||
+    (c.week === getWeekNumber(baseDay) && c.year === baseDay.getFullYear())
+  ));
+
+  // Raggruppa per macro_area
+  const byArea = {};
+  MACRO_AREE_LIST.forEach(a => { byArea[a] = []; });
+  cicliSett.forEach(c => {
+    const a = c.macro_area || 'Da Delegare';
+    if (!byArea[a]) byArea[a] = [];
+    byArea[a].push(c);
+  });
+
+  // Griglia
+  const wrap = document.createElement('div');
+  wrap.className = 'aree-scroll';
+  const table = document.createElement('div');
+  table.className = 'aree-table';
+
+  // Header
+  MACRO_AREE_LIST.forEach(a => {
+    const th = document.createElement('div');
+    th.className = 'aree-th';
+    th.style.borderTop = `3px solid ${getMaColor(a)}`;
+    th.innerHTML = `<div class="aree-th-name">${getMaEmoji(a)} ${escHtml(a)}</div><div class="aree-th-cnt">${byArea[a]?.length || 0}</div>`;
+    table.appendChild(th);
+  });
+
+  // Righe
+  MACRO_AREE_LIST.forEach(a => {
+    const cell = document.createElement('div');
+    cell.className = 'aree-cell';
+    const items = byArea[a] || [];
+    if (!items.length) {
+      cell.innerHTML = '<div class="aree-cell-empty">—</div>';
+    } else {
+      items.forEach(c => {
+        const pill = document.createElement('div');
+        pill.className = 'aree-pill';
+        pill.style.borderLeftColor = getMaColor(c.macro_area || a);
+        pill.onclick = () => openModal(null, c.id);
+        pill.innerHTML = `<div class="aree-pill-title">${escHtml(c.title)}</div>${c.scheduled_date ? `<div class="aree-pill-date">${c.scheduled_date.slice(5).replace('-','/')}</div>` : ''}`;
+        cell.appendChild(pill);
+      });
+    }
+    table.appendChild(cell);
+  });
+
+  wrap.appendChild(table);
+  el.appendChild(wrap);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MOBILE CARD CON SWIPE
+// ══════════════════════════════════════════════════════════════
+function makeMobileCard(ciclo) {
+  const card = document.createElement('div');
+  card.className = 'mobile-card';
+
+  // Swipe backgrounds
+  const doneBg = document.createElement('div');
+  doneBg.className = 'swipe-bg done-bg';
+  doneBg.textContent = '✓';
+  card.appendChild(doneBg);
+
+  const postponeBg = document.createElement('div');
+  postponeBg.className = 'swipe-bg postpone-bg';
+  postponeBg.textContent = '📅';
+  card.appendChild(postponeBg);
+
+  const inner = document.createElement('div');
+  inner.className = 'mobile-card-inner';
+
+  // Titolo + sync indicator
+  const titleRow = document.createElement('div');
+  titleRow.className = 'mobile-card-title';
+  titleRow.textContent = ciclo.title || '';
+  if (ciclo.sync_status === 'failed') {
+    const w = document.createElement('span');
+    w.className = 'sync-warn';
+    w.title = 'Sync Google Calendar fallita — ritenativa in corso';
+    w.textContent = ' ⚠️';
+    titleRow.appendChild(w);
+  }
+  inner.appendChild(titleRow);
+
+  // Meta row
+  const meta = document.createElement('div');
+  meta.className = 'mobile-card-meta';
+  if (ciclo.scheduled_time) {
+    const t = document.createElement('span');
+    t.className = 'mobile-card-time';
+    t.textContent = ciclo.scheduled_time.slice(0,5);
+    meta.appendChild(t);
+  }
+  if (ciclo.macro_area) {
+    const a = document.createElement('span');
+    a.className = 'ma-tag ' + getMaCssClass(ciclo.macro_area);
+    a.textContent = getMaEmoji(ciclo.macro_area) + ' ' + ciclo.macro_area;
+    meta.appendChild(a);
+  }
+  const pm = ciclo.persone_menzionate;
+  if (pm && pm.length) {
+    const p = document.createElement('span');
+    p.style.cssText = 'font-size:10px;color:var(--text-muted)';
+    p.textContent = '👤 ' + pm.slice(0, 2).join(', ') + (pm.length > 2 ? ' +' + (pm.length - 2) : '');
+    meta.appendChild(p);
+  }
+  inner.appendChild(meta);
+
+  // Check button (complete)
+  const check = document.createElement('div');
+  check.className = 'mobile-card-check' + (ciclo.done ? ' done' : '');
+  check.textContent = ciclo.done ? '✓' : '';
+  check.onclick = async e => {
+    e.stopPropagation();
+    try {
+      await flipDone(ciclo.id, ciclo.done);
+      showToast(ciclo.done ? 'Riaperto' : 'Completato ✓', ciclo.done ? 'info' : 'success');
+    } catch (err) { showToast('Errore: ' + err.message, 'error'); }
+  };
+  inner.appendChild(check);
+
+  card.appendChild(inner);
+  card.onclick = e => { if (!e._swipeHandled) openModal(null, ciclo.id); };
+
+  // Long press = modifica
+  let _lpTimer = null;
+  card.addEventListener('touchstart', () => { _lpTimer = setTimeout(() => { openModal(null, ciclo.id); }, 600); }, { passive: true });
+  card.addEventListener('touchend', () => clearTimeout(_lpTimer));
+  card.addEventListener('touchmove', () => clearTimeout(_lpTimer));
+
+  initSwipe(card, ciclo, doneBg, postponeBg);
+  return card;
+}
+
+function initSwipe(card, ciclo, doneBg, postponeBg) {
+  let startX = 0, startY = 0, currentX = 0, swiping = false;
+  const THRESHOLD = 80;
+
+  card.addEventListener('touchstart', e => {
+    startX   = e.touches[0].clientX;
+    startY   = e.touches[0].clientY;
+    currentX = 0;
+    swiping  = false;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (!swiping && Math.abs(dy) > Math.abs(dx)) return;
+    swiping = true;
+    currentX = dx;
+    const pct = Math.min(Math.abs(dx) / THRESHOLD, 1);
+    card.style.transform = `translateX(${dx}px)`;
+    if (dx > 0) { doneBg.style.opacity = pct; postponeBg.style.opacity = 0; }
+    else        { postponeBg.style.opacity = pct; doneBg.style.opacity = 0; }
+  }, { passive: true });
+
+  card.addEventListener('touchend', e => {
+    card.style.transform = '';
+    doneBg.style.opacity = 0;
+    postponeBg.style.opacity = 0;
+    if (!swiping) return;
+    e._swipeHandled = true;
+    if (currentX > THRESHOLD) {
+      // Swipe destra = completa
+      card.style.transition = 'transform 0.25s, opacity 0.25s';
+      card.style.transform = 'translateX(110%)';
+      card.style.opacity = '0';
+      setTimeout(async () => {
+        try { await flipDone(ciclo.id, false); showToast('Completato ✓', 'success'); }
+        catch (err) { showToast('Errore: ' + err.message, 'error'); card.style.transform=''; card.style.opacity=''; }
+        card.style.transition = '';
+      }, 250);
+    } else if (currentX < -THRESHOLD) {
+      // Swipe sinistra = posticipa
+      openPostponeModal(ciclo.id);
+    }
+    swiping = false;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODAL POSTICIPA
+// ══════════════════════════════════════════════════════════════
+function openPostponeModal(cicloId) {
+  _postponeId = cicloId;
+  const ciclo = state.cicli.find(c => c.id === cicloId);
+  const baseDate = ciclo?.scheduled_date || todayISO();
+  // Pre-fill date input
+  const customInput = document.getElementById('postpone-custom-date');
+  if (customInput) customInput.value = addDays(baseDate, 1);
+  document.getElementById('postponeOverlay').classList.add('open');
+}
+
+async function doPostpone(days) {
+  if (!_postponeId) return;
+  const ciclo = state.cicli.find(c => c.id === _postponeId);
+  if (!ciclo) return;
+  const newDate = addDays(ciclo.scheduled_date || todayISO(), days);
+  await _applyPostpone(ciclo, newDate);
+}
+
+async function doPostponeCustom() {
+  if (!_postponeId) return;
+  const ciclo    = state.cicli.find(c => c.id === _postponeId);
+  const newDate  = document.getElementById('postpone-custom-date')?.value;
+  if (!ciclo || !newDate) return;
+  await _applyPostpone(ciclo, newDate);
+}
+
+async function _applyPostpone(ciclo, newDate) {
+  try {
+    const now = new Date().toISOString();
+    await db.from('cicli').update({
+      scheduled_date: newDate,
+      execution_status: 'postponed',
+      sync_status: 'pending',
+      settimana_anno: isoWeekStr(new Date(newDate)),
+      updated_at: now
+    }).eq('id', ciclo.id);
+    closeModal('postponeOverlay');
+    showToast(`Spostato al ${newDate} ✓`, 'success');
+    syncCicloToGcal({ ...ciclo, scheduled_date: newDate, execution_status: 'postponed' }).catch(() => {});
+  } catch (e) {
+    showToast('Errore: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PULL TO REFRESH
+// ══════════════════════════════════════════════════════════════
+function initPullToRefresh() {
+  const content = document.querySelector('.content');
+  if (!content) return;
+  let startY = 0, pulling = false;
+
+  content.addEventListener('touchstart', e => {
+    if (content.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; }
+  }, { passive: true });
+
+  content.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 50) {
+      const spinner = document.getElementById('ptr-' + state.view);
+      if (spinner) spinner.classList.add('visible');
+    }
+  }, { passive: true });
+
+  content.addEventListener('touchend', async () => {
+    if (!pulling) return;
+    pulling = false;
+    const spinner = document.getElementById('ptr-' + state.view);
+    if (spinner && spinner.classList.contains('visible')) {
+      await loadAll();
+      spinner.classList.remove('visible');
+      showToast('Aggiornato ✓', 'success');
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// BATCH MIGRAZIONE MACRO AREE SU CICLI ESISTENTI
+// ══════════════════════════════════════════════════════════════
+async function batchMigrateAree() {
+  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
+  if (!apiKey) { showToast('Configura Claude API Key prima (⚙️)', 'warn'); return; }
+
+  const toMigrate = state.cicli.filter(c => !c.macro_area && c.ctx === 'lavoro').slice(0, 50);
+  if (!toMigrate.length) { showToast('Tutti i cicli hanno già una macro area', 'info'); return; }
+
+  showToast(`Classificando ${toMigrate.length} cicli...`, 'info');
+  let done = 0;
+
+  for (const c of toMigrate) {
+    const area = await autoCategoria(c.title, c.note).catch(() => null);
+    if (area) {
+      await db.from('cicli').update({ macro_area: area, updated_at: new Date().toISOString() }).eq('id', c.id).catch(() => {});
+      done++;
+    }
+    await new Promise(r => setTimeout(r, 200)); // rate limit
+  }
+
+  await loadAll();
+  showToast(`${done}/${toMigrate.length} cicli classificati ✓`, 'success');
+}
 </script>
 </body>
 </html>
