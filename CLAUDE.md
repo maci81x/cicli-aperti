@@ -24,7 +24,7 @@ Deploy su GitHub Pages: https://maci81x.github.io/cicli-aperti/
 |---------|-------------|-----|
 | `cicli` | Task/impegni principali | Aperto (anon) |
 | `persone` | Rubrica persone | Aperto |
-| `categorie` | Categorie personalizzabili | RLS con policy pubblica |
+| `categorie` | Categorie personalizzabili (id, nome, emoji, ctx, ordine — nessuna colonna colore) | RLS con policy pubblica |
 | `assegnazioni` | Assegnazioni ciclo→persona con ruolo | Disabilitato |
 | `macro_aree` | 9 macro aree fisse SSI | Disabilitato |
 | `user_tokens` | Token OAuth Google | Disabilitato |
@@ -43,6 +43,7 @@ google_event_id text,
 macro_area text,                          -- 9 macro aree SSI
 giorno_settimana text,                    -- lunedi..domenica (giorno preferito agenda)
 fascia_oraria text,                       -- mattina|pomeriggio|sera
+ricorrenza text DEFAULT 'nessuna',        -- colonna esistente, NON ancora cablata nel modale
 settimana_anno text,                      -- es. 2025-W26
 sync_status text DEFAULT 'pending',       -- pending|synced|failed
 created_at, updated_at
