@@ -475,6 +475,92 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
 .auto-cat-spin.active { display:block; }
 .auto-cat-hint { font-size:10px; color:var(--text-dim); }
 
+/* ── AGENDA VIEW ── */
+.agenda-head { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:16px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+.agenda-head-left { flex:1; min-width:180px; }
+.agenda-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; line-height:1.1; }
+.agenda-sub { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); margin-top:3px; }
+.agenda-toggle { display:flex; gap:6px; flex-wrap:wrap; }
+.agenda-tog-btn { display:flex; align-items:center; gap:6px; background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); padding:7px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.agenda-tog-btn:hover { background:var(--border); color:var(--text); }
+.agenda-tog-btn.active { background:var(--lavoro-dim); border-color:var(--lavoro); color:var(--lavoro); }
+.agenda-tog-btn.active.personale { background:var(--personale-dim); border-color:var(--personale); color:var(--personale); }
+.agenda-tog-cnt { font-family:'DM Mono',monospace; font-size:11px; background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:0 6px; min-width:20px; text-align:center; }
+
+.agenda-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; align-items:start; }
+.agenda-col { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }
+.agenda-col.is-today { border-color:var(--lavoro); box-shadow:0 0 0 1px var(--lavoro-dim); }
+.agenda-col.is-today.personale { border-color:var(--personale); }
+.agenda-col-hd { padding:9px 10px; border-bottom:1px solid var(--border); background:var(--bg3); text-align:center; }
+.agenda-col-day { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+.agenda-col.is-today .agenda-col-day { color:var(--lavoro); }
+.agenda-col.is-today.personale .agenda-col-day { color:var(--personale); }
+.agenda-col-date { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+.agenda-slot { padding:7px 7px 9px; border-bottom:1px dashed var(--border); transition:background 0.12s, border-color 0.12s; }
+.agenda-slot:last-child { border-bottom:none; }
+.agenda-slot-lbl { font-size:9px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px; display:flex; align-items:center; gap:4px; }
+.agenda-slot-body { min-height:34px; display:flex; flex-direction:column; gap:5px; }
+.agenda-slot.drag-over { background:var(--bg3); border:1px dashed var(--lavoro); border-radius:6px; }
+.agenda-slot-empty { font-size:10px; color:var(--text-dim); font-style:italic; text-align:center; padding:6px 0; }
+
+.ag-card { position:relative; background:var(--bg); border:1px solid var(--border); border-left:3px solid var(--q2); border-radius:5px; padding:6px 7px 6px 8px; cursor:grab; transition:border-color 0.12s, opacity 0.12s, background 0.12s; }
+.ag-card:hover { background:var(--bg3); border-color:var(--border-light); }
+.ag-card:active { cursor:grabbing; }
+.ag-card.dragging { opacity:0.4; cursor:grabbing; }
+.ag-card.done { opacity:0.45; }
+.ag-card.done .ag-card-title { text-decoration:line-through; }
+.ag-card.q1 { border-left-color:var(--q1); }
+.ag-card.q2 { border-left-color:var(--q2); }
+.ag-card.q3 { border-left-color:var(--q3); }
+.ag-card.q4 { border-left-color:var(--q4); }
+.ag-card-top { display:flex; align-items:flex-start; gap:5px; }
+.ag-card-title { flex:1; min-width:0; font-size:11px; font-weight:500; color:var(--text); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word; }
+.ag-check { flex-shrink:0; width:14px; height:14px; border-radius:50%; border:1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:8px; color:transparent; transition:all 0.12s; margin-top:1px; }
+.ag-check:hover { border-color:var(--text-muted); }
+.ag-check.checked { background:#22c55e; border-color:#22c55e; color:#fff; }
+.ag-card-meta { display:flex; align-items:center; gap:4px; margin-top:5px; flex-wrap:wrap; }
+.ag-q-badge { font-family:'DM Mono',monospace; font-size:8px; font-weight:700; padding:1px 4px; border-radius:3px; letter-spacing:0.4px; }
+.ag-q-badge.q1 { background:var(--q1-dim); color:var(--q1); }
+.ag-q-badge.q2 { background:var(--q2-dim); color:var(--q2); }
+.ag-q-badge.q3 { background:var(--q3-dim); color:var(--q3); }
+.ag-q-badge.q4 { background:var(--q4-dim); color:var(--text-muted); }
+.ag-rec { font-size:9px; }
+.ag-avatars { display:flex; align-items:center; margin-left:auto; }
+.ag-avatar { width:15px; height:15px; border-radius:50%; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--bg2); margin-left:-4px; flex-shrink:0; }
+.ag-avatar:first-child { margin-left:0; }
+.ag-avatar.more { background:var(--bg3); color:var(--text-dim); }
+
+.agenda-dots { display:none; gap:6px; justify-content:center; margin-bottom:10px; }
+.agenda-dot { width:8px; height:8px; border-radius:50%; background:var(--border-light); border:none; padding:0; cursor:pointer; transition:all 0.15s; }
+.agenda-dot.active { background:var(--lavoro); transform:scale(1.35); }
+
+/* ── AGENDA: DA PIANIFICARE ── */
+.plan-group { margin-bottom:20px; }
+.plan-group-title { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.plan-group-cnt { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:0 7px; }
+.plan-card { position:relative; display:flex; align-items:center; gap:10px; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--q2); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:7px; cursor:pointer; transition:background 0.12s, border-color 0.12s; }
+.plan-card:hover { background:var(--bg3); border-color:var(--border-light); }
+.plan-card.q1 { border-left-color:var(--q1); }
+.plan-card.q2 { border-left-color:var(--q2); }
+.plan-card.q3 { border-left-color:var(--q3); }
+.plan-card.q4 { border-left-color:var(--q4); }
+.plan-card-info { flex:1; min-width:0; }
+.plan-card-title { font-size:13px; font-weight:500; color:var(--text); line-height:1.35; word-break:break-word; }
+.plan-card-meta { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:4px; }
+.plan-btn { flex-shrink:0; background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); padding:6px 10px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.plan-btn:hover { background:var(--lavoro-dim); border-color:var(--lavoro); color:var(--lavoro); }
+.plan-dd { position:absolute; right:10px; top:calc(100% - 4px); z-index:60; background:var(--bg3); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:10px; box-shadow:0 8px 24px rgba(0,0,0,0.35); width:230px; cursor:default; }
+.plan-dd-label { font-size:9px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+.plan-dd select { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:6px 8px; font-family:'DM Sans',sans-serif; font-size:12px; margin-bottom:8px; }
+.plan-dd-actions { display:flex; gap:6px; }
+.plan-dd-actions button { flex:1; border:none; border-radius:var(--radius-sm); padding:6px; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; cursor:pointer; }
+.plan-dd-save { background:var(--lavoro); color:#fff; }
+.plan-dd-cancel { background:var(--bg2); border:1px solid var(--border) !important; color:var(--text-muted); }
+
+/* ── BADGE GIORNO/FASCIA (matrice + liste) ── */
+.giorno-badge { display:inline-flex; align-items:center; gap:3px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text-muted); background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:1px 5px; white-space:nowrap; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   header { padding: 12px 16px; gap: 8px; }
@@ -494,6 +580,16 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
   .modal-overlay { align-items: flex-end; padding: 0; }
   .view-controls { gap: 4px; }
   .view-btn { padding: 5px 10px; font-size: 11px; }
+  /* AGENDA MOBILE — scroll orizzontale con snap per colonna */
+  .agenda-grid { display: flex; gap: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scroll-padding-left: 0; padding-bottom: 6px; scrollbar-width: none; }
+  .agenda-grid::-webkit-scrollbar { display: none; }
+  .agenda-col { flex: 0 0 240px; min-width: 240px; scroll-snap-align: start; }
+  .agenda-dots { display: flex; }
+  .agenda-head { flex-direction: column; gap: 10px; }
+  .agenda-toggle { width: 100%; }
+  .agenda-tog-btn { flex: 1; justify-content: center; }
+  .ag-card-title { font-size: 12px; }
+  .plan-dd { right: 0; width: min(230px, calc(100vw - 48px)); }
 }
 @media (max-width: 480px) {
   .week-summary { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -653,6 +749,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
   </div>
   <div class="drawer-section">
     <div class="drawer-section-label">Vista</div>
+    <div class="drawer-item" onclick="switchView('agenda');closeDrawer()">📆 Agenda</div>
     <div class="drawer-item" onclick="switchView('mese');closeDrawer()">🗓 Mese</div>
     <div class="drawer-item" onclick="switchView('aree');closeDrawer()">🏢 Macro Aree</div>
     <div class="drawer-item" onclick="switchView('persone');closeDrawer()">👥 Persone</div>
@@ -711,6 +808,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
         <button class="view-btn" id="vbtn-persone" onclick="switchView('persone')">👥 Persone</button>
         <button class="view-btn" id="vbtn-storico" onclick="switchView('storico')">🕐 Storico</button>
         <button class="view-btn" id="vbtn-aree" onclick="switchView('aree')">🏢 Aree</button>
+        <button class="view-btn" id="vbtn-agenda" onclick="switchView('agenda')">📆 Agenda</button>
       </div>
     </div>
 
@@ -767,6 +865,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div id="view-settimana" style="display:none"></div>
     <div id="view-mese" style="display:none"></div>
     <div id="view-aree" style="display:none"></div>
+    <div id="view-agenda" style="display:none"></div>
   </div>
 </div>
 
@@ -776,6 +875,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <button class="mobile-nav-btn" id="mnav-oggi" onclick="switchView('oggi')"><span class="mnav-icon">☀️</span>Oggi</button>
     <button class="mobile-nav-btn" id="mnav-settimana" onclick="switchView('settimana')"><span class="mnav-icon">📅</span>Settimana</button>
     <button class="mobile-nav-btn active" id="mnav-matrix" onclick="switchView('matrix')"><span class="mnav-icon">🔲</span>Matrice</button>
+    <button class="mobile-nav-btn" id="mnav-agenda" onclick="switchView('agenda')"><span class="mnav-icon">📆</span>Agenda</button>
   </div>
 </nav>
 
@@ -812,6 +912,32 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
       <label class="form-label">⏰ Ora inizio</label>
       <input type="time" class="form-input" id="f-scheduled-time">
     </div>
+    <!-- AGENDA SETTIMANALE -->
+    <div class="form-row" id="agenda-fields-row">
+      <div class="form-group">
+        <label class="form-label">📆 Giorno preferito</label>
+        <select class="form-select" id="f-giorno-settimana">
+          <option value="">— Nessuno</option>
+          <option value="lunedi">Lunedì</option>
+          <option value="martedi">Martedì</option>
+          <option value="mercoledi">Mercoledì</option>
+          <option value="giovedi">Giovedì</option>
+          <option value="venerdi">Venerdì</option>
+          <option value="sabato">Sabato</option>
+          <option value="domenica">Domenica</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🕒 Fascia oraria</label>
+        <select class="form-select" id="f-fascia-oraria">
+          <option value="">— Qualsiasi</option>
+          <option value="mattina">🌅 Mattina</option>
+          <option value="pomeriggio">☀️ Pomeriggio</option>
+          <option value="sera">🌙 Sera</option>
+        </select>
+      </div>
+    </div>
+    <div id="agenda-fields-hint" style="font-size:11px;color:var(--text-dim);line-height:1.5;margin:-8px 0 14px">Definisci quando durante la settimana svolgere questo ciclo. Potrai riorganizzarlo trascinandolo nell'agenda.</div>
     <div class="form-group">
       <label class="form-label">🏢 Macro Area <span style="font-size:10px;color:var(--text-dim);font-weight:400">(auto-classifica)</span></label>
       <div class="auto-cat-wrap">
@@ -1009,7 +1135,8 @@ const LS = {
   VIEW:       'cicli_view',
   WEEK:       'cicli_week',
   CAT_FILTER: 'cicli_cat_filter',
-  THEME:      'cicli_theme'
+  THEME:      'cicli_theme',
+  AGENDA_SUB: 'cicli_agenda_sub'
 };
 
 const CAT_COLORS = {
@@ -1035,6 +1162,28 @@ const CAT_EMOJIS = {
   hobbies:'⚽', spiritualita:'🌙', casa:'🏡', idee:'💡'
 };
 
+// ── AGENDA SETTIMANALE ──
+const GIORNI = [
+  { key:'lunedi',    short:'LUN', label:'Lunedì' },
+  { key:'martedi',   short:'MAR', label:'Martedì' },
+  { key:'mercoledi', short:'MER', label:'Mercoledì' },
+  { key:'giovedi',   short:'GIO', label:'Giovedì' },
+  { key:'venerdi',   short:'VEN', label:'Venerdì' },
+  { key:'sabato',    short:'SAB', label:'Sabato' },
+  { key:'domenica',  short:'DOM', label:'Domenica' }
+];
+
+const FASCE = [
+  { key:'mattina',    emoji:'🌅', label:'Mattina' },
+  { key:'pomeriggio', emoji:'☀️', label:'Pomeriggio' },
+  { key:'sera',       emoji:'🌙', label:'Sera' }
+];
+
+const FASCIA_NULL = '__none__';   // pseudo-fascia "Non specificato"
+
+const GIORNI_MAP = Object.fromEntries(GIORNI.map(g => [g.key, g]));
+const FASCE_MAP  = Object.fromEntries(FASCE.map(f => [f.key, f]));
+
 // ══════════════════════════════════════════════════════════════
 // INIT SUPABASE
 // ══════════════════════════════════════════════════════════════
@@ -1056,7 +1205,11 @@ let state = {
   categorie:        [],
   loading:          true,
   searchQuery:      '',
-  personaDetailId:  null
+  personaDetailId:  null,
+  agendaSub:        localStorage.getItem(LS.AGENDA_SUB) || 'pianificati',
+  agendaOverrides:  [],
+  agendaTableOk:    true,
+  agendaColsOk:     true
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -1143,8 +1296,38 @@ async function loadAll() {
     if (!error) state.categorie = data || [];
   } catch (_) { state.categorie = []; }
 
+  await loadAgendaOverrides();
+
   state.loading = false;
   render();
+}
+
+// Carica gli override agenda della SOLA settimana selezionata.
+// Gli override valgono per una singola settimana: cambiando settimana si ricarica.
+async function loadAgendaOverrides() {
+  // Le colonne giorno_settimana/fascia_oraria potrebbero non essere ancora
+  // migrate: rilevalo per non inviarle nei payload e rompere il salvataggio.
+  try {
+    const { error } = await db.from('cicli').select('id,giorno_settimana,fascia_oraria').limit(1);
+    state.agendaColsOk = !error;
+    if (error) console.warn('[Agenda] colonne cicli non migrate:', error.message);
+  } catch (_) { state.agendaColsOk = false; }
+
+  try {
+    const { data, error } = await db.from('agenda_override')
+      .select('*')
+      .eq('settimana', state.week)
+      .eq('anno', state.year);
+    if (error) throw error;
+    state.agendaOverrides = data || [];
+    state.agendaTableOk   = true;
+  } catch (e) {
+    state.agendaOverrides = [];
+    if (state.agendaTableOk) {
+      state.agendaTableOk = false;
+      console.warn('[Agenda] override non disponibili:', e.message);
+    }
+  }
 }
 
 async function upsertCiclo(data) {
@@ -1182,6 +1365,7 @@ db.channel('cicli-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'cicli' },     () => loadAll())
   .on('postgres_changes', { event: '*', schema: 'public', table: 'persone' },   () => loadAll())
   .on('postgres_changes', { event: '*', schema: 'public', table: 'categorie' }, () => loadAll())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda_override' }, () => loadAll())
   .subscribe(status => {
     if (status === 'SUBSCRIBED') console.log('[Realtime] connesso');
   });
@@ -1195,6 +1379,8 @@ function changeWeek(dir) {
   if (state.week > 52) { state.week = 1;  state.year++; }
   localStorage.setItem(LS.WEEK, state.week);
   render();
+  // Gli override sono per-settimana: ricaricali per la nuova settimana
+  loadAgendaOverrides().then(() => { if (state.view === 'agenda') render(); });
 }
 
 function switchCtx(ctx) {
@@ -1241,16 +1427,16 @@ function updateHeader() {
   document.getElementById('addBtn').className = 'btn-primary' + (state.ctx === 'personale' ? ' personale-ctx' : '');
 
   const weekNav = document.querySelector('.week-nav');
-  const weekActive = state.view === 'list' || state.searchQuery;
+  const weekActive = state.view === 'list' || state.view === 'agenda' || !!state.searchQuery;
   if (weekNav) {
     weekNav.style.opacity = weekActive ? '1' : '0.4';
     weekNav.style.pointerEvents = weekActive ? '' : 'auto';
-    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo solo nella vista Lista';
+    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo nelle viste Lista e Agenda';
   }
 }
 
 function updateMobileNav() {
-  ['oggi','settimana','matrix'].forEach(v => {
+  ['oggi','settimana','matrix','agenda'].forEach(v => {
     const btn = document.getElementById('mnav-' + v);
     if (btn) btn.classList.toggle('active', state.view === v);
   });
@@ -1258,7 +1444,7 @@ function updateMobileNav() {
 }
 
 function renderViews() {
-  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree'];
+  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree','agenda'];
   views.forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = state.view === v ? 'block' : 'none';
@@ -1266,7 +1452,7 @@ function renderViews() {
     if (btn) btn.className = 'view-btn' + (state.view === v ? ' active' + (state.ctx === 'personale' ? ' personale' : '') : '');
   });
 
-  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE' };
+  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE', agenda:'AGENDA SETTIMANALE' };
   document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
 
   if (state.searchQuery) {
@@ -1316,6 +1502,7 @@ function renderViews() {
   if (state.view === 'settimana') renderSettimana();
   if (state.view === 'mese')     renderMese();
   if (state.view === 'aree')     renderAree();
+  if (state.view === 'agenda')   renderAgenda();
 }
 
 function applyFilters(cicli) {
@@ -1645,15 +1832,16 @@ function renderSidebar() {
 
   const VIEW_TIPS = {
     matrix:  'Visualizza i cicli nella matrice di Eisenhower divisi per urgenza e priorità',
+    agenda:  'Vista settimanale con cicli distribuiti per giorno e fascia oraria',
     list:    'Tutti i cicli della settimana in ordine di priorità',
     persone: 'Vedi tutti i cicli associati a una persona — utile prima di una riunione',
     storico: 'Archivio cicli chiusi con possibilità di riapertura',
     guida:   'Istruzioni complete per usare CICLI APERTI'
   };
 
-  const viewItems = ['matrix','list','persone','storico','guida'].map(v => {
-    const icons  = { matrix:'🔲', list:'📋', persone:'👥', storico:'🕐', guida:'📖' };
-    const labels = { matrix:'Matrice', list:'Lista settimana', persone:'Persone', storico:'Storico', guida:'Guida' };
+  const viewItems = ['matrix','agenda','list','persone','storico','guida'].map(v => {
+    const icons  = { matrix:'🔲', agenda:'📆', list:'📋', persone:'👥', storico:'🕐', guida:'📖' };
+    const labels = { matrix:'Matrice', agenda:'Agenda', list:'Lista settimana', persone:'Persone', storico:'Storico', guida:'Guida' };
     const active = state.view === v;
     return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="switchView('${v}')">
       <span>${icons[v]}</span>${labels[v]}
@@ -1721,6 +1909,20 @@ function renderSidebar() {
 // ══════════════════════════════════════════════════════════════
 // CARD BUILDER
 // ══════════════════════════════════════════════════════════════
+
+// Badge "📅 Lun mattina" per i cicli con giorno_settimana assegnato
+function makeGiornoBadge(c) {
+  if (!c || !c.giorno_settimana) return null;
+  const g = GIORNI_MAP[c.giorno_settimana];
+  if (!g) return null;
+  const f = c.fascia_oraria ? FASCE_MAP[c.fascia_oraria] : null;
+  const span = document.createElement('span');
+  span.className = 'giorno-badge';
+  span.textContent = '📅 ' + g.label.slice(0, 3) + (f ? ' ' + f.label.toLowerCase() : '');
+  span.title = 'Pianificato: ' + g.label + (f ? ' — ' + f.label : '');
+  return span;
+}
+
 function makeCicloCard(c, mode) {
   const esc = getEscalation(c);
   const effQ = computeEffectiveQ(c);
@@ -1775,6 +1977,8 @@ function makeCicloCard(c, mode) {
       tag.textContent = CAT_LABELS[c.cat] || c.cat;
       meta.appendChild(tag);
     }
+    const gb = makeGiornoBadge(c);
+    if (gb) meta.appendChild(gb);
     if (c.week) {
       const wt = document.createElement('span');
       wt.style.cssText = 'font-size:10px;color:var(--text-dim);font-family:DM Mono,monospace';
@@ -1848,6 +2052,8 @@ function makeCicloCard(c, mode) {
     tag.textContent = CAT_LABELS[c.cat] || c.cat;
     meta.appendChild(tag);
   }
+  const gBadge = makeGiornoBadge(c);
+  if (gBadge) meta.appendChild(gBadge);
   if (daysLeft !== null) {
     const dt = document.createElement('div');
     dt.className = 'ciclo-date' + (esc==='crit' ? ' urgent' : esc==='warn' ? ' near' : '');
@@ -2073,6 +2279,8 @@ function openModal(defaultQ, editId) {
     document.getElementById('f-scheduled-date').value = c.scheduled_date || todayISO();
     document.getElementById('f-scheduled-time').value = c.scheduled_time || '';
     document.getElementById('f-macro-area').value     = c.macro_area || '';
+    document.getElementById('f-giorno-settimana').value = c.giorno_settimana || '';
+    document.getElementById('f-fascia-oraria').value    = c.fascia_oraria || '';
     selectedQ = c.q || 2;
     modalCtx  = c.ctx || state.ctx;
     btnDel.style.display = 'block';
@@ -2087,9 +2295,16 @@ function openModal(defaultQ, editId) {
     document.getElementById('f-scheduled-date').value = todayISO();
     document.getElementById('f-scheduled-time').value = '';
     document.getElementById('f-macro-area').value     = '';
+    document.getElementById('f-giorno-settimana').value = '';
+    document.getElementById('f-fascia-oraria').value    = '';
     btnDel.style.display = 'none';
     initPersonaChips([]);
   }
+
+  const agendaRow = document.getElementById('agenda-fields-row');
+  const agendaHint = document.getElementById('agenda-fields-hint');
+  if (agendaRow)  agendaRow.style.display  = state.agendaColsOk ? '' : 'none';
+  if (agendaHint) agendaHint.style.display = state.agendaColsOk ? '' : 'none';
 
   setModalCtx(modalCtx);
   selectQ(selectedQ);
@@ -2157,6 +2372,11 @@ async function saveCiclo() {
     sync_status:      'pending',
     settimana_anno:   isoWeekStr(new Date(scheduledDate))
   };
+
+  if (state.agendaColsOk) {
+    data.giorno_settimana = document.getElementById('f-giorno-settimana').value || null;
+    data.fascia_oraria    = document.getElementById('f-fascia-oraria').value || null;
+  }
 
   if (editingId) {
     const existing = state.cicli.find(c => c.id === editingId);
@@ -3928,6 +4148,508 @@ function collapseBox(box, grid) {
   box.classList.remove('expanded');
   if (_expandedQBox === box) _expandedQBox = null;
 }
+// ══════════════════════════════════════════════════════════════
+// VISTA AGENDA SETTIMANALE
+// ══════════════════════════════════════════════════════════════
+let _agendaDragId  = null;   // ciclo in trascinamento
+let _planOpenId    = null;   // card "da pianificare" con dropdown aperto
+
+function switchAgendaSub(sub) {
+  if (sub !== 'pianificati' && sub !== 'dapianificare') return;
+  state.agendaSub = sub;
+  _planOpenId = null;
+  localStorage.setItem(LS.AGENDA_SUB, sub);
+  renderAgenda();
+}
+
+// Data del giorno `idx` (0=lunedì) nella settimana selezionata
+function agendaDayDate(idx) {
+  const start = getWeekStart(state.week, state.year);
+  const d = new Date(start);
+  d.setDate(start.getDate() + idx);
+  return d;
+}
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function agendaWeekSubtitle() {
+  const start = getWeekStart(state.week, state.year);
+  const end   = new Date(start); end.setDate(start.getDate() + 6);
+  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  return `Sett. ${String(state.week).padStart(2,'0')} · ${fmt(start)}–${fmt(end)}`;
+}
+
+// Override attivo per un ciclo nella settimana corrente (o null)
+function agendaOverrideFor(cicloId) {
+  return state.agendaOverrides.find(o =>
+    o.ciclo_id === cicloId && o.settimana === state.week && o.anno === state.year
+  ) || null;
+}
+
+// Posizione effettiva del ciclo: override della settimana, altrimenti valore del ciclo
+function agendaSlotFor(c) {
+  const ov = agendaOverrideFor(c.id);
+  if (ov) return { giorno: ov.giorno_settimana, fascia: ov.fascia_oraria, overridden: true };
+  return { giorno: c.giorno_settimana, fascia: c.fascia_oraria || null, overridden: false };
+}
+
+// Cicli aperti del contesto corrente, con i filtri di sidebar applicati
+function agendaBaseCicli() {
+  return applyFilters(state.cicli.filter(c => c.ctx === state.ctx && !c.done));
+}
+
+function agendaPianificati()   { return agendaBaseCicli().filter(c => agendaSlotFor(c).giorno); }
+function agendaDaPianificare() { return agendaBaseCicli().filter(c => !agendaSlotFor(c).giorno); }
+
+function renderAgenda() {
+  const root = document.getElementById('view-agenda');
+  if (!root) return;
+  root.innerHTML = '';
+
+  const isP  = state.ctx === 'personale';
+  const nPia = agendaPianificati().length;
+  const nDap = agendaDaPianificare().length;
+
+  // ── HEADER ──
+  const head = document.createElement('div');
+  head.className = 'agenda-head';
+
+  const left = document.createElement('div');
+  left.className = 'agenda-head-left';
+  left.innerHTML = `
+    <div class="agenda-title">Agenda della settimana</div>
+    <div class="agenda-sub">${escHtml(agendaWeekSubtitle())}</div>`;
+  head.appendChild(left);
+
+  const toggle = document.createElement('div');
+  toggle.className = 'agenda-toggle';
+  [
+    { key:'pianificati',   label:'📅 Pianificati',    cnt:nPia },
+    { key:'dapianificare', label:'📥 Da pianificare', cnt:nDap }
+  ].forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'agenda-tog-btn' + (state.agendaSub === t.key ? ' active' + (isP ? ' personale' : '') : '');
+    b.innerHTML = `<span>${t.label}</span><span class="agenda-tog-cnt">${t.cnt}</span>`;
+    b.onclick = () => switchAgendaSub(t.key);
+    toggle.appendChild(b);
+  });
+  head.appendChild(toggle);
+  root.appendChild(head);
+
+  if (!state.agendaTableOk || !state.agendaColsOk) {
+    const warn = document.createElement('div');
+    warn.className = 'escalation-notice';
+    warn.innerHTML = '⚠️ <strong>Migration non applicata:</strong> esegui <code>supabase_migration_agenda.sql</code> sul progetto. Fino ad allora l\'agenda resta vuota e il drag &amp; drop è disabilitato — il resto dell\'app funziona normalmente.';
+    root.appendChild(warn);
+  }
+
+  if (state.agendaSub === 'dapianificare') renderAgendaDaPianificare(root);
+  else                                     renderAgendaPianificati(root, isP);
+}
+
+// ── SOTTO-VISTA: PIANIFICATI (griglia 7 giorni × fasce) ──
+function renderAgendaPianificati(root, isP) {
+  const cicli = agendaPianificati();
+  const today = new Date();
+
+  // indicizza per giorno → fascia
+  const byDay = {};
+  GIORNI.forEach(g => {
+    byDay[g.key] = { [FASCIA_NULL]: [] };
+    FASCE.forEach(f => { byDay[g.key][f.key] = []; });
+  });
+  cicli.forEach(c => {
+    const slot = agendaSlotFor(c);
+    const bucket = byDay[slot.giorno];
+    if (!bucket) return;
+    const fk = slot.fascia && bucket[slot.fascia] ? slot.fascia : FASCIA_NULL;
+    bucket[fk].push(c);
+  });
+
+  // dots di navigazione (solo mobile via CSS)
+  const dots = document.createElement('div');
+  dots.className = 'agenda-dots';
+  root.appendChild(dots);
+
+  const grid = document.createElement('div');
+  grid.className = 'agenda-grid';
+  grid.id = 'agendaGrid';
+
+  GIORNI.forEach((g, idx) => {
+    const date    = agendaDayDate(idx);
+    const isToday = isSameDay(date, today);
+
+    const col = document.createElement('div');
+    col.className = 'agenda-col' + (isToday ? ' is-today' : '') + (isP ? ' personale' : '');
+    col.dataset.dayIndex = idx;
+
+    const hd = document.createElement('div');
+    hd.className = 'agenda-col-hd';
+    hd.innerHTML = `
+      <div class="agenda-col-day">${g.short}</div>
+      <div class="agenda-col-date">${date.getDate()}/${date.getMonth()+1}</div>`;
+    col.appendChild(hd);
+
+    // "Non specificato" in cima solo se contiene qualcosa
+    const slotDefs = [];
+    if (byDay[g.key][FASCIA_NULL].length) {
+      slotDefs.push({ key: FASCIA_NULL, emoji: '•', label: 'Non specificato', droppable: false });
+    }
+    FASCE.forEach(f => slotDefs.push({ key: f.key, emoji: f.emoji, label: f.label, droppable: true }));
+
+    slotDefs.forEach(sd => {
+      const slot = document.createElement('div');
+      slot.className = 'agenda-slot';
+      slot.dataset.giorno = g.key;
+      slot.dataset.fascia = sd.key;
+
+      const lbl = document.createElement('div');
+      lbl.className = 'agenda-slot-lbl';
+      lbl.innerHTML = `<span>${sd.emoji}</span><span>${escHtml(sd.label)}</span>`;
+      slot.appendChild(lbl);
+
+      const body = document.createElement('div');
+      body.className = 'agenda-slot-body';
+      const items = byDay[g.key][sd.key] || [];
+      if (!items.length) {
+        const e = document.createElement('div');
+        e.className = 'agenda-slot-empty';
+        e.textContent = '—';
+        body.appendChild(e);
+      } else {
+        items.forEach(c => body.appendChild(makeAgendaCard(c)));
+      }
+      slot.appendChild(body);
+
+      if (sd.droppable && state.agendaTableOk && state.agendaColsOk) attachDropZone(slot, g.key, sd.key);
+      col.appendChild(slot);
+    });
+
+    grid.appendChild(col);
+  });
+
+  root.appendChild(grid);
+
+  // dots → scroll alla colonna
+  GIORNI.forEach((g, idx) => {
+    const dot = document.createElement('button');
+    dot.className = 'agenda-dot' + (isSameDay(agendaDayDate(idx), today) ? ' active' : '');
+    dot.title = g.label;
+    dot.setAttribute('aria-label', g.label);
+    dot.onclick = () => {
+      const col = grid.children[idx];
+      if (col) col.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      dots.querySelectorAll('.agenda-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    };
+    dots.appendChild(dot);
+  });
+
+  // aggiorna i dots durante lo scroll orizzontale (mobile)
+  grid.addEventListener('scroll', () => {
+    const first = grid.children[0];
+    if (!first) return;
+    const w = first.getBoundingClientRect().width + 10;
+    const i = Math.max(0, Math.min(GIORNI.length - 1, Math.round(grid.scrollLeft / w)));
+    dots.querySelectorAll('.agenda-dot').forEach((d, j) => d.classList.toggle('active', j === i));
+  }, { passive: true });
+}
+
+// ── CARD COMPATTA DELL'AGENDA ──
+function makeAgendaCard(c) {
+  const q = computeEffectiveQ(c);
+  const card = document.createElement('div');
+  card.className = 'ag-card q' + q + (c.done ? ' done' : '');
+  card.dataset.id = c.id;
+  card.draggable = state.agendaTableOk && state.agendaColsOk;
+  card.title = c.title || '';
+  card.onclick = () => openModal(null, c.id);
+
+  const top = document.createElement('div');
+  top.className = 'ag-card-top';
+
+  const check = document.createElement('div');
+  check.className = 'ag-check' + (c.done ? ' checked' : '');
+  check.textContent = '✓';
+  check.title = c.done ? 'Riapri ciclo' : 'Chiudi ciclo';
+  check.onclick = async e => {
+    e.stopPropagation();
+    try { await flipDone(c.id, c.done); showToast(c.done ? 'Ciclo riaperto' : 'Ciclo chiuso ✓', c.done ? 'info' : 'success'); }
+    catch (err) { showToast('Errore: ' + err.message, 'error'); }
+  };
+  top.appendChild(check);
+
+  const title = document.createElement('div');
+  title.className = 'ag-card-title';
+  title.textContent = c.title || '';
+  top.appendChild(title);
+  card.appendChild(top);
+
+  const meta = document.createElement('div');
+  meta.className = 'ag-card-meta';
+
+  const badge = document.createElement('span');
+  badge.className = 'ag-q-badge q' + q;
+  badge.textContent = 'Q' + q;
+  meta.appendChild(badge);
+
+  // Indicatore: posizione da override temporaneo (solo questa settimana)
+  if (agendaOverrideFor(c.id)) {
+    const r = document.createElement('span');
+    r.className = 'ag-rec';
+    r.textContent = '🔄';
+    r.title = 'Spostato solo per questa settimana — la prossima torna al giorno originale';
+    meta.appendChild(r);
+  }
+
+  const avatars = makeAgendaAvatars(c.persone_menzionate);
+  if (avatars) meta.appendChild(avatars);
+
+  card.appendChild(meta);
+
+  card.addEventListener('dragstart', e => {
+    _agendaDragId = c.id;
+    card.classList.add('dragging');
+    try {
+      e.dataTransfer.setData('text/plain', c.id);
+      e.dataTransfer.effectAllowed = 'move';
+    } catch (_) {}
+  });
+  card.addEventListener('dragend', () => {
+    _agendaDragId = null;
+    card.classList.remove('dragging');
+    document.querySelectorAll('.agenda-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+  });
+
+  return card;
+}
+
+function makeAgendaAvatars(nomi) {
+  const list = (nomi || []).filter(Boolean);
+  if (!list.length) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'ag-avatars';
+  list.slice(0, 3).forEach(nome => {
+    const p   = state.persone.find(x => x.nome === nome);
+    const col = personColor(p || nome);
+    const a = document.createElement('div');
+    a.className = 'ag-avatar';
+    a.style.cssText = `background:${col}33;color:${col}`;
+    a.textContent = nome.charAt(0).toUpperCase();
+    a.title = nome;
+    wrap.appendChild(a);
+  });
+  if (list.length > 3) {
+    const more = document.createElement('div');
+    more.className = 'ag-avatar more';
+    more.textContent = '+' + (list.length - 3);
+    more.title = list.slice(3).join(', ');
+    wrap.appendChild(more);
+  }
+  return wrap;
+}
+
+// ── DRAG & DROP ──
+function attachDropZone(slot, giorno, fascia) {
+  slot.addEventListener('dragover', e => {
+    if (!_agendaDragId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    slot.classList.add('drag-over');
+  });
+  slot.addEventListener('dragleave', e => {
+    if (slot.contains(e.relatedTarget)) return;
+    slot.classList.remove('drag-over');
+  });
+  slot.addEventListener('drop', async e => {
+    e.preventDefault();
+    slot.classList.remove('drag-over');
+    let id = _agendaDragId;
+    try { id = e.dataTransfer.getData('text/plain') || id; } catch (_) {}
+    if (!id) return;
+    _agendaDragId = null;
+    await moveCicloInAgenda(id, giorno, fascia);
+  });
+}
+
+// Crea/aggiorna l'override — vale SOLO per la settimana corrente
+async function moveCicloInAgenda(cicloId, giorno, fascia) {
+  const ciclo = state.cicli.find(c => c.id === cicloId);
+  if (!ciclo) return;
+  const prev = agendaSlotFor(ciclo);
+  if (prev.giorno === giorno && prev.fascia === fascia) return;
+
+  const payload = {
+    ciclo_id:         cicloId,
+    settimana:        state.week,
+    anno:             state.year,
+    giorno_settimana: giorno,
+    fascia_oraria:    fascia
+  };
+
+  try {
+    const { data, error } = await db.from('agenda_override')
+      .upsert(payload, { onConflict: 'ciclo_id,settimana,anno' })
+      .select();
+    if (error) throw error;
+
+    // stato immutabile: rimpiazza l'override esistente
+    const saved = (data && data[0]) || payload;
+    state.agendaOverrides = [
+      ...state.agendaOverrides.filter(o => !(o.ciclo_id === cicloId && o.settimana === state.week && o.anno === state.year)),
+      saved
+    ];
+    renderAgenda();
+    showToast(`Spostato a ${GIORNI_MAP[giorno].label} ${FASCE_MAP[fascia].label.toLowerCase()} per questa settimana`, 'success');
+  } catch (err) {
+    showToast('Errore spostamento: ' + err.message, 'error');
+  }
+}
+
+// ── SOTTO-VISTA: DA PIANIFICARE ──
+function renderAgendaDaPianificare(root) {
+  const cicli = agendaDaPianificare();
+
+  if (!cicli.length) {
+    const e = document.createElement('div');
+    e.className = 'empty-state';
+    e.innerHTML = 'Tutti i cicli aperti hanno un giorno assegnato 🎉<br>Passa a “Pianificati” per vedere la settimana.';
+    root.appendChild(e);
+    return;
+  }
+
+  const byQ = { 1: [], 2: [], 3: [], 4: [] };
+  cicli.forEach(c => { const q = computeEffectiveQ(c); if (byQ[q]) byQ[q].push(c); });
+
+  const qLabels = { 1:'🔥 Q1 — Crisi', 2:'📌 Q2 — Qualità', 3:'📋 Q3 — Inganno', 4:'🗑 Q4 — Spreco' };
+  const qColors = { 1:'var(--q1)', 2:'var(--q2)', 3:'var(--q3)', 4:'var(--q4)' };
+
+  [1,2,3,4].forEach(q => {
+    if (!byQ[q].length) return;
+    const sec = document.createElement('div');
+    sec.className = 'plan-group';
+
+    const title = document.createElement('div');
+    title.className = 'plan-group-title';
+    title.style.color = qColors[q];
+    title.innerHTML = `<span>${qLabels[q]}</span><span class="plan-group-cnt">${byQ[q].length}</span>`;
+    sec.appendChild(title);
+
+    byQ[q].forEach(c => sec.appendChild(makePlanCard(c, q)));
+    root.appendChild(sec);
+  });
+}
+
+function makePlanCard(c, q) {
+  const esc      = getEscalation(c);
+  const daysLeft = getDaysLeft(c.due_date);
+
+  const card = document.createElement('div');
+  card.className = 'plan-card q' + q;
+  card.onclick = () => openModal(null, c.id);
+
+  const info = document.createElement('div');
+  info.className = 'plan-card-info';
+
+  const title = document.createElement('div');
+  title.className = 'plan-card-title';
+  title.textContent = c.title || '';
+  info.appendChild(title);
+
+  const meta = document.createElement('div');
+  meta.className = 'plan-card-meta';
+  if (c.cat) {
+    const tag = document.createElement('span');
+    tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
+    tag.textContent = CAT_LABELS[c.cat] || c.cat;
+    meta.appendChild(tag);
+  }
+  const avatars = makeAgendaAvatars(c.persone_menzionate);
+  if (avatars) { avatars.style.marginLeft = '0'; meta.appendChild(avatars); }
+  if (daysLeft !== null) {
+    const dt = document.createElement('span');
+    dt.className = 'ciclo-date' + (esc === 'crit' ? ' urgent' : esc === 'warn' ? ' near' : '');
+    dt.textContent = '📅 ' + formatDaysLeft(daysLeft);
+    meta.appendChild(dt);
+  }
+  info.appendChild(meta);
+  card.appendChild(info);
+
+  const btn = document.createElement('button');
+  btn.className = 'plan-btn';
+  btn.textContent = 'Pianifica';
+  btn.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+  card.appendChild(btn);
+
+  if (_planOpenId === c.id) card.appendChild(makePlanDropdown(c));
+  return card;
+}
+
+function togglePlanDropdown(id) {
+  _planOpenId = (_planOpenId === id) ? null : id;
+  renderAgenda();
+}
+
+function makePlanDropdown(c) {
+  const dd = document.createElement('div');
+  dd.className = 'plan-dd';
+  dd.onclick = e => e.stopPropagation();
+
+  const gOpts = GIORNI.map(g => `<option value="${g.key}">${g.label}</option>`).join('');
+  const fOpts = FASCE.map(f => `<option value="${f.key}">${f.emoji} ${f.label}</option>`).join('');
+
+  dd.innerHTML = `
+    <div class="plan-dd-label">Giorno</div>
+    <select id="pdd-giorno-${c.id}">${gOpts}</select>
+    <div class="plan-dd-label">Fascia oraria</div>
+    <select id="pdd-fascia-${c.id}"><option value="">— Qualsiasi</option>${fOpts}</select>
+    <div class="plan-dd-actions">
+      <button class="plan-dd-save">Assegna</button>
+      <button class="plan-dd-cancel">Annulla</button>
+    </div>`;
+
+  dd.querySelector('.plan-dd-cancel').onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+  dd.querySelector('.plan-dd-save').onclick   = e => {
+    e.stopPropagation();
+    const giorno = document.getElementById('pdd-giorno-' + c.id).value;
+    const fascia = document.getElementById('pdd-fascia-' + c.id).value || null;
+    assegnaGiornoCiclo(c.id, giorno, fascia);
+  };
+  return dd;
+}
+
+// Assegnazione permanente sul ciclo (non è un override settimanale)
+async function assegnaGiornoCiclo(cicloId, giorno, fascia) {
+  if (!giorno) { showToast('Seleziona un giorno', 'warn'); return; }
+  if (!state.agendaColsOk) { showToast('Migration agenda non applicata', 'error'); return; }
+  try {
+    const { error } = await db.from('cicli')
+      .update({ giorno_settimana: giorno, fascia_oraria: fascia, updated_at: new Date().toISOString() })
+      .eq('id', cicloId);
+    if (error) throw error;
+
+    // aggiornamento immutabile dello stato locale
+    state.cicli = state.cicli.map(c =>
+      c.id === cicloId ? { ...c, giorno_settimana: giorno, fascia_oraria: fascia } : c
+    );
+    _planOpenId = null;
+    renderAgenda();
+    const f = fascia ? ' ' + FASCE_MAP[fascia].label.toLowerCase() : '';
+    showToast(`Pianificato: ${GIORNI_MAP[giorno].label}${f} ✓`, 'success');
+  } catch (err) {
+    showToast('Errore: ' + err.message, 'error');
+  }
+}
+
+// chiude il mini dropdown cliccando fuori
+document.addEventListener('click', e => {
+  if (_planOpenId === null) return;
+  if (e.target.closest('.plan-dd') || e.target.closest('.plan-btn')) return;
+  _planOpenId = null;
+  if (state.view === 'agenda') renderAgenda();
+});
+
 </script>
 </body>
 </html>

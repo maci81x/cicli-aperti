@@ -28,6 +28,7 @@ Deploy su GitHub Pages: https://maci81x.github.io/cicli-aperti/
 | `assegnazioni` | Assegnazioni ciclo→persona con ruolo | Disabilitato |
 | `macro_aree` | 9 macro aree fisse SSI | Disabilitato |
 | `user_tokens` | Token OAuth Google | Disabilitato |
+| `agenda_override` | Spostamenti agenda validi per 1 sola settimana | RLS con policy anon |
 
 ### Schema cicli (colonne rilevanti)
 
@@ -40,6 +41,8 @@ scheduled_time time, scheduled_end timestamp,
 execution_status text DEFAULT 'planned',  -- planned|in_progress|done|postponed
 google_event_id text,
 macro_area text,                          -- 9 macro aree SSI
+giorno_settimana text,                    -- lunedi..domenica (giorno preferito agenda)
+fascia_oraria text,                       -- mattina|pomeriggio|sera
 settimana_anno text,                      -- es. 2025-W26
 sync_status text DEFAULT 'pending',       -- pending|synced|failed
 created_at, updated_at
@@ -51,6 +54,19 @@ created_at, updated_at
 id serial PK, ciclo_id uuid FK cicli, persona_id uuid FK persone,
 ruolo text DEFAULT 'esecutore_principale', created_at timestamp
 ```
+
+### Schema agenda_override
+
+```sql
+id uuid PK, ciclo_id uuid FK cicli ON DELETE CASCADE,
+settimana int NOT NULL, anno int NOT NULL,
+giorno_settimana text NOT NULL, fascia_oraria text NOT NULL,
+created_at timestamptz,
+UNIQUE(ciclo_id, settimana, anno)
+```
+
+Un override vale **solo per la settimana indicata**: la settimana successiva
+il ciclo torna al `giorno_settimana`/`fascia_oraria` definiti sul ciclo stesso.
 
 ### Schema user_tokens
 
@@ -91,7 +107,8 @@ CARD BUILDER → CATEGORIE → PERSONA CHIPS → MODAL →
 PLAUD IMPORT → API KEY → TOAST → THEME → TOOLTIP → GUIDA →
 SKELETON → KEYBOARD → AVVIO →
 [BATTLE PLAN] GOOGLE CALENDAR → AUTO-CAT → VISTE (OGGI/SETTIMANA/MESE/AREE) →
-MOBILE CARD SWIPE → POSTPONE → PULL-TO-REFRESH → BATCH MIGRATE
+MOBILE CARD SWIPE → POSTPONE → PULL-TO-REFRESH → BATCH MIGRATE →
+DRAWER → COMPACT CARD → MATRIX MOBILE → VISTA AGENDA
 ```
 
 ## Macro Aree (9 fisse SSI)
@@ -113,12 +130,13 @@ Auto-assegnate via Claude Haiku alla creazione di ogni ciclo di tipo `lavoro`.
 | Persone | Cicli raggruppati per persona | — |
 | Storico | Cicli completati e passati | — |
 | Guida | Documentazione OSM | — |
+| Agenda | Griglia 7 giorni × 3 fasce, drag & drop override settimanali | 📆 |
 
 ## Mobile redesign v2 (2026-06-29)
 
 - Header mobile: 56px, solo logo + hamburger ≡
 - **Drawer** (`#drawer`): slide-in 250ms sinistra (80vw) con contesto, settimana nav, viste, GCal, strumenti, impostazioni
-- Nav mobile: **3 tab** — ☀️ Oggi | 📅 Settimana | 🔲 Matrice (Mese/Aree/Persone nel drawer)
+- Nav mobile: **4 tab** — ☀️ Oggi | 📅 Settimana | 🔲 Matrice | 📆 Agenda (Mese/Aree/Persone nel drawer)
 - **Compact card** (`makeCompactCard`): 48px altezza, riga [dot Q][titolo][area pill][orario], tap=expand inline, swipe threshold 60px
 - **Matrix mobile**: 2×2 grid compact boxes (`renderMatrixMobile`), tap box=espandi full-width
 - **Modal semplificato**: Contesto+Titolo+DataPianificata sempre visibili; "Più opzioni ▼" collassa il resto (solo mobile; desktop mostra tutto)
@@ -141,11 +159,36 @@ cicli_view         — vista corrente
 cicli_week         — settimana selezionata
 cicli_cat_filter   — filtro categoria
 cicli_theme        — tema (dark|light)
+cicli_agenda_sub   — sotto-vista agenda (pianificati|dapianificare)
 gcal_token         — Google access token
 gcal_expires       — timestamp scadenza token
 gcal_cal_id        — ID calendario Google Calendar
 gcal_email         — email account Google
 ```
+
+## Vista Agenda (2026-08-25)
+
+Due sotto-viste (toggle in header, persistito in `cicli_agenda_sub`):
+
+- **📅 Pianificati** — griglia 7 colonne (Lun→Dom) × sezioni 🌅 Mattina / ☀️ Pomeriggio /
+  🌙 Sera. Una quarta sezione "Non specificato" appare in cima al giorno solo se
+  contiene cicli con `fascia_oraria` null. Ogni sezione fascia è drop-zone.
+- **📥 Da pianificare** — cicli aperti senza `giorno_settimana`, raggruppati per
+  quadrante Q1→Q4. Pulsante "Pianifica" apre un mini dropdown che scrive
+  direttamente su `cicli` (assegnazione permanente, non override).
+
+Risoluzione posizione di un ciclo (`agendaSlotFor`):
+1. override in `agenda_override` per (ciclo_id, settimana, anno) → vince
+2. altrimenti `cicli.giorno_settimana` / `cicli.fascia_oraria`
+
+Drag & drop → upsert su `agenda_override` con `onConflict: 'ciclo_id,settimana,anno'`.
+Il selettore settimana in header è attivo in questa vista e ricarica gli override.
+
+**Degradazione**: `state.agendaColsOk` / `state.agendaTableOk` rilevano se la
+migration è applicata; se no, i campi del modale sono nascosti, il payload di
+`saveCiclo` non include le nuove colonne e il drag & drop è disabilitato.
+
+Migration: `supabase_migration_agenda.sql`.
 
 ## Regole per Claude Code
 
