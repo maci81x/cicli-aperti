@@ -44,6 +44,8 @@ macro_area text,                          -- 9 macro aree SSI
 giorno_settimana text,                    -- lunedi..domenica (giorno preferito agenda)
 fascia_oraria text,                       -- mattina|pomeriggio|sera
 ricorrenza text DEFAULT 'nessuna',        -- colonna esistente, NON ancora cablata nel modale
+parcheggiato boolean DEFAULT false,       -- "metti da parte": escluso dalle viste attive
+parcheggiato_at timestamptz,              -- quando e stato parcheggiato (ordinamento vista)
 settimana_anno text,                      -- es. 2025-W26
 sync_status text DEFAULT 'pending',       -- pending|synced|failed
 created_at, updated_at
@@ -132,6 +134,7 @@ Auto-assegnate via Claude Haiku alla creazione di ogni ciclo di tipo `lavoro`.
 | Storico | Cicli completati e passati | — |
 | Guida | Documentazione OSM | — |
 | Agenda | Griglia 7 giorni × 3 fasce, drag & drop override settimanali | 📆 |
+| Parcheggio | Cicli messi da parte, ordinati per parcheggiato_at DESC | — |
 
 ## Mobile redesign v2 (2026-06-29)
 
@@ -190,6 +193,32 @@ migration è applicata; se no, i campi del modale sono nascosti, il payload di
 `saveCiclo` non include le nuove colonne e il drag & drop è disabilitato.
 
 Migration: `supabase_migration_agenda.sql`.
+
+## Categorie: risoluzione etichette
+
+I cicli referenziano le categorie custom con `cat = 'custom_<id>'`. **Non mostrare
+mai quello slug in UI**: usa sempre gli helper
+
+- `catNome(cat)` → builtin da `CAT_LABELS`, custom da `state.categorie`, altrimenti
+  `'Senza categoria'`. Non restituisce mai `custom_N`.
+- `catIcona(cat)` → emoji builtin, emoji della categoria, altrimenti
+  `CAT_FALLBACK_EMOJI` (📌).
+
+## Parcheggio (2026-08-25)
+
+Un ciclo `parcheggiato = true` resta nel DB ma sparisce dalle viste di
+pianificazione. Il predicato unico è `isAttivo(c)` = `!c.done && !c.parcheggiato`,
+usato da: matrice, lista settimana, agenda, oggi, settimana, mese, aree, persone,
+ricerca e conteggi sidebar. Storico è volutamente escluso dal filtro (è l'archivio).
+
+Un ciclo esce da **Agenda → Da pianificare** quando ha `giorno_settimana`,
+oppure un `agenda_override` per la settimana corrente, oppure è parcheggiato.
+
+Azioni: `parcheggiaCiclo(id)`, `riattivaCiclo(id)`. `assegnaGiornoCiclo()`
+disparcheggia automaticamente se il ciclo era in parcheggio.
+
+Migration: `supabase_migration_parcheggio.sql`. Degradazione via
+`state.parcheggioColsOk` (nasconde il pulsante e mostra un banner nella vista).
 
 ## Regole per Claude Code
 
