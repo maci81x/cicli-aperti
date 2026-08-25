@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>Cicli Aperti — Roby</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -561,7 +561,49 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
 /* ── BADGE GIORNO/FASCIA (matrice + liste) ── */
 .giorno-badge { display:inline-flex; align-items:center; gap:3px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text-muted); background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:1px 5px; white-space:nowrap; }
 
+/* ── LISTE GRANDI: DA PIANIFICARE + PARCHEGGIO ── */
+.biglist-head { display:flex; align-items:center; gap:12px; margin:4px 0 6px; }
+.biglist-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; line-height:1.1; }
+.biglist-count { font-family:'DM Mono',monospace; font-size:13px; font-weight:700; color:var(--text-muted); background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:2px 11px; }
+.biglist-sub { font-size:12px; color:var(--text-dim); line-height:1.5; margin-bottom:14px; max-width:70ch; }
+.park-search-wrap { margin-bottom:16px; }
+.park-search { width:100%; max-width:420px; background:var(--bg2); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:10px 13px; font-family:'DM Sans',sans-serif; font-size:13px; }
+.park-search:focus { outline:none; border-color:var(--lavoro); }
+.park-search::placeholder { color:var(--text-dim); }
+
+/* griglia responsive: 3 desktop / 2 tablet / 1 mobile */
+.big-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:start; }
+
+.big-card { position:relative; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--q2); border-radius:var(--radius); padding:14px 15px 12px; cursor:pointer; transition:background 0.12s, border-color 0.12s; display:flex; flex-direction:column; min-height:132px; }
+.big-card:hover { background:var(--bg3); border-color:var(--border-light); }
+.big-card.q1 { border-left-color:var(--q1); }
+.big-card.q2 { border-left-color:var(--q2); }
+.big-card.q3 { border-left-color:var(--q3); }
+.big-card.q4 { border-left-color:var(--q4); }
+
+.big-q-badge { position:absolute; top:12px; right:13px; font-family:'DM Mono',monospace; font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.5px; }
+.big-q-badge.q1 { background:var(--q1-dim); color:var(--q1); }
+.big-q-badge.q2 { background:var(--q2-dim); color:var(--q2); }
+.big-q-badge.q3 { background:var(--q3-dim); color:var(--q3); }
+.big-q-badge.q4 { background:var(--q4-dim); color:var(--text-muted); }
+
+.big-card-title { font-family:'Inter','DM Sans',sans-serif; font-size:15px; font-weight:500; color:var(--text); line-height:1.4; padding-right:44px; word-break:break-word; }
+.big-card-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:9px; }
+.big-cat { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; color:var(--text-muted); background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:2px 8px; white-space:nowrap; }
+.big-park-date { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); }
+
+.big-card-actions { display:flex; gap:7px; margin-top:auto; padding-top:12px; }
+.big-btn { flex:1; border-radius:var(--radius-sm); padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.big-btn.primary { background:var(--lavoro); border:1px solid var(--lavoro); color:#fff; }
+.big-btn.primary:hover { filter:brightness(1.1); }
+.big-btn.secondary { background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); }
+.big-btn.secondary:hover { background:var(--border); color:var(--text); }
+body.light .big-btn.primary { color:#fff; }
+
 /* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .big-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 768px) {
   header { padding: 12px 16px; gap: 8px; }
   .logo { font-size: 20px; }
@@ -590,6 +632,9 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
   .agenda-tog-btn { flex: 1; justify-content: center; }
   .ag-card-title { font-size: 12px; }
   .plan-dd { right: 0; width: min(230px, calc(100vw - 48px)); }
+  .big-grid { grid-template-columns: 1fr; }
+  .biglist-title { font-size: 20px; }
+  .park-search { max-width: 100%; }
 }
 @media (max-width: 480px) {
   .week-summary { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -754,6 +799,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div class="drawer-item" onclick="switchView('aree');closeDrawer()">🏢 Macro Aree</div>
     <div class="drawer-item" onclick="switchView('persone');closeDrawer()">👥 Persone</div>
     <div class="drawer-item" onclick="switchView('storico');closeDrawer()">🕐 Storico</div>
+    <div class="drawer-item" onclick="switchView('parcheggio');closeDrawer()">⭐ Parcheggio</div>
     <div class="drawer-item" onclick="switchView('guida');closeDrawer()">📖 Guida</div>
   </div>
   <div class="drawer-section">
@@ -809,6 +855,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
         <button class="view-btn" id="vbtn-storico" onclick="switchView('storico')">🕐 Storico</button>
         <button class="view-btn" id="vbtn-aree" onclick="switchView('aree')">🏢 Aree</button>
         <button class="view-btn" id="vbtn-agenda" onclick="switchView('agenda')">📆 Agenda</button>
+        <button class="view-btn" id="vbtn-parcheggio" onclick="switchView('parcheggio')">⭐ Parcheggio</button>
       </div>
     </div>
 
@@ -866,6 +913,7 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
     <div id="view-mese" style="display:none"></div>
     <div id="view-aree" style="display:none"></div>
     <div id="view-agenda" style="display:none"></div>
+    <div id="view-parcheggio" style="display:none"></div>
   </div>
 </div>
 
@@ -1181,6 +1229,8 @@ const FASCE = [
 
 const FASCIA_NULL = '__none__';   // pseudo-fascia "Non specificato"
 
+const CAT_FALLBACK_EMOJI = '📌';
+
 const GIORNI_MAP = Object.fromEntries(GIORNI.map(g => [g.key, g]));
 const FASCE_MAP  = Object.fromEntries(FASCE.map(f => [f.key, f]));
 
@@ -1209,7 +1259,9 @@ let state = {
   agendaSub:        localStorage.getItem(LS.AGENDA_SUB) || 'pianificati',
   agendaOverrides:  [],
   agendaTableOk:    true,
-  agendaColsOk:     true
+  agendaColsOk:     true,
+  parcheggioColsOk: true,
+  parcheggioQuery:  ''
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -1267,6 +1319,36 @@ function computeEffectiveQ(c) {
   return c.q;
 }
 
+// Risolve l'etichetta di una categoria: builtin, custom_<id> dalla tabella
+// categorie, o fallback leggibile. Non deve MAI restituire uno slug tecnico.
+// Un ciclo è "attivo" se non chiuso e non parcheggiato.
+// I parcheggiati restano nel DB ma spariscono dalle viste di pianificazione.
+function isParcheggiato(c) { return !!(c && c.parcheggiato); }
+function isAttivo(c)       { return !c.done && !isParcheggiato(c); }
+
+function catNome(cat) {
+  if (!cat) return '';
+  if (CAT_LABELS[cat]) return CAT_LABELS[cat];
+  const m = /^custom_(.+)$/.exec(cat);
+  if (m) {
+    const found = (state.categorie || []).find(c => String(c.id) === m[1]);
+    if (found && found.nome) return found.nome;
+    return 'Senza categoria';
+  }
+  return cat;
+}
+
+function catIcona(cat) {
+  if (!cat) return CAT_FALLBACK_EMOJI;
+  if (CAT_EMOJIS[cat]) return CAT_EMOJIS[cat];
+  const m = /^custom_(.+)$/.exec(cat);
+  if (m) {
+    const found = (state.categorie || []).find(c => String(c.id) === m[1]);
+    if (found && found.emoji && found.emoji.trim()) return found.emoji;
+  }
+  return CAT_FALLBACK_EMOJI;
+}
+
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -1312,6 +1394,12 @@ async function loadAgendaOverrides() {
     state.agendaColsOk = !error;
     if (error) console.warn('[Agenda] colonne cicli non migrate:', error.message);
   } catch (_) { state.agendaColsOk = false; }
+
+  try {
+    const { error } = await db.from('cicli').select('id,parcheggiato,parcheggiato_at').limit(1);
+    state.parcheggioColsOk = !error;
+    if (error) console.warn('[Parcheggio] colonne cicli non migrate:', error.message);
+  } catch (_) { state.parcheggioColsOk = false; }
 
   try {
     const { data, error } = await db.from('agenda_override')
@@ -1444,7 +1532,7 @@ function updateMobileNav() {
 }
 
 function renderViews() {
-  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree','agenda'];
+  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree','agenda','parcheggio'];
   views.forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = state.view === v ? 'block' : 'none';
@@ -1452,7 +1540,7 @@ function renderViews() {
     if (btn) btn.className = 'view-btn' + (state.view === v ? ' active' + (state.ctx === 'personale' ? ' personale' : '') : '');
   });
 
-  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE', agenda:'AGENDA SETTIMANALE' };
+  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE', agenda:'AGENDA SETTIMANALE', parcheggio:'PARCHEGGIO' };
   document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
 
   if (state.searchQuery) {
@@ -1470,8 +1558,8 @@ function renderViews() {
   if (state.view === 'guida') { renderGuida(); return; }
 
   const allCtx    = state.cicli.filter(c => c.ctx === state.ctx);
-  const nonDoneCtx = allCtx.filter(c => !c.done);
-  const weekCtx   = allCtx.filter(c => c.week === state.week && c.year === state.year);
+  const nonDoneCtx = allCtx.filter(isAttivo);
+  const weekCtx   = allCtx.filter(c => isAttivo(c) && c.week === state.week && c.year === state.year);
 
   // Se filter_cat è stale (non corrisponde ad alcun ciclo del contesto corrente) lo azzeriamo
   if (state.filter_cat) {
@@ -1503,6 +1591,7 @@ function renderViews() {
   if (state.view === 'mese')     renderMese();
   if (state.view === 'aree')     renderAree();
   if (state.view === 'agenda')   renderAgenda();
+  if (state.view === 'parcheggio') renderParcheggio();
 }
 
 function applyFilters(cicli) {
@@ -1566,7 +1655,7 @@ function personColor(p) {
 }
 
 function cicliForPersona(nome) {
-  return state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(nome));
+  return state.cicli.filter(c => isAttivo(c) && (c.persone_menzionate || []).includes(nome));
 }
 
 function renderPersone() {
@@ -1617,7 +1706,7 @@ function renderPersonaDetail(pv) {
   if (!p) { state.personaDetailId = null; renderPersone(); return; }
 
   const col = personColor(p);
-  const allCicli = state.cicli.filter(c => !c.done && (c.persone_menzionate || []).includes(p.nome));
+  const allCicli = state.cicli.filter(c => isAttivo(c) && (c.persone_menzionate || []).includes(p.nome));
 
   const back = document.createElement('button');
   back.className = 'persona-back-btn';
@@ -1786,11 +1875,11 @@ function renderSearchResults() {
   lv.innerHTML = '';
   const q = state.searchQuery.toLowerCase();
 
-  const results = state.cicli.filter(c => !c.done && (
+  const results = state.cicli.filter(c => isAttivo(c) && (
     (c.title || '').toLowerCase().includes(q) ||
     (c.note  || '').toLowerCase().includes(q) ||
     (c.cat   || '').toLowerCase().includes(q) ||
-    (CAT_LABELS[c.cat] || '').toLowerCase().includes(q) ||
+    (catNome(c.cat) || '').toLowerCase().includes(q) ||
     (c.persone_menzionate || []).some(n => n.toLowerCase().includes(q))
   ));
 
@@ -1836,41 +1925,47 @@ function renderSidebar() {
     list:    'Tutti i cicli della settimana in ordine di priorità',
     persone: 'Vedi tutti i cicli associati a una persona — utile prima di una riunione',
     storico: 'Archivio cicli chiusi con possibilità di riapertura',
+    parcheggio: 'Cicli da tenere presenti ma non ancora pianificati',
     guida:   'Istruzioni complete per usare CICLI APERTI'
   };
 
-  const viewItems = ['matrix','agenda','list','persone','storico','guida'].map(v => {
-    const icons  = { matrix:'🔲', agenda:'📆', list:'📋', persone:'👥', storico:'🕐', guida:'📖' };
-    const labels = { matrix:'Matrice', agenda:'Agenda', list:'Lista settimana', persone:'Persone', storico:'Storico', guida:'Guida' };
+  const parkCount = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c)).length;
+
+  const viewItems = ['matrix','agenda','list','persone','storico','parcheggio','guida'].map(v => {
+    const icons  = { matrix:'🔲', agenda:'📆', list:'📋', persone:'👥', storico:'🕐', parcheggio:'⭐', guida:'📖' };
+    const labels = { matrix:'Matrice', agenda:'Agenda', list:'Lista settimana', persone:'Persone', storico:'Storico', parcheggio:'Parcheggio', guida:'Guida' };
     const active = state.view === v;
-    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="switchView('${v}')">
+    const badge = v === 'parcheggio'
+      ? `<span class="sidebar-count">${parkCount}</span>`
+      : `<span class="tip-icon" data-tip="${VIEW_TIPS[v]}">i</span>`;
+    return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="switchView('${v}')"${v==='parcheggio' ? ` title="${VIEW_TIPS[v]}"` : ''}>
       <span>${icons[v]}</span>${labels[v]}
-      <span class="tip-icon" data-tip="${VIEW_TIPS[v]}">i</span>
+      ${badge}
     </div>`;
   }).join('');
 
   const builtinItems = builtinCats.map(cat => {
-    const cnt = allCtx.filter(c => c.cat === cat && !c.done).length;
+    const cnt = allCtx.filter(c => c.cat === cat && isAttivo(c)).length;
     const active = state.filter_cat === cat;
     return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('${cat}')">
-      <span>${CAT_EMOJIS[cat]||'•'}</span>${CAT_LABELS[cat]||cat}
+      <span>${catIcona(cat)}</span>${catNome(cat)}
       <span class="sidebar-count">${cnt||0}</span>
     </div>`;
   }).join('');
 
   const customItems = customCats.map(cat => {
-    const cnt = allCtx.filter(c => c.cat === 'custom_'+cat.id && !c.done).length;
+    const cnt = allCtx.filter(c => c.cat === 'custom_'+cat.id && isAttivo(c)).length;
     const active = state.filter_cat === 'custom_'+cat.id;
     const canDel = cnt === 0;
     return `<div class="sidebar-item ${active ? 'active'+(isP?' personale':'') : ''}" onclick="filterByCat('custom_${cat.id}')">
-      <span>${cat.emoji||'•'}</span>${escHtml(cat.nome)}
+      <span>${cat.emoji || CAT_FALLBACK_EMOJI}</span>${escHtml(cat.nome)}
       <span class="sidebar-count">${cnt}</span>
       <span class="sidebar-edit-icon" onclick="event.stopPropagation();editCatInline(${cat.id})" title="Modifica">✏️</span>
       ${canDel ? `<span class="sidebar-edit-icon" onclick="event.stopPropagation();deleteCat(${cat.id})" title="Elimina">🗑</span>` : ''}
     </div>`;
   }).join('');
 
-  const totalActive = allCtx.filter(c=>!c.done).length;
+  const totalActive = allCtx.filter(isAttivo).length;
   const totalDone   = allCtx.filter(c=>c.done).length;
 
   sidebar.innerHTML = `
@@ -1974,7 +2069,7 @@ function makeCicloCard(c, mode) {
     if (c.cat) {
       const tag = document.createElement('span');
       tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
-      tag.textContent = CAT_LABELS[c.cat] || c.cat;
+      tag.textContent = catNome(c.cat);
       meta.appendChild(tag);
     }
     const gb = makeGiornoBadge(c);
@@ -2049,7 +2144,7 @@ function makeCicloCard(c, mode) {
   if (c.cat) {
     const tag = document.createElement('span');
     tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
-    tag.textContent = CAT_LABELS[c.cat] || c.cat;
+    tag.textContent = catNome(c.cat);
     meta.appendChild(tag);
   }
   const gBadge = makeGiornoBadge(c);
@@ -2554,7 +2649,7 @@ function renderPlaudItems(items) {
       </div>
       ${noteHtml}
       <div class="plaud-item-meta">
-        <span class="meta-tag ${CAT_COLORS[item.cat]||''}">${CAT_LABELS[item.cat]||item.cat||'—'}</span>
+        <span class="meta-tag ${CAT_COLORS[item.cat]||''}">${escHtml(catNome(item.cat)) || '—'}</span>
         ${personeHtml}
         <input type="date" id="plaud-date-${idx}" value="${dateVal}" class="plaud-date-input" title="Scadenza">
       </div>
@@ -3302,7 +3397,7 @@ function renderOggi() {
   const el = document.getElementById('view-oggi');
   if (!el) return;
   const today = todayISO();
-  const todayItems = state.cicli.filter(c => !c.done && c.scheduled_date === today)
+  const todayItems = state.cicli.filter(c => isAttivo(c) && c.scheduled_date === today)
     .sort((a, b) => (a.scheduled_time || '23:59').localeCompare(b.scheduled_time || '23:59'));
 
   const DAYS = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -3378,7 +3473,7 @@ function renderSettimana() {
   el.appendChild(ptr);
 
   // Raggruppa cicli per giorno
-  const cicliSett = state.cicli.filter(c => !c.done && c.scheduled_date >= startISO && c.scheduled_date <= endISO);
+  const cicliSett = state.cicli.filter(c => isAttivo(c) && c.scheduled_date >= startISO && c.scheduled_date <= endISO);
   const byDay = {};
   for (let i = 0; i < 7; i++) {
     const d = new Date(baseDay); d.setDate(baseDay.getDate() + i);
@@ -3451,7 +3546,7 @@ function renderMese() {
 
   // Prepara mappa cicli per giorno
   const cicliMap = {};
-  state.cicli.filter(c => !c.done && c.scheduled_date).forEach(c => {
+  state.cicli.filter(c => isAttivo(c) && c.scheduled_date).forEach(c => {
     const [y, m] = c.scheduled_date.split('-').map(Number);
     if (y === year && m === month + 1) {
       const d = parseInt(c.scheduled_date.slice(8));
@@ -3489,7 +3584,7 @@ function renderMese() {
   el.appendChild(grid);
 
   // Mini legenda macro aree usate
-  const used = [...new Set(state.cicli.filter(c=>!c.done&&c.macro_area).map(c=>c.macro_area))].slice(0,5);
+  const used = [...new Set(state.cicli.filter(c=>isAttivo(c)&&c.macro_area).map(c=>c.macro_area))].slice(0,5);
   if (used.length) {
     const leg = document.createElement('div');
     leg.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:8px';
@@ -3530,7 +3625,7 @@ function renderAree() {
   el.appendChild(nav);
 
   // Filtra cicli della settimana (per scheduled_date o week/year)
-  const cicliSett = state.cicli.filter(c => !c.done && (
+  const cicliSett = state.cicli.filter(c => isAttivo(c) && (
     (c.scheduled_date && c.scheduled_date >= startISO && c.scheduled_date <= endISO) ||
     (c.week === getWeekNumber(baseDay) && c.year === baseDay.getFullYear())
   ));
@@ -4197,7 +4292,7 @@ function agendaSlotFor(c) {
 
 // Cicli aperti del contesto corrente, con i filtri di sidebar applicati
 function agendaBaseCicli() {
-  return applyFilters(state.cicli.filter(c => c.ctx === state.ctx && !c.done));
+  return applyFilters(state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c)));
 }
 
 function agendaPianificati()   { return agendaBaseCicli().filter(c => agendaSlotFor(c).giorno); }
@@ -4507,9 +4602,107 @@ async function moveCicloInAgenda(cicloId, giorno, fascia) {
   }
 }
 
+// ── CARD GRANDE (usata da "Da pianificare" e "Parcheggio") ──
+// mode: 'pianifica' | 'parcheggio'
+function makeBigCard(c, mode) {
+  const q        = computeEffectiveQ(c);
+  const esc      = getEscalation(c);
+  const daysLeft = getDaysLeft(c.due_date);
+
+  const card = document.createElement('div');
+  card.className = 'big-card q' + q;
+  card.onclick = () => openModal(null, c.id);
+
+  const badge = document.createElement('span');
+  badge.className = 'big-q-badge q' + q;
+  badge.textContent = 'Q' + q;
+  card.appendChild(badge);
+
+  const title = document.createElement('div');
+  title.className = 'big-card-title';
+  title.textContent = c.title || '';
+  card.appendChild(title);
+
+  const meta = document.createElement('div');
+  meta.className = 'big-card-meta';
+
+  if (c.cat) {
+    const tag = document.createElement('span');
+    tag.className = 'big-cat';
+    tag.textContent = catIcona(c.cat) + ' ' + catNome(c.cat);
+    meta.appendChild(tag);
+  }
+  if (daysLeft !== null) {
+    const dt = document.createElement('span');
+    dt.className = 'ciclo-date' + (esc === 'crit' ? ' urgent' : esc === 'warn' ? ' near' : '');
+    dt.textContent = '📅 ' + formatDaysLeft(daysLeft);
+    meta.appendChild(dt);
+  }
+  if (mode === 'parcheggio' && c.parcheggiato_at) {
+    const pa = document.createElement('span');
+    pa.className = 'big-park-date';
+    const d = new Date(c.parcheggiato_at);
+    pa.textContent = '⭐ dal ' + d.getDate() + '/' + (d.getMonth() + 1);
+    meta.appendChild(pa);
+  }
+  const avatars = makeAgendaAvatars(c.persone_menzionate);
+  if (avatars) { avatars.style.marginLeft = '0'; meta.appendChild(avatars); }
+  card.appendChild(meta);
+
+  const actions = document.createElement('div');
+  actions.className = 'big-card-actions';
+
+  if (mode === 'parcheggio') {
+    const back = document.createElement('button');
+    back.className = 'big-btn secondary';
+    back.textContent = '🔄 Riattiva';
+    back.onclick = e => { e.stopPropagation(); riattivaCiclo(c.id); };
+    actions.appendChild(back);
+
+    const plan = document.createElement('button');
+    plan.className = 'big-btn primary';
+    plan.textContent = '📅 Pianifica ora';
+    plan.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+    actions.appendChild(plan);
+  } else {
+    if (state.parcheggioColsOk) {
+      const park = document.createElement('button');
+      park.className = 'big-btn secondary';
+      park.textContent = '⭐ Metti da parte';
+      park.onclick = e => { e.stopPropagation(); parcheggiaCiclo(c.id); };
+      actions.appendChild(park);
+    }
+
+    const plan = document.createElement('button');
+    plan.className = 'big-btn primary';
+    plan.textContent = '📅 Pianifica';
+    plan.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+    actions.appendChild(plan);
+  }
+  card.appendChild(actions);
+
+  if (_planOpenId === c.id) card.appendChild(makePlanDropdown(c));
+  return card;
+}
+
+// Q1 prima, poi per data di creazione crescente
+function sortByQThenCreated(list) {
+  return [...list].sort((a, b) => {
+    const qa = computeEffectiveQ(a), qb = computeEffectiveQ(b);
+    if (qa !== qb) return qa - qb;
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+  });
+}
+
 // ── SOTTO-VISTA: DA PIANIFICARE ──
 function renderAgendaDaPianificare(root) {
-  const cicli = agendaDaPianificare();
+  const cicli = sortByQThenCreated(agendaDaPianificare());
+
+  const head = document.createElement('div');
+  head.className = 'biglist-head';
+  head.innerHTML = `<div class="biglist-title">📥 Cicli da pianificare</div>
+    <div class="biglist-count">${cicli.length}</div>`;
+  root.appendChild(head);
 
   if (!cicli.length) {
     const e = document.createElement('div');
@@ -4519,76 +4712,124 @@ function renderAgendaDaPianificare(root) {
     return;
   }
 
-  const byQ = { 1: [], 2: [], 3: [], 4: [] };
-  cicli.forEach(c => { const q = computeEffectiveQ(c); if (byQ[q]) byQ[q].push(c); });
-
-  const qLabels = { 1:'🔥 Q1 — Crisi', 2:'📌 Q2 — Qualità', 3:'📋 Q3 — Inganno', 4:'🗑 Q4 — Spreco' };
-  const qColors = { 1:'var(--q1)', 2:'var(--q2)', 3:'var(--q3)', 4:'var(--q4)' };
-
-  [1,2,3,4].forEach(q => {
-    if (!byQ[q].length) return;
-    const sec = document.createElement('div');
-    sec.className = 'plan-group';
-
-    const title = document.createElement('div');
-    title.className = 'plan-group-title';
-    title.style.color = qColors[q];
-    title.innerHTML = `<span>${qLabels[q]}</span><span class="plan-group-cnt">${byQ[q].length}</span>`;
-    sec.appendChild(title);
-
-    byQ[q].forEach(c => sec.appendChild(makePlanCard(c, q)));
-    root.appendChild(sec);
-  });
+  const grid = document.createElement('div');
+  grid.className = 'big-grid';
+  cicli.forEach(c => grid.appendChild(makeBigCard(c, 'pianifica')));
+  root.appendChild(grid);
 }
 
-function makePlanCard(c, q) {
-  const esc      = getEscalation(c);
-  const daysLeft = getDaysLeft(c.due_date);
+// ── VISTA PARCHEGGIO ──
+function renderParcheggio() {
+  const root = document.getElementById('view-parcheggio');
+  if (!root) return;
+  root.innerHTML = '';
 
-  const card = document.createElement('div');
-  card.className = 'plan-card q' + q;
-  card.onclick = () => openModal(null, c.id);
-
-  const info = document.createElement('div');
-  info.className = 'plan-card-info';
-
-  const title = document.createElement('div');
-  title.className = 'plan-card-title';
-  title.textContent = c.title || '';
-  info.appendChild(title);
-
-  const meta = document.createElement('div');
-  meta.className = 'plan-card-meta';
-  if (c.cat) {
-    const tag = document.createElement('span');
-    tag.className = 'meta-tag ' + (CAT_COLORS[c.cat] || '');
-    tag.textContent = CAT_LABELS[c.cat] || c.cat;
-    meta.appendChild(tag);
+  if (!state.parcheggioColsOk) {
+    const warn = document.createElement('div');
+    warn.className = 'escalation-notice';
+    warn.innerHTML = '⚠️ <strong>Migration non applicata:</strong> esegui <code>supabase_migration_parcheggio.sql</code> sul progetto per attivare il parcheggio.';
+    root.appendChild(warn);
+    return;
   }
-  const avatars = makeAgendaAvatars(c.persone_menzionate);
-  if (avatars) { avatars.style.marginLeft = '0'; meta.appendChild(avatars); }
-  if (daysLeft !== null) {
-    const dt = document.createElement('span');
-    dt.className = 'ciclo-date' + (esc === 'crit' ? ' urgent' : esc === 'warn' ? ' near' : '');
-    dt.textContent = '📅 ' + formatDaysLeft(daysLeft);
-    meta.appendChild(dt);
+
+  // più recenti in alto
+  const all = state.cicli
+    .filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c))
+    .sort((a, b) => new Date(b.parcheggiato_at || 0) - new Date(a.parcheggiato_at || 0));
+
+  const q = (state.parcheggioQuery || '').trim().toLowerCase();
+  const cicli = q
+    ? all.filter(c =>
+        (c.title || '').toLowerCase().includes(q) ||
+        (c.note  || '').toLowerCase().includes(q) ||
+        (catNome(c.cat) || '').toLowerCase().includes(q) ||
+        (c.persone_menzionate || []).some(p => p.toLowerCase().includes(q)))
+    : all;
+
+  const head = document.createElement('div');
+  head.className = 'biglist-head';
+  head.innerHTML = `<div class="biglist-title">⭐ Parcheggio</div>
+    <div class="biglist-count">${cicli.length}${q && cicli.length !== all.length ? ' / ' + all.length : ''}</div>`;
+  root.appendChild(head);
+
+  const sub = document.createElement('div');
+  sub.className = 'biglist-sub';
+  sub.textContent = 'Cicli da tenere presenti ma non ancora pianificati. Non compaiono in Matrice, Agenda e Lista settimana.';
+  root.appendChild(sub);
+
+  const searchWrap = document.createElement('div');
+  searchWrap.className = 'park-search-wrap';
+  const search = document.createElement('input');
+  search.type = 'text';
+  search.className = 'park-search';
+  search.placeholder = '🔍 Cerca nel parcheggio...';
+  search.value = state.parcheggioQuery || '';
+  search.oninput = e => {
+    state.parcheggioQuery = e.target.value;
+    const pos = e.target.selectionStart;
+    renderParcheggio();
+    const again = document.querySelector('.park-search');
+    if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+  };
+  searchWrap.appendChild(search);
+  root.appendChild(searchWrap);
+
+  if (!all.length) {
+    const e = document.createElement('div');
+    e.className = 'empty-state';
+    e.innerHTML = 'Il parcheggio è vuoto.<br>Usa “⭐ Metti da parte” su un ciclo in <em>Agenda → Da pianificare</em>.';
+    root.appendChild(e);
+    return;
   }
-  info.appendChild(meta);
-  card.appendChild(info);
+  if (!cicli.length) {
+    const e = document.createElement('div');
+    e.className = 'empty-state';
+    e.textContent = 'Nessun ciclo corrisponde alla ricerca.';
+    root.appendChild(e);
+    return;
+  }
 
-  const btn = document.createElement('button');
-  btn.className = 'plan-btn';
-  btn.textContent = 'Pianifica';
-  btn.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
-  card.appendChild(btn);
+  const grid = document.createElement('div');
+  grid.className = 'big-grid';
+  cicli.forEach(c => grid.appendChild(makeBigCard(c, 'parcheggio')));
+  root.appendChild(grid);
+}
 
-  if (_planOpenId === c.id) card.appendChild(makePlanDropdown(c));
-  return card;
+// ── AZIONI PARCHEGGIO ──
+async function parcheggiaCiclo(cicloId) {
+  if (!state.parcheggioColsOk) { showToast('Migration parcheggio non applicata', 'error'); return; }
+  const now = new Date().toISOString();
+  try {
+    const { error } = await db.from('cicli')
+      .update({ parcheggiato: true, parcheggiato_at: now, updated_at: now })
+      .eq('id', cicloId);
+    if (error) throw error;
+    state.cicli = state.cicli.map(c =>
+      c.id === cicloId ? { ...c, parcheggiato: true, parcheggiato_at: now } : c);
+    _planOpenId = null;
+    render();
+    showToast('Messo in parcheggio ⭐', 'success');
+  } catch (err) { showToast('Errore: ' + err.message, 'error'); }
+}
+
+async function riattivaCiclo(cicloId) {
+  const now = new Date().toISOString();
+  try {
+    const { error } = await db.from('cicli')
+      .update({ parcheggiato: false, parcheggiato_at: null, updated_at: now })
+      .eq('id', cicloId);
+    if (error) throw error;
+    state.cicli = state.cicli.map(c =>
+      c.id === cicloId ? { ...c, parcheggiato: false, parcheggiato_at: null } : c);
+    _planOpenId = null;
+    render();
+    showToast('Ciclo riattivato 🔄', 'success');
+  } catch (err) { showToast('Errore: ' + err.message, 'error'); }
 }
 
 function togglePlanDropdown(id) {
   _planOpenId = (_planOpenId === id) ? null : id;
-  renderAgenda();
+  if (state.view === 'parcheggio') renderParcheggio(); else renderAgenda();
 }
 
 function makePlanDropdown(c) {
@@ -4619,24 +4860,28 @@ function makePlanDropdown(c) {
   return dd;
 }
 
-// Assegnazione permanente sul ciclo (non è un override settimanale)
+// Assegnazione permanente sul ciclo. Se il ciclo era parcheggiato lo disparcheggia.
 async function assegnaGiornoCiclo(cicloId, giorno, fascia) {
   if (!giorno) { showToast('Seleziona un giorno', 'warn'); return; }
   if (!state.agendaColsOk) { showToast('Migration agenda non applicata', 'error'); return; }
+
+  const wasParked = isParcheggiato(state.cicli.find(c => c.id === cicloId));
+  const patch = { giorno_settimana: giorno, fascia_oraria: fascia, updated_at: new Date().toISOString() };
+  if (wasParked && state.parcheggioColsOk) { patch.parcheggiato = false; patch.parcheggiato_at = null; }
+
   try {
-    const { error } = await db.from('cicli')
-      .update({ giorno_settimana: giorno, fascia_oraria: fascia, updated_at: new Date().toISOString() })
-      .eq('id', cicloId);
+    const { error } = await db.from('cicli').update(patch).eq('id', cicloId);
     if (error) throw error;
 
-    // aggiornamento immutabile dello stato locale
     state.cicli = state.cicli.map(c =>
-      c.id === cicloId ? { ...c, giorno_settimana: giorno, fascia_oraria: fascia } : c
-    );
+      c.id === cicloId
+        ? { ...c, giorno_settimana: giorno, fascia_oraria: fascia,
+            ...(wasParked ? { parcheggiato: false, parcheggiato_at: null } : {}) }
+        : c);
     _planOpenId = null;
-    renderAgenda();
+    render();
     const f = fascia ? ' ' + FASCE_MAP[fascia].label.toLowerCase() : '';
-    showToast(`Pianificato: ${GIORNI_MAP[giorno].label}${f} ✓`, 'success');
+    showToast(`Pianificato: ${GIORNI_MAP[giorno].label}${f} ✓` + (wasParked ? ' — tolto dal parcheggio' : ''), 'success');
   } catch (err) {
     showToast('Errore: ' + err.message, 'error');
   }
@@ -4645,9 +4890,10 @@ async function assegnaGiornoCiclo(cicloId, giorno, fascia) {
 // chiude il mini dropdown cliccando fuori
 document.addEventListener('click', e => {
   if (_planOpenId === null) return;
-  if (e.target.closest('.plan-dd') || e.target.closest('.plan-btn')) return;
+  if (e.target.closest('.plan-dd') || e.target.closest('.big-btn')) return;
   _planOpenId = null;
   if (state.view === 'agenda') renderAgenda();
+  else if (state.view === 'parcheggio') renderParcheggio();
 });
 
 </script>
