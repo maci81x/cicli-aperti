@@ -637,9 +637,49 @@ body.light .ag-rip.settimanale { color:#b45309; }
 body.light .ag-rip.mensile     { color:#1d4ed8; }
 body.light .ag-rip.trimestrale { color:#6d28d9; }
 
+/* ── MODALE PIANIFICA: griglia ripetizione 3x2 + ora/durata ── */
+.pf-grid-rip { grid-template-columns: 1fr 1fr; gap: 6px; }
+.pf-opt-empty { display: block; }
+.pf-hint { font-size: 11px; color: var(--text-dim); line-height: 1.4; margin: -3px 0 7px; }
+.pf-durata-custom { margin-top: 8px; }
+.pf-error { font-size: 11px; color: var(--q1); margin-top: 7px; line-height: 1.4; }
+.pf-field.pf-hidden { display: none; }
+
+/* ── RITUALI QUOTIDIANI (vista Agenda) ── */
+.rituali-block { margin-bottom: 18px; }
+.rituali-head { margin-bottom: 10px; }
+.rituali-title { font-family: 'Inter','DM Sans',sans-serif; font-size: 15px; font-weight: 500; color: var(--text); }
+.rituali-sub { font-family: 'Inter','DM Sans',sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.rituali-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; align-items: start; }
+.rituali-sep { height: 0; border-top: 0.5px solid var(--border); margin: 18px 0; }
+
+.rit-card { position: relative; background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--lavoro); border-radius: var(--radius-sm); padding: 10px 12px 10px 13px; cursor: pointer; transition: background 0.12s, border-color 0.12s, opacity 0.15s; min-height: 84px; display: flex; flex-direction: column; }
+.rit-card:hover { background: var(--bg3); border-color: var(--border-light); }
+.rit-card.personale { border-left-color: var(--personale); }
+.rit-card.fatto { opacity: 0.4; }
+.rit-top { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+.rit-q { font-family: 'DM Mono',monospace; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.4px; }
+.rit-q.q1 { background: var(--q1-dim); color: var(--q1); }
+.rit-q.q2 { background: var(--q2-dim); color: var(--q2); }
+.rit-q.q3 { background: var(--q3-dim); color: var(--q3); }
+.rit-q.q4 { background: var(--q4-dim); color: var(--text-muted); }
+.rit-fatto-badge { font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 3px; background: rgba(34,197,94,0.15); color: #22c55e; white-space: nowrap; }
+.rit-ora { font-family: 'Inter','DM Sans',sans-serif; font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.2; }
+.rit-durata { font-size: 10px; color: var(--text-dim); font-family: 'DM Mono',monospace; margin-top: 1px; }
+.rit-titolo { font-size: 12px; color: var(--text); line-height: 1.35; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.rit-bottom { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 8px; }
+.rit-cat { font-size: 10px; color: var(--text-muted); background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rit-check { margin-left: auto; flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; color: transparent; transition: all 0.12s; }
+.rit-check:hover { border-color: var(--text-muted); }
+.rit-check.checked { background: #22c55e; border-color: #22c55e; color: #fff; }
+
+/* ── BADGE "OGNI GIORNO" (matrice / lista) ── */
+.giornaliero-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 3px; background: rgba(255,170,0,0.1); color: #ffaa00; white-space: nowrap; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
   .big-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rituali-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 768px) {
   header { padding: 12px 16px; gap: 8px; }
@@ -670,6 +710,10 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
   .ag-card-title { font-size: 12px; }
   .plan-dd { right: 0; width: min(230px, calc(100vw - 48px)); }
   .big-grid { grid-template-columns: 1fr; }
+  /* rituali: scroll orizzontale su mobile */
+  .rituali-grid { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 6px; scrollbar-width: none; }
+  .rituali-grid::-webkit-scrollbar { display: none; }
+  .rit-card { flex: 0 0 200px; min-width: 200px; scroll-snap-align: start; }
   .biglist-title { font-size: 20px; }
   .park-search { max-width: 100%; }
   /* PIANIFICA: bottom sheet */
@@ -1111,7 +1155,7 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
       <input type="date" class="form-input pf-date" id="pf-data-specifica" style="display:none">
     </div>
 
-    <div class="pf-field">
+    <div class="pf-field" id="pf-giornofascia-field">
       <div class="pf-grid2">
         <div>
           <div class="pf-label">Giorno</div>
@@ -1138,12 +1182,36 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
 
     <div class="pf-field">
       <div class="pf-label">Ripetizione</div>
-      <div class="pf-grid2">
+      <div class="pf-grid2 pf-grid-rip">
         <button class="pf-opt" data-rip="nessuna">Una volta sola</button>
+        <button class="pf-opt" data-rip="giornaliera">Giornaliero</button>
         <button class="pf-opt" data-rip="settimanale">Settimanale</button>
         <button class="pf-opt" data-rip="mensile">Mensile</button>
         <button class="pf-opt" data-rip="trimestrale">Trimestrale</button>
+        <span class="pf-opt-empty"></span>
       </div>
+    </div>
+
+    <div class="pf-field" id="pf-oradurata-field">
+      <div class="pf-label">Ora e durata</div>
+      <div class="pf-hint" id="pf-oradurata-hint">Obbligatorio per rituali giornalieri, opzionale altrimenti</div>
+      <div class="pf-grid2">
+        <input type="time" class="form-input" id="f-ora-inizio" placeholder="09:00">
+        <select class="form-select" id="f-durata">
+          <option value="">— Durata</option>
+          <option value="15">15 min</option>
+          <option value="30">30 min</option>
+          <option value="45">45 min</option>
+          <option value="60">1 ora</option>
+          <option value="90">1h 30</option>
+          <option value="120">2 ore</option>
+          <option value="180">3 ore</option>
+          <option value="custom">Personalizzata</option>
+        </select>
+      </div>
+      <input type="number" class="form-input pf-durata-custom" id="f-durata-custom"
+             min="5" max="480" step="5" placeholder="Minuti (5–480)" style="display:none">
+      <div class="pf-error" id="pf-error" style="display:none"></div>
     </div>
 
     <div class="pf-actions">
@@ -1354,6 +1422,9 @@ let state = {
   agendaColsOk:     true,
   parcheggioColsOk: true,
   pianificaColsOk:  true,
+  ritualiColsOk:    true,
+  ritualiTableOk:   true,
+  ritualiCompletati: [],
   parcheggioQuery:  ''
 };
 
@@ -1501,6 +1572,14 @@ async function loadAgendaOverrides() {
   } catch (_) { state.pianificaColsOk = false; }
 
   try {
+    const { error } = await db.from('cicli').select('id,ora_inizio,durata_minuti').limit(1);
+    state.ritualiColsOk = !error;
+    if (error) console.warn('[Rituali] colonne cicli non migrate:', error.message);
+  } catch (_) { state.ritualiColsOk = false; }
+
+  await loadRitualiCompletati();
+
+  try {
     const { data, error } = await db.from('agenda_override')
       .select('*')
       .eq('settimana', state.week)
@@ -1553,6 +1632,7 @@ db.channel('cicli-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'persone' },   () => loadAll())
   .on('postgres_changes', { event: '*', schema: 'public', table: 'categorie' }, () => loadAll())
   .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda_override' }, () => loadAll())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'rituali_completati' }, () => loadAll())
   .subscribe(status => {
     if (status === 'SUBSCRIBED') console.log('[Realtime] connesso');
   });
@@ -2103,7 +2183,20 @@ function renderSidebar() {
 // ══════════════════════════════════════════════════════════════
 
 // Badge "📅 Lun mattina" per i cicli con giorno_settimana assegnato
+// Badge "🌅 Ogni giorno" (con ora se presente) per i rituali quotidiani
+function makeGiornalieroBadge(c) {
+  if (!isGiornaliero(c)) return null;
+  const span = document.createElement('span');
+  span.className = 'giornaliero-badge';
+  const ora = formatOra(c.ora_inizio);
+  span.textContent = ora ? '🌅 ' + ora : '🌅 Ogni giorno';
+  span.title = 'Rituale quotidiano' + (ora ? ' alle ' + ora : '')
+             + (c.durata_minuti ? ' · ' + formatDurata(c.durata_minuti) : '');
+  return span;
+}
+
 function makeGiornoBadge(c) {
+  if (isGiornaliero(c)) return null;   // ha il suo badge dedicato
   if (!c || !c.giorno_settimana) return null;
   const g = GIORNI_MAP[c.giorno_settimana];
   if (!g) return null;
@@ -2169,6 +2262,8 @@ function makeCicloCard(c, mode) {
       tag.textContent = catNome(c.cat);
       meta.appendChild(tag);
     }
+    const gdb = makeGiornalieroBadge(c);
+    if (gdb) meta.appendChild(gdb);
     const gb = makeGiornoBadge(c);
     if (gb) meta.appendChild(gb);
     if (c.week) {
@@ -2244,6 +2339,8 @@ function makeCicloCard(c, mode) {
     tag.textContent = catNome(c.cat);
     meta.appendChild(tag);
   }
+  const gdBadge = makeGiornalieroBadge(c);
+  if (gdBadge) meta.appendChild(gdBadge);
   const gBadge = makeGiornoBadge(c);
   if (gBadge) meta.appendChild(gBadge);
   if (daysLeft !== null) {
@@ -4524,6 +4621,7 @@ function agendaSlotFor(c) {
 
 // Un ciclo è "da pianificare" solo se non ha nessun aggancio temporale.
 function haPianificazione(c) {
+  if (isGiornaliero(c)) return true;
   if (c.pianificato_data) return true;
   if (c.giorno_settimana) return true;
   return !!agendaOverrideFor(c.id);
@@ -4534,7 +4632,9 @@ function agendaBaseCicli() {
   return applyFilters(state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c)));
 }
 
-function agendaPianificati()   { return agendaBaseCicli().filter(c => agendaSlotFor(c).giorno); }
+// I rituali giornalieri hanno un blocco dedicato: escludili dalla griglia
+// settimanale, altrimenti comparirebbero 7 volte.
+function agendaPianificati()   { return agendaBaseCicli().filter(c => !isGiornaliero(c) && agendaSlotFor(c).giorno); }
 function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianificazione(c)); }
 
 function renderAgenda() {
@@ -4579,8 +4679,12 @@ function renderAgenda() {
     root.appendChild(warn);
   }
 
-  if (state.agendaSub === 'dapianificare') renderAgendaDaPianificare(root);
-  else                                     renderAgendaPianificati(root, isP);
+  if (state.agendaSub === 'dapianificare') {
+    renderAgendaDaPianificare(root);
+  } else {
+    renderRitualiBlock(root);
+    renderAgendaPianificati(root, isP);
+  }
 }
 
 // ── SOTTO-VISTA: PIANIFICATI (griglia 7 giorni × fasce) ──
@@ -5098,6 +5202,21 @@ function openPianificaModal(cicloId) {
   dateInput.value = c.pianificato_data || '';
   dateInput.style.display = 'none';
 
+  // ora e durata
+  const oraEl = document.getElementById('f-ora-inizio');
+  oraEl.value = (c.ora_inizio || '').slice(0,5);
+  const durSel = document.getElementById('f-durata');
+  const durCus = document.getElementById('f-durata-custom');
+  const preset = ['15','30','45','60','90','120','180'];
+  if (c.durata_minuti && preset.includes(String(c.durata_minuti))) {
+    durSel.value = String(c.durata_minuti); durCus.value = ''; durCus.style.display = 'none';
+  } else if (c.durata_minuti) {
+    durSel.value = 'custom'; durCus.value = c.durata_minuti; durCus.style.display = '';
+  } else {
+    durSel.value = ''; durCus.value = ''; durCus.style.display = 'none';
+  }
+  pfMostraErrore('');
+
   pfSelectQuando('questa');
   pfSelectRip(state.pianificaColsOk ? _pfRip : 'nessuna');
   const ripField = document.querySelector('#pianificaOverlay .pf-opt[data-rip]')?.closest('.pf-field');
@@ -5130,7 +5249,43 @@ function pfSelectRip(key) {
   _pfRip = key;
   document.querySelectorAll('#pianificaOverlay .pf-opt[data-rip]').forEach(b =>
     b.classList.toggle('selected', b.dataset.rip === key));
+
+  // Un rituale giornaliero non ha un singolo giorno: l'ora esatta è più precisa.
+  const gf = document.getElementById('pf-giornofascia-field');
+  if (gf) gf.classList.toggle('pf-hidden', key === 'giornaliera');
+  const hint = document.getElementById('pf-oradurata-hint');
+  if (hint) hint.textContent = key === 'giornaliera'
+    ? 'Ora obbligatoria per i rituali quotidiani'
+    : 'Obbligatorio per rituali giornalieri, opzionale altrimenti';
+  pfMostraErrore('');
 }
+
+function pfMostraErrore(msg) {
+  const el = document.getElementById('pf-error');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? '' : 'none';
+}
+
+// Durata scelta in minuti, o null
+function pfDurataMinuti() {
+  const v = document.getElementById('f-durata').value;
+  if (!v) return null;
+  if (v === 'custom') {
+    const n = parseInt(document.getElementById('f-durata-custom').value, 10);
+    return Number.isFinite(n) ? Math.min(480, Math.max(5, n)) : null;
+  }
+  return parseInt(v, 10);
+}
+
+// toggle input "Personalizzata"
+document.addEventListener('change', e => {
+  if (e.target && e.target.id === 'f-durata') {
+    const cus = document.getElementById('f-durata-custom');
+    cus.style.display = e.target.value === 'custom' ? '' : 'none';
+    if (e.target.value === 'custom') cus.focus();
+  }
+});
 
 // Data base secondo la scelta "QUANDO"
 function pfDataBase() {
@@ -5169,6 +5324,20 @@ async function confermaPianificazione() {
     showToast('Scegli una data', 'warn'); return;
   }
 
+  const oraInizio = document.getElementById('f-ora-inizio').value || null;
+  let durata = pfDurataMinuti();
+
+  // Validazione rituale quotidiano
+  if (_pfRip === 'giornaliera') {
+    if (!oraInizio) {
+      pfMostraErrore('Ora obbligatoria per rituali quotidiani');
+      document.getElementById('f-ora-inizio').focus();
+      return;
+    }
+    if (!durata) durata = 30;   // default
+  }
+  pfMostraErrore('');
+
   const data = pfAggiustaAlGiorno(pfDataBase(), giorno);
   const dataISO = toISODate(data);
   const w = isoWeekParts(data);
@@ -5178,15 +5347,21 @@ async function confermaPianificazione() {
   btn.disabled = true;
   btn.textContent = 'Salvataggio...';
 
+  const giornaliera = _pfRip === 'giornaliera';
+
   const patch = {
-    giorno_settimana: giorno,
-    fascia_oraria:    fascia,
+    // un rituale quotidiano non ha un singolo giorno né una fascia
+    giorno_settimana: giornaliera ? null : giorno,
+    fascia_oraria:    giornaliera ? null : fascia,
     updated_at:       new Date().toISOString()
   };
-  // colonne nuove solo se la migration è applicata
   if (state.pianificaColsOk) {
-    patch.pianificato_data        = dataISO;
+    patch.pianificato_data        = giornaliera ? todayISO() : dataISO;
     patch.pianificato_ripetizione = _pfRip;
+  }
+  if (state.ritualiColsOk) {
+    patch.ora_inizio    = oraInizio;
+    patch.durata_minuti = durata;
   }
   // ricorrenza: campo storico usato dalla logica di ripetizione alla chiusura
   patch.ricorrenza = _pfRip;
@@ -5198,7 +5373,7 @@ async function confermaPianificazione() {
 
     // override per la settimana della data calcolata
     let savedOv = null;
-    if (state.agendaTableOk) {
+    if (state.agendaTableOk && !giornaliera) {
       const ovPayload = {
         ciclo_id: cicloId, settimana: w.week, anno: w.year,
         giorno_settimana: giorno, fascia_oraria: fascia
@@ -5211,9 +5386,11 @@ async function confermaPianificazione() {
 
     // aggiornamento immutabile dello stato locale
     state.cicli = state.cicli.map(x => x.id === cicloId
-      ? { ...x, giorno_settimana: giorno, fascia_oraria: fascia, ricorrenza: _pfRip,
+      ? { ...x, giorno_settimana: patch.giorno_settimana, fascia_oraria: patch.fascia_oraria,
+          ricorrenza: _pfRip,
+          ...(state.ritualiColsOk ? { ora_inizio: oraInizio, durata_minuti: durata } : {}),
           ...(state.pianificaColsOk
-                ? { pianificato_data: dataISO, pianificato_ripetizione: _pfRip }
+                ? { pianificato_data: patch.pianificato_data, pianificato_ripetizione: _pfRip }
                 : {}),
           ...(wasParked ? { parcheggiato: false, parcheggiato_at: null } : {}) }
       : x);
@@ -5228,10 +5405,14 @@ async function confermaPianificazione() {
 
     closePianificaModal();
     render();
-    const g = GIORNI_MAP[giorno].label;
-    const f = FASCE_MAP[fascia].label.toLowerCase();
-    const dd = `${String(data.getDate()).padStart(2,'0')}/${String(data.getMonth()+1).padStart(2,'0')}`;
-    showToast(`Pianificato per ${g} ${dd} ${f}`, 'success');
+    if (giornaliera) {
+      showToast(`Rituale quotidiano alle ${oraInizio} · ${formatDurata(durata)}`, 'success');
+    } else {
+      const g = GIORNI_MAP[giorno].label;
+      const f = FASCE_MAP[fascia].label.toLowerCase();
+      const dd = `${String(data.getDate()).padStart(2,'0')}/${String(data.getMonth()+1).padStart(2,'0')}`;
+      showToast(`Pianificato per ${g} ${dd} ${f}`, 'success');
+    }
   } catch (err) {
     showToast('Errore: ' + err.message, 'error');
     btn.disabled = false;
@@ -5246,6 +5427,162 @@ document.addEventListener('click', e => {
   if (opt.dataset.quando) pfSelectQuando(opt.dataset.quando);
   else if (opt.dataset.rip) pfSelectRip(opt.dataset.rip);
 });
+
+// ══════════════════════════════════════════════════════════════
+// RITUALI QUOTIDIANI
+// ══════════════════════════════════════════════════════════════
+function isGiornaliero(c) {
+  return !!c && c.pianificato_ripetizione === 'giornaliera';
+}
+
+function formatDurata(min) {
+  if (!min) return '';
+  if (min < 60) return min + ' min';
+  const h = Math.floor(min / 60), m = min % 60;
+  return m ? `${h}h ${m}` : (h === 1 ? '1 ora' : `${h} ore`);
+}
+
+function formatOra(t) {
+  return (t || '').slice(0, 5);
+}
+
+// Rituali del contesto corrente, ordinati per ora_inizio
+function ritualiQuotidiani() {
+  return state.cicli
+    .filter(c => c.ctx === state.ctx && isAttivo(c) && isGiornaliero(c))
+    .sort((a, b) => formatOra(a.ora_inizio).localeCompare(formatOra(b.ora_inizio)));
+}
+
+function rituraleFattoOggi(cicloId) {
+  const oggi = todayISO();
+  return state.ritualiCompletati.some(r => r.ciclo_id === cicloId && r.data_completamento === oggi);
+}
+
+async function loadRitualiCompletati() {
+  try {
+    const { data, error } = await db.from('rituali_completati')
+      .select('*').eq('data_completamento', todayISO());
+    if (error) throw error;
+    state.ritualiCompletati = data || [];
+    state.ritualiTableOk = true;
+  } catch (e) {
+    state.ritualiCompletati = [];
+    if (state.ritualiTableOk) {
+      state.ritualiTableOk = false;
+      console.warn('[Rituali] tabella non disponibile:', e.message);
+    }
+  }
+}
+
+// Spunta/despunta il rituale per OGGI: non chiude il ciclo, domani riappare.
+async function toggleRitualeOggi(cicloId) {
+  if (!state.ritualiTableOk) { showToast('Migration rituali non applicata', 'error'); return; }
+  const oggi = todayISO();
+  const gia  = rituraleFattoOggi(cicloId);
+  try {
+    if (gia) {
+      const { error } = await db.from('rituali_completati')
+        .delete().eq('ciclo_id', cicloId).eq('data_completamento', oggi);
+      if (error) throw error;
+      state.ritualiCompletati = state.ritualiCompletati
+        .filter(r => !(r.ciclo_id === cicloId && r.data_completamento === oggi));
+      showToast('Rituale riaperto per oggi', 'info');
+    } else {
+      const { data, error } = await db.from('rituali_completati')
+        .insert({ ciclo_id: cicloId, data_completamento: oggi }).select();
+      if (error) throw error;
+      state.ritualiCompletati = [...state.ritualiCompletati,
+        (data && data[0]) || { ciclo_id: cicloId, data_completamento: oggi }];
+      showToast('Fatto per oggi ✓', 'success');
+    }
+    renderAgenda();
+  } catch (err) {
+    showToast('Errore: ' + err.message, 'error');
+  }
+}
+
+function makeRitualeCard(c) {
+  const q = computeEffectiveQ(c);
+  const fatto = rituraleFattoOggi(c.id);
+
+  const card = document.createElement('div');
+  card.className = 'rit-card' + (c.ctx === 'personale' ? ' personale' : '') + (fatto ? ' fatto' : '');
+  card.onclick = () => openModal(null, c.id);
+
+  const top = document.createElement('div');
+  top.className = 'rit-top';
+  const badge = document.createElement('span');
+  badge.className = 'rit-q q' + q;
+  badge.textContent = 'Q' + q;
+  top.appendChild(badge);
+  if (fatto) {
+    const f = document.createElement('span');
+    f.className = 'rit-fatto-badge';
+    f.textContent = '✓ Fatto oggi';
+    top.appendChild(f);
+  }
+  card.appendChild(top);
+
+  const ora = document.createElement('div');
+  ora.className = 'rit-ora';
+  ora.textContent = formatOra(c.ora_inizio) || '—';
+  card.appendChild(ora);
+
+  if (c.durata_minuti) {
+    const d = document.createElement('div');
+    d.className = 'rit-durata';
+    d.textContent = formatDurata(c.durata_minuti);
+    card.appendChild(d);
+  }
+
+  const t = document.createElement('div');
+  t.className = 'rit-titolo';
+  t.textContent = c.title || '';
+  card.appendChild(t);
+
+  const bottom = document.createElement('div');
+  bottom.className = 'rit-bottom';
+  if (c.cat) {
+    const cat = document.createElement('span');
+    cat.className = 'rit-cat';
+    cat.textContent = catIcona(c.cat) + ' ' + catNome(c.cat);
+    bottom.appendChild(cat);
+  }
+  const check = document.createElement('div');
+  check.className = 'rit-check' + (fatto ? ' checked' : '');
+  check.textContent = '✓';
+  check.title = fatto ? 'Segna come non fatto oggi' : 'Segna come fatto per oggi';
+  check.onclick = e => { e.stopPropagation(); toggleRitualeOggi(c.id); };
+  bottom.appendChild(check);
+  card.appendChild(bottom);
+
+  return card;
+}
+
+function renderRitualiBlock(root) {
+  const rituali = ritualiQuotidiani();
+  if (!rituali.length) return;
+
+  const block = document.createElement('div');
+  block.className = 'rituali-block';
+
+  const head = document.createElement('div');
+  head.className = 'rituali-head';
+  head.innerHTML = `<div class="rituali-title">🌅 Rituali quotidiani (${rituali.length})</div>
+    <div class="rituali-sub">Attività ricorrenti ogni giorno</div>`;
+  block.appendChild(head);
+
+  const grid = document.createElement('div');
+  grid.className = 'rituali-grid';
+  rituali.forEach(c => grid.appendChild(makeRitualeCard(c)));
+  block.appendChild(grid);
+
+  root.appendChild(block);
+
+  const sep = document.createElement('div');
+  sep.className = 'rituali-sep';
+  root.appendChild(sep);
+}
 
 </script>
 </body>
