@@ -46,6 +46,8 @@ fascia_oraria text,                       -- mattina|pomeriggio|sera
 ricorrenza text DEFAULT 'nessuna',        -- colonna esistente, NON ancora cablata nel modale
 parcheggiato boolean DEFAULT false,       -- "metti da parte": escluso dalle viste attive
 parcheggiato_at timestamptz,              -- quando e stato parcheggiato (ordinamento vista)
+pianificato_data date,                    -- data target calcolata dal mini-modale Pianifica
+pianificato_ripetizione text DEFAULT 'nessuna', -- nessuna|settimanale|mensile|trimestrale
 settimana_anno text,                      -- es. 2025-W26
 sync_status text DEFAULT 'pending',       -- pending|synced|failed
 created_at, updated_at
@@ -219,6 +221,34 @@ disparcheggia automaticamente se il ciclo era in parcheggio.
 
 Migration: `supabase_migration_parcheggio.sql`. Degradazione via
 `state.parcheggioColsOk` (nasconde il pulsante e mostra un banner nella vista).
+
+## Mini-modale Pianifica (2026-08-27)
+
+Sostituisce il vecchio mini-dropdown. Aperto da `openPianificaModal(id)` dalle card
+di *Da pianificare* e *Parcheggio*. Tre campi: QUANDO (4 preset + data specifica),
+GIORNO/FASCIA, RIPETIZIONE.
+
+Calcolo della data: `pfDataBase()` risolve il preset, poi `pfAggiustaAlGiorno()`
+sposta la data al giorno scelto **restando nella stessa settimana ISO**. Al salvataggio
+scrive `pianificato_data`, `pianificato_ripetizione`, `giorno_settimana`, `fascia_oraria`,
+`ricorrenza`, e fa upsert su `agenda_override` per la settimana calcolata.
+
+### Risoluzione della posizione in agenda (`agendaSlotForWeek`)
+
+In ordine di priorità:
+1. `agenda_override` per quella (settimana, anno) → vince
+2. `pianificato_data` + ripetizione → `ricadeInSettimana()` decide
+3. `giorno_settimana` permanente senza `pianificato_data` → presente in ogni settimana
+
+`ricadeInSettimana()`: `nessuna` = solo la sua settimana; `settimanale` = ogni settimana
+da lì in poi; `mensile`/`trimestrale` = itera le occorrenze con `addMesi()` (che fa
+clamp sui mesi corti: 31 gen +1 mese → 28 feb).
+
+Un ciclo esce da *Da pianificare* quando `haPianificazione(c)` è vera:
+`pianificato_data` **oppure** `giorno_settimana` **oppure** un override per la settimana corrente.
+
+Migration: `supabase_migration_pianifica.sql`. Degradazione via `state.pianificaColsOk`
+(nasconde la sezione RIPETIZIONE e omette le due colonne dal payload).
 
 ## Regole per Claude Code
 
