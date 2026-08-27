@@ -2477,13 +2477,16 @@ function openModal(defaultQ, editId) {
   btnSave.textContent = 'Salva';
   btnSave.disabled = false;
 
+  renderCatOptions();
+  let desideredCat = null;
+
   if (editId) {
     const c = state.cicli.find(x => x.id === editId);
     if (!c) return;
     title.textContent = 'MODIFICA CICLO';
     document.getElementById('f-title').value          = c.title || '';
     document.getElementById('f-note').value           = c.note  || '';
-    document.getElementById('f-cat').value            = c.cat   || 'management';
+    desideredCat = c.cat || null;
     document.getElementById('f-date').value           = c.due_date || '';
     document.getElementById('f-week').value           = c.week  || state.week;
     document.getElementById('f-scheduled-date').value = c.scheduled_date || todayISO();
@@ -2499,7 +2502,7 @@ function openModal(defaultQ, editId) {
     title.textContent = 'NUOVO CICLO APERTO';
     document.getElementById('f-title').value          = '';
     document.getElementById('f-note').value           = '';
-    document.getElementById('f-cat').value            = state.ctx === 'personale' ? 'salute' : 'management';
+    desideredCat = state.ctx === 'personale' ? 'salute' : 'management';
     document.getElementById('f-date').value           = '';
     document.getElementById('f-week').value           = state.week;
     document.getElementById('f-scheduled-date').value = todayISO();
@@ -2516,7 +2519,14 @@ function openModal(defaultQ, editId) {
   if (agendaRow)  agendaRow.style.display  = state.agendaColsOk ? '' : 'none';
   if (agendaHint) agendaHint.style.display = state.agendaColsOk ? '' : 'none';
 
-  setModalCtx(modalCtx);
+  setModalCtx(modalCtx, true);
+  // riapplica la categoria dopo il render delle opzioni
+  const catSel = document.getElementById('f-cat');
+  if (desideredCat && [...catSel.options].some(o => o.value === desideredCat)) {
+    catSel.value = desideredCat;
+  } else {
+    catSel.value = modalCtx === 'personale' ? 'salute' : 'management';
+  }
   selectQ(selectedQ);
   // On mobile, collapse "Più opzioni" by default; on desktop always open
   if (window.innerWidth <= 768) closeMoreOpts();
@@ -2535,14 +2545,34 @@ function closeModalOnBg(e, id) {
   if (e.target === document.getElementById(id)) closeModal(id);
 }
 
-function setModalCtx(ctx) {
+// Ripopola #f-cat includendo le categorie custom (custom_<id>) nel gruppo del
+// contesto giusto. Senza questo, aprire un ciclo con categoria custom perde il valore.
+function renderCatOptions() {
+  const gl = document.getElementById('cat-lavoro-group');
+  const gp = document.getElementById('cat-personale-group');
+  if (!gl || !gp) return;
+  gl.querySelectorAll('option[data-custom]').forEach(o => o.remove());
+  gp.querySelectorAll('option[data-custom]').forEach(o => o.remove());
+  (state.categorie || []).forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = 'custom_' + cat.id;
+    opt.textContent = (cat.emoji || CAT_FALLBACK_EMOJI) + ' ' + cat.nome;
+    opt.dataset.custom = '1';
+    (cat.ctx === 'personale' ? gp : gl).appendChild(opt);
+  });
+}
+
+// keepCat: true quando si sta solo ripristinando lo stato di un ciclo esistente,
+// così il cambio di contesto non sovrascrive la categoria già impostata.
+function setModalCtx(ctx, keepCat) {
   modalCtx = ctx;
   document.getElementById('cpk-lavoro').classList.toggle('selected', ctx === 'lavoro');
   document.getElementById('cpk-personale').classList.toggle('selected', ctx === 'personale');
   document.getElementById('cat-lavoro-group').style.display   = ctx === 'lavoro'    ? '' : 'none';
   document.getElementById('cat-personale-group').style.display = ctx === 'personale' ? '' : 'none';
-  if (ctx === 'personale') document.getElementById('f-cat').value = 'salute';
-  else                     document.getElementById('f-cat').value = 'management';
+  if (!keepCat) {
+    document.getElementById('f-cat').value = ctx === 'personale' ? 'salute' : 'management';
+  }
   document.getElementById('btn-save').className = 'btn-save' + (ctx === 'personale' ? ' personale' : '');
 }
 
