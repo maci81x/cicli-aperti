@@ -1046,29 +1046,7 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Categoria</label>
-        <select class="form-select" id="f-cat">
-          <optgroup label="Lavoro" id="cat-lavoro-group">
-            <option value="management">Management</option>
-            <option value="hr">HR</option>
-            <option value="marketing">Marketing</option>
-            <option value="vendite">Vendite</option>
-            <option value="amministrazione">Amministrazione</option>
-            <option value="produzione">Produzione</option>
-            <option value="rnd">R&amp;D</option>
-            <option value="da-delegare">Da Delegare</option>
-            <option value="idee">Idee</option>
-          </optgroup>
-          <optgroup label="Personale" id="cat-personale-group" style="display:none">
-            <option value="salute">Salute &amp; Fitness</option>
-            <option value="relazioni">Relazioni</option>
-            <option value="finanze">Finanze Personali</option>
-            <option value="crescita">Crescita Personale</option>
-            <option value="hobbies">Hobbies &amp; Sport</option>
-            <option value="spiritualita">Spiritualità</option>
-            <option value="casa">Casa &amp; Famiglia</option>
-            <option value="idee">Idee</option>
-          </optgroup>
-        </select>
+        <select class="form-select" id="f-cat"></select>
       </div>
       <div class="form-group">
         <label class="form-label">Scadenza (opzionale)</label>
@@ -1338,6 +1316,12 @@ const FASCIA_NULL = '__none__';   // pseudo-fascia "Non specificato"
 const CAT_FALLBACK_EMOJI = '📌';
 
 const RIP_LABELS = { settimanale:'Settimanale', mensile:'Mensile', trimestrale:'Trimestrale' };
+
+// Categorie builtin per contesto (unica fonte: usate da sidebar e modale)
+const CAT_BUILTIN = {
+  lavoro:    ['management','hr','marketing','vendite','amministrazione','produzione','rnd','da-delegare','idee'],
+  personale: ['salute','relazioni','finanze','crescita','hobbies','spiritualita','casa','idee']
+};
 
 const GIORNI_MAP = Object.fromEntries(GIORNI.map(g => [g.key, g]));
 const FASCE_MAP  = Object.fromEntries(FASCE.map(f => [f.key, f]));
@@ -2029,9 +2013,7 @@ function renderSidebar() {
 
   const isP = state.ctx === 'personale';
   const allCtx = state.cicli.filter(c => c.ctx === state.ctx);
-  const builtinCats = isP
-    ? ['salute','relazioni','finanze','crescita','hobbies','spiritualita','casa','idee']
-    : ['management','hr','marketing','vendite','amministrazione','produzione','rnd','da-delegare','idee'];
+  const builtinCats = CAT_BUILTIN[state.ctx] || CAT_BUILTIN.lavoro;
   const customCats = state.categorie.filter(c => c.ctx === state.ctx);
 
   const VIEW_TIPS = {
@@ -2477,7 +2459,6 @@ function openModal(defaultQ, editId) {
   btnSave.textContent = 'Salva';
   btnSave.disabled = false;
 
-  renderCatOptions();
   let desideredCat = null;
 
   if (editId) {
@@ -2520,13 +2501,10 @@ function openModal(defaultQ, editId) {
   if (agendaHint) agendaHint.style.display = state.agendaColsOk ? '' : 'none';
 
   setModalCtx(modalCtx, true);
-  // riapplica la categoria dopo il render delle opzioni
-  const catSel = document.getElementById('f-cat');
-  if (desideredCat && [...catSel.options].some(o => o.value === desideredCat)) {
-    catSel.value = desideredCat;
-  } else {
-    catSel.value = modalCtx === 'personale' ? 'salute' : 'management';
-  }
+  // riapplica la categoria del ciclo dopo aver costruito le opzioni
+  document.getElementById('f-cat').value = catOptionEsiste(desideredCat)
+    ? desideredCat
+    : (modalCtx === 'personale' ? 'salute' : 'management');
   selectQ(selectedQ);
   // On mobile, collapse "Più opzioni" by default; on desktop always open
   if (window.innerWidth <= 768) closeMoreOpts();
@@ -2547,31 +2525,62 @@ function closeModalOnBg(e, id) {
 
 // Ripopola #f-cat includendo le categorie custom (custom_<id>) nel gruppo del
 // contesto giusto. Senza questo, aprire un ciclo con categoria custom perde il valore.
-function renderCatOptions() {
-  const gl = document.getElementById('cat-lavoro-group');
-  const gp = document.getElementById('cat-personale-group');
-  if (!gl || !gp) return;
-  gl.querySelectorAll('option[data-custom]').forEach(o => o.remove());
-  gp.querySelectorAll('option[data-custom]').forEach(o => o.remove());
-  (state.categorie || []).forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = 'custom_' + cat.id;
-    opt.textContent = (cat.emoji || CAT_FALLBACK_EMOJI) + ' ' + cat.nome;
-    opt.dataset.custom = '1';
-    (cat.ctx === 'personale' ? gp : gl).appendChild(opt);
-  });
+// Ricostruisce #f-cat con TUTTE le categorie del contesto:
+// prima le builtin, poi le custom da Supabase ordinate per `ordine`.
+// I value sono quelli realmente salvati in cicli.cat: 'management', 'vendite', 'custom_5'...
+function renderCatOptions(ctx) {
+  const sel = document.getElementById('f-cat');
+  if (!sel) return;
+  sel.innerHTML = '';
+
+  const mk = (value, testo) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = testo;
+    return o;
+  };
+
+  const gBuiltin = document.createElement('optgroup');
+  gBuiltin.label = ctx === 'personale' ? 'Personale' : 'Lavoro';
+  (CAT_BUILTIN[ctx] || CAT_BUILTIN.lavoro).forEach(k =>
+    gBuiltin.appendChild(mk(k, (CAT_EMOJIS[k] || CAT_FALLBACK_EMOJI) + ' ' + (CAT_LABELS[k] || k))));
+  sel.appendChild(gBuiltin);
+
+  const custom = (state.categorie || [])
+    .filter(c => c.ctx === ctx)
+    .sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0));
+  if (custom.length) {
+    const gCustom = document.createElement('optgroup');
+    gCustom.label = 'Personalizzate';
+    custom.forEach(c =>
+      gCustom.appendChild(mk('custom_' + c.id, (c.emoji || CAT_FALLBACK_EMOJI) + ' ' + c.nome)));
+    sel.appendChild(gCustom);
+  }
+}
+
+function catOptionEsiste(value) {
+  const sel = document.getElementById('f-cat');
+  return !!sel && [...sel.options].some(o => o.value === value);
 }
 
 // keepCat: true quando si sta solo ripristinando lo stato di un ciclo esistente,
 // così il cambio di contesto non sovrascrive la categoria già impostata.
+// keepCat: true da openModal (sta ripristinando un ciclo). Senza il flag (click
+// su Lavoro/Personale) la scelta precedente viene mantenuta solo se esiste ancora
+// nel nuovo contesto, altrimenti si ricade sul default.
 function setModalCtx(ctx, keepCat) {
   modalCtx = ctx;
+  const sel = document.getElementById('f-cat');
+  const precedente = sel ? sel.value : null;
+
   document.getElementById('cpk-lavoro').classList.toggle('selected', ctx === 'lavoro');
   document.getElementById('cpk-personale').classList.toggle('selected', ctx === 'personale');
-  document.getElementById('cat-lavoro-group').style.display   = ctx === 'lavoro'    ? '' : 'none';
-  document.getElementById('cat-personale-group').style.display = ctx === 'personale' ? '' : 'none';
+  renderCatOptions(ctx);
+
   if (!keepCat) {
-    document.getElementById('f-cat').value = ctx === 'personale' ? 'salute' : 'management';
+    sel.value = catOptionEsiste(precedente)
+      ? precedente
+      : (ctx === 'personale' ? 'salute' : 'management');
   }
   document.getElementById('btn-save').className = 'btn-save' + (ctx === 'personale' ? ' personale' : '');
 }
