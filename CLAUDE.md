@@ -206,6 +206,19 @@ mai quello slug in UI**: usa sempre gli helper
 - `catIcona(cat)` → emoji builtin, emoji della categoria, altrimenti
   `CAT_FALLBACK_EMOJI` (📌).
 
+## Modale ciclo: categorie custom (2026-08-27)
+
+`#f-cat` contiene solo le categorie builtin nell'HTML. `renderCatOptions()` inietta
+a ogni apertura le custom come `custom_<id>` nell'optgroup del contesto giusto.
+
+`setModalCtx(ctx, keepCat)` — con `keepCat=true` (usato da `openModal`) non tocca
+`#f-cat`, così riaprire un ciclo non ne sovrascrive la categoria. Senza il flag
+(click sui pulsanti Lavoro/Personale) resetta al default del contesto, che è corretto
+perché le categorie sono legate al contesto.
+
+**Regressione storica**: prima di questo fix ogni salvataggio dal modale completo
+riscriveva `cat` a `management`/`salute`, sia per le custom sia per le builtin.
+
 ## Parcheggio (2026-08-25)
 
 Un ciclo `parcheggiato = true` resta nel DB ma sparisce dalle viste di

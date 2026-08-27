@@ -2632,11 +2632,11 @@ async function saveCiclo() {
   btn.disabled = true;
 
   try {
+    const eraModifica = !!editingId;
     await upsertCiclo(data);
-    closeModal('modalOverlay');
-    showToast(editingId ? 'Ciclo aggiornato ✓' : 'Ciclo aggiunto ✓', 'success');
+    closeModal('modalOverlay');   // azzera editingId: leggilo prima
+    showToast(eraModifica ? 'Ciclo aggiornato ✓' : 'Ciclo aggiunto ✓', 'success');
     // Sync to Google Calendar in background
-    const saved = state.cicli.find(c => c.id === (editingId || undefined));
     syncCicloToGcal({ ...data }).catch(() => {});
   } catch (e) {
     showToast('Errore: ' + e.message, 'error');
