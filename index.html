@@ -5217,6 +5217,17 @@ function openPianificaModal(cicloId) {
   }
   pfMostraErrore('');
 
+  // Senza la migration rituali il valore 'giornaliera' violerebbe il CHECK:
+  // disabilita l'opzione e i campi ora/durata.
+  const optGiorn = document.querySelector('#pianificaOverlay .pf-opt[data-rip="giornaliera"]');
+  if (optGiorn) {
+    optGiorn.style.display = state.ritualiColsOk ? '' : 'none';
+    optGiorn.disabled = !state.ritualiColsOk;
+  }
+  const odField = document.getElementById('pf-oradurata-field');
+  if (odField) odField.classList.toggle('pf-hidden', !state.ritualiColsOk);
+  if (!state.ritualiColsOk && _pfRip === 'giornaliera') _pfRip = 'nessuna';
+
   pfSelectQuando('questa');
   pfSelectRip(state.pianificaColsOk ? _pfRip : 'nessuna');
   const ripField = document.querySelector('#pianificaOverlay .pf-opt[data-rip]')?.closest('.pf-field');
@@ -5329,6 +5340,7 @@ async function confermaPianificazione() {
 
   // Validazione rituale quotidiano
   if (_pfRip === 'giornaliera') {
+    if (!state.ritualiColsOk) { showToast('Migration rituali non applicata', 'error'); return; }
     if (!oraInizio) {
       pfMostraErrore('Ora obbligatoria per rituali quotidiani');
       document.getElementById('f-ora-inizio').focus();
