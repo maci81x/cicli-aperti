@@ -600,6 +600,43 @@ mark.hl { background: rgba(245,158,11,0.38); color: var(--text); border-radius: 
 .big-btn.secondary:hover { background:var(--border); color:var(--text); }
 body.light .big-btn.primary { color:#fff; }
 
+/* ── MINI-MODALE PIANIFICA ── */
+.pianifica-modal { max-width: 420px; padding: 20px 22px 18px; position: relative; }
+.pf-drag-handle { display: none; }
+.pf-close { position:absolute; top:14px; right:14px; background:transparent; border:none; color:var(--text-dim); font-size:15px; cursor:pointer; line-height:1; padding:4px; border-radius:4px; transition:color 0.12s; }
+.pf-close:hover { color:var(--text); background:var(--bg3); }
+.pf-head { margin-bottom:18px; padding-right:28px; }
+.pf-title { font-family:'Inter','DM Sans',sans-serif; font-size:15px; font-weight:500; color:var(--text); }
+.pf-subtitle { font-family:'Inter','DM Sans',sans-serif; font-size:13px; color:var(--text-muted); margin-top:3px; line-height:1.4; word-break:break-word; }
+
+.pf-field { margin-bottom:16px; }
+.pf-label { font-size:12px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); margin-bottom:7px; }
+.pf-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+.pf-opt { background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.12s; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pf-opt:hover { background:var(--border); color:var(--text); }
+.pf-opt.selected { background:var(--lavoro-dim); border:1px solid var(--lavoro); color:var(--lavoro); font-weight:500; }
+.pf-opt-wide { width:100%; margin-top:8px; }
+.pf-date { margin-top:8px; }
+
+.pf-actions { display:flex; gap:8px; margin-top:20px; }
+.pf-btn-cancel { flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.12s; }
+.pf-btn-cancel:hover { background:var(--border); color:var(--text); }
+.pf-btn-save { flex:2; background:var(--lavoro); border:1px solid var(--lavoro); color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.12s; }
+.pf-btn-save:hover { filter:brightness(1.1); }
+.pf-btn-save:disabled { opacity:0.6; cursor:default; }
+.pf-btn-save.personale { background:var(--personale); border-color:var(--personale); }
+.pianifica-overlay.personale-ctx .pf-opt.selected { background:var(--personale-dim); border-color:var(--personale); color:var(--personale); }
+
+/* ── BADGE RIPETIZIONE SU CARD AGENDA ── */
+.ag-rip { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:600; padding:1px 5px; border-radius:3px; white-space:nowrap; margin-top:5px; align-self:flex-start; }
+.ag-rip.settimanale { background:rgba(245,158,11,0.15); color:#fbbf24; }
+.ag-rip.mensile     { background:rgba(61,127,255,0.15); color:#60a5fa; }
+.ag-rip.trimestrale { background:rgba(168,85,247,0.15); color:#c084fc; }
+body.light .ag-rip.settimanale { color:#b45309; }
+body.light .ag-rip.mensile     { color:#1d4ed8; }
+body.light .ag-rip.trimestrale { color:#6d28d9; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
   .big-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -635,6 +672,11 @@ body.light .big-btn.primary { color:#fff; }
   .big-grid { grid-template-columns: 1fr; }
   .biglist-title { font-size: 20px; }
   .park-search { max-width: 100%; }
+  /* PIANIFICA: bottom sheet */
+  .pianifica-modal { border-radius: 16px 16px 0 0; padding: 8px 18px 22px; transition: transform 220ms cubic-bezier(0.32,0.72,0,1); }
+  .pf-drag-handle { display: block; width: 36px; height: 4px; border-radius: 3px; background: var(--border-light); margin: 6px auto 12px; }
+  .pf-close { top: 18px; }
+  .pf-opt { font-size: 12px; padding: 10px 8px; }
 }
 @media (max-width: 480px) {
   .week-summary { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1069,6 +1111,70 @@ body.light .big-btn.primary { color:#fff; }
   </div>
 </div>
 
+<!-- MINI-MODALE PIANIFICA CICLO -->
+<div class="modal-overlay pianifica-overlay" id="pianificaOverlay" onclick="closeModalOnBg(event,'pianificaOverlay')">
+  <div class="modal pianifica-modal">
+    <div class="pf-drag-handle"></div>
+    <button class="pf-close" onclick="closePianificaModal()" aria-label="Chiudi">✕</button>
+    <div class="pf-head">
+      <div class="pf-title">Pianifica ciclo</div>
+      <div class="pf-subtitle" id="pf-ciclo-title">—</div>
+    </div>
+
+    <div class="pf-field">
+      <div class="pf-label">Quando</div>
+      <div class="pf-grid2">
+        <button class="pf-opt" data-quando="questa">Questa settimana</button>
+        <button class="pf-opt" data-quando="prossima">Prossima settimana</button>
+        <button class="pf-opt" data-quando="mese1">Tra 1 mese</button>
+        <button class="pf-opt" data-quando="mese3">Tra 3 mesi</button>
+      </div>
+      <button class="pf-opt pf-opt-wide" data-quando="specifica">📅 Data specifica</button>
+      <input type="date" class="form-input pf-date" id="pf-data-specifica" style="display:none">
+    </div>
+
+    <div class="pf-field">
+      <div class="pf-grid2">
+        <div>
+          <div class="pf-label">Giorno</div>
+          <select class="form-select" id="pf-giorno">
+            <option value="lunedi">Lunedì</option>
+            <option value="martedi">Martedì</option>
+            <option value="mercoledi">Mercoledì</option>
+            <option value="giovedi">Giovedì</option>
+            <option value="venerdi">Venerdì</option>
+            <option value="sabato">Sabato</option>
+            <option value="domenica">Domenica</option>
+          </select>
+        </div>
+        <div>
+          <div class="pf-label">Fascia</div>
+          <select class="form-select" id="pf-fascia">
+            <option value="mattina">🌅 Mattina</option>
+            <option value="pomeriggio">☀️ Pomeriggio</option>
+            <option value="sera">🌙 Sera</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="pf-field">
+      <div class="pf-label">Ripetizione</div>
+      <div class="pf-grid2">
+        <button class="pf-opt" data-rip="nessuna">Una volta sola</button>
+        <button class="pf-opt" data-rip="settimanale">Settimanale</button>
+        <button class="pf-opt" data-rip="mensile">Mensile</button>
+        <button class="pf-opt" data-rip="trimestrale">Trimestrale</button>
+      </div>
+    </div>
+
+    <div class="pf-actions">
+      <button class="pf-btn-cancel" onclick="closePianificaModal()">Annulla</button>
+      <button class="pf-btn-save" id="pf-save" onclick="confermaPianificazione()">Pianifica ciclo</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL IMPORT PLAUD -->
 <div class="modal-overlay" id="plaudOverlay" onclick="closeModalOnBg(event,'plaudOverlay')">
   <div class="modal plaud-modal">
@@ -1231,6 +1337,8 @@ const FASCIA_NULL = '__none__';   // pseudo-fascia "Non specificato"
 
 const CAT_FALLBACK_EMOJI = '📌';
 
+const RIP_LABELS = { settimanale:'Settimanale', mensile:'Mensile', trimestrale:'Trimestrale' };
+
 const GIORNI_MAP = Object.fromEntries(GIORNI.map(g => [g.key, g]));
 const FASCE_MAP  = Object.fromEntries(FASCE.map(f => [f.key, f]));
 
@@ -1261,6 +1369,7 @@ let state = {
   agendaTableOk:    true,
   agendaColsOk:     true,
   parcheggioColsOk: true,
+  pianificaColsOk:  true,
   parcheggioQuery:  ''
 };
 
@@ -1400,6 +1509,12 @@ async function loadAgendaOverrides() {
     state.parcheggioColsOk = !error;
     if (error) console.warn('[Parcheggio] colonne cicli non migrate:', error.message);
   } catch (_) { state.parcheggioColsOk = false; }
+
+  try {
+    const { error } = await db.from('cicli').select('id,pianificato_data,pianificato_ripetizione').limit(1);
+    state.pianificaColsOk = !error;
+    if (error) console.warn('[Pianifica] colonne cicli non migrate:', error.message);
+  } catch (_) { state.pianificaColsOk = false; }
 
   try {
     const { data, error } = await db.from('agenda_override')
@@ -4247,12 +4362,10 @@ function collapseBox(box, grid) {
 // VISTA AGENDA SETTIMANALE
 // ══════════════════════════════════════════════════════════════
 let _agendaDragId  = null;   // ciclo in trascinamento
-let _planOpenId    = null;   // card "da pianificare" con dropdown aperto
 
 function switchAgendaSub(sub) {
   if (sub !== 'pianificati' && sub !== 'dapianificare') return;
   state.agendaSub = sub;
-  _planOpenId = null;
   localStorage.setItem(LS.AGENDA_SUB, sub);
   renderAgenda();
 }
@@ -4284,10 +4397,97 @@ function agendaOverrideFor(cicloId) {
 }
 
 // Posizione effettiva del ciclo: override della settimana, altrimenti valore del ciclo
-function agendaSlotFor(c) {
-  const ov = agendaOverrideFor(c.id);
+// Settimana ISO (numero + anno-settimana) di una data.
+function isoWeekParts(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);          // giovedì della settimana
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  return { week, year: date.getUTCFullYear() };
+}
+
+function parseISODate(str) {
+  if (!str) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+  if (!m) return null;
+  return new Date(+m[1], +m[2] - 1, +m[3]);
+}
+
+function addMesi(date, n) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const giorno = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  // clamp per mesi più corti (es. 31 gen + 1 mese -> 28/29 feb)
+  const ultimo = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(giorno, ultimo));
+  return d;
+}
+
+const RIPETIZIONE_MESI = { mensile: 1, trimestrale: 3 };
+
+// Il ciclo, per la sua pianificato_data + ripetizione, ricade nella settimana (week, year)?
+function ricadeInSettimana(c, week, year) {
+  const base = parseISODate(c.pianificato_data);
+  if (!base) return false;
+
+  const rip = c.pianificato_ripetizione || 'nessuna';
+  const baseW = isoWeekParts(base);
+
+  if (rip === 'nessuna') return baseW.week === week && baseW.year === year;
+
+  const target = getWeekStart(week, year);
+  const baseWeekStart = getWeekStart(baseW.week, baseW.year);
+  if (target < baseWeekStart) return false;               // prima della prima occorrenza
+
+  if (rip === 'settimanale') return true;                 // ogni settimana da lì in poi
+
+  const passo = RIPETIZIONE_MESI[rip];
+  if (!passo) return false;
+  const fineSettimana = new Date(target); fineSettimana.setDate(target.getDate() + 6);
+  for (let n = 0; n < 400; n++) {
+    const occ = addMesi(base, n * passo);
+    if (occ > fineSettimana) return false;
+    const w = isoWeekParts(occ);
+    if (w.week === week && w.year === year) return true;
+  }
+  return false;
+}
+
+// Posizione del ciclo nella settimana (week, year), in ordine di priorità:
+//   1. agenda_override specifico per quella settimana
+//   2. pianificato_data (+ ripetizione) che ricade in quella settimana
+//   3. giorno_settimana permanente senza pianificato_data -> sempre presente
+function agendaSlotForWeek(c, week, year) {
+  const ov = state.agendaOverrides.find(o =>
+    o.ciclo_id === c.id && o.settimana === week && o.anno === year);
   if (ov) return { giorno: ov.giorno_settimana, fascia: ov.fascia_oraria, overridden: true };
+
+  if (c.pianificato_data) {
+    if (ricadeInSettimana(c, week, year)) {
+      const base = parseISODate(c.pianificato_data);
+      return {
+        giorno: c.giorno_settimana || GIORNI[(base.getDay() + 6) % 7].key,
+        fascia: c.fascia_oraria || null,
+        overridden: false
+      };
+    }
+    return { giorno: null, fascia: null, overridden: false };
+  }
+
   return { giorno: c.giorno_settimana, fascia: c.fascia_oraria || null, overridden: false };
+}
+
+function agendaSlotFor(c) {
+  return agendaSlotForWeek(c, state.week, state.year);
+}
+
+// Un ciclo è "da pianificare" solo se non ha nessun aggancio temporale.
+function haPianificazione(c) {
+  if (c.pianificato_data) return true;
+  if (c.giorno_settimana) return true;
+  return !!agendaOverrideFor(c.id);
 }
 
 // Cicli aperti del contesto corrente, con i filtri di sidebar applicati
@@ -4296,7 +4496,7 @@ function agendaBaseCicli() {
 }
 
 function agendaPianificati()   { return agendaBaseCicli().filter(c => agendaSlotFor(c).giorno); }
-function agendaDaPianificare() { return agendaBaseCicli().filter(c => !agendaSlotFor(c).giorno); }
+function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianificazione(c)); }
 
 function renderAgenda() {
   const root = document.getElementById('view-agenda');
@@ -4503,6 +4703,15 @@ function makeAgendaCard(c) {
 
   card.appendChild(meta);
 
+  const rip = c.pianificato_ripetizione;
+  if (rip && rip !== 'nessuna' && RIP_LABELS[rip]) {
+    const badge = document.createElement('span');
+    badge.className = 'ag-rip ' + rip;
+    badge.textContent = '🔁 ' + RIP_LABELS[rip];
+    badge.title = 'Si ripete: ' + RIP_LABELS[rip].toLowerCase();
+    card.appendChild(badge);
+  }
+
   card.addEventListener('dragstart', e => {
     _agendaDragId = c.id;
     card.classList.add('dragging');
@@ -4662,7 +4871,7 @@ function makeBigCard(c, mode) {
     const plan = document.createElement('button');
     plan.className = 'big-btn primary';
     plan.textContent = '📅 Pianifica ora';
-    plan.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+    plan.onclick = e => { e.stopPropagation(); openPianificaModal(c.id); };
     actions.appendChild(plan);
   } else {
     if (state.parcheggioColsOk) {
@@ -4676,12 +4885,11 @@ function makeBigCard(c, mode) {
     const plan = document.createElement('button');
     plan.className = 'big-btn primary';
     plan.textContent = '📅 Pianifica';
-    plan.onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
+    plan.onclick = e => { e.stopPropagation(); openPianificaModal(c.id); };
     actions.appendChild(plan);
   }
   card.appendChild(actions);
 
-  if (_planOpenId === c.id) card.appendChild(makePlanDropdown(c));
   return card;
 }
 
@@ -4806,8 +5014,7 @@ async function parcheggiaCiclo(cicloId) {
     if (error) throw error;
     state.cicli = state.cicli.map(c =>
       c.id === cicloId ? { ...c, parcheggiato: true, parcheggiato_at: now } : c);
-    _planOpenId = null;
-    render();
+      render();
     showToast('Messo in parcheggio ⭐', 'success');
   } catch (err) { showToast('Errore: ' + err.message, 'error'); }
 }
@@ -4821,79 +5028,184 @@ async function riattivaCiclo(cicloId) {
     if (error) throw error;
     state.cicli = state.cicli.map(c =>
       c.id === cicloId ? { ...c, parcheggiato: false, parcheggiato_at: null } : c);
-    _planOpenId = null;
-    render();
+      render();
     showToast('Ciclo riattivato 🔄', 'success');
   } catch (err) { showToast('Errore: ' + err.message, 'error'); }
 }
 
-function togglePlanDropdown(id) {
-  _planOpenId = (_planOpenId === id) ? null : id;
-  if (state.view === 'parcheggio') renderParcheggio(); else renderAgenda();
-}
 
-function makePlanDropdown(c) {
-  const dd = document.createElement('div');
-  dd.className = 'plan-dd';
-  dd.onclick = e => e.stopPropagation();
 
-  const gOpts = GIORNI.map(g => `<option value="${g.key}">${g.label}</option>`).join('');
-  const fOpts = FASCE.map(f => `<option value="${f.key}">${f.emoji} ${f.label}</option>`).join('');
+// ══════════════════════════════════════════════════════════════
+// MINI-MODALE PIANIFICA CICLO
+// ══════════════════════════════════════════════════════════════
+let _pfCicloId = null;
+let _pfQuando  = 'questa';
+let _pfRip     = 'nessuna';
 
-  dd.innerHTML = `
-    <div class="plan-dd-label">Giorno</div>
-    <select id="pdd-giorno-${c.id}">${gOpts}</select>
-    <div class="plan-dd-label">Fascia oraria</div>
-    <select id="pdd-fascia-${c.id}"><option value="">— Qualsiasi</option>${fOpts}</select>
-    <div class="plan-dd-actions">
-      <button class="plan-dd-save">Assegna</button>
-      <button class="plan-dd-cancel">Annulla</button>
-    </div>`;
-
-  dd.querySelector('.plan-dd-cancel').onclick = e => { e.stopPropagation(); togglePlanDropdown(c.id); };
-  dd.querySelector('.plan-dd-save').onclick   = e => {
-    e.stopPropagation();
-    const giorno = document.getElementById('pdd-giorno-' + c.id).value;
-    const fascia = document.getElementById('pdd-fascia-' + c.id).value || null;
-    assegnaGiornoCiclo(c.id, giorno, fascia);
-  };
-  return dd;
-}
-
-// Assegnazione permanente sul ciclo. Se il ciclo era parcheggiato lo disparcheggia.
-async function assegnaGiornoCiclo(cicloId, giorno, fascia) {
-  if (!giorno) { showToast('Seleziona un giorno', 'warn'); return; }
+function openPianificaModal(cicloId) {
+  const c = state.cicli.find(x => x.id === cicloId);
+  if (!c) return;
   if (!state.agendaColsOk) { showToast('Migration agenda non applicata', 'error'); return; }
 
-  const wasParked = isParcheggiato(state.cicli.find(c => c.id === cicloId));
-  const patch = { giorno_settimana: giorno, fascia_oraria: fascia, updated_at: new Date().toISOString() };
+  _pfCicloId = cicloId;
+  _pfQuando  = 'questa';
+  _pfRip     = c.pianificato_ripetizione || 'nessuna';
+
+  document.getElementById('pf-ciclo-title').textContent = c.title || '';
+  document.getElementById('pf-giorno').value = c.giorno_settimana || 'lunedi';
+  document.getElementById('pf-fascia').value = c.fascia_oraria    || 'mattina';
+
+  const dateInput = document.getElementById('pf-data-specifica');
+  dateInput.value = c.pianificato_data || '';
+  dateInput.style.display = 'none';
+
+  pfSelectQuando('questa');
+  pfSelectRip(state.pianificaColsOk ? _pfRip : 'nessuna');
+  const ripField = document.querySelector('#pianificaOverlay .pf-opt[data-rip]')?.closest('.pf-field');
+  if (ripField) ripField.style.display = state.pianificaColsOk ? '' : 'none';
+
+  const overlay = document.getElementById('pianificaOverlay');
+  overlay.classList.toggle('personale-ctx', state.ctx === 'personale');
+  document.getElementById('pf-save').className = 'pf-btn-save' + (state.ctx === 'personale' ? ' personale' : '');
+  const btn = document.getElementById('pf-save');
+  btn.disabled = false;
+  btn.textContent = 'Pianifica ciclo';
+  overlay.classList.add('open');
+}
+
+function closePianificaModal() {
+  document.getElementById('pianificaOverlay').classList.remove('open');
+  _pfCicloId = null;
+}
+
+function pfSelectQuando(key) {
+  _pfQuando = key;
+  document.querySelectorAll('#pianificaOverlay .pf-opt[data-quando]').forEach(b =>
+    b.classList.toggle('selected', b.dataset.quando === key));
+  const dateInput = document.getElementById('pf-data-specifica');
+  dateInput.style.display = key === 'specifica' ? '' : 'none';
+  if (key === 'specifica' && !dateInput.value) dateInput.value = todayISO();
+}
+
+function pfSelectRip(key) {
+  _pfRip = key;
+  document.querySelectorAll('#pianificaOverlay .pf-opt[data-rip]').forEach(b =>
+    b.classList.toggle('selected', b.dataset.rip === key));
+}
+
+// Data base secondo la scelta "QUANDO"
+function pfDataBase() {
+  const oggi = new Date();
+  if (_pfQuando === 'questa')   return getWeekStart(state.week, state.year);
+  if (_pfQuando === 'prossima') { const d = getWeekStart(state.week, state.year); d.setDate(d.getDate() + 7); return d; }
+  if (_pfQuando === 'mese1')    return addMesi(oggi, 1);
+  if (_pfQuando === 'mese3')    return addMesi(oggi, 3);
+  if (_pfQuando === 'specifica') return parseISODate(document.getElementById('pf-data-specifica').value) || oggi;
+  return oggi;
+}
+
+// Sposta la data al giorno della settimana scelto, restando nella stessa settimana ISO
+function pfAggiustaAlGiorno(base, giornoKey) {
+  const idx = GIORNI.findIndex(g => g.key === giornoKey);
+  const w = isoWeekParts(base);
+  const lunedi = getWeekStart(w.week, w.year);
+  const d = new Date(lunedi);
+  d.setDate(lunedi.getDate() + (idx < 0 ? 0 : idx));
+  return d;
+}
+
+function toISODate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+async function confermaPianificazione() {
+  const cicloId = _pfCicloId;
+  const c = state.cicli.find(x => x.id === cicloId);
+  if (!c) return;
+
+  const giorno = document.getElementById('pf-giorno').value;
+  const fascia = document.getElementById('pf-fascia').value;
+
+  if (_pfQuando === 'specifica' && !document.getElementById('pf-data-specifica').value) {
+    showToast('Scegli una data', 'warn'); return;
+  }
+
+  const data = pfAggiustaAlGiorno(pfDataBase(), giorno);
+  const dataISO = toISODate(data);
+  const w = isoWeekParts(data);
+  const wasParked = isParcheggiato(c);
+
+  const btn = document.getElementById('pf-save');
+  btn.disabled = true;
+  btn.textContent = 'Salvataggio...';
+
+  const patch = {
+    giorno_settimana: giorno,
+    fascia_oraria:    fascia,
+    updated_at:       new Date().toISOString()
+  };
+  // colonne nuove solo se la migration è applicata
+  if (state.pianificaColsOk) {
+    patch.pianificato_data        = dataISO;
+    patch.pianificato_ripetizione = _pfRip;
+  }
+  // ricorrenza: campo storico usato dalla logica di ripetizione alla chiusura
+  patch.ricorrenza = _pfRip;
   if (wasParked && state.parcheggioColsOk) { patch.parcheggiato = false; patch.parcheggiato_at = null; }
 
   try {
     const { error } = await db.from('cicli').update(patch).eq('id', cicloId);
     if (error) throw error;
 
-    state.cicli = state.cicli.map(c =>
-      c.id === cicloId
-        ? { ...c, giorno_settimana: giorno, fascia_oraria: fascia,
-            ...(wasParked ? { parcheggiato: false, parcheggiato_at: null } : {}) }
-        : c);
-    _planOpenId = null;
+    // override per la settimana della data calcolata
+    let savedOv = null;
+    if (state.agendaTableOk) {
+      const ovPayload = {
+        ciclo_id: cicloId, settimana: w.week, anno: w.year,
+        giorno_settimana: giorno, fascia_oraria: fascia
+      };
+      const { data: ovData, error: ovErr } = await db.from('agenda_override')
+        .upsert(ovPayload, { onConflict: 'ciclo_id,settimana,anno' }).select();
+      if (ovErr) throw ovErr;
+      savedOv = (ovData && ovData[0]) || ovPayload;
+    }
+
+    // aggiornamento immutabile dello stato locale
+    state.cicli = state.cicli.map(x => x.id === cicloId
+      ? { ...x, giorno_settimana: giorno, fascia_oraria: fascia, ricorrenza: _pfRip,
+          ...(state.pianificaColsOk
+                ? { pianificato_data: dataISO, pianificato_ripetizione: _pfRip }
+                : {}),
+          ...(wasParked ? { parcheggiato: false, parcheggiato_at: null } : {}) }
+      : x);
+
+    if (savedOv && w.week === state.week && w.year === state.year) {
+      state.agendaOverrides = [
+        ...state.agendaOverrides.filter(o =>
+          !(o.ciclo_id === cicloId && o.settimana === w.week && o.anno === w.year)),
+        savedOv
+      ];
+    }
+
+    closePianificaModal();
     render();
-    const f = fascia ? ' ' + FASCE_MAP[fascia].label.toLowerCase() : '';
-    showToast(`Pianificato: ${GIORNI_MAP[giorno].label}${f} ✓` + (wasParked ? ' — tolto dal parcheggio' : ''), 'success');
+    const g = GIORNI_MAP[giorno].label;
+    const f = FASCE_MAP[fascia].label.toLowerCase();
+    const dd = `${String(data.getDate()).padStart(2,'0')}/${String(data.getMonth()+1).padStart(2,'0')}`;
+    showToast(`Pianificato per ${g} ${dd} ${f}`, 'success');
   } catch (err) {
     showToast('Errore: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Pianifica ciclo';
   }
 }
 
-// chiude il mini dropdown cliccando fuori
+// delega dei click sui pulsanti-opzione del modale
 document.addEventListener('click', e => {
-  if (_planOpenId === null) return;
-  if (e.target.closest('.plan-dd') || e.target.closest('.big-btn')) return;
-  _planOpenId = null;
-  if (state.view === 'agenda') renderAgenda();
-  else if (state.view === 'parcheggio') renderParcheggio();
+  const opt = e.target.closest('#pianificaOverlay .pf-opt');
+  if (!opt) return;
+  if (opt.dataset.quando) pfSelectQuando(opt.dataset.quando);
+  else if (opt.dataset.rip) pfSelectRip(opt.dataset.rip);
 });
 
 </script>
