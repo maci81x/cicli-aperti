@@ -7081,7 +7081,8 @@ function bpStampaPdf() {
   });
 
   // ── FOOTER: NOTE GENERALI + BILANCIO ──
-  spazio(70);
+  // basta che ci stiano titolo e prime righe: il resto va a capo pagina da solo
+  spazio(22);
   y += 4;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
   doc.text('NOTE GENERALI', M, y);
