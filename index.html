@@ -7,8 +7,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>Cicli Aperti — Roby</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
@@ -825,6 +826,182 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
   .modal-more-opts { display:none; }
   .modal-more-opts.open { display:block; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   BATTLE PLAN
+   ══════════════════════════════════════════════════════════════ */
+.bp-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+.bp-head-left { min-width:0; }
+.bp-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; letter-spacing:-0.4px; line-height:1.15; }
+.bp-sub { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); margin-top:4px; }
+.bp-head-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.bp-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; padding:4px 10px; border-radius:20px; border:1px solid var(--border); background:var(--bg3); color:var(--text-muted); margin-top:8px; }
+.bp-badge.bozza  { color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.10); }
+.bp-badge.attivo { color:#22c55e; border-color:rgba(34,197,94,0.4);  background:rgba(34,197,94,0.10); }
+.bp-badge.chiuso { color:var(--text-dim); }
+.bp-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text-muted); padding:8px 14px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.bp-btn:hover { background:var(--border); color:var(--text); }
+.bp-btn.primary { background:var(--lavoro); border-color:var(--lavoro); color:#fff; }
+.bp-btn.primary.personale { background:var(--personale); border-color:var(--personale); }
+.bp-btn.primary:hover { opacity:.88; color:#fff; }
+.bp-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* progresso */
+.bp-progress-wrap { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; }
+.bp-progress-top { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; flex-wrap:wrap; }
+.bp-progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--text-muted); }
+.bp-progress-count strong { color:var(--text); font-size:15px; }
+.bp-progress-pct { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; }
+.bp-bar { height:10px; border-radius:20px; background:var(--bg3); border:1px solid var(--border); overflow:hidden; }
+.bp-bar-fill { height:100%; border-radius:20px; transition:width .4s cubic-bezier(.4,0,.2,1); }
+.bp-pct-ok   { color:#22c55e; } .bp-fill-ok   { background:#22c55e; }
+.bp-pct-mid  { color:#f59e0b; } .bp-fill-mid  { background:#f59e0b; }
+.bp-pct-low  { color:#ef4444; } .bp-fill-low  { background:#ef4444; }
+.bp-progress-hint { font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5; }
+
+/* griglia giorni */
+.bp-grid { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:8px; align-items:start; }
+.bp-col { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:8px; min-height:120px; display:flex; flex-direction:column; }
+.bp-col.is-today { border-color:var(--lavoro); background:var(--lavoro-dim); }
+.bp-col.is-today.personale { border-color:var(--personale); background:var(--personale-dim); }
+.bp-col.bp-col-week { border-style:dashed; }
+.bp-col-hd { display:flex; align-items:baseline; justify-content:space-between; gap:6px; padding:2px 4px 6px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+.bp-col-day { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1.2px; color:var(--text); }
+.bp-col-date { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); }
+.bp-col-tot { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-muted); padding:0 4px 6px; }
+.bp-col-body { display:flex; flex-direction:column; gap:6px; flex:1; }
+.bp-col-empty { font-size:11px; color:var(--text-dim); text-align:center; padding:10px 0; }
+.bp-week-title { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-muted); padding:0 4px 6px; }
+
+/* card BP */
+.bp-card { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--q2); border-radius:var(--radius-sm); padding:7px 8px; cursor:pointer; transition:opacity .3s, transform .15s, background .15s; }
+.bp-card:hover { background:var(--border); }
+.bp-card.q1 { border-left-color:var(--q1); } .bp-card.q2 { border-left-color:var(--q2); }
+.bp-card.q3 { border-left-color:var(--q3); } .bp-card.q4 { border-left-color:var(--q4); }
+.bp-card.done { opacity:.4; }
+.bp-card.done .bp-card-title { text-decoration:line-through; }
+.bp-card-top { display:flex; align-items:flex-start; gap:6px; }
+.bp-check { width:16px; height:16px; flex-shrink:0; border-radius:4px; border:1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-size:10px; color:transparent; cursor:pointer; margin-top:1px; }
+.bp-check:hover { border-color:var(--text-muted); }
+.bp-check.checked { background:#22c55e; border-color:#22c55e; color:#fff; }
+.bp-card-title { font-size:12px; line-height:1.35; color:var(--text); word-break:break-word; flex:1; }
+.bp-card-meta { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:5px; padding-left:22px; }
+.bp-chip { font-family:'DM Mono',monospace; font-size:9px; padding:1px 5px; border-radius:4px; background:var(--bg); border:1px solid var(--border); color:var(--text-muted); }
+.bp-chip.ora { color:var(--text); }
+.bp-q { font-family:'DM Mono',monospace; font-size:9px; font-weight:600; padding:1px 5px; border-radius:4px; }
+.bp-q.q1 { background:var(--q1-dim); color:var(--q1); } .bp-q.q2 { background:var(--q2-dim); color:var(--q2); }
+.bp-q.q3 { background:var(--q3-dim); color:var(--q3); } .bp-q.q4 { background:var(--q4-dim); color:var(--q4); }
+
+/* stato vuoto / cta */
+.bp-empty { background:var(--bg2); border:1px dashed var(--border-light); border-radius:var(--radius); padding:36px 24px; text-align:center; }
+.bp-empty-icon { font-size:38px; margin-bottom:10px; }
+.bp-empty-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:6px; }
+.bp-empty-txt { font-size:13px; color:var(--text-muted); line-height:1.6; max-width:460px; margin:0 auto 18px; }
+.bp-note-box { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; margin-bottom:14px; font-size:12px; color:var(--text-muted); line-height:1.6; white-space:pre-wrap; }
+.bp-note-box strong { color:var(--text); display:block; margin-bottom:4px; font-size:11px; letter-spacing:.6px; text-transform:uppercase; }
+
+/* ── WIZARD ── */
+.bp-wiz { max-width:960px; width:96vw; height:88vh; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
+.bp-wiz-head { flex-shrink:0; }
+.bp-wiz-title { font-family:'Syne',sans-serif; font-size:19px; font-weight:800; }
+.bp-wiz-sub { font-size:12px; color:var(--text-muted); margin-top:3px; }
+.bp-wiz-steps { display:flex; gap:6px; margin:12px 0 14px; }
+.bp-wiz-step { flex:1; height:4px; border-radius:4px; background:var(--bg3); }
+.bp-wiz-step.on { background:var(--lavoro); }
+.personale-ctx .bp-wiz-step.on { background:var(--personale); }
+.bp-wiz-body { flex:1; overflow:hidden; display:grid; grid-template-columns:1fr 320px; gap:14px; min-height:0; }
+.bp-wiz-body.single { grid-template-columns:1fr; }
+.bp-wiz-left  { overflow-y:auto; padding-right:4px; min-height:0; }
+.bp-wiz-right { overflow-y:auto; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; min-height:0; }
+.bp-wiz-tools { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.bp-wiz-tools .form-input, .bp-wiz-tools .form-select { margin:0; flex:1; min-width:130px; }
+.bp-qgroup { margin-bottom:14px; }
+.bp-qgroup-hd { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.bp-pick { display:flex; align-items:flex-start; gap:9px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg2); cursor:pointer; margin-bottom:5px; transition:all .12s; }
+.bp-pick:hover { border-color:var(--border-light); }
+.bp-pick.sel { border-color:var(--lavoro); background:var(--lavoro-dim); }
+.personale-ctx .bp-pick.sel { border-color:var(--personale); background:var(--personale-dim); }
+.bp-pick input { margin-top:3px; accent-color:var(--lavoro); flex-shrink:0; }
+.bp-pick-main { flex:1; min-width:0; }
+.bp-pick-title { font-size:13px; line-height:1.35; }
+.bp-pick-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.bp-sum-h { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:10px; }
+.bp-sum-n { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; line-height:1; }
+.bp-sum-lbl { font-size:11px; color:var(--text-muted); margin-bottom:14px; }
+.bp-sum-row { display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-top:1px solid var(--border); color:var(--text-muted); }
+.bp-sum-row strong { color:var(--text); font-family:'DM Mono',monospace; }
+.bp-warn { background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; font-size:11px; line-height:1.5; padding:8px 10px; border-radius:var(--radius-sm); margin-top:12px; }
+.bp-tip { background:var(--bg2); border:1px solid var(--border); font-size:11px; line-height:1.6; color:var(--text-muted); padding:9px 11px; border-radius:var(--radius-sm); margin-top:10px; }
+.bp-wiz-actions { flex-shrink:0; display:flex; justify-content:space-between; gap:10px; padding-top:14px; margin-top:12px; border-top:1px solid var(--border); }
+
+/* step 2 */
+.bp-assign-wrap { display:grid; grid-template-columns:230px 1fr; gap:12px; overflow:hidden; min-height:0; }
+.bp-assign-pool { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:10px; overflow-y:auto; min-height:0; }
+.bp-assign-pool-hd { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+.bp-assign-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; overflow-y:auto; min-height:0; align-content:start; }
+.bp-drop { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px; min-height:88px; display:flex; flex-direction:column; }
+.bp-drop.drag-over { border-color:var(--lavoro); background:var(--lavoro-dim); }
+.bp-drop-hd { font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:baseline; gap:4px; padding-bottom:5px; border-bottom:1px solid var(--border); margin-bottom:6px; }
+.bp-drop-tot { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:0; }
+.bp-drop-body { display:flex; flex-direction:column; gap:5px; flex:1; }
+.bp-mini { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--q2); border-radius:4px; padding:5px 6px; font-size:11px; line-height:1.3; cursor:grab; word-break:break-word; }
+.bp-mini.q1 { border-left-color:var(--q1); } .bp-mini.q2 { border-left-color:var(--q2); }
+.bp-mini.q3 { border-left-color:var(--q3); } .bp-mini.q4 { border-left-color:var(--q4); }
+.bp-mini.dragging { opacity:.4; }
+.bp-mini-meta { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-dim); margin-top:3px; }
+.bp-mini-x { float:right; color:var(--text-dim); cursor:pointer; font-size:11px; padding-left:4px; }
+.bp-mini-x:hover { color:var(--q1); }
+
+/* mini pannello assegnazione slot */
+.bp-slot-panel { position:fixed; inset:0; z-index:520; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); padding:16px; }
+.bp-slot-panel.open { display:flex; }
+.bp-slot-box { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:18px; width:100%; max-width:380px; }
+.bp-slot-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:2px; }
+.bp-slot-sub { font-size:11px; color:var(--text-muted); margin-bottom:14px; }
+.bp-slot-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); margin:12px 0 6px; }
+.bp-slot-opts { display:flex; gap:6px; flex-wrap:wrap; }
+.bp-slot-opt { flex:1; min-width:88px; padding:9px 6px; border:1px solid var(--border); background:var(--bg3); color:var(--text-muted); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; }
+.bp-slot-opt.sel { border-color:var(--lavoro); background:var(--lavoro-dim); color:var(--lavoro); }
+.personale-ctx .bp-slot-opt.sel { border-color:var(--personale); background:var(--personale-dim); color:var(--personale); }
+.bp-slot-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.bp-slot-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+
+/* ── REVIEW ── */
+.bp-rev { max-width:620px; width:94vw; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
+.bp-rev-body { overflow-y:auto; flex:1; min-height:0; padding-right:4px; }
+.bp-rev-verdict { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin:14px 0; padding:12px 14px; border-radius:var(--radius-sm); background:var(--bg3); border:1px solid var(--border); }
+.bp-rev-item { border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; background:var(--bg2); }
+.bp-rev-item-title { font-size:13px; margin-bottom:8px; line-height:1.35; }
+.bp-rev-opts { display:flex; gap:6px; flex-wrap:wrap; }
+.bp-rev-opt { flex:1; min-width:110px; font-size:11px; padding:7px 8px; border:1px solid var(--border); background:var(--bg3); color:var(--text-muted); border-radius:var(--radius-sm); cursor:pointer; text-align:center; }
+.bp-rev-opt.sel { border-color:var(--lavoro); background:var(--lavoro-dim); color:var(--lavoro); }
+.personale-ctx .bp-rev-opt.sel { border-color:var(--personale); background:var(--personale-dim); color:var(--personale); }
+
+/* Q2 nudge nel modale ciclo */
+.q2-nudge { display:none; margin:-6px 0 14px; padding:11px 13px; border-radius:var(--radius-sm); background:var(--q2-dim); border:1px solid rgba(61,127,255,0.4); }
+.q2-nudge.show { display:block; }
+.q2-nudge-txt { font-size:11.5px; line-height:1.6; color:var(--text-muted); }
+.q2-nudge-btn { margin-top:9px; background:var(--q2); border:none; color:#fff; padding:7px 12px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; }
+.q2-nudge-btn:hover { opacity:.88; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .bp-title { font-size:19px; }
+  .bp-head { flex-direction:column; align-items:stretch; gap:10px; }
+  .bp-head-right { justify-content:flex-start; }
+  .bp-grid { display:flex; flex-direction:column; gap:8px; }
+  .bp-col { min-height:0; }
+  .bp-col-hd { cursor:pointer; margin-bottom:0; border-bottom:none; padding-bottom:2px; }
+  .bp-col.collapsed .bp-col-body, .bp-col.collapsed .bp-col-tot { display:none; }
+  .bp-col:not(.collapsed) .bp-col-hd { border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:8px; }
+  .bp-acc-caret { font-size:10px; color:var(--text-dim); }
+  .bp-wiz, .bp-rev { width:100vw; max-width:100vw; height:100vh; max-height:100vh; border-radius:0; padding:16px; }
+  .bp-wiz-body { grid-template-columns:1fr; grid-template-rows:1fr auto; }
+  .bp-wiz-right { max-height:38vh; }
+  .bp-assign-wrap { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .bp-assign-pool { max-height:26vh; }
+  .bp-assign-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 </style>
 </head>
 <body>
@@ -880,6 +1057,7 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
   </div>
   <div class="drawer-section">
     <div class="drawer-section-label">Vista</div>
+    <div class="drawer-item" onclick="switchView('bp');closeDrawer()">⚔️ Battle Plan</div>
     <div class="drawer-item" onclick="switchView('agenda');closeDrawer()">📆 Agenda</div>
     <div class="drawer-item" onclick="switchView('mese');closeDrawer()">🗓 Mese</div>
     <div class="drawer-item" onclick="switchView('aree');closeDrawer()">🏢 Macro Aree</div>
@@ -932,6 +1110,7 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
     <div class="view-header">
       <div class="view-title" id="viewTitle">MATRICE EISENHOWER</div>
       <div class="view-controls">
+        <button class="view-btn" id="vbtn-bp" onclick="switchView('bp')">⚔️ Battle Plan</button>
         <button class="view-btn" id="vbtn-oggi" onclick="switchView('oggi')">☀️ Oggi</button>
         <button class="view-btn" id="vbtn-settimana" onclick="switchView('settimana')">📅 Sett.</button>
         <button class="view-btn" id="vbtn-mese" onclick="switchView('mese')">🗓 Mese</button>
@@ -994,6 +1173,7 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
     <!-- GUIDA VIEW -->
     <div id="view-guida" style="display:none"></div>
     <!-- BATTLE PLAN VIEWS -->
+    <div id="view-bp" style="display:none"></div>
     <div id="view-oggi" style="display:none"></div>
     <div id="view-settimana" style="display:none"></div>
     <div id="view-mese" style="display:none"></div>
@@ -1106,6 +1286,10 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
         <button class="q-pick-btn" data-q="3" onclick="selectQ(3)">📋 Q3 — Inganno<div class="q-pick-label">Urgente, non prioritario</div></button>
         <button class="q-pick-btn" data-q="4" onclick="selectQ(4)">🗑 Q4 — Spreco<div class="q-pick-label">Non urgente, non prioritario</div></button>
       </div>
+    </div>
+    <div class="q2-nudge" id="q2-nudge">
+      <div class="q2-nudge-txt">📌 I cicli <strong>Q2</strong> sono attività strategiche. Pianificali direttamente in agenda per i prossimi 2–3 mesi — se non li piazzi, il lavoro urgente li occuperà.</div>
+      <button type="button" class="q2-nudge-btn" onclick="q2PianificaOra()">📅 Pianifica in agenda ora</button>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -1316,6 +1500,97 @@ body.light .ag-rip.trimestrale { color:#6d28d9; }
   </div>
 </div>
 
+<!-- MODAL BATTLE PLAN — WIZARD (step 1 selezione, step 2 assegnazione) -->
+<div class="modal-overlay" id="bpWizOverlay">
+  <div class="modal bp-wiz">
+    <div class="bp-wiz-head">
+      <div class="bp-wiz-title" id="bpw-title">⚔️ Prepara il Battle Plan</div>
+      <div class="bp-wiz-sub" id="bpw-sub">—</div>
+      <div class="bp-wiz-steps">
+        <div class="bp-wiz-step on" id="bpw-s1"></div>
+        <div class="bp-wiz-step" id="bpw-s2"></div>
+      </div>
+    </div>
+
+    <!-- STEP 1 — selezione cicli -->
+    <div class="bp-wiz-body" id="bpw-step1">
+      <div class="bp-wiz-left">
+        <div class="bp-wiz-tools">
+          <input type="text" class="form-input" id="bpw-search" placeholder="🔍 Cerca un ciclo..." autocomplete="off" oninput="bpwSetQuery(this.value)">
+          <select class="form-select" id="bpw-cat" onchange="bpwSetCat(this.value)"></select>
+        </div>
+        <div id="bpw-list"></div>
+      </div>
+      <div class="bp-wiz-right" id="bpw-summary"></div>
+    </div>
+
+    <!-- STEP 2 — assegnazione ai giorni -->
+    <div class="bp-wiz-body single" id="bpw-step2" style="display:none">
+      <div class="bp-assign-wrap">
+        <div class="bp-assign-pool">
+          <div class="bp-assign-pool-hd" id="bpw-pool-hd">Da assegnare</div>
+          <div id="bpw-pool"></div>
+        </div>
+        <div class="bp-assign-grid" id="bpw-days"></div>
+      </div>
+    </div>
+
+    <div class="bp-wiz-actions">
+      <button class="bp-btn" id="bpw-back" onclick="bpwBack()">Annulla</button>
+      <button class="bp-btn primary" id="bpw-next" onclick="bpwNext()">Avanti → Assegna ai giorni</button>
+    </div>
+  </div>
+</div>
+
+<!-- MINI PANNELLO: fascia + ora + durata al drop -->
+<div class="bp-slot-panel" id="bpSlotPanel">
+  <div class="bp-slot-box">
+    <div class="bp-slot-title" id="bps-title">Assegna al giorno</div>
+    <div class="bp-slot-sub" id="bps-sub">—</div>
+
+    <div class="bp-slot-lbl">Giorno</div>
+    <select class="form-select" id="bps-giorno"></select>
+
+    <div class="bp-slot-lbl">Fascia</div>
+    <div class="bp-slot-opts" id="bps-fasce"></div>
+
+    <div class="bp-slot-lbl">Ora e durata</div>
+    <div class="bp-slot-row">
+      <input type="time" class="form-input" id="bps-ora">
+      <select class="form-select" id="bps-durata">
+        <option value="15">15 min</option>
+        <option value="30" selected>30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">1 ora</option>
+        <option value="90">1h 30</option>
+        <option value="120">2 ore</option>
+        <option value="180">3 ore</option>
+        <option value="240">4 ore</option>
+      </select>
+    </div>
+
+    <div class="bp-slot-actions">
+      <button class="bp-btn" onclick="bpSlotClose()">Annulla</button>
+      <button class="bp-btn primary" id="bps-ok" onclick="bpSlotConfirm()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REVIEW CHIUSURA SETTIMANA -->
+<div class="modal-overlay" id="bpRevOverlay" onclick="closeModalOnBg(event,'bpRevOverlay')">
+  <div class="modal bp-rev">
+    <div class="bp-wiz-head">
+      <div class="bp-wiz-title" id="bprev-title">Review settimana</div>
+      <div class="bp-wiz-sub" id="bprev-sub">—</div>
+    </div>
+    <div class="bp-rev-body" id="bprev-body"></div>
+    <div class="bp-wiz-actions">
+      <button class="bp-btn" onclick="closeModal('bpRevOverlay')">Annulla</button>
+      <button class="bp-btn primary" id="bprev-ok" onclick="bpChiudiSettimana()">Chiudi settimana e prepara la prossima →</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOOLTIP SINGLETON -->
 <div id="tooltip"></div>
 
@@ -1425,7 +1700,10 @@ let state = {
   ritualiColsOk:    true,
   ritualiTableOk:   true,
   ritualiCompletati: [],
-  parcheggioQuery:  ''
+  parcheggioQuery:  '',
+  bp:               null,   // battle_plan della settimana selezionata
+  bpItems:          [],     // battle_plan_items del bp corrente
+  bpTableOk:        true
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -1542,10 +1820,16 @@ async function loadAll() {
     if (!error) state.categorie = data || [];
   } catch (_) { state.categorie = []; }
 
-  await loadAgendaOverrides();
+  await reloadWeekData();
 
   state.loading = false;
   render();
+}
+
+// Dati che dipendono dalla settimana selezionata (override agenda + battle plan).
+async function reloadWeekData() {
+  await loadAgendaOverrides();
+  await loadBattlePlan();
 }
 
 // Carica gli override agenda della SOLA settimana selezionata.
@@ -1599,12 +1883,15 @@ async function loadAgendaOverrides() {
 async function upsertCiclo(data) {
   const now = new Date().toISOString();
   if (data.id) {
-    const { error } = await db.from('cicli').update({ ...data, updated_at: now }).eq('id', data.id);
+    const { data: rows, error } = await db.from('cicli')
+      .update({ ...data, updated_at: now }).eq('id', data.id).select();
     if (error) throw error;
-  } else {
-    const { error } = await db.from('cicli').insert({ ...data, created_at: now, updated_at: now });
-    if (error) throw error;
+    return (rows && rows[0]) || { ...data };
   }
+  const { data: rows, error } = await db.from('cicli')
+    .insert({ ...data, created_at: now, updated_at: now }).select();
+  if (error) throw error;
+  return (rows && rows[0]) || null;
 }
 
 async function removeCiclo(id) {
@@ -1646,8 +1933,8 @@ function changeWeek(dir) {
   if (state.week > 52) { state.week = 1;  state.year++; }
   localStorage.setItem(LS.WEEK, state.week);
   render();
-  // Gli override sono per-settimana: ricaricali per la nuova settimana
-  loadAgendaOverrides().then(() => { if (state.view === 'agenda') render(); });
+  // Override e battle plan sono per-settimana: ricaricali per la nuova settimana
+  reloadWeekData().then(() => { if (state.view === 'agenda' || state.view === 'bp') render(); });
 }
 
 function switchCtx(ctx) {
@@ -1694,11 +1981,11 @@ function updateHeader() {
   document.getElementById('addBtn').className = 'btn-primary' + (state.ctx === 'personale' ? ' personale-ctx' : '');
 
   const weekNav = document.querySelector('.week-nav');
-  const weekActive = state.view === 'list' || state.view === 'agenda' || !!state.searchQuery;
+  const weekActive = state.view === 'list' || state.view === 'agenda' || state.view === 'bp' || !!state.searchQuery;
   if (weekNav) {
     weekNav.style.opacity = weekActive ? '1' : '0.4';
     weekNav.style.pointerEvents = weekActive ? '' : 'auto';
-    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo nelle viste Lista e Agenda';
+    weekNav.title = weekActive ? '' : 'Il filtro settimana è attivo nelle viste Battle Plan, Lista e Agenda';
   }
 }
 
@@ -1711,7 +1998,7 @@ function updateMobileNav() {
 }
 
 function renderViews() {
-  const views = ['matrix','list','persone','storico','guida','oggi','settimana','mese','aree','agenda','parcheggio'];
+  const views = ['bp','matrix','list','persone','storico','guida','oggi','settimana','mese','aree','agenda','parcheggio'];
   views.forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = state.view === v ? 'block' : 'none';
@@ -1719,7 +2006,7 @@ function renderViews() {
     if (btn) btn.className = 'view-btn' + (state.view === v ? ' active' + (state.ctx === 'personale' ? ' personale' : '') : '');
   });
 
-  const titles = { matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE', agenda:'AGENDA SETTIMANALE', parcheggio:'PARCHEGGIO' };
+  const titles = { bp:'BATTLE PLAN', matrix:'MATRICE EISENHOWER', list:'LISTA SETTIMANA', persone:'PERSONE', storico:'STORICO', guida:'GUIDA', oggi:'OGGI', settimana:'SETTIMANA', mese:'MESE', aree:'MACRO AREE', agenda:'AGENDA SETTIMANALE', parcheggio:'PARCHEGGIO' };
   document.getElementById('legend-bar').style.display = state.view === 'matrix' && !state.searchQuery ? 'flex' : 'none';
 
   if (state.searchQuery) {
@@ -1771,6 +2058,7 @@ function renderViews() {
   if (state.view === 'aree')     renderAree();
   if (state.view === 'agenda')   renderAgenda();
   if (state.view === 'parcheggio') renderParcheggio();
+  if (state.view === 'bp')         renderBattlePlan();
 }
 
 function applyFilters(cicli) {
@@ -2097,6 +2385,7 @@ function renderSidebar() {
   const customCats = state.categorie.filter(c => c.ctx === state.ctx);
 
   const VIEW_TIPS = {
+    bp:      'Piano di battaglia settimanale — unisci agenda e cicli aperti per la settimana',
     matrix:  'Visualizza i cicli nella matrice di Eisenhower divisi per urgenza e priorità',
     agenda:  'Vista settimanale con cicli distribuiti per giorno e fascia oraria',
     list:    'Tutti i cicli della settimana in ordine di priorità',
@@ -2108,9 +2397,9 @@ function renderSidebar() {
 
   const parkCount = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c)).length;
 
-  const viewItems = ['matrix','agenda','list','persone','storico','parcheggio','guida'].map(v => {
-    const icons  = { matrix:'🔲', agenda:'📆', list:'📋', persone:'👥', storico:'🕐', parcheggio:'⭐', guida:'📖' };
-    const labels = { matrix:'Matrice', agenda:'Agenda', list:'Lista settimana', persone:'Persone', storico:'Storico', parcheggio:'Parcheggio', guida:'Guida' };
+  const viewItems = ['bp','matrix','agenda','list','persone','storico','parcheggio','guida'].map(v => {
+    const icons  = { bp:'⚔️', matrix:'🔲', agenda:'📆', list:'📋', persone:'👥', storico:'🕐', parcheggio:'⭐', guida:'📖' };
+    const labels = { bp:'Battle Plan', matrix:'Matrice', agenda:'Agenda', list:'Lista settimana', persone:'Persone', storico:'Storico', parcheggio:'Parcheggio', guida:'Guida' };
     const active = state.view === v;
     const badge = v === 'parcheggio'
       ? `<span class="sidebar-count">${parkCount}</span>`
@@ -2687,6 +2976,9 @@ function selectQ(q) {
   document.querySelectorAll('.q-pick-btn').forEach(btn => {
     btn.classList.toggle('selected', parseInt(btn.dataset.q) === q);
   });
+  // I Q2 spariscono se non vengono piazzati in agenda: banner informativo, non bloccante
+  const nudge = document.getElementById('q2-nudge');
+  if (nudge) nudge.classList.toggle('show', q === 2);
 }
 
 async function saveCiclo() {
@@ -2739,15 +3031,21 @@ async function saveCiclo() {
 
   try {
     const eraModifica = !!editingId;
-    await upsertCiclo(data);
+    const saved = await upsertCiclo(data);
     closeModal('modalOverlay');   // azzera editingId: leggilo prima
     showToast(eraModifica ? 'Ciclo aggiornato ✓' : 'Ciclo aggiunto ✓', 'success');
+    // stato locale immutabile: il realtime arriverà, ma il chiamante può servire subito l'id
+    if (saved && saved.id) {
+      state.cicli = [saved, ...state.cicli.filter(c => c.id !== saved.id)];
+    }
     // Sync to Google Calendar in background
     syncCicloToGcal({ ...data }).catch(() => {});
+    return saved;
   } catch (e) {
     showToast('Errore: ' + e.message, 'error');
     btn.textContent = 'Salva';
     btn.disabled = false;
+    return null;
   }
 }
 
@@ -5595,6 +5893,1236 @@ function renderRitualiBlock(root) {
   sep.className = 'rituali-sep';
   root.appendChild(sep);
 }
+
+// ══════════════════════════════════════════════════════════════
+// BATTLE PLAN — PIANO DI BATTAGLIA SETTIMANALE
+// ══════════════════════════════════════════════════════════════
+// Un battle_plan è la fotografia di una settimana: quali cicli aperti
+// vengono presi in carico, in che giorno e con quale durata prevista.
+// I cicli restano la fonte di verità; battle_plan_items è solo il piano.
+
+const BP_DURATA_DEFAULT   = 30;      // minuti, quando il ciclo non ne ha una
+const BP_OBIETTIVO_PCT    = 80;      // completamento atteso
+const BP_SOVRACCARICO_MIN = 40 * 60; // oltre 40h di pianificato: warning
+
+const BP_STATI = {
+  bozza:  { emoji: '🟡', label: 'Bozza'  },
+  attivo: { emoji: '🟢', label: 'Attivo' },
+  chiuso: { emoji: '⚫', label: 'Chiuso' }
+};
+
+// 7 giorni + la colonna "senza giorno specifico"
+const BP_ZONE = [
+  ...GIORNI.map(g => ({ key: g.key, short: g.short, label: g.label })),
+  { key: 'settimana', short: 'SETT.', label: 'Settimana' }
+];
+const BP_ZONE_MAP = Object.fromEntries(BP_ZONE.map(z => [z.key, z]));
+
+const _bpAutoAperti = new Set();   // week-year per cui il wizard è già stato proposto
+const _bpAccAperti  = new Set();   // giorni espansi manualmente (accordion mobile)
+
+// ── CARICAMENTO ──────────────────────────────────────────────
+async function loadBattlePlan() {
+  try {
+    const { data, error } = await db.from('battle_plan')
+      .select('*').eq('settimana', state.week).eq('anno', state.year).maybeSingle();
+    if (error) throw error;
+    state.bp        = data || null;
+    state.bpTableOk = true;
+  } catch (e) {
+    state.bp      = null;
+    state.bpItems = [];
+    if (state.bpTableOk) {
+      state.bpTableOk = false;
+      console.warn('[BattlePlan] tabella non disponibile:', e.message);
+    }
+    return;
+  }
+
+  if (!state.bp) { state.bpItems = []; return; }
+  try {
+    const { data, error } = await db.from('battle_plan_items')
+      .select('*').eq('battle_plan_id', state.bp.id).order('ordine');
+    if (error) throw error;
+    state.bpItems = data || [];
+  } catch (e) {
+    state.bpItems = [];
+    console.warn('[BattlePlan] items non disponibili:', e.message);
+  }
+}
+
+// Piano + items di una settimana qualsiasi (usato dal wizard sulla settimana futura)
+async function bpFetchPlan(week, year) {
+  const { data: plan, error } = await db.from('battle_plan')
+    .select('*').eq('settimana', week).eq('anno', year).maybeSingle();
+  if (error) throw error;
+  if (!plan) return { plan: null, items: [] };
+  const { data: items, error: e2 } = await db.from('battle_plan_items')
+    .select('*').eq('battle_plan_id', plan.id).order('ordine');
+  if (e2) throw e2;
+  return { plan, items: items || [] };
+}
+
+// ── HELPER ───────────────────────────────────────────────────
+function bpCiclo(item)        { return state.cicli.find(c => c.id === item.ciclo_id) || null; }
+function bpItemsValidi()      { return state.bpItems.filter(i => bpCiclo(i)); }
+function bpDurata(item)       { return item.durata_prevista || BP_DURATA_DEFAULT; }
+function bpOra(item)          { return item.ora_prevista ? String(item.ora_prevista).slice(0, 5) : null; }
+
+function bpFormatMin(min) {
+  if (!min) return '0min';
+  const h = Math.floor(min / 60), m = min % 60;
+  if (!h) return `${m}min`;
+  return m ? `${h}h ${m}min` : `${h}h`;
+}
+
+function bpStats(items) {
+  const tot  = items.length;
+  const done = items.filter(i => i.completato).length;
+  return { tot, done, pct: tot ? Math.round(done / tot * 100) : 0 };
+}
+
+function bpPctClass(pct) { return pct >= 80 ? 'ok' : (pct >= 50 ? 'mid' : 'low'); }
+
+// Un ciclo ricorrente non si chiude quando lo spunti nel piano: torna la settimana dopo.
+function bpEricorrente(c) {
+  if (!c) return false;
+  if (isGiornaliero(c)) return true;
+  const rip = c.pianificato_ripetizione || c.ricorrenza || 'nessuna';
+  return rip !== 'nessuna';
+}
+
+function bpSottotitolo(week, year) {
+  const start = getWeekStart(week, year);
+  const end   = new Date(start); end.setDate(start.getDate() + 6);
+  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  return `Settimana ${String(week).padStart(2,'0')} · ${fmt(start)} – ${fmt(end)} · ${year}`;
+}
+
+function bpDataGiorno(week, year, idx) {
+  const d = new Date(getWeekStart(week, year));
+  d.setDate(d.getDate() + idx);
+  return d;
+}
+
+// Settimana ISO successiva a (week, year)
+function bpSettimanaSuccessiva(week, year) {
+  const d = new Date(getWeekStart(week, year));
+  d.setDate(d.getDate() + 7);
+  return isoWeekParts(d);
+}
+
+function bpSettimanaCorrente() { return isoWeekParts(new Date()); }
+
+// La settimana selezionata è passata? (piani passati sono in sola lettura)
+function bpSettimanaPassata() {
+  const oggi = getWeekStart(bpSettimanaCorrente().week, bpSettimanaCorrente().year);
+  return getWeekStart(state.week, state.year) < oggi;
+}
+
+function bpSolaLettura() {
+  return !!state.bp && (state.bp.stato === 'chiuso' || bpSettimanaPassata());
+}
+
+// ── VISTA BATTLE PLAN ────────────────────────────────────────
+function renderBattlePlan() {
+  const root = document.getElementById('view-bp');
+  if (!root) return;
+  root.innerHTML = '';
+
+  if (!state.bpTableOk) {
+    const warn = document.createElement('div');
+    warn.className = 'escalation-notice';
+    warn.innerHTML = '⚠️ <strong>Migration non applicata:</strong> esegui <code>supabase_migration_battleplan.sql</code> sul progetto Supabase. Fino ad allora il Battle Plan non è disponibile — il resto dell\'app funziona normalmente.';
+    root.appendChild(warn);
+    return;
+  }
+
+  root.appendChild(bpHeader());
+
+  if (!state.bp) { bpRenderVuoto(root); return; }
+
+  const items = bpItemsValidi();
+  root.appendChild(bpProgressBar(bpStats(items)));
+
+  if (state.bp.note) {
+    const box = document.createElement('div');
+    box.className = 'bp-note-box';
+    box.innerHTML = '<strong>Note di riflessione</strong>' + escHtml(state.bp.note);
+    root.appendChild(box);
+  }
+
+  root.appendChild(bpGriglia(items));
+}
+
+function bpHeader() {
+  const head = document.createElement('div');
+  head.className = 'bp-head';
+  const isP  = state.ctx === 'personale';
+  const stato = state.bp ? (BP_STATI[state.bp.stato] || BP_STATI.bozza) : null;
+
+  const left = document.createElement('div');
+  left.className = 'bp-head-left';
+  left.innerHTML = `
+    <div class="bp-title">⚔️ Battle Plan</div>
+    <div class="bp-sub">${escHtml(bpSottotitolo(state.week, state.year))}</div>
+    ${stato ? `<div class="bp-badge ${state.bp.stato}">${stato.emoji} ${stato.label}</div>` : ''}`;
+  head.appendChild(left);
+
+  const right = document.createElement('div');
+  right.className = 'bp-head-right';
+
+  if (state.bp) {
+    const pdf = document.createElement('button');
+    pdf.className = 'bp-btn';
+    pdf.textContent = '📄 Stampa PDF';
+    pdf.onclick = () => bpStampaPdf();
+    right.appendChild(pdf);
+  }
+
+  if (state.bp && !bpSolaLettura()) {
+    const mod = document.createElement('button');
+    mod.className = 'bp-btn';
+    mod.textContent = '✏️ Modifica piano';
+    mod.onclick = () => openBpWizard(state.week, state.year);
+    right.appendChild(mod);
+  }
+
+  if (state.bp && state.bp.stato === 'attivo' && !bpSettimanaPassata()) {
+    const close = document.createElement('button');
+    close.className = 'bp-btn primary' + (isP ? ' personale' : '');
+    close.textContent = '✅ Chiudi settimana';
+    close.onclick = () => openBpReview();
+    right.appendChild(close);
+  }
+
+  head.appendChild(right);
+  return head;
+}
+
+function bpProgressBar(st) {
+  const cls  = bpPctClass(st.pct);
+  const wrap = document.createElement('div');
+  wrap.className = 'bp-progress-wrap';
+  wrap.innerHTML = `
+    <div class="bp-progress-top">
+      <div class="bp-progress-count"><strong>${st.done}</strong> completati su <strong>${st.tot}</strong> totali</div>
+      <div class="bp-progress-pct bp-pct-${cls}">${st.pct}% completato</div>
+    </div>
+    <div class="bp-bar"><div class="bp-bar-fill bp-fill-${cls}" style="width:${st.pct}%"></div></div>
+    <div class="bp-progress-hint">Obiettivo: completare almeno l'${BP_OBIETTIVO_PCT}% — sovraccarica del 30%</div>`;
+  return wrap;
+}
+
+function bpRenderVuoto(root) {
+  const passata = bpSettimanaPassata();
+  const box = document.createElement('div');
+  box.className = 'bp-empty';
+  box.innerHTML = `
+    <div class="bp-empty-icon">⚔️</div>
+    <div class="bp-empty-title">${passata ? 'Nessun Battle Plan in archivio' : 'Nessun Battle Plan per questa settimana'}</div>
+    <div class="bp-empty-txt">${passata
+      ? 'Non è stato creato alcun piano per la settimana selezionata. Torna alla settimana corrente con le frecce in alto.'
+      : "Scegli i cicli aperti da chiudere questa settimana, assegnali ai giorni e attiva il piano. L'obiettivo è completarne almeno l'80%."}</div>`;
+  if (!passata) {
+    const btn = document.createElement('button');
+    btn.className = 'bp-btn primary' + (state.ctx === 'personale' ? ' personale' : '');
+    btn.textContent = '⚔️ Prepara il Battle Plan';
+    btn.onclick = () => openBpWizard(state.week, state.year);
+    box.appendChild(btn);
+  }
+  root.appendChild(box);
+
+  // Alla prima apertura della settimana proponi direttamente il wizard
+  const key = `${state.year}-${state.week}`;
+  if (!passata && !_bpAutoAperti.has(key)) {
+    _bpAutoAperti.add(key);
+    setTimeout(() => { if (state.view === 'bp' && !state.bp) openBpWizard(state.week, state.year); }, 250);
+  }
+}
+
+// ── GRIGLIA 7 GIORNI + COLONNA SETTIMANA ─────────────────────
+function bpGriglia(items) {
+  const isP    = state.ctx === 'personale';
+  const oggi   = new Date();
+  const mobile = window.innerWidth <= 768;
+  const ro     = bpSolaLettura();
+
+  const perZona = {};
+  BP_ZONE.forEach(z => { perZona[z.key] = []; });
+  items.forEach(i => {
+    const k = perZona[i.giorno] ? i.giorno : 'settimana';
+    perZona[k].push(i);
+  });
+  // ora prevista crescente, poi ordine
+  Object.keys(perZona).forEach(k => {
+    perZona[k] = perZona[k].slice().sort((a, b) => {
+      const oa = bpOra(a) || '99:99', ob = bpOra(b) || '99:99';
+      if (oa !== ob) return oa.localeCompare(ob);
+      return (a.ordine ?? 0) - (b.ordine ?? 0);
+    });
+  });
+
+  const grid = document.createElement('div');
+  grid.className = 'bp-grid';
+
+  BP_ZONE.forEach((z, idx) => {
+    const isWeekCol = z.key === 'settimana';
+    const date      = isWeekCol ? null : bpDataGiorno(state.week, state.year, idx);
+    const isToday   = !!date && isSameDay(date, oggi);
+    const lista     = perZona[z.key];
+    const minuti    = lista.reduce((s, i) => s + bpDurata(i), 0);
+
+    const col = document.createElement('div');
+    col.className = 'bp-col'
+      + (isToday ? ' is-today' : '')
+      + (isP ? ' personale' : '')
+      + (isWeekCol ? ' bp-col-week' : '');
+
+    // accordion su mobile: aperti solo oggi, la colonna settimana e quelli espansi a mano
+    if (mobile) {
+      const aperto = isToday || isWeekCol || _bpAccAperti.has(z.key);
+      if (!aperto) col.classList.add('collapsed');
+    }
+
+    const hd = document.createElement('div');
+    hd.className = 'bp-col-hd';
+    hd.innerHTML = isWeekCol
+      ? `<div class="bp-col-day">📋 SETT.</div><div class="bp-col-date">${lista.length}</div>`
+      : `<div class="bp-col-day">${z.short}</div><div class="bp-col-date">${date.getDate()}/${date.getMonth()+1}</div>`;
+    hd.onclick = () => {
+      if (window.innerWidth > 768) return;
+      if (_bpAccAperti.has(z.key)) _bpAccAperti.delete(z.key); else _bpAccAperti.add(z.key);
+      col.classList.toggle('collapsed');
+    };
+    col.appendChild(hd);
+
+    if (isWeekCol) {
+      const t = document.createElement('div');
+      t.className = 'bp-week-title';
+      t.textContent = 'Da chiudere in settimana';
+      col.appendChild(t);
+    }
+
+    const tot = document.createElement('div');
+    tot.className = 'bp-col-tot';
+    tot.textContent = lista.length ? bpFormatMin(minuti) : '—';
+    col.appendChild(tot);
+
+    const body = document.createElement('div');
+    body.className = 'bp-col-body';
+    if (!lista.length) {
+      const e = document.createElement('div');
+      e.className = 'bp-col-empty';
+      e.textContent = '—';
+      body.appendChild(e);
+    } else {
+      lista.forEach(i => body.appendChild(makeBpCard(i, ro)));
+    }
+    col.appendChild(body);
+    grid.appendChild(col);
+  });
+
+  return grid;
+}
+
+function makeBpCard(item, readonly) {
+  const c = bpCiclo(item);
+  const q = c ? computeEffectiveQ(c) : 2;
+
+  const card = document.createElement('div');
+  card.className = 'bp-card q' + q + (item.completato ? ' done' : '');
+  card.title = c ? (c.title || '') : '';
+  card.onclick = () => { if (c) openModal(null, c.id); };
+
+  const top = document.createElement('div');
+  top.className = 'bp-card-top';
+
+  const check = document.createElement('div');
+  check.className = 'bp-check' + (item.completato ? ' checked' : '');
+  check.textContent = '✓';
+  check.title = readonly ? 'Piano in sola lettura'
+    : (item.completato ? 'Segna come non completato' : 'Segna come completato');
+  check.onclick = e => { e.stopPropagation(); if (!readonly) toggleBpItem(item.id); };
+  top.appendChild(check);
+
+  const title = document.createElement('div');
+  title.className = 'bp-card-title';
+  title.textContent = c ? (c.title || '') : '(ciclo eliminato)';
+  top.appendChild(title);
+  card.appendChild(top);
+
+  const meta = document.createElement('div');
+  meta.className = 'bp-card-meta';
+
+  const ora = bpOra(item);
+  if (ora) {
+    const s = document.createElement('span');
+    s.className = 'bp-chip ora';
+    s.textContent = ora;
+    meta.appendChild(s);
+  }
+
+  const dur = document.createElement('span');
+  dur.className = 'bp-chip';
+  dur.textContent = bpFormatMin(bpDurata(item));
+  meta.appendChild(dur);
+
+  if (c && c.cat) {
+    const cat = document.createElement('span');
+    cat.className = 'bp-chip';
+    cat.textContent = catIcona(c.cat) + ' ' + catNome(c.cat);
+    meta.appendChild(cat);
+  }
+
+  const qb = document.createElement('span');
+  qb.className = 'bp-q q' + q;
+  qb.textContent = 'Q' + q;
+  meta.appendChild(qb);
+
+  card.appendChild(meta);
+  return card;
+}
+
+// ── COMPLETAMENTO DAL PIANO ──────────────────────────────────
+// Spuntare un item chiude anche il ciclo se è "una volta sola".
+// I ricorrenti (settimanale/mensile/trimestrale/giornaliera) restano aperti:
+// la loro ricomparsa è già gestita da ricadeInSettimana().
+async function toggleBpItem(itemId) {
+  const item = state.bpItems.find(i => i.id === itemId);
+  if (!item) return;
+  const nuovo = !item.completato;
+  const quando = nuovo ? new Date().toISOString() : null;
+
+  try {
+    const { error } = await db.from('battle_plan_items')
+      .update({ completato: nuovo, completato_at: quando }).eq('id', itemId);
+    if (error) throw error;
+
+    state.bpItems = state.bpItems.map(i =>
+      i.id === itemId ? { ...i, completato: nuovo, completato_at: quando } : i);
+
+    const c = bpCiclo(item);
+    if (c && !bpEricorrente(c) && !!c.done !== nuovo) {
+      await flipDone(c.id, c.done);
+      state.cicli = state.cicli.map(x => x.id === c.id
+        ? { ...x, done: nuovo, execution_status: nuovo ? 'done' : 'planned' } : x);
+    }
+
+    renderBattlePlan();
+    const st = bpStats(bpItemsValidi());
+    showToast(nuovo ? `Completato ✓ (${st.done}/${st.tot})` : `Riaperto (${st.done}/${st.tot})`,
+      nuovo ? 'success' : 'info');
+  } catch (err) {
+    showToast('Errore: ' + err.message, 'error');
+  }
+}
+
+// ── WIZARD: STEP 1 SELEZIONE + STEP 2 ASSEGNAZIONE ───────────
+let _bpwStep  = 1;
+let _bpwWeek  = null;
+let _bpwYear  = null;
+let _bpwPlan  = null;
+let _bpwSel   = new Map();   // ciclo_id → { giorno, fascia, ora, durata, completato, completato_at, inAgenda }
+let _bpwQuery = '';
+let _bpwCat   = '';
+let _bpwDragId = null;
+
+// Armadio: cicli aperti del contesto, esclusi i rituali quotidiani
+function bpwCandidati() {
+  return state.cicli
+    .filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c))
+    .sort((a, b) => {
+      const qa = computeEffectiveQ(a), qb = computeEffectiveQ(b);
+      if (qa !== qb) return qa - qb;
+      return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+    });
+}
+
+function bpwDefaultDurata(c) { return (c && c.durata_minuti) || BP_DURATA_DEFAULT; }
+function bpwDefaultOra(c) {
+  const o = (c && (c.ora_inizio || c.scheduled_time)) || null;
+  return o ? String(o).slice(0, 5) : null;
+}
+
+async function openBpWizard(week, year, preselIds) {
+  if (!state.bpTableOk) { showToast('Migration Battle Plan non applicata', 'error'); return; }
+
+  _bpwWeek = week; _bpwYear = year;
+  _bpwQuery = ''; _bpwCat = ''; _bpwStep = 1;
+  _bpwSel = new Map();
+
+  try {
+    const { plan, items } = await bpFetchPlan(week, year);
+    _bpwPlan = plan;
+    items.forEach(i => {
+      if (!state.cicli.find(c => c.id === i.ciclo_id)) return;
+      _bpwSel.set(i.ciclo_id, {
+        giorno: i.giorno || null, fascia: i.fascia || null,
+        ora: i.ora_prevista ? String(i.ora_prevista).slice(0, 5) : null,
+        durata: i.durata_prevista || BP_DURATA_DEFAULT,
+        completato: !!i.completato, completato_at: i.completato_at || null
+      });
+    });
+  } catch (e) {
+    showToast('Errore lettura piano: ' + e.message, 'error');
+    return;
+  }
+
+  // Pre-selezione: cicli già pianificati in agenda per questa settimana
+  bpwCandidati().forEach(c => {
+    if (_bpwSel.has(c.id)) return;
+    const slot = agendaSlotForWeek(c, week, year);
+    if (!slot.giorno) return;
+    _bpwSel.set(c.id, {
+      giorno: slot.giorno, fascia: slot.fascia || null,
+      ora: bpwDefaultOra(c), durata: bpwDefaultDurata(c), inAgenda: true
+    });
+  });
+
+  // Cicli rinviati dalla review della settimana precedente
+  (preselIds || []).forEach(id => {
+    if (_bpwSel.has(id)) return;
+    const c = state.cicli.find(x => x.id === id);
+    if (!c) return;
+    _bpwSel.set(id, { giorno: null, fascia: null, ora: bpwDefaultOra(c), durata: bpwDefaultDurata(c) });
+  });
+
+  document.getElementById('bpw-sub').textContent = bpSottotitolo(week, year);
+  const overlay = document.getElementById('bpWizOverlay');
+  overlay.classList.toggle('personale-ctx', state.ctx === 'personale');
+  bpwRenderCatFilter();
+  bpwGoStep(1);
+  overlay.classList.add('open');
+}
+
+function closeBpWizard() {
+  document.getElementById('bpWizOverlay').classList.remove('open');
+}
+
+function bpwGoStep(n) {
+  _bpwStep = n;
+  document.getElementById('bpw-step1').style.display = n === 1 ? '' : 'none';
+  document.getElementById('bpw-step2').style.display = n === 2 ? '' : 'none';
+  document.getElementById('bpw-s1').classList.toggle('on', n >= 1);
+  document.getElementById('bpw-s2').classList.toggle('on', n >= 2);
+
+  const isP = state.ctx === 'personale';
+  document.getElementById('bpw-title').textContent = n === 1
+    ? `⚔️ Prepara il Battle Plan — Sett. ${String(_bpwWeek).padStart(2,'0')}`
+    : `📆 Assegna ai giorni — Sett. ${String(_bpwWeek).padStart(2,'0')}`;
+
+  const next = document.getElementById('bpw-next');
+  next.textContent = n === 1 ? 'Avanti → Assegna ai giorni' : '✅ Attiva il Battle Plan';
+  next.className = 'bp-btn primary' + (isP ? ' personale' : '');
+  next.disabled = false;
+  document.getElementById('bpw-back').textContent = n === 1 ? 'Annulla' : '← Indietro';
+
+  if (n === 1) bpwRenderStep1(); else bpwRenderStep2();
+}
+
+function bpwBack() { if (_bpwStep === 2) bpwGoStep(1); else closeBpWizard(); }
+
+async function bpwNext() {
+  if (_bpwStep === 1) {
+    if (!_bpwSel.size) { showToast('Seleziona almeno un ciclo', 'warn'); return; }
+    bpwGoStep(2);
+    return;
+  }
+  await bpAttiva();
+}
+
+// ── STEP 1 ───────────────────────────────────────────────────
+function bpwRenderCatFilter() {
+  const sel = document.getElementById('bpw-cat');
+  if (!sel) return;
+  const usate = [...new Set(bpwCandidati().map(c => c.cat).filter(Boolean))];
+  sel.innerHTML = '<option value="">Tutte le categorie</option>' +
+    usate.map(k => `<option value="${escHtml(k)}">${catIcona(k)} ${escHtml(catNome(k))}</option>`).join('');
+  sel.value = _bpwCat;
+}
+
+function bpwSetQuery(v) { _bpwQuery = (v || '').toLowerCase().trim(); bpwRenderStep1(); }
+function bpwSetCat(v)   { _bpwCat = v || ''; bpwRenderStep1(); }
+
+function bpwToggle(cicloId) {
+  if (_bpwSel.has(cicloId)) {
+    _bpwSel.delete(cicloId);
+  } else {
+    const c = state.cicli.find(x => x.id === cicloId);
+    const slot = c ? agendaSlotForWeek(c, _bpwWeek, _bpwYear) : { giorno: null, fascia: null };
+    _bpwSel.set(cicloId, {
+      giorno: slot.giorno || null, fascia: slot.fascia || null,
+      ora: bpwDefaultOra(c), durata: bpwDefaultDurata(c)
+    });
+  }
+  bpwRenderStep1();
+}
+
+function bpwRenderStep1() {
+  const list = document.getElementById('bpw-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  let cicli = bpwCandidati();
+  if (_bpwCat)   cicli = cicli.filter(c => c.cat === _bpwCat);
+  if (_bpwQuery) cicli = cicli.filter(c =>
+    (c.title || '').toLowerCase().includes(_bpwQuery) ||
+    (c.note  || '').toLowerCase().includes(_bpwQuery));
+
+  if (!cicli.length) {
+    const e = document.createElement('div');
+    e.className = 'bp-col-empty';
+    e.textContent = 'Nessun ciclo aperto corrisponde ai filtri.';
+    list.appendChild(e);
+  }
+
+  [1, 2, 3, 4].forEach(q => {
+    const gruppo = cicli.filter(c => computeEffectiveQ(c) === q);
+    if (!gruppo.length) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'bp-qgroup';
+    const hd = document.createElement('div');
+    hd.className = 'bp-qgroup-hd';
+    const QL = { 1:'🔥 Q1 — Crisi', 2:'📌 Q2 — Qualità', 3:'📋 Q3 — Inganno', 4:'🗑 Q4 — Spreco' };
+    hd.innerHTML = `<span class="bp-q q${q}">Q${q}</span><span>${QL[q]}</span><span style="color:var(--text-dim)">(${gruppo.length})</span>`;
+    wrap.appendChild(hd);
+
+    gruppo.forEach(c => {
+      const sel = _bpwSel.get(c.id);
+      const row = document.createElement('label');
+      row.className = 'bp-pick' + (sel ? ' sel' : '');
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!sel;
+      cb.onchange = () => bpwToggle(c.id);
+      row.appendChild(cb);
+
+      const main = document.createElement('div');
+      main.className = 'bp-pick-main';
+      const t = document.createElement('div');
+      t.className = 'bp-pick-title';
+      t.textContent = c.title || '';
+      main.appendChild(t);
+
+      const meta = document.createElement('div');
+      meta.className = 'bp-pick-meta';
+      const chip = (txt, cls) => { const s = document.createElement('span'); s.className = 'bp-chip' + (cls || ''); s.textContent = txt; meta.appendChild(s); };
+      if (c.cat) chip(catIcona(c.cat) + ' ' + catNome(c.cat));
+      const persone = (c.persone_menzionate || []).filter(Boolean);
+      if (persone.length) chip('👤 ' + persone.slice(0, 2).join(', ') + (persone.length > 2 ? ` +${persone.length-2}` : ''));
+      if (c.due_date) {
+        const gg = getDaysLeft(c.due_date);
+        chip('⏳ ' + formatDaysLeft(gg));
+      }
+      if (sel && sel.inAgenda) chip('📅 Già in agenda');
+      main.appendChild(meta);
+      row.appendChild(main);
+      wrap.appendChild(row);
+    });
+
+    list.appendChild(wrap);
+  });
+
+  bpwRenderSummary();
+}
+
+function bpwRenderSummary() {
+  const box = document.getElementById('bpw-summary');
+  if (!box) return;
+  const n      = _bpwSel.size;
+  const minuti = [..._bpwSel.values()].reduce((s, v) => s + (v.durata || BP_DURATA_DEFAULT), 0);
+  const over   = minuti > BP_SOVRACCARICO_MIN;
+
+  box.innerHTML = `
+    <div class="bp-sum-h">Riepilogo selezione</div>
+    <div class="bp-sum-n">${n}</div>
+    <div class="bp-sum-lbl">${n === 1 ? 'ciclo selezionato' : 'cicli selezionati'}</div>
+    <div class="bp-sum-row"><span>Tempo totale stimato</span><strong>${bpFormatMin(minuti)}</strong></div>
+    <div class="bp-sum-row"><span>Media per ciclo</span><strong>${n ? bpFormatMin(Math.round(minuti/n)) : '—'}</strong></div>
+    <div class="bp-sum-row"><span>Obiettivo ${BP_OBIETTIVO_PCT}%</span><strong>${Math.ceil(n * BP_OBIETTIVO_PCT / 100)} cicli</strong></div>
+    ${over ? '<div class="bp-warn">⚠️ Stai sovraccaricando la settimana — oltre 40 ore di pianificato.</div>' : ''}
+    <div class="bp-tip">💡 <strong>Consiglio:</strong> seleziona il 130% di quello che pensi di fare — l'80% di completamento è l'obiettivo.</div>`;
+}
+
+// ── STEP 2: ASSEGNAZIONE AI GIORNI (drag & drop + tap) ───────
+function bpwRenderStep2() {
+  const pool = document.getElementById('bpw-pool');
+  const days = document.getElementById('bpw-days');
+  if (!pool || !days) return;
+  pool.innerHTML = '';
+  days.innerHTML = '';
+
+  const daAssegnare = [..._bpwSel.entries()].filter(([, v]) => !v.giorno);
+  document.getElementById('bpw-pool-hd').textContent =
+    `Da assegnare (${daAssegnare.length}) — finiranno in 📋 Settimana`;
+
+  if (!daAssegnare.length) {
+    const e = document.createElement('div');
+    e.className = 'bp-col-empty';
+    e.textContent = 'Tutti assegnati ✓';
+    pool.appendChild(e);
+  } else {
+    daAssegnare.forEach(([id, v]) => pool.appendChild(bpwMiniCard(id, v, null)));
+  }
+
+  BP_ZONE.forEach((z, idx) => {
+    const isWeekCol = z.key === 'settimana';
+    const date  = isWeekCol ? null : bpDataGiorno(_bpwWeek, _bpwYear, idx);
+    const lista = [..._bpwSel.entries()].filter(([, v]) => v.giorno === z.key);
+    const min   = lista.reduce((s, [, v]) => s + (v.durata || BP_DURATA_DEFAULT), 0);
+
+    const zone = document.createElement('div');
+    zone.className = 'bp-drop';
+    zone.dataset.zona = z.key;
+
+    const hd = document.createElement('div');
+    hd.className = 'bp-drop-hd';
+    hd.innerHTML = isWeekCol
+      ? `<span>📋 SETT.</span><span class="bp-drop-tot">${lista.length ? bpFormatMin(min) : '—'}</span>`
+      : `<span>${z.short} ${date.getDate()}/${date.getMonth()+1}</span><span class="bp-drop-tot">${lista.length ? bpFormatMin(min) : '—'}</span>`;
+    zone.appendChild(hd);
+
+    const body = document.createElement('div');
+    body.className = 'bp-drop-body';
+    if (!lista.length) {
+      const e = document.createElement('div');
+      e.className = 'bp-col-empty';
+      e.textContent = '—';
+      body.appendChild(e);
+    } else {
+      lista
+        .sort((a, b) => (a[1].ora || '99:99').localeCompare(b[1].ora || '99:99'))
+        .forEach(([id, v]) => body.appendChild(bpwMiniCard(id, v, z.key)));
+    }
+    zone.appendChild(body);
+
+    bpwAttachDrop(zone, z.key);
+    days.appendChild(zone);
+  });
+}
+
+function bpwMiniCard(cicloId, v, zonaKey) {
+  const c = state.cicli.find(x => x.id === cicloId);
+  const q = c ? computeEffectiveQ(c) : 2;
+
+  const el = document.createElement('div');
+  el.className = 'bp-mini q' + q;
+  el.draggable = true;
+  el.dataset.id = cicloId;
+  el.title = 'Trascina in un giorno, oppure tocca per scegliere giorno e fascia';
+
+  const x = document.createElement('span');
+  x.className = 'bp-mini-x';
+  x.textContent = '✕';
+  x.title = 'Togli dal Battle Plan';
+  x.onclick = e => { e.stopPropagation(); _bpwSel.delete(cicloId); bpwRenderStep2(); };
+  el.appendChild(x);
+
+  const t = document.createElement('span');
+  t.textContent = c ? (c.title || '') : '(ciclo eliminato)';
+  el.appendChild(t);
+
+  const meta = document.createElement('div');
+  meta.className = 'bp-mini-meta';
+  const parti = [];
+  if (v.ora) parti.push(v.ora);
+  if (v.fascia && FASCE_MAP[v.fascia]) parti.push(FASCE_MAP[v.fascia].emoji);
+  parti.push(bpFormatMin(v.durata || BP_DURATA_DEFAULT));
+  meta.textContent = parti.join(' · ');
+  el.appendChild(meta);
+
+  el.onclick = () => bpSlotOpen(cicloId, zonaKey || v.giorno || 'lunedi');
+  el.addEventListener('dragstart', e => {
+    _bpwDragId = cicloId;
+    el.classList.add('dragging');
+    try { e.dataTransfer.setData('text/plain', cicloId); e.dataTransfer.effectAllowed = 'move'; } catch (_) {}
+  });
+  el.addEventListener('dragend', () => {
+    _bpwDragId = null;
+    el.classList.remove('dragging');
+    document.querySelectorAll('.bp-drop.drag-over').forEach(z => z.classList.remove('drag-over'));
+  });
+  return el;
+}
+
+function bpwAttachDrop(zone, zonaKey) {
+  zone.addEventListener('dragover', e => {
+    if (!_bpwDragId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', e => {
+    if (zone.contains(e.relatedTarget)) return;
+    zone.classList.remove('drag-over');
+  });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    let id = _bpwDragId;
+    try { id = e.dataTransfer.getData('text/plain') || id; } catch (_) {}
+    _bpwDragId = null;
+    if (!id || !_bpwSel.has(id)) return;
+    const v = _bpwSel.get(id);
+    // Fascia e durata già note (o colonna "settimana"): assegna diretto, senza chiedere
+    if (zonaKey === 'settimana' || (v.fascia && v.durata)) {
+      _bpwSel.set(id, { ...v, giorno: zonaKey, fascia: zonaKey === 'settimana' ? null : v.fascia });
+      bpwRenderStep2();
+    } else {
+      bpSlotOpen(id, zonaKey);
+    }
+  });
+}
+
+// ── MINI PANNELLO: giorno / fascia / ora / durata ────────────
+let _bpsCicloId = null;
+let _bpsFascia  = 'mattina';
+
+function bpSlotOpen(cicloId, giornoKey) {
+  const v = _bpwSel.get(cicloId);
+  if (!v) return;
+  const c = state.cicli.find(x => x.id === cicloId);
+  _bpsCicloId = cicloId;
+  _bpsFascia  = v.fascia || 'mattina';
+
+  document.getElementById('bps-sub').textContent = c ? (c.title || '') : '';
+
+  const gsel = document.getElementById('bps-giorno');
+  gsel.innerHTML = BP_ZONE.map(z =>
+    `<option value="${z.key}">${z.key === 'settimana' ? '📋 In settimana (senza giorno)' : z.label}</option>`).join('');
+  gsel.value = giornoKey || v.giorno || 'lunedi';
+
+  const fasce = document.getElementById('bps-fasce');
+  fasce.innerHTML = '';
+  FASCE.forEach(f => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'bp-slot-opt' + (f.key === _bpsFascia ? ' sel' : '');
+    b.textContent = `${f.emoji} ${f.label}`;
+    b.onclick = () => {
+      _bpsFascia = f.key;
+      [...fasce.children].forEach(x => x.classList.toggle('sel', x === b));
+    };
+    fasce.appendChild(b);
+  });
+
+  document.getElementById('bps-ora').value = v.ora || '';
+  const dsel = document.getElementById('bps-durata');
+  const dur  = String(v.durata || bpwDefaultDurata(c));
+  dsel.value = [...dsel.options].some(o => o.value === dur) ? dur : String(BP_DURATA_DEFAULT);
+
+  const panel = document.getElementById('bpSlotPanel');
+  panel.classList.toggle('personale-ctx', state.ctx === 'personale');
+  panel.classList.add('open');
+}
+
+function bpSlotClose() {
+  document.getElementById('bpSlotPanel').classList.remove('open');
+  _bpsCicloId = null;
+}
+
+function bpSlotConfirm() {
+  const id = _bpsCicloId;
+  if (!id || !_bpwSel.has(id)) { bpSlotClose(); return; }
+  const giorno = document.getElementById('bps-giorno').value;
+  const ora    = document.getElementById('bps-ora').value || null;
+  const durata = parseInt(document.getElementById('bps-durata').value, 10) || BP_DURATA_DEFAULT;
+
+  _bpwSel.set(id, {
+    ..._bpwSel.get(id),
+    giorno,
+    fascia: giorno === 'settimana' ? null : _bpsFascia,
+    ora, durata
+  });
+  bpSlotClose();
+  bpwRenderStep2();
+}
+
+document.getElementById('bpSlotPanel').addEventListener('click', e => {
+  if (e.target.id === 'bpSlotPanel') bpSlotClose();
+});
+
+// ── STEP 3: ATTIVAZIONE ──────────────────────────────────────
+async function bpAttiva() {
+  const btn = document.getElementById('bpw-next');
+  btn.disabled = true;
+  btn.textContent = 'Attivazione...';
+
+  try {
+    const { data: planRows, error } = await db.from('battle_plan')
+      .upsert({ settimana: _bpwWeek, anno: _bpwYear, stato: 'attivo' }, { onConflict: 'settimana,anno' })
+      .select();
+    if (error) throw error;
+    const plan = (planRows && planRows[0]) || _bpwPlan;
+    if (!plan) throw new Error('Piano non creato');
+
+    // rimuovi gli item non più selezionati
+    const { data: esistenti, error: e1 } = await db.from('battle_plan_items')
+      .select('id,ciclo_id').eq('battle_plan_id', plan.id);
+    if (e1) throw e1;
+    const daEliminare = (esistenti || []).filter(i => !_bpwSel.has(i.ciclo_id)).map(i => i.id);
+    if (daEliminare.length) {
+      const { error: e2 } = await db.from('battle_plan_items').delete().in('id', daEliminare);
+      if (e2) throw e2;
+    }
+
+    const rows = [..._bpwSel.entries()].map(([cicloId, v], idx) => ({
+      battle_plan_id:  plan.id,
+      ciclo_id:        cicloId,
+      giorno:          v.giorno || 'settimana',
+      fascia:          v.giorno === 'settimana' || !v.giorno ? null : (v.fascia || null),
+      ora_prevista:    v.ora || null,
+      durata_prevista: v.durata || BP_DURATA_DEFAULT,
+      completato:      !!v.completato,
+      completato_at:   v.completato_at || null,
+      ordine:          idx
+    }));
+    if (rows.length) {
+      const { error: e3 } = await db.from('battle_plan_items')
+        .upsert(rows, { onConflict: 'battle_plan_id,ciclo_id' });
+      if (e3) throw e3;
+    }
+
+    const n = rows.length;
+    closeBpWizard();
+
+    // porta la vista sulla settimana appena pianificata
+    if (state.week !== _bpwWeek || state.year !== _bpwYear) {
+      state.week = _bpwWeek; state.year = _bpwYear;
+      localStorage.setItem(LS.WEEK, state.week);
+      await reloadWeekData();
+    } else {
+      await loadBattlePlan();
+    }
+    switchView('bp');
+    showToast(`Battle Plan attivato — ${n} cicli per questa settimana. In bocca al lupo! 🔥`, 'success');
+  } catch (err) {
+    showToast('Errore attivazione: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '✅ Attiva il Battle Plan';
+  }
+}
+
+// ── REVIEW: CHIUSURA SETTIMANA ───────────────────────────────
+let _bpRevScelte = new Map();   // item_id → 'sposta' | 'armadio' | 'chiudi'
+
+const BP_REV_OPZIONI = [
+  { key: 'sposta',  label: '📅 Prossima settimana' },
+  { key: 'armadio', label: '📦 Rimetti nell\'armadio' },
+  { key: 'chiudi',  label: '🗑 Chiudi comunque' }
+];
+
+function openBpReview() {
+  if (!state.bp) return;
+  const items   = bpItemsValidi();
+  const aperti  = items.filter(i => !i.completato);
+  const st      = bpStats(items);
+
+  _bpRevScelte = new Map(aperti.map(i => [i.id, 'sposta']));
+
+  document.getElementById('bprev-title').textContent = `Review settimana ${String(state.week).padStart(2,'0')}`;
+  document.getElementById('bprev-sub').textContent   = bpSottotitolo(state.week, state.year);
+
+  const body = document.getElementById('bprev-body');
+  body.innerHTML = '';
+  body.appendChild(bpProgressBar(st));
+
+  const verdetto = document.createElement('div');
+  verdetto.className = 'bp-rev-verdict';
+  verdetto.textContent = st.pct >= 80 ? '🏆 Ottimo lavoro! Obiettivo raggiunto.'
+    : st.pct >= 50 ? '👍 Buon lavoro. Puoi migliorare.'
+    : '⚠️ Settimana difficile. Rivedi il carico per la prossima.';
+  body.appendChild(verdetto);
+
+  if (aperti.length) {
+    const h = document.createElement('div');
+    h.className = 'bp-qgroup-hd';
+    h.textContent = `Cicli non completati (${aperti.length})`;
+    body.appendChild(h);
+
+    aperti.forEach(item => {
+      const c = bpCiclo(item);
+      const row = document.createElement('div');
+      row.className = 'bp-rev-item';
+
+      const t = document.createElement('div');
+      t.className = 'bp-rev-item-title';
+      t.textContent = c ? (c.title || '') : '(ciclo eliminato)';
+      row.appendChild(t);
+
+      const opts = document.createElement('div');
+      opts.className = 'bp-rev-opts';
+      BP_REV_OPZIONI.forEach(o => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'bp-rev-opt' + (o.key === 'sposta' ? ' sel' : '');
+        b.textContent = o.label;
+        b.onclick = () => {
+          _bpRevScelte.set(item.id, o.key);
+          [...opts.children].forEach(x => x.classList.toggle('sel', x === b));
+        };
+        opts.appendChild(b);
+      });
+      row.appendChild(opts);
+      body.appendChild(row);
+    });
+  } else {
+    const ok = document.createElement('div');
+    ok.className = 'bp-tip';
+    ok.textContent = '🎉 Hai completato tutti i cicli del piano.';
+    body.appendChild(ok);
+  }
+
+  const note = document.createElement('div');
+  note.className = 'form-group';
+  note.style.marginTop = '16px';
+  note.innerHTML = `
+    <label class="form-label">Note di riflessione</label>
+    <textarea class="form-textarea" id="bprev-note" placeholder="Come è andata questa settimana? Cosa migliorare?">${escHtml(state.bp.note || '')}</textarea>`;
+  body.appendChild(note);
+
+  const overlay = document.getElementById('bpRevOverlay');
+  overlay.classList.toggle('personale-ctx', state.ctx === 'personale');
+  const ok = document.getElementById('bprev-ok');
+  ok.className = 'bp-btn primary' + (state.ctx === 'personale' ? ' personale' : '');
+  ok.disabled = false;
+  ok.textContent = 'Chiudi settimana e prepara la prossima →';
+  overlay.classList.add('open');
+}
+
+async function bpChiudiSettimana() {
+  if (!state.bp) return;
+  const btn = document.getElementById('bprev-ok');
+  btn.disabled = true;
+  btn.textContent = 'Chiusura...';
+
+  const note = (document.getElementById('bprev-note') || {}).value || null;
+  const daSpostare = [], daChiudere = [];
+  _bpRevScelte.forEach((scelta, itemId) => {
+    const item = state.bpItems.find(i => i.id === itemId);
+    if (!item) return;
+    if (scelta === 'sposta') daSpostare.push(item.ciclo_id);
+    if (scelta === 'chiudi') daChiudere.push(item.ciclo_id);
+    // 'armadio': nessuna azione, il ciclo resta aperto tra i cicli aperti
+  });
+
+  try {
+    const { error } = await db.from('battle_plan')
+      .update({ stato: 'chiuso', chiuso_at: new Date().toISOString(), note })
+      .eq('id', state.bp.id);
+    if (error) throw error;
+
+    if (daChiudere.length) {
+      const { error: e2 } = await db.from('cicli')
+        .update({ done: true, execution_status: 'done', sync_status: 'pending', updated_at: new Date().toISOString() })
+        .in('id', daChiudere);
+      if (e2) throw e2;
+      state.cicli = state.cicli.map(c => daChiudere.includes(c.id)
+        ? { ...c, done: true, execution_status: 'done' } : c);
+    }
+
+    state.bp = { ...state.bp, stato: 'chiuso', chiuso_at: new Date().toISOString(), note };
+    closeModal('bpRevOverlay');
+    renderBattlePlan();
+    showToast(`Settimana chiusa. ${daSpostare.length} cicli spostati alla prossima.`, 'success');
+
+    const next = bpSettimanaSuccessiva(state.week, state.year);
+    setTimeout(() => openBpWizard(next.week, next.year, daSpostare), 400);
+  } catch (err) {
+    showToast('Errore chiusura: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Chiudi settimana e prepara la prossima →';
+  }
+}
+
+// ── Q2: SPINTA VERSO L'AGENDA ────────────────────────────────
+// Banner informativo sotto il quadrant picker: i Q2 non urgenti spariscono
+// se non vengono piazzati in agenda. Non blocca il salvataggio.
+async function q2PianificaOra() {
+  if (editingId) {
+    const id = editingId;
+    closeModal('modalOverlay');
+    openPianificaModal(id);
+    return;
+  }
+  const titolo = document.getElementById('f-title').value.trim();
+  if (!titolo) { showToast('Inserisci prima un titolo', 'warn'); return; }
+  const saved = await saveCiclo();
+  if (saved && saved.id) setTimeout(() => openPianificaModal(saved.id), 150);
+}
+
+// ── EXPORT PDF A4 ────────────────────────────────────────────
+// jsPDF usa i font standard PDF (WinAnsi): niente emoji, vanno rimosse
+// altrimenti escono caratteri sporchi.
+function pdfTxt(s) {
+  return String(s || '')
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function bpStampaPdf() {
+  if (!state.bp) { showToast('Nessun Battle Plan da stampare', 'warn'); return; }
+  const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDFCtor) { showToast('Libreria PDF non caricata — riprova', 'error'); return; }
+
+  const mobile = window.innerWidth <= 768;
+  const M      = mobile ? 10 : 14;              // margini ridotti su mobile
+  const doc    = new jsPDFCtor({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  const W      = doc.internal.pageSize.getWidth();
+  const H      = doc.internal.pageSize.getHeight();
+  const LIMITE = H - M - 6;
+  const COL_L  = (W - 2 * M) * 0.68;            // elenco cicli
+  const COL_R_X = M + COL_L + 6;                // colonna note
+  const COL_R_W = W - M - COL_R_X;
+
+  const items = bpItemsValidi();
+  const st    = bpStats(items);
+
+  const perZona = {};
+  BP_ZONE.forEach(z => { perZona[z.key] = []; });
+  items.forEach(i => { (perZona[i.giorno] || perZona.settimana).push(i); });
+  Object.keys(perZona).forEach(k => perZona[k].sort((a, b) =>
+    (bpOra(a) || '99:99').localeCompare(bpOra(b) || '99:99')));
+
+  let y = M;
+
+  const nuovaPagina = () => { doc.addPage(); y = M; };
+  const spazio = h => { if (y + h > LIMITE) nuovaPagina(); };
+
+  const rigaTratteggiata = (x, yy, w) => {
+    doc.setDrawColor(170);
+    doc.setLineDashPattern([1, 1.2], 0);
+    doc.line(x, yy, x + w, yy);
+    doc.setLineDashPattern([], 0);
+    doc.setDrawColor(0);
+  };
+
+  // ── HEADER ──
+  const start = getWeekStart(state.week, state.year);
+  const end   = new Date(start); end.setDate(start.getDate() + 6);
+  const fmtD  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+  doc.text(pdfTxt(`BATTLE PLAN - Settimana ${String(state.week).padStart(2,'0')}`), M, y + 6);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(`${fmtD(start)} - ${fmtD(end)}`, M, y + 12);
+  doc.setFontSize(8);
+  doc.text(`Stampato il ${fmtD(new Date())}`, W - M, y + 6, { align: 'right' });
+  doc.setTextColor(0);
+  y += 16;
+  doc.setDrawColor(0); doc.setLineWidth(0.4);
+  doc.line(M, y, W - M, y);
+  doc.setLineWidth(0.2);
+  y += 8;
+
+  // ── UN BLOCCO PER GIORNO + SEZIONE SETTIMANA ──
+  BP_ZONE.forEach((z, idx) => {
+    const isWeekCol = z.key === 'settimana';
+    const lista = perZona[z.key];
+    const date  = isWeekCol ? null : bpDataGiorno(state.week, state.year, idx);
+
+    spazio(18);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    const titolo = isWeekCol
+      ? 'IN SETTIMANA (senza giorno specifico)'
+      : `${z.label.toUpperCase()} ${date.getDate()}/${date.getMonth()+1}`;
+    doc.text(pdfTxt(titolo), M, y);
+    doc.setLineWidth(0.3);
+    doc.line(M, y + 1.4, M + doc.getTextWidth(pdfTxt(titolo)), y + 1.4);
+    doc.setLineWidth(0.2);
+    y += 6;
+
+    if (!lista.length) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(140);
+      doc.text('Nessun ciclo pianificato', M + 2, y);
+      doc.setTextColor(0);
+      rigaTratteggiata(COL_R_X, y, COL_R_W);
+      y += 8;
+      return;
+    }
+
+    lista.forEach(item => {
+      const c = bpCiclo(item);
+      const righe = doc.splitTextToSize(pdfTxt(c ? c.title : '(ciclo eliminato)'), COL_L - 8);
+
+      const dettagli = [];
+      const ora = bpOra(item);
+      if (ora) dettagli.push(`${ora} - ${bpFormatMin(bpDurata(item))}`);
+      else dettagli.push(bpFormatMin(bpDurata(item)));
+      if (c && c.cat) dettagli.push(`(${pdfTxt(catNome(c.cat))})`);
+
+      spazio(righe.length * 4.6 + 7);
+
+      // checkbox
+      doc.setDrawColor(60);
+      doc.rect(M + 1, y - 3.1, 3.4, 3.4);
+      doc.setDrawColor(0);
+
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(0);
+      righe.forEach((r, i) => {
+        if (i > 0) y += 4.6;
+        doc.text(r, M + 7, y);
+        rigaTratteggiata(COL_R_X, y, COL_R_W);
+      });
+
+      y += 4.2;
+      doc.setFontSize(8); doc.setTextColor(110);
+      doc.text(pdfTxt(dettagli.join('  ')), M + 7, y);
+      doc.setTextColor(0);
+      rigaTratteggiata(COL_R_X, y, COL_R_W);
+      y += 6;
+    });
+
+    y += 3;
+  });
+
+  // ── FOOTER: NOTE GENERALI + BILANCIO ──
+  spazio(70);
+  y += 4;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+  doc.text('NOTE GENERALI', M, y);
+  y += 6;
+  for (let i = 0; i < 10; i++) {
+    spazio(8);
+    rigaTratteggiata(M, y, W - 2 * M);
+    y += 6.5;
+  }
+
+  spazio(14);
+  y += 4;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+  doc.text(`Cicli completati: ____ / ____  (____%)  -  Obiettivo: ${BP_OBIETTIVO_PCT}%`, M, y);
+  doc.setFontSize(8); doc.setTextColor(120);
+  doc.text(`Al momento della stampa: ${st.done}/${st.tot} (${st.pct}%)`, W - M, y, { align: 'right' });
+  doc.setTextColor(0);
+
+  const nomeFile = `battle-plan-${state.year}-W${String(state.week).padStart(2,'0')}.pdf`;
+  try {
+    const url = URL.createObjectURL(doc.output('blob'));
+    const win = window.open(url, '_blank');
+    if (!win) { doc.save(nomeFile); showToast('PDF scaricato (popup bloccato)', 'info'); }
+    else showToast('PDF generato — pronto per la stampa', 'success');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    doc.save(nomeFile);
+    showToast('PDF scaricato', 'info');
+  }
+}
+
+// ── REALTIME BATTLE PLAN (canale separato: se la tabella non è in
+//    publication non arrivano eventi, ma il resto dell'app non si rompe) ──
+try {
+  db.channel('bp-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'battle_plan' },
+        () => loadBattlePlan().then(() => { if (state.view === 'bp') renderBattlePlan(); }))
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'battle_plan_items' },
+        () => loadBattlePlan().then(() => { if (state.view === 'bp') renderBattlePlan(); }))
+    .subscribe();
+} catch (e) { console.warn('[BattlePlan] realtime non attivo:', e.message); }
 
 </script>
 </body>

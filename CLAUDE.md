@@ -29,6 +29,8 @@ Deploy su GitHub Pages: https://maci81x.github.io/cicli-aperti/
 | `macro_aree` | 9 macro aree fisse SSI | Disabilitato |
 | `user_tokens` | Token OAuth Google | Disabilitato |
 | `agenda_override` | Spostamenti agenda validi per 1 sola settimana | RLS con policy anon |
+| `battle_plan` | Piano settimanale (una riga per settimana/anno) | RLS con policy anon |
+| `battle_plan_items` | Cicli del piano con giorno, fascia, ora, durata | RLS con policy anon |
 
 ### Schema cicli (colonne rilevanti)
 
@@ -73,6 +75,30 @@ UNIQUE(ciclo_id, settimana, anno)
 Un override vale **solo per la settimana indicata**: la settimana successiva
 il ciclo torna al `giorno_settimana`/`fascia_oraria` definiti sul ciclo stesso.
 
+### Schema battle_plan / battle_plan_items
+
+```sql
+-- battle_plan: una riga per settimana ISO
+id uuid PK, settimana int NOT NULL, anno int NOT NULL,
+stato text DEFAULT 'bozza' CHECK (bozza|attivo|chiuso),
+note text,                       -- note di riflessione scritte nella review
+creato_at timestamptz, chiuso_at timestamptz,
+UNIQUE(settimana, anno)
+
+-- battle_plan_items: i cicli presi in carico per quella settimana
+id uuid PK,
+battle_plan_id uuid FK battle_plan ON DELETE CASCADE,
+ciclo_id uuid FK cicli ON DELETE CASCADE,
+giorno text CHECK (lunedi..domenica | settimana),   -- 'settimana' = senza giorno
+fascia text CHECK (mattina|pomeriggio|sera),
+ora_prevista time, durata_prevista int DEFAULT 30,
+completato boolean DEFAULT false, completato_at timestamptz,
+ordine int DEFAULT 0, note_item text,
+UNIQUE(battle_plan_id, ciclo_id)
+```
+
+Migration: `supabase_migration_battleplan.sql`.
+
 ### Schema user_tokens
 
 ```sql
@@ -83,7 +109,8 @@ google_calendar_id text, expires_at timestamp
 
 ### Realtime
 
-Attivo su: `cicli`, `persone`, `categorie`
+Attivo su: `cicli`, `persone`, `categorie`, `agenda_override`, `rituali_completati`,
+`battle_plan`, `battle_plan_items` (questi ultimi su canale separato `bp-changes`)
 
 ## Google Calendar OAuth
 
@@ -113,7 +140,8 @@ PLAUD IMPORT → API KEY → TOAST → THEME → TOOLTIP → GUIDA →
 SKELETON → KEYBOARD → AVVIO →
 [BATTLE PLAN] GOOGLE CALENDAR → AUTO-CAT → VISTE (OGGI/SETTIMANA/MESE/AREE) →
 MOBILE CARD SWIPE → POSTPONE → PULL-TO-REFRESH → BATCH MIGRATE →
-DRAWER → COMPACT CARD → MATRIX MOBILE → VISTA AGENDA
+DRAWER → COMPACT CARD → MATRIX MOBILE → VISTA AGENDA →
+MINI-MODALE PIANIFICA → RITUALI QUOTIDIANI → BATTLE PLAN
 ```
 
 ## Macro Aree (9 fisse SSI)
@@ -137,6 +165,7 @@ Auto-assegnate via Claude Haiku alla creazione di ogni ciclo di tipo `lavoro`.
 | Guida | Documentazione OSM | — |
 | Agenda | Griglia 7 giorni × 3 fasce, drag & drop override settimanali | 📆 |
 | Parcheggio | Cicli messi da parte, ordinati per parcheggiato_at DESC | — |
+| Battle Plan | Piano settimanale: 7 giorni + colonna Settimana, progress bar, PDF | drawer |
 
 ## Mobile redesign v2 (2026-06-29)
 
@@ -262,6 +291,82 @@ Un ciclo esce da *Da pianificare* quando `haPianificazione(c)` è vera:
 
 Migration: `supabase_migration_pianifica.sql`. Degradazione via `state.pianificaColsOk`
 (nasconde la sezione RIPETIZIONE e omette le due colonne dal payload).
+
+## Battle Plan (2026-09-04)
+
+Piano di battaglia settimanale: unisce l'armadio dei cicli aperti e l'agenda in
+un unico piano per la settimana ISO selezionata. La settimana in header è attiva
+in questa vista (come in Lista e Agenda).
+
+### Vista
+
+Header (titolo Syne 22px, sottotitolo `Settimana XX · GG/MM – GG/MM · YYYY`,
+badge stato 🟡/🟢/⚫) → progress bar (verde ≥80%, arancio ≥50%, rosso <50%) →
+griglia **8 colonne**: Lun→Dom + `📋 SETT.` (cicli senza giorno specifico).
+Le card sono ordinate per `ora_prevista` ASC, poi `ordine`.
+
+Su mobile la griglia diventa una lista verticale con i giorni come accordion
+(aperti di default: oggi e la colonna Settimana).
+
+### Wizard di creazione
+
+`openBpWizard(week, year, preselIds)` — due step in `#bpWizOverlay`:
+
+1. **Selezione** — cicli aperti del contesto raggruppati per quadrante Q1→Q4,
+   con ricerca e filtro categoria. Pre-selezionati (badge `📅 Già in agenda`) i
+   cicli che `agendaSlotForWeek()` colloca in quella settimana. A destra il
+   riepilogo: numero, tempo stimato (default 30 min/ciclo), warning oltre 40h.
+2. **Assegnazione** — pool a sinistra + 8 drop-zone. Drag & drop su desktop,
+   tap sulla card su mobile: entrambi aprono `#bpSlotPanel` (giorno, fascia, ora,
+   durata). Un ciclo che ha già fascia e durata viene assegnato diretto al drop.
+
+`bpAttiva()` fa upsert su `battle_plan` (`onConflict: 'settimana,anno'`,
+stato `attivo`), elimina gli item deselezionati e fa upsert dei restanti su
+`onConflict: 'battle_plan_id,ciclo_id'` — così `completato` non viene azzerato
+quando si rientra nel wizard per modificare un piano già attivo.
+
+Se non esiste un piano per la settimana corrente il wizard viene proposto
+automaticamente **una sola volta per settimana per sessione** (`_bpAutoAperti`).
+
+### Completamento
+
+`toggleBpItem(id)` scrive `completato`/`completato_at` sull'item e:
+
+- ciclo **una volta sola** → chiude anche il ciclo (`flipDone`)
+- ciclo **ricorrente** (`pianificato_ripetizione`/`ricorrenza` ≠ `nessuna`,
+  rituali giornalieri inclusi) → resta aperto, ricompare la settimana dopo
+
+### Review di chiusura
+
+`openBpReview()` → verdetto per fascia di completamento, per ogni ciclo non
+fatto tre scelte (`sposta` default / `armadio` / `chiudi`), textarea note.
+`bpChiudiSettimana()` mette il piano in `chiuso`, chiude i cicli marcati
+`chiudi` e riapre il wizard sulla settimana successiva con i cicli `sposta`
+pre-selezionati.
+
+### Storico
+
+Navigando a una settimana passata il piano è in **sola lettura**
+(`bpSolaLettura()` = stato `chiuso` oppure settimana già trascorsa):
+progress bar finale, note di riflessione, nessuna spunta.
+
+### PDF
+
+`bpStampaPdf()` usa **jsPDF 2.5.1** (CDN cdnjs, globale `window.jspdf.jsPDF`).
+A4 verticale, un blocco per giorno con checkbox quadrati, titolo, ora/durata e
+categoria a sinistra e righe tratteggiate per le note a destra; in fondo NOTE
+GENERALI (10 righe) e il bilancio. `pdfTxt()` **rimuove le emoji**: i font
+standard PDF sono WinAnsi e le renderebbero come caratteri sporchi.
+
+### Q2 → agenda
+
+Selezionando Q2 nel modale ciclo compare `#q2-nudge` (banner informativo, non
+bloccante) con il pulsante *Pianifica in agenda ora* → `q2PianificaOra()`:
+se il ciclo esiste apre il mini-modale Pianifica, altrimenti lo salva prima
+(`saveCiclo()` ora restituisce la riga salvata).
+
+**Degradazione**: `state.bpTableOk` — senza migration la vista mostra solo il
+banner e il resto dell'app funziona normalmente.
 
 ## Regole per Claude Code
 

@@ -130,3 +130,63 @@ Tocca un ciclo per aprire il modal di modifica.
 | `←` / `→` | Naviga settimana |
 | `Escape` | Chiudi modal |
 | `Enter` | Salva ciclo (modal aperto) |
+
+---
+
+## ⚔️ Vista Battle Plan (settimanale)
+
+Il **Battle Plan** è il piano della settimana: prendi i cicli aperti
+dall'armadio, li assegni ai giorni e li spunti man mano che li chiudi.
+
+Lo trovi come **prima voce** nella sidebar e nella barra delle viste
+(su mobile: menu ≡ → Vista → ⚔️ Battle Plan).
+
+### Creare il piano
+
+Alla prima apertura di una settimana senza piano si apre il wizard.
+
+**Step 1 — Seleziona i cicli**
+- A sinistra i cicli aperti raggruppati per quadrante (Q1 → Q4), con ricerca
+  e filtro categoria.
+- I cicli già pianificati in agenda per quella settimana sono già spuntati e
+  mostrano il badge **📅 Già in agenda**.
+- A destra il riepilogo: quanti cicli, quante ore stimate, l'avviso se superi
+  le 40 ore.
+
+> 💡 Seleziona il **130%** di quello che pensi di fare: l'obiettivo è chiudere
+> l'**80%**, non il 100%.
+
+**Step 2 — Assegna ai giorni**
+- Trascina un ciclo dalla lista di sinistra sul giorno desiderato (desktop),
+  oppure **toccalo** per scegliere giorno, fascia, ora e durata (mobile).
+- La colonna **📋 SETT.** raccoglie i cicli da chiudere entro la settimana ma
+  senza un giorno preciso. Quello che non assegni finisce lì.
+- Sotto ogni giorno vedi il tempo totale pianificato.
+
+**Step 3** — *Attiva il Battle Plan*. Fatto.
+
+### Durante la settimana
+
+- Spunta la casella su una card: la card si barra, la barra di avanzamento si
+  aggiorna e il ciclo viene chiuso (se è un ciclo "una volta sola").
+- I cicli **ricorrenti** (settimanali, mensili, rituali quotidiani) restano
+  aperti: la spunta vale solo per il piano di questa settimana.
+- **📄 Stampa PDF** genera un A4 da appendere: checkbox da barrare a mano,
+  righe tratteggiate per le note, spazio note generali in fondo.
+- **✏️ Modifica piano** riapre il wizard senza perdere le spunte già fatte.
+
+### Chiudere la settimana
+
+**✅ Chiudi settimana** apre la review:
+- quanto hai completato e il verdetto (🏆 ≥80% / 👍 ≥50% / ⚠️ <50%)
+- per ogni ciclo non fatto scegli: **📅 prossima settimana**, **📦 rimetti
+  nell'armadio**, **🗑 chiudi comunque**
+- una nota di riflessione libera
+
+Alla conferma il piano va in archivio e si apre subito il wizard della
+settimana successiva, con i cicli rinviati già selezionati.
+
+### Storico
+
+Con le frecce **‹ ›** in header navighi alle settimane passate: i piani chiusi
+si vedono in sola lettura, con percentuale finale e note della review.
