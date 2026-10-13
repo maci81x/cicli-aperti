@@ -52,8 +52,8 @@ Accanto al titolo di Oggi, Pianifica, Tutto, In attesa e Fatte c'è `btnAiuto(k)
 `riconciliaCalendar()` parte all'avvio se Calendar è collegato, al massimo una volta ogni 6 ore (`localStorage cal_recon_last`).
 
 1. `eventiPassatiCalendar()` legge gli eventi degli ultimi 14 giorni fino a ieri (calendario principale + «Cicli Aperti — Battle Plan»).
-2. `reconAbbina()` cerca per ogni cosa aperta un evento: id certo (`calendar_event_id` o `google_event_id`), altrimenti titolo (`normTitolo`: minuscolo, senza accenti e punteggiatura; inclusione da 5 caratteri in su, oppure `dice` sui bigrammi ≥ 0.8).
-3. Se trova qualcosa, in Oggi si apre il foglio «Trovate sul calendario» (`#reconOverlay`): [Fatta] = `azioneFatto` (ricorrenza compresa), [Non ancora] = l'evento finisce in `localStorage cal_recon_ignored` e non viene più chiesto. «Chiedimelo dopo» azzera `cal_recon_last`.
+2. `reconAbbina()` cerca per ogni cosa aperta un evento. Match certo (`calendar_event_id`, etichetta «dal piano», o `google_event_id`): sempre proposto, in cima. Match per titolo (`titoliUguali`, su `normTitolo`): `dice` sui bigrammi ≥ 0.8, oppure inclusione a parole intere solo se il titolo dell'evento (e il pezzo contenuto) ha almeno 3 parole e 12 caratteri. Un evento di una parola non aggancia mai per inclusione. Al massimo 10 righe per foglio: le altre tornano alla prossima apertura.
+3. Se trova qualcosa, in Oggi si apre il foglio «Trovate sul calendario» (`#reconOverlay`): [Fatta] = `azioneFatto` (ricorrenza compresa), [Non ancora] = l'evento finisce in `localStorage cal_recon_ignored` come `{ id, t }` e non viene più chiesto, nemmeno se torna con un titolo simile (`reconEventoIgnorato`). «Chiedimelo dopo» azzera `cal_recon_last`.
 
 Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) viene scritto da `mettiPianoSuCalendar`.
 
