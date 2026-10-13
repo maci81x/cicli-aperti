@@ -3,6 +3,61 @@
 App single-file HTML per gestione cicli aperti (impegni/task) con metodologia OSM.
 Deploy su GitHub Pages: https://maci81x.github.io/cicli-aperti/
 
+## Redesign v2 (2026-10-13)
+
+`index.html` è la versione nuova; `index.legacy.html` è quella di prima, raggiungibile da Altro → Versione precedente.
+Riferimenti: `DESIGN_SYSTEM.md` (token, componenti, mappa del linguaggio), `design-preview.html`, `NOTE_LOGICA.md` (ogni funzione e dove è finita).
+
+### Architettura: 3 modalità + Altro
+
+| Sezione | Cosa c'è |
+|---|---|
+| **Oggi** (apertura) | data, «N di M fatte», Appuntamenti (Google Calendar, sola lettura), Routine, Mattina / Pomeriggio / Sera, «In scadenza» |
+| **Pianifica** | Settimana (chip dei giorni su telefono, colonne Lun–Ven su desktop) · Mese (puntini per tipo, tap → quel giorno) · Agenda (giorni × momenti, drag & drop su desktop). In fondo: Senza data, Riepilogo, Stampa la settimana, Chiudi la settimana |
+| **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «Raggruppa per», In attesa |
+| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
+
+Telefono: barra in basso Oggi · Pianifica · [+] · Tutto · Altro. Desktop (≥ 768px): barra laterale stretta + intestazione con Lavoro/Personale, ricerca, tema, Google Calendar, Aggiungi.
+
+Il file ha un solo `<script>` in due parti: **Parte 1 — Logica** (codice di prima, invariato) e **Parte 2 — Interfaccia v2**. Lo stato dell'interfaccia sta in `ui`; `render()` ridisegna la vista corrente; i click passano da un solo ascoltatore (`data-act` → `AZIONI`).
+
+### Mappa del linguaggio
+
+Subito / Importante / Delega / Lascia stare (Q1–Q4 nel suggerimento) · Cose aperte (cicli) · Tutto (armadio) · Piano della settimana (Battle Plan) · Prepara la settimana (wizard) · Chiudi la settimana (review) · In attesa (parcheggio) · Routine (rituali) · Agenda (giorni × momenti) · Senza data (da pianificare) · Fatte (storico) · Domani (posticipa). «Calendario» si usa solo per Google Calendar. Niente emoji nell'interfaccia: icone Tabler.
+
+### Azioni rapide su ogni riga
+
+Swipe a sinistra su telefono, «···» su desktop; lo swipe a destra fa «Fatto». Ogni azione mostra un toast con «Annulla» per 5 secondi.
+
+| Azione | Funzione | Cosa scrive |
+|---|---|---|
+| Fatto | `azioneFatto` | chiude; routine di ogni giorno → `rituali_completati`; se si ripete → `chiudiERicrea` (chiude e crea la prossima a +1 passo, scadenza compresa) |
+| Domani | `azioneDomani` | `agenda_override` del giorno dopo, stesso momento; se non si ripete sposta anche `pianificato_data`; aggiorna la riga del piano |
+| Scegli quando | `azioneQuando` | apre il modale Pianifica (`confermaPianificazione`) |
+| Ripeti | `apriRipeti` / `salvaRipeti` | Giornaliera / Settimanale / Mensile / Trimestrale / Annuale |
+| Lascia stare | `azioneLascia` | `q = 4` + `parcheggiato = true`; da In attesa: «Elimina definitivamente» |
+
+**Annuale**: salvata come `ricorrenza = 'annuale'` e `pianificato_ripetizione = 'nessuna'` (il CHECK del database non ammette ancora `annuale`). Leggere sempre con `ripetizioneDi(c)`, mai dal campo diretto.
+
+### Chiudi la settimana
+
+Due passi. Per ogni cosa non fatta: Domani / Prossima settimana (predefinita) / Tra 2 settimane / Scegli data / Rimetti in Cose aperte / Lascia stare. Poi «N su M», una nota, «Metti il piano su Google Calendar» (`mettiPianoSuCalendar`), e si apre la preparazione della settimana dopo con le cose spostate già scelte.
+
+### PWA
+
+`manifest.json` + `icons/icon-192.png`, `icons/icon-512.png` (dal logo) + meta `apple-mobile-web-app-*`.
+
+### localStorage in più
+
+`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`. `cicli_theme` vuoto = segue il tema del sistema.
+
+### Per modificare la v2
+
+- CSS: solo token di `DESIGN_SYSTEM.md`, niente colori scritti a mano; area di tocco ≥ 44px.
+- Una vista nuova = una funzione `vistaX()` che restituisce HTML + una voce in `disegna()`.
+- Le funzioni della Parte 1 mostrano i loro toast: se le chiami da un'azione v2 usa `inSilenzio(...)` e dai tu il messaggio.
+- Le sezioni qui sotto descrivono il modello dati e la logica, che non sono cambiati; i nomi delle viste e i gesti sono quelli della versione precedente.
+
 ## Stack
 
 - **Frontend**: HTML + CSS + Vanilla JS (single file `index.html`)
@@ -371,6 +426,7 @@ banner e il resto dell'app funziona normalmente.
 ## Regole per Claude Code
 
 - **Non riscrivere index.html da zero** — usa Edit per modifiche chirurgiche
+- **Non toccare index.legacy.html**: è la versione precedente, resta com'è
 - **Mantieni le feature esistenti**: matrice Eisenhower, Plaud import, dark/light mode, categorie custom, persone, storico, guida, keyboard shortcuts
 - **Supabase**: usa `apply_migration` per DDL, non eseguire SQL diretto
 - **CSS**: mobile-first, breakpoint a 768px
