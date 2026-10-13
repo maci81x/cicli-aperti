@@ -43,6 +43,27 @@ Swipe a sinistra su telefono, «···» su desktop; lo swipe a destra fa «Fatt
 
 Due passi. Per ogni cosa non fatta: Domani / Prossima settimana (predefinita) / Tra 2 settimane / Scegli data / Rimetti in Cose aperte / Lascia stare. Poi «N su M», una nota, «Metti il piano su Google Calendar» (`mettiPianoSuCalendar`), e si apre la preparazione della settimana dopo con le cose spostate già scelte.
 
+### Aiuto della schermata («?»)
+
+Accanto al titolo di Oggi, Pianifica, Tutto, In attesa e Fatte c'è `btnAiuto(k)`. I testi stanno in `AIUTI`; il «?» mostra l'aiuto della sotto-vista aperta (`chiaveAiuto`: Mese, Agenda, Matrice, Persone hanno il loro). Telefono: foglio `#aiutoOverlay`; desktop: riquadro `#aiutoPop`. La Guida si apre con «Come funziona in 1 minuto», che riusa gli stessi testi.
+
+### Riconciliazione con Google Calendar
+
+`riconciliaCalendar()` parte all'avvio se Calendar è collegato, al massimo una volta ogni 6 ore (`localStorage cal_recon_last`).
+
+1. `eventiPassatiCalendar()` legge gli eventi degli ultimi 14 giorni fino a ieri (calendario principale + «Cicli Aperti — Battle Plan»).
+2. `reconAbbina()` cerca per ogni cosa aperta un evento: id certo (`calendar_event_id` o `google_event_id`), altrimenti titolo (`normTitolo`: minuscolo, senza accenti e punteggiatura; inclusione da 5 caratteri in su, oppure `dice` sui bigrammi ≥ 0.8).
+3. Se trova qualcosa, in Oggi si apre il foglio «Trovate sul calendario» (`#reconOverlay`): [Fatta] = `azioneFatto` (ricorrenza compresa), [Non ancora] = l'evento finisce in `localStorage cal_recon_ignored` e non viene più chiesto. «Chiedimelo dopo» azzera `cal_recon_last`.
+
+Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) viene scritto da `mettiPianoSuCalendar`.
+
+### Chip dei giorni
+
+`chipGiorni(act, id, attivo)` disegna L M M G V S D + «Sett.» (in settimana, senza giorno).
+
+- **Prepara la settimana, passo 2** (`bpwChipGiorni`): ogni cosa scelta ha i suoi chip, con ora/momento/durata sotto; in alto il carico di ogni giorno (cose + appuntamenti Calendar). Su desktop restano in più le colonne per trascinare; su telefono solo i chip.
+- **Dettaglio, sezione Pianificazione** (`disegnaPianificazione`, `impostaGiorno`): cambia il giorno nella settimana selezionata. «Sett.» è attivo solo se c'è un piano della settimana.
+
 ### PWA
 
 `manifest.json` + `icons/icon-192.png`, `icons/icon-512.png` (dal logo) + meta `apple-mobile-web-app-*`.

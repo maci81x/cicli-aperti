@@ -673,6 +673,9 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .mappa td { padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border); }
 .mappa td:first-child { color: var(--text-3); width: 44%; }
 .mappa tr:first-child td { border-top: 0; }
+.mappa.minuto td { vertical-align: top; line-height: var(--lh-label); }
+.mappa.minuto td:first-child { width: 28%; color: var(--text); }
+.mappa.minuto td:last-child { color: var(--text-2); }
 
 /* --- Prima apertura --- */
 .onb { position: fixed; inset: 0; z-index: 80; display: grid; grid-template-rows: auto 1fr auto; background: var(--bg); padding: calc(var(--sp-3) + env(safe-area-inset-top)) 0 calc(var(--sp-5) + env(safe-area-inset-bottom)); }
@@ -690,6 +693,42 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .onb-dots { display: flex; justify-content: center; gap: 6px; }
 .onb-dots i { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--border); transition: width var(--t-base), background-color var(--t-base); }
 .onb-dots i.on { width: 24px; background: var(--primary); }
+
+/* --- Aiuto della schermata --- */
+.aiuto-btn { display: inline-grid; place-items: center; width: var(--tap); height: var(--tap); margin: -6px 0 -6px 2px; border: 0; border-radius: var(--r-full); background: none; color: var(--text-3); vertical-align: middle; -webkit-tap-highlight-color: transparent; }
+.aiuto-btn .ti { font-size: 20px; }
+.aiuto-btn:hover { background: var(--surface-2); color: var(--text-2); }
+.aiuto-testo p { font-size: var(--fs-body); line-height: var(--lh-body); color: var(--text-2); margin-bottom: var(--sp-3); }
+.pop { position: fixed; z-index: 60; width: 340px; padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-3); }
+.pop h3 { margin-bottom: var(--sp-2); }
+.pop p { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); margin-bottom: var(--sp-2); }
+.pop .btn { margin-left: calc(-1 * var(--sp-3)); }
+
+/* --- Chip dei giorni (wizard e dettaglio) --- */
+.gchips { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, 1.5fr); gap: 4px; }
+.gchip { position: relative; display: grid; place-items: center; height: 36px; padding: 0; border-radius: var(--r-full); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: var(--fs-label); line-height: 1; -webkit-tap-highlight-color: transparent; }
+.gchip::before { content: ""; position: absolute; inset: -4px 0; }
+.gchip[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: var(--fw-strong); }
+.gchip:disabled { opacity: .45; cursor: not-allowed; }
+.gchips-sotto { margin-top: 6px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.bpw-riepilogo { display: flex; flex-wrap: wrap; gap: 4px var(--sp-3); margin-bottom: var(--sp-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--surface-2); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.bpw-riepilogo b { color: var(--text); }
+.bpw-riepilogo .pieno b { color: var(--warn); }
+.bpw-riga { padding: var(--sp-3); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); }
+.bpw-riga-h { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 2px; margin: -6px -8px 2px 0; }
+.bpw-riga-h b { font-weight: var(--fw-regular); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#bpw-pool.bpw-lista { max-height: none; gap: var(--sp-2); }
+.bp-assign-pool.con-lista { background: none; padding: 0; }
+@media (max-width: 767px) { .bp-assign-grid.solo-trascina { display: none; } .bp-assign-wrap { max-height: 58vh; overflow-y: auto; } }
+@media (min-width: 768px) { .bp-assign-wrap.con-chip { grid-template-columns: 360px minmax(0, 1fr); } .bp-assign-wrap.con-chip .bp-assign-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } #bpw-pool.bpw-lista { max-height: 56vh; overflow-y: auto; } }
+.det-box .gchips { margin-top: 2px; }
+
+/* --- Trovate sul calendario --- */
+.recon-lista { display: grid; margin-top: var(--sp-3); }
+.recon-riga { display: grid; gap: var(--sp-2); padding: var(--sp-3) 0; }
+.recon-riga + .recon-riga { border-top: 1px solid var(--border); }
+.recon-riga p { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.recon-riga .azioni { display: flex; gap: var(--sp-2); }
 
 /* --- Toast e tooltip --- */
 #toast-container { position: fixed; z-index: 90; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + var(--sp-3) + env(safe-area-inset-bottom)); display: grid; gap: var(--sp-2); pointer-events: none; }
@@ -1216,6 +1255,37 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
   <div class="onb-foot">
     <div class="onb-dots" id="onb-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
     <button type="button" class="btn btn-primary btn-block" id="onb-avanti" data-act="onb-avanti">Avanti</button>
+  </div>
+</div>
+
+<!-- ══════════ AIUTO DELLA SCHERMATA: foglio (telefono) e riquadro (desktop) ══════════ -->
+<div class="modal-overlay" id="aiutoOverlay" onclick="closeModalOnBg(event,'aiutoOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="aiuto-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="aiuto-titolo">—</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('aiutoOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="aiuto-testo" id="aiuto-testo"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-secondary btn-block" data-act="aiuto-guida"><i class="ti ti-book"></i>Guida completa</button></div>
+  </div>
+</div>
+<div class="pop" id="aiutoPop" hidden role="dialog" aria-label="Aiuto"></div>
+
+<!-- ══════════ TROVATE SUL CALENDARIO (riconciliazione con Google Calendar) ══════════ -->
+<div class="modal-overlay" id="reconOverlay" onclick="closeModalOnBg(event,'reconOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="recon-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="recon-titolo">Trovate sul calendario</h3>
+        <p class="t-label muted">Erano in calendario nei giorni scorsi. Le hai fatte?</p>
+      </div>
+      <button type="button" class="btn btn-icon" data-act="recon-dopo" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm btn-block" data-act="recon-tutte"><i class="ti ti-checks"></i>Segna tutte come fatte</button>
+    <div id="recon-lista" class="recon-lista"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-ghost btn-sm btn-block" data-act="recon-dopo">Chiedimelo dopo</button></div>
   </div>
 </div>
 
@@ -4343,6 +4413,7 @@ function vai(tab, opz) {
   localStorage.setItem(LS2.TAB, tab);
   chiudiSwipe();
   $('main').scrollTop = 0;
+  if (tab === 'oggi') setTimeout(reconMostra, 300);
   if (tab === 'oggi' && !eSettimanaCorrente()) { tornaAOggi(); return; }
   render();
 }
@@ -4612,12 +4683,14 @@ async function mettiPianoSuCalendar() {
     const fine = new Date(inizio.getTime() + bpDurata(item) * 60000);
     const hhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     try {
-      await gcalFetch(path, 'POST', {
+      const ev = await gcalFetch(path, 'POST', {
         summary: bpCiclo(item).title, description: 'Cicli Aperti',
         start: { dateTime: `${giorno}T${ora}:00`, timeZone: 'Europe/Rome' },
         end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' }
       });
       creati++;
+      // da qui la riconciliazione riconosce l'evento con certezza
+      if (ev && ev.id && ui.calEventColOk) await patchCiclo(item.ciclo_id, { calendar_event_id: ev.id }).catch(() => {});
     } catch (e) { console.warn('[GCal] evento del piano:', e.message); }
   }
   showToast(creati ? `${plurale(creati, 'evento creato', 'eventi creati')} su Google Calendar` : 'Nessuna riga del piano ha un\'ora', creati ? 'success' : 'info');
@@ -4901,18 +4974,7 @@ function apriDettaglio(id) {
          <button type="button" class="btn btn-secondary btn-sm" data-act="d-domani">Domani</button>
          <button type="button" class="btn btn-ghost btn-sm" data-act="d-lascia">Lascia stare</button>`;
 
-  const pianificata = haPianificazione(c);
-  const rip = ripetizioneDi(c);
-  const dove = [];
-  if (isGiornaliero(c)) dove.push(`Ogni giorno alle <span class="mono">${formatOra(c.ora_inizio)}</span>`);
-  else if (c.pianificato_data) dove.push(`${fmtGiorno(parseISODate(c.pianificato_data))}${c.fascia_oraria ? ', ' + FASCE_MAP[c.fascia_oraria].label.toLowerCase() : ''}`);
-  else if (c.giorno_settimana) dove.push(`Ogni ${GIORNI_MAP[c.giorno_settimana].label.toLowerCase()}${c.fascia_oraria ? ', ' + FASCE_MAP[c.fascia_oraria].label.toLowerCase() : ''}`);
-  if (rip !== 'nessuna' && rip !== 'giornaliera') dove.push(`si ripete: ${RIP_LABELS[rip].toLowerCase()}`);
-  const box = $('det-pianificazione');
-  box.hidden = !!c.done;
-  box.innerHTML = `<div><b>${pianificata ? 'In agenda' : 'Senza data'}</b>${dove.length ? ' · ' + dove.join(' · ') : ''}</div>
-    <div class="azioni"><button type="button" class="btn btn-secondary btn-sm" data-act="d-quando"><i class="ti ti-calendar-event"></i>Scegli quando</button>
-    <button type="button" class="btn btn-ghost btn-sm" data-act="d-ripeti"><i class="ti ti-repeat"></i>Ripeti</button></div>`;
+  const pianificata = disegnaPianificazione(c);
 
   // il suggerimento «mettila in agenda» serve solo se è Importante e non ha ancora una data
   $('q2-nudge').classList.toggle('show', selectedQ === 2 && !pianificata && !c.done);
@@ -5074,7 +5136,7 @@ function vistaOggi() {
     .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
   const eventi = eventiDelGiorno(oggi);
 
-  let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi</h1></div></div>`;
+  let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi${btnAiuto('oggi')}</h1></div></div>`;
   if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> di <b class="mono">${tot}</b> fatte</span></div>`;
 
   if (isGcalTokenValid() && eventi.length) {
@@ -5116,7 +5178,7 @@ function navSettimana() {
 function vistaPianifica() {
   const seg = [['settimana', 'Settimana'], ['mese', 'Mese'], ['agenda', 'Agenda']].map(([k, l]) =>
     `<button type="button" data-act="pian" data-v="${k}" aria-pressed="${ui.pian === k}">${l}</button>`).join('');
-  let h = `<div class="vh"><div><h1>Pianifica</h1></div></div><div class="seg" role="group" aria-label="Vista">${seg}</div>`;
+  let h = `<div class="vh"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div></div><div class="seg" role="group" aria-label="Vista">${seg}</div>`;
   if (ui.pian === 'mese') return h + pianMese();
   h += navSettimana();
   h += ui.pian === 'agenda' ? pianAgenda() : pianSettimana();
@@ -5292,7 +5354,7 @@ function cicliFiltrati() {
 function vistaTutto() {
   const seg = [['lista', 'Lista'], ['matrice', 'Matrice'], ['persone', 'Persone']].map(([k, l]) =>
     `<button type="button" data-act="tutto" data-v="${k}" aria-pressed="${ui.tutto === k}">${l}</button>`).join('');
-  return `<div class="vh"><div><h1>Cose aperte</h1></div></div>
+  return `<div class="vh"><div><h1>Cose aperte${btnAiuto('tutto')}</h1></div></div>
     <div class="tools">
       <label class="cerca solo-tel"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="searchInputM" name="q-nofill-m" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose aperte" value="${esc(ui.q)}"></label>
       <div class="tools-row"><div class="seg grow" role="group" aria-label="Vista">${seg}</div>
@@ -5369,7 +5431,7 @@ function indietro(tab, etichetta) { return `<button type="button" class="back" d
 function vistaAttesa() {
   const lista = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c))
     .sort((a, b) => String(b.parcheggiato_at || '').localeCompare(String(a.parcheggiato_at || '')));
-  let h = `${indietro('tutto', 'Cose aperte')}<div class="vh"><div><h1>In attesa</h1></div></div>`;
+  let h = `${indietro('tutto', 'Cose aperte')}<div class="vh"><div><h1>In attesa${btnAiuto('attesa')}</h1></div></div>`;
   if (!lista.length) return h + vuoto('ti-hourglass-empty', 'Niente in attesa', 'Quello che decidi di lasciar stare finisce qui, fuori dalla vista.', `<button type="button" class="btn btn-secondary btn-sm" data-act="sub" data-tab="tutto" data-sub="">Torna alle cose aperte</button>`);
   return h + `<div class="group">${lista.map(c => `<div class="item" data-id="${c.id}"><div class="item-row no-check">
       <button type="button" class="item-main" data-act="apri"><span class="item-title">${escHtml(c.title)}</span><span class="item-meta">${tagTipo(c.q)}${c.parcheggiato_at ? `<span class="sep">·</span><span>dal ${fmtCorta(new Date(c.parcheggiato_at))}</span>` : ''}</span></button>
@@ -5395,7 +5457,7 @@ function vistaAltro() {
 
 function vistaFatte() {
   const lista = state.cicli.filter(c => c.done).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
-  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte</h1></div></div>`;
+  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte${btnAiuto('fatte')}</h1></div></div>`;
   if (!lista.length) return h + vuoto('ti-circle-check', 'Ancora niente, inizia da Oggi', 'Ogni cosa che spunti finisce qui, così vedi quanta strada hai fatto.', `<button type="button" class="btn btn-primary btn-sm" data-tab="oggi">Vai a Oggi</button>`);
   const mesi = new Map();
   lista.forEach(c => { const d = new Date(c.updated_at || c.created_at); const k = d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }); if (!mesi.has(k)) mesi.set(k, []); mesi.get(k).push(c); });
@@ -5410,7 +5472,9 @@ const MAPPA_PAROLE = [['Subito', 'Q1 · Crisi'], ['Importante', 'Q2 · Qualità'
   ['Tutto', 'Armadio'], ['Piano della settimana', 'Battle Plan'], ['Chiudi la settimana', 'Review'], ['In attesa', 'Parcheggio'], ['Routine', 'Rituali'], ['Fatte', 'Storico']];
 function vistaGuida() {
   return `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Guida</h1></div></div>
-    <div class="group"><button type="button" class="riga-link" data-act="onb-apri"><i class="ti ti-player-play"></i><span>Rivedi l'introduzione</span><span></span><i class="ti ti-chevron-right"></i></button></div>
+    <p class="list-head"><span>Come funziona in 1 minuto</span></p>
+    <div class="group"><table class="mappa minuto">${['oggi', 'pianifica', 'tutto', 'attesa', 'fatte'].map(k => `<tr><td><b>${AIUTI[k].titolo}</b></td><td>${escHtml(AIUTI[k].testo[0])}</td></tr>`).join('')}</table>
+      <button type="button" class="riga-link" data-act="onb-apri" style="border-top:1px solid var(--border)"><i class="ti ti-player-play"></i><span>Rivedi l'introduzione</span><span></span><i class="ti ti-chevron-right"></i></button></div>
     <p class="list-head"><span>Le parole dell'app e quelle del metodo</span></p>
     <div class="group"><table class="mappa">${MAPPA_PAROLE.map(([a, b]) => `<tr><td>${b}</td><td><b>${a}</b></td></tr>`).join('')}</table></div>
     <p class="list-head"><span>Il metodo</span></p>
@@ -5756,12 +5820,23 @@ const AZIONI = {
   'rev-gcal': async el => { el.disabled = true; await mettiPianoSuCalendar(); el.disabled = false; },
   'onb-salta': () => onbChiudi(false),
   'onb-avanti': () => onbAvanti(),
-  'onb-apri': () => onbApri()
+  'onb-apri': () => onbApri(),
+  aiuto: el => apriAiuto(el),
+  'aiuto-guida': () => { chiudiAiuto(); vai('altro', { sub: 'guida' }); },
+  'recon-fatta': el => reconRisposta(el.dataset.id, true),
+  'recon-no': el => reconRisposta(el.dataset.id, false),
+  'recon-tutte': () => reconTutte(),
+  'recon-dopo': () => reconDopo(),
+  'bpw-giorno': el => bpwImpostaGiorno(el.dataset.id, el.dataset.g),
+  'bpw-ora': el => bpSlotOpen(el.dataset.id, (_bpwSel.get(el.dataset.id) || {}).giorno || 'lunedi'),
+  'bpw-togli': el => { _bpwSel.delete(el.dataset.id); bpwRenderStep2(); },
+  'det-giorno': el => impostaGiorno(editingId, el.dataset.g)
 };
 function daDettaglio(fn) { const id = editingId; if (!id) return; closeModal('modalOverlay'); fn(id); }
 
 document.addEventListener('click', e => {
   if (!e.target.closest('#rigaMenu') && !e.target.closest('[data-act="menu"]')) chiudiMenu();
+  if (!e.target.closest('#aiutoPop') && !e.target.closest('[data-act="aiuto"]')) $('aiutoPop').hidden = true;
   const tab = e.target.closest('[data-tab]:not([data-act])');
   if (tab) { vai(tab.dataset.tab); return; }
   const scelta = e.target.closest('[data-scelta] button');
@@ -5804,6 +5879,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   chiudiMenu();
+  $('aiutoPop').hidden = true;
   if ($('bpSlotPanel').classList.contains('open')) { bpSlotClose(); e.stopImmediatePropagation(); }
 }, true);
 
@@ -5821,6 +5897,279 @@ function initPullToRefresh() {
     await loadAll();
     showToast('Aggiornato', 'success');
   });
+}
+
+// ══════════════════════════════════════════════════════════════
+// v2 · AIUTO DELLA SCHERMATA («?» accanto al titolo)
+// ══════════════════════════════════════════════════════════════
+const AIUTI = {
+  oggi:      { titolo: 'Oggi',      testo: ['L\'unica schermata da guardare durante il giorno. Qui trovi la routine, il piano di oggi e gli appuntamenti. Spunta quello che fai.'] },
+  pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Senza data = cose ancora da piazzare. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
+  settimana: { titolo: 'Settimana', base: 'pianifica', testo: ['Qui vedi un giorno alla volta: tocca un giorno per aprire quello che c\'è in programma.'] },
+  mese:      { titolo: 'Mese',      base: 'pianifica', testo: ['Un puntino per ogni cosa in programma, colorato per tipo. Tocca un giorno per aprirlo.'] },
+  agenda:    { titolo: 'Agenda',    base: 'pianifica', testo: ['Ogni giorno diviso in mattina, pomeriggio e sera. Su computer puoi trascinare una cosa in un altro giorno: vale solo per quella settimana.'] },
+  tutto:     { titolo: 'Tutto',     testo: ['Il tuo armadio: ogni cosa aperta, di lavoro e personale, finisce qui. Cercala, filtrala, vedila per persona o nella matrice.'] },
+  matrice:   { titolo: 'Matrice',   testo: ['Le cose aperte divise per tipo: Subito (urgente e importante), Importante (da mettere in agenda), Delega, Lascia stare.'] },
+  persone:   { titolo: 'Persone',   testo: ['Prima di una riunione, apri la persona: vedi tutto quello che hai in sospeso con lei.'] },
+  attesa:    { titolo: 'In attesa', testo: ['Cose messe da parte di proposito. Non sparisce niente, ma non ti disturbano.'] },
+  fatte:     { titolo: 'Fatte',     testo: ['Tutto quello che hai chiuso. Puoi riaprire una cosa se serve.'] }
+};
+function btnAiuto(k) { return `<button type="button" class="aiuto-btn" data-act="aiuto" data-k="${k}" aria-label="A cosa serve questa schermata"><i class="ti ti-help-circle"></i></button>`; }
+// Il «?» sta sul titolo della schermata: l'aiuto è quello della sotto-vista aperta in quel momento.
+function chiaveAiuto(k) {
+  if (k === 'pianifica') return ui.pian;
+  if (k === 'tutto') return ui.tutto === 'lista' ? 'tutto' : ui.tutto;
+  return k;
+}
+function apriAiuto(btn) {
+  const a = AIUTI[chiaveAiuto(btn.dataset.k)] || AIUTI.oggi;
+  const frasi = [...(a.base ? AIUTI[a.base].testo : []), ...a.testo];
+  const corpo = frasi.map(t => `<p>${escHtml(t)}</p>`).join('');
+  if (window.innerWidth < 768) {
+    $('aiuto-titolo').textContent = a.titolo;
+    $('aiuto-testo').innerHTML = corpo;
+    $('aiutoOverlay').classList.add('open');
+    return;
+  }
+  const pop = $('aiutoPop');
+  if (!pop.hidden && pop.dataset.k === btn.dataset.k) { pop.hidden = true; return; }
+  pop.dataset.k = btn.dataset.k;
+  pop.innerHTML = `<h3 class="t-title">${a.titolo}</h3>${corpo}<button type="button" class="btn btn-ghost btn-sm" data-act="aiuto-guida"><i class="ti ti-book"></i>Guida completa</button>`;
+  pop.hidden = false;
+  const r = btn.getBoundingClientRect();
+  pop.style.left = Math.max(8, Math.min(window.innerWidth - pop.offsetWidth - 8, r.left)) + 'px';
+  pop.style.top = (r.bottom + 6) + 'px';
+}
+function chiudiAiuto() { $('aiutoPop').hidden = true; $('aiutoOverlay').classList.remove('open'); }
+
+// ══════════════════════════════════════════════════════════════
+// v2 · RICONCILIAZIONE CON GOOGLE CALENDAR
+// Cose aperte che erano in calendario nei giorni scorsi: si chiede sempre,
+// non si chiude mai niente da soli.
+// ══════════════════════════════════════════════════════════════
+const RECON = { LS_ULTIMA: 'cal_recon_last', LS_IGNORATI: 'cal_recon_ignored', OGNI_MS: 6 * 60 * 60 * 1000, GIORNI: 14, SOGLIA: 0.8, MIN_INCLUSO: 5 };
+ui.recon = [];
+
+function reconIgnorati() { try { return new Set(JSON.parse(localStorage.getItem(RECON.LS_IGNORATI) || '[]')); } catch (e) { return new Set(); } }
+function reconIgnora(eventoId) {
+  const s = reconIgnorati(); s.add(eventoId);
+  localStorage.setItem(RECON.LS_IGNORATI, JSON.stringify([...s].slice(-500)));
+}
+
+// minuscolo, senza accenti, senza punteggiatura; via i prefissi [Area] e [DONE] messi dalla sincronizzazione
+function normTitolo(t) {
+  return String(t || '').replace(/\[[^\]]*\]/g, ' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+// coefficiente di Dice sui bigrammi
+function dice(a, b) {
+  if (a === b) return a ? 1 : 0;
+  if (a.length < 2 || b.length < 2) return 0;
+  const big = x => { const m = new Map(); for (let i = 0; i < x.length - 1; i++) { const g = x.slice(i, i + 2); m.set(g, (m.get(g) || 0) + 1); } return m; };
+  const A = big(a), B = big(b);
+  let comuni = 0;
+  A.forEach((n, g) => { comuni += Math.min(n, B.get(g) || 0); });
+  return (2 * comuni) / (a.length - 1 + b.length - 1);
+}
+function titoliUguali(a, b) {
+  const x = normTitolo(a), y = normTitolo(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  const corto = x.length <= y.length ? x : y, lungo = x.length <= y.length ? y : x;
+  if (corto.length >= RECON.MIN_INCLUSO && lungo.includes(corto)) return true;
+  return dice(x, y) >= RECON.SOGLIA;
+}
+
+// Eventi degli ultimi 14 giorni fino a ieri: calendario principale + quello di Cicli Aperti.
+async function eventiPassatiCalendar() {
+  const a = new Date(); a.setHours(0, 0, 0, 0);
+  const da = new Date(a); da.setDate(da.getDate() - RECON.GIORNI);
+  const qs = new URLSearchParams({ timeMin: da.toISOString(), timeMax: a.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '500' });
+  const calendari = [...new Set(['primary', gcal.calendarId].filter(Boolean))];
+  const out = [];
+  for (const cal of calendari) {
+    try {
+      const res = await gcalFetch(`/calendars/${encodeURIComponent(cal)}/events?${qs}`, 'GET');
+      ((res && res.items) || []).forEach(e => {
+        if (e.status === 'cancelled' || !e.start) return;
+        const inizio = e.start.dateTime ? new Date(e.start.dateTime) : parseISODate(e.start.date);
+        if (!inizio || inizio >= a) return;
+        out.push({ id: e.id, titolo: e.summary || '', inizio, ora: e.start.dateTime ? `${String(inizio.getHours()).padStart(2, '0')}:${String(inizio.getMinutes()).padStart(2, '0')}` : null });
+      });
+    } catch (err) { console.warn('[GCal] riconciliazione:', err.message); }
+  }
+  return out;
+}
+
+// Per ogni cosa aperta, l'evento passato più recente che le corrisponde.
+function reconAbbina(eventi) {
+  const ignorati = reconIgnorati();
+  const validi = eventi.filter(e => !ignorati.has(e.id));
+  const out = [];
+  state.cicli.filter(c => !c.done && !isGiornaliero(c)).forEach(c => {
+    const trovati = validi.filter(e => (c.calendar_event_id && c.calendar_event_id === e.id) || (c.google_event_id && c.google_event_id === e.id) || titoliUguali(c.title, e.titolo));
+    if (!trovati.length) return;
+    const e = trovati.sort((x, y) => y.inizio - x.inizio)[0];
+    out.push({ id: c.id, eventoId: e.id, inizio: e.inizio, ora: e.ora });
+  });
+  return out.sort((x, y) => y.inizio - x.inizio);
+}
+
+async function riconciliaCalendar(forza) {
+  if (!isGcalTokenValid()) return;
+  const ultima = parseInt(localStorage.getItem(RECON.LS_ULTIMA) || '0', 10);
+  if (!forza && Date.now() - ultima < RECON.OGNI_MS) return;
+  localStorage.setItem(RECON.LS_ULTIMA, String(Date.now()));
+  ui.recon = reconAbbina(await eventiPassatiCalendar());
+  reconMostra();
+}
+
+function reconMostra() {
+  if (!ui.recon.length || ui.tab !== 'oggi' || !$('onb').hidden) return;
+  if (document.querySelector('.modal-overlay.open')) return;
+  reconDisegna();
+  $('reconOverlay').classList.add('open');
+}
+function reconDisegna() {
+  ui.recon = ui.recon.filter(r => { const c = ciclo(r.id); return c && !c.done; });
+  if (!ui.recon.length) { $('reconOverlay').classList.remove('open'); return; }
+  $('recon-lista').innerHTML = ui.recon.map(r => `<div class="recon-riga">
+      <div><b>${escHtml(ciclo(r.id).title)}</b><p>sul calendario ${fmtGiornoLungo(r.inizio)}${r.ora ? ` alle <span class="mono">${r.ora}</span>` : ''}</p></div>
+      <div class="azioni"><button type="button" class="btn btn-primary btn-sm" data-act="recon-fatta" data-id="${r.id}"><i class="ti ti-check"></i>Fatta</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-act="recon-no" data-id="${r.id}">Non ancora</button></div></div>`).join('');
+  document.querySelector('[data-act="recon-tutte"]').hidden = ui.recon.length < 2;
+}
+// Fatta = lo stesso «Fatto» di ogni riga (ricorrenza compresa). In entrambi i casi quell'evento non viene più chiesto.
+async function reconRisposta(id, fatta) {
+  const r = ui.recon.find(x => x.id === id);
+  if (!r) return;
+  reconIgnora(r.eventoId);
+  ui.recon = ui.recon.filter(x => x.id !== id);
+  if (fatta) await azioneFatto(id);
+  reconDisegna();
+}
+async function reconTutte() {
+  for (const r of [...ui.recon]) { reconIgnora(r.eventoId); await azioneFatto(r.id); }
+  ui.recon = [];
+  reconDisegna();
+  showToast('Segnate tutte come fatte', 'success');
+}
+function reconDopo() {
+  $('reconOverlay').classList.remove('open');
+  localStorage.removeItem(RECON.LS_ULTIMA);   // alla prossima apertura lo richiede
+  ui.recon = [];
+}
+
+// ══════════════════════════════════════════════════════════════
+// v2 · CHIP DEI GIORNI: L M M G V S D + Sett. (wizard e dettaglio)
+// ══════════════════════════════════════════════════════════════
+const GIORNI_CHIP = [...GIORNI.map(g => ({ k: g.key, l: g.label.slice(0, 1), nome: g.label })), { k: 'settimana', l: 'Sett.', nome: 'In settimana, senza giorno' }];
+function chipGiorni(act, id, attivo, spenti) {
+  return `<div class="gchips" role="group" aria-label="Giorno">${GIORNI_CHIP.map(g =>
+    `<button type="button" class="gchip" data-act="${act}" data-id="${id}" data-g="${g.k}" aria-pressed="${attivo === g.k}" aria-label="${g.nome}"${spenti && spenti.includes(g.k) ? ' disabled data-tip="Serve il piano della settimana"' : ''}>${g.l}</button>`).join('')}</div>`;
+}
+function fmtTempo(min) {   // 60 → 1h · 150 → 2h30 · 30 → 30min
+  if (!min) return '—';
+  const h = Math.floor(min / 60), m = min % 60;
+  return h ? `${h}h${m ? String(m).padStart(2, '0') : ''}` : `${m}min`;
+}
+
+// --- wizard, passo 2: ogni cosa scelta ha i suoi chip; in alto il carico di ogni giorno ---
+function bpwImpostaGiorno(id, g) {
+  const v = _bpwSel.get(id);
+  if (!v) return;
+  _bpwSel.set(id, { ...v, giorno: g, fascia: g === 'settimana' ? null : v.fascia });
+  bpwRenderStep2();
+}
+function bpwChipGiorni() {
+  const passo = $('bpw-step2'), pool = $('bpw-pool');
+  if (!passo || !pool) return;
+  const voci = [..._bpwSel.entries()];
+  const minutiDi = k => voci.filter(([, v]) => (v.giorno || 'settimana') === k).reduce((s, [, v]) => s + (v.durata || BP_DURATA_DEFAULT), 0);
+
+  let riep = $('bpw-riepilogo');
+  if (!riep) { riep = document.createElement('div'); riep.id = 'bpw-riepilogo'; riep.className = 'bpw-riepilogo'; passo.insertBefore(riep, passo.firstChild); }
+  riep.innerHTML = GIORNI.map((g, idx) => {
+    const cose = minutiDi(g.key), app = minutiOccupati(bpDataGiorno(_bpwWeek, _bpwYear, idx));
+    return `<span class="${cose + app > 8 * 60 ? 'pieno' : ''}"${app ? ` data-tip="${fmtTempo(cose)} di cose + ${fmtTempo(app)} di appuntamenti"` : ''}>${g.label.slice(0, 3)} <b class="mono">${fmtTempo(cose + app)}</b></span>`;
+  }).join('<span aria-hidden="true">·</span>') + `<span aria-hidden="true">·</span><span>Sett. <b class="mono">${fmtTempo(minutiDi('settimana'))}</b></span>`;
+
+  const ordine = Object.fromEntries(GIORNI_CHIP.map((g, i) => [g.k, i]));
+  $('bpw-pool-hd').hidden = true;
+  pool.parentElement.classList.add('con-lista');
+  pool.classList.add('bpw-lista');
+  $('bpw-days').classList.add('solo-trascina');
+  passo.querySelector('.bp-assign-wrap').classList.add('con-chip');
+  pool.innerHTML = voci
+    .sort((a, b) => (ordine[a[1].giorno || 'settimana'] - ordine[b[1].giorno || 'settimana']) || (a[1].ora || '99').localeCompare(b[1].ora || '99'))
+    .map(([id, v]) => {
+      const c = ciclo(id);
+      const sotto = [v.ora, v.fascia && FASCE_MAP[v.fascia] ? FASCE_MAP[v.fascia].label.toLowerCase() : null, formatDurata(v.durata || BP_DURATA_DEFAULT)].filter(Boolean).join(' · ');
+      return `<div class="bpw-riga"><div class="bpw-riga-h"><b>${escHtml(c ? c.title : '')}</b>
+          <button type="button" class="btn btn-icon" data-act="bpw-ora" data-id="${id}" aria-label="Ora, momento e durata" data-tip="Ora, momento e durata"><i class="ti ti-clock"></i></button>
+          <button type="button" class="btn btn-icon" data-act="bpw-togli" data-id="${id}" aria-label="Togli dal piano"><i class="ti ti-x"></i></button></div>
+        ${chipGiorni('bpw-giorno', id, v.giorno || 'settimana')}<div class="gchips-sotto">${sotto}</div></div>`;
+    }).join('');
+}
+
+// --- dettaglio: sezione Pianificazione, con gli stessi chip per cambiare giorno anche dopo ---
+function giornoInSettimana(c) {
+  const item = state.bp ? itemDelPiano(c.id) : null;
+  if (item) return item.giorno;
+  return agendaSlotForWeek(c, state.week, state.year).giorno || null;
+}
+function disegnaPianificazione(c) {
+  const pianificata = haPianificazione(c);
+  const rip = ripetizioneDi(c);
+  const dove = [];
+  if (isGiornaliero(c)) dove.push(`Ogni giorno alle <span class="mono">${formatOra(c.ora_inizio)}</span>`);
+  else if (c.pianificato_data) dove.push(`${fmtGiorno(parseISODate(c.pianificato_data))}${c.fascia_oraria ? ', ' + FASCE_MAP[c.fascia_oraria].label.toLowerCase() : ''}`);
+  else if (c.giorno_settimana) dove.push(`Ogni ${GIORNI_MAP[c.giorno_settimana].label.toLowerCase()}${c.fascia_oraria ? ', ' + FASCE_MAP[c.fascia_oraria].label.toLowerCase() : ''}`);
+  if (rip !== 'nessuna' && rip !== 'giornaliera') dove.push(`si ripete: ${RIP_LABELS[rip].toLowerCase()}`);
+  const box = $('det-pianificazione');
+  box.hidden = !!c.done;
+  const chip = isGiornaliero(c) || !state.agendaColsOk ? '' : `<div><span class="t-caption muted">${eSettimanaCorrente() ? 'Questa settimana' : 'Settimana ' + state.week}</span>
+      ${chipGiorni('det-giorno', c.id, giornoInSettimana(c), state.bp && !bpSolaLettura() ? null : ['settimana'])}
+      ${c.durata_minuti ? `<div class="gchips-sotto">${formatDurata(c.durata_minuti)}</div>` : ''}</div>`;
+  box.innerHTML = `<div><b>Pianificazione</b> · ${pianificata ? 'in agenda' : 'senza data'}${dove.length ? ' · ' + dove.join(' · ') : ''}</div>
+    ${chip}
+    <div class="azioni"><button type="button" class="btn btn-secondary btn-sm" data-act="d-quando"><i class="ti ti-calendar-event"></i>Scegli quando</button>
+    <button type="button" class="btn btn-ghost btn-sm" data-act="d-ripeti"><i class="ti ti-repeat"></i>Ripeti</button></div>`;
+  return pianificata;
+}
+
+// Cambia il giorno di una cosa nella settimana selezionata. «Sett.» = nel piano, senza giorno.
+async function impostaGiorno(id, g) {
+  const c = ciclo(id);
+  if (!c) return;
+  const item = state.bp ? itemDelPiano(id) : null;
+  const w = { week: state.week, year: state.year };
+  try {
+    if (g === 'settimana') {
+      if (!state.bp) return;
+      const riga = { battle_plan_id: state.bp.id, ciclo_id: id, giorno: 'settimana', fascia: null, ora_prevista: (item && item.ora_prevista) || null,
+        durata_prevista: (item && item.durata_prevista) || c.durata_minuti || BP_DURATA_DEFAULT, completato: !!(item && item.completato), ordine: item ? item.ordine : state.bpItems.length };
+      const { data, error } = await db.from('battle_plan_items').upsert(riga, { onConflict: 'battle_plan_id,ciclo_id' }).select();
+      if (error) throw error;
+      const salvata = (data && data[0]) || riga;
+      state.bpItems = [...state.bpItems.filter(i => i.ciclo_id !== id), salvata];
+    } else {
+      const idx = GIORNI.findIndex(x => x.key === g);
+      const data = bpDataGiorno(w.week, w.year, idx);
+      const fascia = (item && item.fascia) || c.fascia_oraria || 'mattina';
+      if (ripetizioneDi(c) !== 'nessuna') await upsertOverride(id, w, g, fascia);   // solo questa settimana
+      else await pianificaInData(c, data, fascia);
+      if (item) {
+        const { error } = await db.from('battle_plan_items').update({ giorno: g, fascia }).eq('id', item.id);
+        if (error) throw error;
+        state.bpItems = state.bpItems.map(i => i.id === item.id ? { ...i, giorno: g, fascia } : i);
+      }
+    }
+    const agg = ciclo(id);
+    if (editingId === id) { const p = disegnaPianificazione(agg); $('q2-nudge').classList.toggle('show', selectedQ === 2 && !p && !agg.done); }
+    render();
+    showToast(g === 'settimana' ? 'In settimana, senza giorno' : `Spostata a ${GIORNI_MAP[g].label.toLowerCase()}`, 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -5852,11 +6201,15 @@ moveCicloInAgenda = async function (cicloId, giorno, fascia) {
 
 // Nel wizard, accanto a ogni giorno, il tempo già preso dagli appuntamenti.
 const _bpwRenderStep2Base = bpwRenderStep2;
-bpwRenderStep2 = function () { _bpwRenderStep2Base(); decoraWizard(); };
+bpwRenderStep2 = function () {
+  // senza giorno = «in settimana»: così chip, colonne e riepilogo dicono la stessa cosa
+  _bpwSel.forEach((v, id) => { if (!v.giorno) _bpwSel.set(id, { ...v, giorno: 'settimana', fascia: null }); });
+  _bpwRenderStep2Base(); decoraWizard(); bpwChipGiorni();
+};
 
 // Dopo il collegamento a Google Calendar: carica gli appuntamenti della settimana.
 const _handleGcalTokenBase = _handleGcalToken;
-_handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); caricaEventi(state.week, state.year); render(); };
+_handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); caricaEventi(state.week, state.year); render(); riconciliaCalendar(); };
 
 (function avvio() {
   applyTheme();
@@ -5868,6 +6221,8 @@ _handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); car
   if (!localStorage.getItem(LS2.ONB)) onbApri();
   loadAll().then(() => {
     initGcal();
+    db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
+    setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
     initPullToRefresh();
     caricaEventi(state.week, state.year);
     const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
