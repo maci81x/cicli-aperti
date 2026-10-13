@@ -539,6 +539,7 @@ a { color: var(--primary-ink); }
 .btn-save:disabled, .pf-btn-save:disabled, .bp-btn.primary:disabled { background: var(--surface-2); color: var(--text-3); box-shadow: none; }
 .bp-btn { min-height: 48px; padding: 0 20px; border: 0; border-radius: var(--r-md); background: none; color: var(--text-2); font-size: var(--fs-body); font-weight: var(--fw-strong); }
 .btn-danger.legacy, #gcal-modal-body .btn-danger { color: var(--danger); }
+.campo-segreto { -webkit-text-security: disc; }
 .textarea { min-height: 96px; padding: var(--sp-3) var(--sp-4); line-height: var(--lh-body); resize: vertical; }
 select.input { appearance: none; -webkit-appearance: none; padding-right: 36px; background-image: linear-gradient(45deg, transparent 50%, var(--border-strong) 50%), linear-gradient(135deg, var(--border-strong) 50%, transparent 50%); background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
 input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appearance: none; appearance: none; }
@@ -732,7 +733,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     </div>
     <label class="top-search">
       <i class="ti ti-search" aria-hidden="true"></i>
-      <input type="search" id="searchInput" placeholder="Cerca" autocomplete="off" aria-label="Cerca tra le cose aperte">
+      <input type="search" id="searchInput" name="q-nofill" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose aperte">
     </label>
     <div class="top-actions">
       <button type="button" class="btn btn-icon" id="themeBtn" data-act="tema" aria-label="Cambia tema" data-tip="Tema chiaro o scuro"><i class="ti ti-moon"></i></button>
@@ -1068,7 +1069,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     </div>
     <p class="t-label muted">Serve per leggere le registrazioni e assegnare le aree. Si crea su <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> e resta solo in questo browser.</p>
     <label class="field-label" for="claude-key-input">Chiave (sk-ant-…)</label>
-    <input type="password" class="input" id="claude-key-input" placeholder="sk-ant-api03-…" autocomplete="off">
+    <input type="text" class="input campo-segreto" id="claude-key-input" name="chiave-api-nofill" placeholder="sk-ant-api03-…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" onclick="saveApiKey()">Salva la chiave</button></div>
   </div>
 </div>
@@ -5293,7 +5294,7 @@ function vistaTutto() {
     `<button type="button" data-act="tutto" data-v="${k}" aria-pressed="${ui.tutto === k}">${l}</button>`).join('');
   return `<div class="vh"><div><h1>Cose aperte</h1></div></div>
     <div class="tools">
-      <label class="cerca solo-tel"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="searchInputM" placeholder="Cerca" autocomplete="off" aria-label="Cerca tra le cose aperte" value="${esc(ui.q)}"></label>
+      <label class="cerca solo-tel"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="searchInputM" name="q-nofill-m" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose aperte" value="${esc(ui.q)}"></label>
       <div class="tools-row"><div class="seg grow" role="group" aria-label="Vista">${seg}</div>
         <button type="button" class="btn btn-secondary btn-sm" data-act="filtri" id="btn-filtri"><i class="ti ti-adjustments-horizontal"></i>Filtri</button></div>
     </div>
@@ -5688,7 +5689,8 @@ function onbAggiorna() {
 function onbChiudi(crea) {
   localStorage.setItem(LS2.ONB, '1');
   $('onb').hidden = true;
-  if (crea) { vai('tutto'); setTimeout(() => apriNuovo(), 150); }
+  vai('oggi');   // dopo l'introduzione si parte sempre da Oggi
+  if (crea) setTimeout(() => apriNuovo(), 150);
 }
 function onbAvanti() {
   const t = $('onb-track'), i = onbIndice();
