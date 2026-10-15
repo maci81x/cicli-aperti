@@ -477,10 +477,41 @@ a { color: var(--primary-ink); }
 .slot.drag-over { background: var(--primary-soft); outline: 2px dashed var(--primary); outline-offset: -3px; }
 .item[draggable="true"] { cursor: grab; }
 .item.dragging { opacity: .4; }
-.piano-stato { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); font-size: var(--fs-label); }
-.piano-stato .bar { flex: 1; max-width: 120px; }
-.piano-stato small { display: block; font-size: var(--fs-caption); color: var(--text-2); }
-@media (max-width: 767px) { .piano-stato .bar { display: none; } }
+/* riepilogo del piano: stessa forma del «Hai scelto» del wizard */
+.piano-card { margin-bottom: var(--sp-4); }
+.pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); }
+.pc-top .t-label { margin-top: 2px; }
+.piano-card .bar { margin-top: var(--sp-2); }
+.pc-nota { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); color: var(--text-2); font-size: var(--fs-label); line-height: var(--lh-label); }
+.pc-nota .ti { flex: none; font-size: 18px; color: var(--text-3); }
+@media (min-width: 768px) { .piano-card { max-width: 420px; } }
+
+/* in ritardo: puntino e parola, mai solo il colore */
+.ritardo { display: inline-flex; align-items: center; gap: 5px; color: var(--q1); font-weight: var(--fw-strong); }
+.ritardo::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: var(--r-full); background: var(--q1); }
+
+/* rimaste indietro */
+.carry { margin-bottom: var(--sp-5); }
+.carry-h { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--sp-1); padding: var(--sp-1) var(--sp-1) var(--sp-3) var(--sp-4); }
+.carry-h b { flex: 1; white-space: nowrap; font-size: var(--fs-label); line-height: var(--lh-label); font-weight: var(--fw-strong); }
+.carry-h .mono { color: var(--text-3); font-weight: 500; }
+.carry-tutte { flex-basis: 100%; justify-content: center; margin-right: var(--sp-3); }
+@media (min-width: 768px) { .carry-h { flex-wrap: nowrap; padding-bottom: 0; } .carry-tutte { flex-basis: auto; order: 1; margin-right: 0; } .carry-h .btn-icon { order: 2; } }
+.carry-riga { padding-bottom: var(--sp-3); }
+.carry-riga .item-row { min-height: 56px; grid-template-columns: var(--tap) minmax(0, 1fr); }
+.carry-main { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.carry-azioni, .carry-giorni { padding: 0 var(--sp-3) 0 calc(var(--sp-2) + var(--tap) + var(--sp-1)); }
+.carry-azioni.chips-wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+.carry .chip { justify-content: center; padding: 0 12px; }
+@media (min-width: 768px) { .carry-azioni.chips-wrap { display: flex; } }
+.carry-giorni { display: grid; gap: var(--sp-3); margin-top: var(--sp-3); }
+.carry-giorni .gchips { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.carry-giorni .chip { justify-self: start; }
+
+/* wizard: ‹ Settimana 42 · 12/10–18/10 › */
+.bpw-sett { display: inline-flex; align-items: center; gap: 2px; margin-left: -12px; }
+.bpw-sett .btn-icon:disabled { background: none; opacity: .35; }
+.bpw-sett b { color: var(--primary-ink); }
 .riga-link span small { display: block; font-size: var(--fs-caption); line-height: var(--lh-caption); }
 
 /* mese */
@@ -3726,6 +3757,32 @@ let _bpwSel   = new Map();   // ciclo_id → { giorno, fascia, ora, durata, comp
 let _bpwQuery = '';
 let _bpwCat   = '';
 let _bpwDragId = null;
+let _bpwNelPiano = new Set();   // cicli già nel piano quando il wizard si è aperto (modalità modifica)
+
+// Modalità modifica: la settimana ha già un piano attivo o in bozza
+function bpwModifica() { return !!_bpwPlan && _bpwPlan.stato !== 'chiuso'; }
+
+// «questa settimana» / «la prossima settimana» / «la settimana del 26/10»
+function bpwFrase(week, year) {
+  const cur = bpSettimanaCorrente(), next = bpSettimanaSuccessiva(cur.week, cur.year);
+  if (week === cur.week && year === cur.year) return { nome: 'questa settimana', di: 'di questa settimana' };
+  if (week === next.week && year === next.year) return { nome: 'la prossima settimana', di: 'della prossima settimana' };
+  const d = getWeekStart(week, year);
+  const dm = `${d.getDate()}/${d.getMonth() + 1}`;
+  return { nome: `la settimana del ${dm}`, di: `della settimana del ${dm}` };
+}
+
+// ‹ Settimana 42 · 12/10–18/10 ›  — non si torna prima della settimana corrente
+function bpwDisegnaSettimana() {
+  const da = getWeekStart(_bpwWeek, _bpwYear), a = new Date(da); a.setDate(da.getDate() + 6);
+  const dm = d => `${d.getDate()}/${d.getMonth() + 1}`;
+  const cur = bpSettimanaCorrente();
+  const primaDiOggi = getWeekStart(_bpwWeek, _bpwYear) <= getWeekStart(cur.week, cur.year);
+  document.getElementById('bpw-sub').innerHTML = `<span class="bpw-sett">
+    <button type="button" class="btn btn-icon" data-act="bpw-sett" data-dir="-1" aria-label="Settimana precedente"${primaDiOggi ? ' disabled' : ''}><i class="ti ti-chevron-left"></i></button>
+    <span>Settimana <span class="mono">${_bpwWeek}</span> · <span class="mono">${dm(da)}–${dm(a)}</span></span>
+    <button type="button" class="btn btn-icon" data-act="bpw-sett" data-dir="1" aria-label="Settimana successiva"><i class="ti ti-chevron-right"></i></button></span>`;
+}
 
 // Armadio: cicli aperti del contesto, esclusi i rituali quotidiani
 function bpwCandidati() {
@@ -3750,10 +3807,12 @@ async function openBpWizard(week, year, preselIds) {
   _bpwWeek = week; _bpwYear = year;
   _bpwQuery = ''; _bpwCat = ''; _bpwStep = 1;
   _bpwSel = new Map();
+  _bpwNelPiano = new Set();
 
   try {
     const { plan, items } = await bpFetchPlan(week, year);
     _bpwPlan = plan;
+    if (bpwModifica()) items.forEach(i => _bpwNelPiano.add(i.ciclo_id));
     items.forEach(i => {
       if (!state.cicli.find(c => c.id === i.ciclo_id)) return;
       _bpwSel.set(i.ciclo_id, {
@@ -3787,7 +3846,7 @@ async function openBpWizard(week, year, preselIds) {
     _bpwSel.set(id, { giorno: null, fascia: null, ora: bpwDefaultOra(c), durata: bpwDefaultDurata(c) });
   });
 
-  document.getElementById('bpw-sub').textContent = bpSottotitolo(week, year);
+  bpwDisegnaSettimana();
   const overlay = document.getElementById('bpWizOverlay');
   overlay.classList.toggle('personale-ctx', state.ctx === 'personale');
   bpwRenderCatFilter();
@@ -3807,12 +3866,13 @@ function bpwGoStep(n) {
   document.getElementById('bpw-s2').classList.toggle('on', n >= 2);
 
   const isP = state.ctx === 'personale';
-  document.getElementById('bpw-title').textContent = n === 1
-    ? 'Cosa vuoi fare questa settimana?'
-    : 'Dai a ognuna un giorno';
+  const frase = bpwFrase(_bpwWeek, _bpwYear);
+  document.getElementById('bpw-title').textContent = n === 2
+    ? 'Dai a ognuna un giorno'
+    : bpwModifica() ? `Modifica il piano ${frase.di}` : `Cosa vuoi fare ${frase.nome}?`;
 
   const next = document.getElementById('bpw-next');
-  next.textContent = n === 1 ? 'Avanti' : 'Attiva il piano';
+  next.textContent = n === 1 ? 'Avanti' : bpwModifica() ? 'Salva il piano' : 'Attiva il piano';
   next.className = 'bp-btn primary' + (isP ? ' personale' : '');
   next.disabled = false;
   document.getElementById('bpw-back').textContent = n === 1 ? 'Annulla' : 'Indietro';
@@ -3863,68 +3923,74 @@ function bpwRenderStep1() {
   if (!list) return;
   list.innerHTML = '';
 
-  let cicli = bpwCandidati();
-  if (_bpwCat)   cicli = cicli.filter(c => c.cat === _bpwCat);
-  if (_bpwQuery) cicli = cicli.filter(c =>
-    (c.title || '').toLowerCase().includes(_bpwQuery) ||
-    (c.note  || '').toLowerCase().includes(_bpwQuery));
+  const filtra = arr => arr
+    .filter(c => !_bpwCat || c.cat === _bpwCat)
+    .filter(c => !_bpwQuery ||
+      (c.title || '').toLowerCase().includes(_bpwQuery) ||
+      (c.note  || '').toLowerCase().includes(_bpwQuery));
 
-  if (!cicli.length) {
+  // in modifica: quello che è già nel piano sta in cima, anche se nel frattempo è stato tolto la spunta
+  const nelPiano = filtra([..._bpwNelPiano]
+    .map(id => state.cicli.find(c => c.id === id))
+    .filter(c => c && c.ctx === state.ctx));
+  const cicli = filtra(bpwCandidati().filter(c => !_bpwNelPiano.has(c.id)));
+
+  if (!cicli.length && !nelPiano.length) {
     const e = document.createElement('div');
     e.className = 'bp-col-empty';
     e.textContent = 'Nessuna cosa aperta con questi filtri.';
     list.appendChild(e);
   }
 
-  [1, 2, 3, 4].forEach(q => {
-    const gruppo = cicli.filter(c => computeEffectiveQ(c) === q);
-    if (!gruppo.length) return;
-
+  const gruppi = [
+    { etichetta: '<span class="tag">Già nel piano</span>', cicli: nelPiano },
+    ...[1, 2, 3, 4].map(q => ({ etichetta: tagTipo(q), cicli: cicli.filter(c => computeEffectiveQ(c) === q) }))
+  ];
+  gruppi.forEach(g => {
+    if (!g.cicli.length) return;
     const wrap = document.createElement('div');
     wrap.className = 'bp-qgroup';
     const hd = document.createElement('div');
     hd.className = 'bp-qgroup-hd';
-    hd.innerHTML = `${tagTipo(q)}<span style="color:var(--text-dim)">${gruppo.length}</span>`;
+    hd.innerHTML = `${g.etichetta}<span style="color:var(--text-dim)">${g.cicli.length}</span>`;
     wrap.appendChild(hd);
-
-    gruppo.forEach(c => {
-      const sel = _bpwSel.get(c.id);
-      const row = document.createElement('label');
-      row.className = 'bp-pick' + (sel ? ' sel' : '');
-
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = !!sel;
-      cb.onchange = () => bpwToggle(c.id);
-      row.appendChild(cb);
-
-      const main = document.createElement('div');
-      main.className = 'bp-pick-main';
-      const t = document.createElement('div');
-      t.className = 'bp-pick-title';
-      t.textContent = c.title || '';
-      main.appendChild(t);
-
-      const meta = document.createElement('div');
-      meta.className = 'bp-pick-meta';
-      const chip = (txt, cls) => { const s = document.createElement('span'); s.className = 'bp-chip' + (cls || ''); s.textContent = txt; meta.appendChild(s); };
-      if (c.cat) chip(catNome(c.cat));
-      const persone = (c.persone_menzionate || []).filter(Boolean);
-      if (persone.length) chip(persone.slice(0, 2).join(', ') + (persone.length > 2 ? ` +${persone.length-2}` : ''));
-      if (c.due_date) {
-        const gg = getDaysLeft(c.due_date);
-        chip(formatDaysLeft(gg));
-      }
-      if (sel && sel.inAgenda) chip('già in agenda');
-      main.appendChild(meta);
-      row.appendChild(main);
-      wrap.appendChild(row);
-    });
-
+    g.cicli.forEach(c => wrap.appendChild(bpwRigaScelta(c)));
     list.appendChild(wrap);
   });
 
   bpwRenderSummary();
+}
+
+function bpwRigaScelta(c) {
+  const sel = _bpwSel.get(c.id);
+  const row = document.createElement('label');
+  row.className = 'bp-pick' + (sel ? ' sel' : '');
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = !!sel;
+  cb.onchange = () => bpwToggle(c.id);
+  row.appendChild(cb);
+
+  const main = document.createElement('div');
+  main.className = 'bp-pick-main';
+  const t = document.createElement('div');
+  t.className = 'bp-pick-title';
+  t.textContent = c.title || '';
+  main.appendChild(t);
+
+  const meta = document.createElement('div');
+  meta.className = 'bp-pick-meta';
+  const chip = (txt, cls) => { const s = document.createElement('span'); s.className = 'bp-chip' + (cls || ''); s.textContent = txt; meta.appendChild(s); };
+  if (sel && sel.giorno && _bpwNelPiano.has(c.id)) chip(sel.giorno === 'settimana' ? 'in settimana' : GIORNI_MAP[sel.giorno].label.toLowerCase());
+  if (c.cat) chip(catNome(c.cat));
+  const persone = (c.persone_menzionate || []).filter(Boolean);
+  if (persone.length) chip(persone.slice(0, 2).join(', ') + (persone.length > 2 ? ` +${persone.length-2}` : ''));
+  if (c.due_date) chip(formatDaysLeft(getDaysLeft(c.due_date)));
+  if (sel && sel.inAgenda) chip('già in agenda');
+  main.appendChild(meta);
+  row.appendChild(main);
+  return row;
 }
 
 function bpwRenderSummary() {
@@ -3933,14 +3999,16 @@ function bpwRenderSummary() {
   const n      = _bpwSel.size;
   const minuti = [..._bpwSel.values()].reduce((s, v) => s + (v.durata || BP_DURATA_DEFAULT), 0);
   const over   = minuti > BP_SOVRACCARICO_MIN;
+  const app    = bpwMinutiAppuntamenti();
 
   box.innerHTML = `
-    <div class="bp-sum-h">Hai scelto</div>
+    <div class="bp-sum-h">${bpwModifica() ? 'Nel piano' : 'Hai scelto'}</div>
     <div class="bp-sum-n">${n}</div>
     <div class="bp-sum-lbl">${n === 1 ? 'cosa' : 'cose'}</div>
     <div class="bp-sum-row"><span>Tempo previsto</span><strong>${bpFormatMin(minuti)}</strong></div>
     <div class="bp-sum-row"><span>In media, ognuna</span><strong>${n ? bpFormatMin(Math.round(minuti/n)) : '—'}</strong></div>
     <div class="bp-sum-row"><span>Traguardo: farne</span><strong>${Math.ceil(n * BP_OBIETTIVO_PCT / 100)}</strong></div>
+    ${app ? `<div class="bp-sum-row"><span>Appuntamenti in calendario</span><strong>${bpFormatMin(app)}</strong></div>` : ''}
     ${over ? '<div class="bp-warn">Troppa roba: più di 40 ore in una settimana.</div>' : ''}
     `;
 }
@@ -4185,6 +4253,7 @@ async function bpAttiva() {
     }
 
     const n = rows.length;
+    const modifica = bpwModifica();
     closeBpWizard();
 
     // porta la vista sulla settimana appena pianificata
@@ -4195,12 +4264,14 @@ async function bpAttiva() {
     } else {
       await loadBattlePlan();
     }
+    ui.pian = 'settimana';
     vai('pianifica');
-    showToast(`Piano della settimana pronto: ${n} cose`, 'success');
+    caricaRimaste();
+    showToast(modifica ? `Piano aggiornato: ${n} cose` : `Piano della settimana pronto: ${n} cose`, 'success');
   } catch (err) {
     showToast('Errore attivazione: ' + err.message, 'error');
     btn.disabled = false;
-    btn.textContent = 'Attiva il piano';
+    btn.textContent = bpwModifica() ? 'Salva il piano' : 'Attiva il piano';
   }
 }
 
@@ -4413,7 +4484,7 @@ function vai(tab, opz) {
   localStorage.setItem(LS2.TAB, tab);
   chiudiSwipe();
   $('main').scrollTop = 0;
-  if (tab === 'oggi') setTimeout(reconMostra, 300);
+  if (tab === 'oggi') { setTimeout(reconMostra, 300); caricaRimaste(); }
   if (tab === 'oggi' && !eSettimanaCorrente()) { tornaAOggi(); return; }
   render();
 }
@@ -4542,13 +4613,14 @@ const SVG_SPUNTA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5
 
 // Una riga: spunta, titolo, tipo + un dato, ora. Azioni rapide con lo swipe (telefono) o «···» (desktop).
 function riga(r, opz) {
-  const o = opz || {};
+  const o = opz && opz.solaLettura ? { ...opz, senzaAzioni: true } : (opz || {});
   const c = r.c;
   const q = computeEffectiveQ(c);
   const fatto = !!r.fatto;
   const inRitardo = !fatto && !!c.due_date && getDaysLeft(c.due_date) < 0;
   const meta = [tagTipo(q)];
-  if (o.routine) { meta.length = 0; meta.push(`<i class="ti ti-repeat" style="font-size:14px"></i><span>ogni giorno${r.durata ? ' · ' + formatDurata(r.durata) : ''}</span>`); }
+  if (o.passato && !fatto) meta.unshift('<span class="ritardo">in ritardo</span>');   // giorno passato, non fatta
+  else if (o.routine) { meta.length = 0; meta.push(`<i class="ti ti-repeat" style="font-size:14px"></i><span>ogni giorno${r.durata ? ' · ' + formatDurata(r.durata) : ''}</span>`); }
   else if (!fatto && q === 2 && !haPianificazione(c) && o.suggerisci) meta.push(`<span class="hint-quando"><i class="ti ti-calendar-plus"></i>Scegli quando</span>`);
   else if (c.due_date && !fatto) meta.push(scadenzaHtml(c));
   else if (o.extra) meta.push(`<span>${escHtml(o.extra)}</span>`);
@@ -4567,7 +4639,7 @@ function riga(r, opz) {
   return `<div class="item${fatto ? ' is-done' : ''}${inRitardo ? ' is-late' : ''}" data-id="${c.id}"${data}${o.trascina ? ' draggable="true"' : ''}>
     ${azioni}
     <div class="item-row">
-      <label class="check"><input type="checkbox" data-act="spunta"${fatto ? ' checked' : ''} aria-label="Fatta: ${esc(c.title)}"><span class="check-box">${SVG_SPUNTA}</span></label>
+      <label class="check"><input type="checkbox" data-act="spunta"${fatto ? ' checked' : ''}${o.solaLettura ? ' disabled' : ''} aria-label="Fatta: ${esc(c.title)}"><span class="check-box">${SVG_SPUNTA}</span></label>
       <button type="button" class="item-main" data-act="apri"><span class="item-title">${titolo}</span><span class="item-meta">${meta.join(sep)}</span></button>
       <span class="item-side">${r.ora ? `<span class="mono">${r.ora}</span>` : (o.lato || '')}${o.senzaAzioni ? '' : `<button type="button" class="btn btn-icon" data-act="menu" aria-label="Azioni per ${esc(c.title)}"><i class="ti ti-dots"></i></button>`}</span>
     </div>
@@ -4628,6 +4700,9 @@ function righeGiorno(gk) {
 }
 
 function dataDelGiorno(idx) { return bpDataGiorno(state.week, state.year, idx); }
+const giornoPassato = d => toISODate(d) < oggiLocale();
+// righe della settimana chiusa: si guardano, non si toccano
+const opzRighe = d => ({ data: toISODate(d), passato: giornoPassato(d), solaLettura: !!state.bp && state.bp.stato === 'chiuso' });
 
 function htmlFasce(righe, opz) {
   return FASCE.map(f => {
@@ -5137,6 +5212,7 @@ function vistaOggi() {
   const eventi = eventiDelGiorno(oggi);
 
   let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi${btnAiuto('oggi')}</h1></div></div>`;
+  h += bloccoRimaste();
   if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> di <b class="mono">${tot}</b> fatte</span></div>`;
 
   if (isGcalTokenValid() && eventi.length) {
@@ -5153,7 +5229,7 @@ function vistaOggi() {
 
   if (!tot) {
     h += vuoto('ti-calendar-week', 'Nessun piano per oggi', 'Scegli le cose che vuoi portare a casa questa settimana e dai a ognuna un giorno.',
-      `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button>`);
+      `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">${etichettaWizard()}</button>`);
   }
   if (scadenza.length) {
     h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('scadenza', 'In scadenza', `<span class="mono">${scadenza.length}</span>`,
@@ -5178,20 +5254,35 @@ function navSettimana() {
 function vistaPianifica() {
   const seg = [['settimana', 'Settimana'], ['mese', 'Mese'], ['agenda', 'Agenda']].map(([k, l]) =>
     `<button type="button" data-act="pian" data-v="${k}" aria-pressed="${ui.pian === k}">${l}</button>`).join('');
-  let h = `<div class="vh"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div></div><div class="seg" role="group" aria-label="Vista">${seg}</div>`;
+  const matita = ui.pian === 'settimana' && state.bp && !bpSolaLettura()
+    ? '<button type="button" class="btn btn-icon" data-act="wizard" aria-label="Modifica il piano" data-tip="Modifica il piano"><i class="ti ti-pencil"></i></button>' : '';
+  let h = `<div class="vh"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div>${matita}</div><div class="seg" role="group" aria-label="Vista">${seg}</div>`;
   if (ui.pian === 'mese') return h + pianMese();
   h += navSettimana();
   h += ui.pian === 'agenda' ? pianAgenda() : pianSettimana();
   return h + pianFondo();
 }
 
-function statoPiano() {
-  if (!state.bp) return '';
-  const st = bpStats(bpItemsValidi().filter(i => bpCiclo(i).ctx === state.ctx));
+// Riepilogo del piano in cima a Pianifica → Settimana: stessa forma del «Hai scelto» del wizard.
+function cardPiano() {
+  if (!state.bp) {
+    if (bpSettimanaPassata()) return '';
+    return `<div class="bp-wiz-right piano-card"><div class="pc-top"><div><span class="bp-sum-h">Nessun piano</span><p class="t-label muted">Scegli cosa portare a casa ${bpwFrase(state.week, state.year).nome}.</p></div>
+      <button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button></div></div>`;
+  }
+  const items = bpItemsValidi().filter(i => bpCiclo(i).ctx === state.ctx);
+  const st = bpStats(items);
+  const minuti = items.reduce((s, i) => s + bpDurata(i), 0);
   const chiuso = state.bp.stato === 'chiuso';
-  return `<div class="piano-stato"><span><b>${chiuso ? 'Settimana chiusa' : 'Piano della settimana'}</b><small><span class="mono">${st.done}</span> di <span class="mono">${st.tot}</span> fatte</small></span>
-    <span class="bar"><i style="width:${st.pct}%"></i></span>
-    ${bpSolaLettura() ? '' : '<button type="button" class="btn btn-ghost btn-sm" data-act="wizard">Modifica</button>'}</div>`;
+  const titolo = chiuso ? 'Settimana chiusa' : state.bp.stato === 'bozza' ? 'Piano in bozza' : 'Piano della settimana';
+  return `<div class="bp-wiz-right piano-card">
+    <div class="pc-top"><div><span class="bp-sum-h">${titolo}</span><div><span class="bp-sum-n">${st.tot}</span><span class="bp-sum-lbl">${st.tot === 1 ? 'cosa' : 'cose'}</span></div></div>
+      ${bpSolaLettura() ? '' : '<button type="button" class="btn btn-secondary btn-sm" data-act="wizard"><i class="ti ti-pencil"></i>Modifica il piano</button>'}</div>
+    <div class="bp-sum-row"><span>Tempo previsto</span><strong>${bpFormatMin(minuti)}</strong></div>
+    <div class="bp-sum-row"><span>Fatte</span><strong>${st.done}/${st.tot}</strong></div>
+    <div class="bar" role="progressbar" aria-label="Fatte nel piano" aria-valuemin="0" aria-valuemax="${st.tot}" aria-valuenow="${st.done}"><i style="width:${st.pct}%"></i></div>
+    ${chiuso && state.bp.note ? `<p class="pc-nota"><i class="ti ti-quote"></i>${escHtml(state.bp.note)}</p>` : ''}
+  </div>`;
 }
 
 function settimanaVuota() {
@@ -5201,15 +5292,16 @@ function settimanaVuota() {
 
 function pianSettimana() {
   if (settimanaVuota()) {
-    return vuoto('ti-calendar-week', 'Nessun piano per questa settimana', 'Scegli le cose che vuoi portare a casa e dai a ognuna un giorno.',
-      `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button>`);
+    return (eSettimanaCorrente() ? bloccoRimaste() : '') + vuoto('ti-calendar-week', 'Nessun piano', bpSettimanaPassata() ? 'In questa settimana non c\'era niente in programma.' : 'Scegli le cose che vuoi portare a casa e dai a ognuna un giorno.',
+      bpSettimanaPassata() ? '' : `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button>`);
   }
   const oggi = oggiData();
   const eOggi = idx => eSettimanaCorrente() && giornoIdxDi(oggi) === idx;
-  let h = statoPiano();
+  let h = cardPiano() + (eSettimanaCorrente() ? bloccoRimaste() : '');
   const desk = window.innerWidth >= 768;
   const inSett = righeGiorno('settimana');
-  const coda = inSett.length ? `<p class="list-head"><span>Da fare in settimana</span><span class="mono">${inSett.length}</span></p><div class="group">${inSett.map(r => riga(r, { data: oggiLocale() })).join('')}</div>` : '';
+  const fineSett = dataDelGiorno(6);
+  const coda = inSett.length ? `<p class="list-head"><span>Da fare in settimana</span><span class="mono">${inSett.length}</span></p><div class="group">${inSett.map(r => riga(r, { ...opzRighe(fineSett), data: oggiLocale() })).join('')}</div>` : '';
   if (desk) return h + pianSettimanaColonne(eOggi) + coda;
 
   // telefono: un giorno alla volta
@@ -5221,7 +5313,7 @@ function pianSettimana() {
   const occ = minutiOccupati(dSel);
   h += `<div><div class="days" role="group" aria-label="Giorno">${giorni}</div>
     <p class="list-head"><span>${fmtGiornoLungo(dSel)}</span>${occ ? `<span class="mono">${bpFormatMin(occ)} di appuntamenti</span>` : ''}</p>
-    ${righe.length ? htmlFasce(righe, { data: toISODate(dSel) }).replace('<p class="list-head">', '<p class="list-head" style="margin-top:var(--sp-3)">')
+    ${righe.length ? htmlFasce(righe, opzRighe(dSel)).replace('<p class="list-head">', '<p class="list-head" style="margin-top:var(--sp-3)">')
       : `<div class="group"><div class="col-vuota">Niente in programma per ${g.label.toLowerCase()}</div></div>`}</div>`;
   return h + coda;
 }
@@ -5233,7 +5325,7 @@ function pianSettimanaColonne(eOggi) {
     <div class="cols${ui.weekend ? ' sette' : ''}">${GIORNI.slice(0, quanti).map((gg, idx) => {
       const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), o = minutiOccupati(d);
       return `<div><div class="col-h${eOggi(idx) ? ' oggi' : ''}"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${o ? `<span class="mono t-caption" data-tip="Appuntamenti su Google Calendar">${bpFormatMin(o)}</span>` : ''}</div>
-        <div class="group">${rs.length ? rs.map(r => riga(r, { data: toISODate(d) })).join('') : '<div class="col-vuota">—</div>'}</div></div>`;
+        <div class="group">${rs.length ? rs.map(r => riga(r, opzRighe(d))).join('') : '<div class="col-vuota">—</div>'}</div></div>`;
     }).join('')}</div></div>`;
 }
 
@@ -5248,13 +5340,13 @@ function pianAgenda() {
     const fasce = FASCE.map(f => {
       const rs = righe.filter(r => r.fascia === f.key);
       if (!desk && !rs.length) return '';
-      return `<div class="slot" data-giorno="${g.key}" data-fascia="${f.key}"><div class="fascia-h">${f.label}</div>${rs.map(r => riga(r, { data: toISODate(d), trascina: desk && !r.fatto })).join('')}</div>`;
+      return `<div class="slot" data-giorno="${g.key}" data-fascia="${f.key}"><div class="fascia-h">${f.label}</div>${rs.map(r => riga(r, { ...opzRighe(d), trascina: desk && !r.fatto && !opzRighe(d).solaLettura })).join('')}</div>`;
     }).join('');
     if (!desk && !righe.length) return '';
     return `<div><div class="col-h${eOggi ? ' oggi' : ''}"><span>${desk ? g.label.slice(0, 3) : g.label} <span class="mono">${d.getDate()}</span></span></div><div class="group">${fasce}</div></div>`;
   }).join('');
   if (!colonne.trim()) return vuoto('ti-calendar-week', 'Agenda vuota', 'Non hai ancora dato un giorno a niente, questa settimana.',
-    `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button>`);
+    bpSettimanaPassata() ? '' : `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">${etichettaWizard()}</button>`);
   return desk ? `<div class="cols sette agenda">${colonne}</div>` : `<div class="pv-stack" style="display:grid;gap:var(--sp-4)">${colonne}</div>`;
 }
 
@@ -5457,7 +5549,10 @@ function vistaAltro() {
 
 function vistaFatte() {
   const lista = state.cicli.filter(c => c.done).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
-  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte${btnAiuto('fatte')}</h1></div></div>`;
+  const seg = [['cose', 'Cose'], ['settimane', 'Settimane']].map(([k, l]) =>
+    `<button type="button" data-act="fatte" data-v="${k}" aria-pressed="${ui.fatte === k}">${l}</button>`).join('');
+  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte${btnAiuto('fatte')}</h1></div></div><div class="seg" role="group" aria-label="Vista" style="margin-bottom:var(--sp-4)">${seg}</div>`;
+  if (ui.fatte === 'settimane') return h + fatteSettimane();
   if (!lista.length) return h + vuoto('ti-circle-check', 'Ancora niente, inizia da Oggi', 'Ogni cosa che spunti finisce qui, così vedi quanta strada hai fatto.', `<button type="button" class="btn btn-primary btn-sm" data-tab="oggi">Vai a Oggi</button>`);
   const mesi = new Map();
   lista.forEach(c => { const d = new Date(c.updated_at || c.created_at); const k = d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }); if (!mesi.has(k)) mesi.set(k, []); mesi.get(k).push(c); });
@@ -5640,12 +5735,38 @@ async function bpChiudiSettimana() {
 // ══════════════════════════════════════════════════════════════
 // v2 · PREPARA LA SETTIMANA: tempo già occupato dagli appuntamenti
 // ══════════════════════════════════════════════════════════════
-function apriWizard() {
-  const w = ui.tab === 'oggi' ? bpSettimanaCorrente() : { week: state.week, year: state.year };
+// Agisce sulla settimana visualizzata in Pianifica (in Oggi: quella corrente).
+// Se ha già un piano, il wizard si apre in modalità modifica.
+async function apriWizard(week, year) {
+  const w = week ? { week, year } : ui.tab === 'oggi' ? bpSettimanaCorrente() : { week: state.week, year: state.year };
   $('bpw-search').value = '';
-  caricaEventi(w.week, w.year);
-  openBpWizard(w.week, w.year);
+  await openBpWizard(w.week, w.year);
+  bpwConEventi(w.week, w.year);
 }
+
+// ‹ › nell'intestazione del wizard: ricarica tutto per l'altra settimana (pre-spunte comprese)
+function bpwCambiaSettimana(dir) {
+  const d = getWeekStart(_bpwWeek, _bpwYear);
+  d.setDate(d.getDate() + dir * 7);
+  const w = isoWeekParts(d), cur = bpSettimanaCorrente();
+  if (getWeekStart(w.week, w.year) < getWeekStart(cur.week, cur.year)) return;
+  apriWizard(w.week, w.year);
+}
+
+// Gli appuntamenti arrivano dopo: quando ci sono, ridisegna il riepilogo del wizard.
+function bpwConEventi(week, year) {
+  caricaEventi(week, year).then(() => {
+    if (!$('bpWizOverlay').classList.contains('open') || _bpwWeek !== week || _bpwYear !== year) return;
+    if (_bpwStep === 2) bpwRenderStep2(); else bpwRenderSummary();
+  });
+}
+function bpwMinutiAppuntamenti() {
+  if (!_bpwWeek) return 0;
+  return GIORNI.reduce((s, _, idx) => s + minutiOccupati(bpDataGiorno(_bpwWeek, _bpwYear, idx)), 0);
+}
+
+// «Prepara la settimana» oppure «Modifica il piano», per la settimana selezionata
+function etichettaWizard() { return state.bp && state.bp.stato !== 'chiuso' ? 'Modifica il piano' : 'Prepara la settimana'; }
 function decoraWizard() {
   if (!_bpwWeek) return;
   document.querySelectorAll('#bpw-days .bp-drop').forEach(zona => {
@@ -5656,6 +5777,271 @@ function decoraWizard() {
     const hd = zona.querySelector('.bp-drop-hd');
     if (hd && !hd.querySelector('.bp-occ')) hd.insertAdjacentHTML('beforeend', `<span class="bp-occ">${bpFormatMin(min)} già occupati da appuntamenti</span>`);
   });
+}
+
+// ══════════════════════════════════════════════════════════════
+// v2 · RIMASTE INDIETRO: righe del piano di un giorno passato non fatte
+// Si cercano nei piani attivi o in bozza delle ultime settimane (quelli chiusi
+// hanno già avuto la loro revisione). Niente si sposta da solo: si sceglie riga per riga.
+// ══════════════════════════════════════════════════════════════
+const CARRY = { LS: 'carry_dismissed', SETTIMANE: 4 };
+ui.carry = [];          // [{ item, plan }]
+ui.carryScegli = null;  // item con i chip dei giorni aperti
+
+function carryData(item, plan) {
+  const idx = GIORNI.findIndex(g => g.key === item.giorno);
+  return idx < 0 ? null : bpDataGiorno(plan.settimana, plan.anno, idx);
+}
+// senza giorno: rimasta indietro solo quando la sua settimana è finita
+function carryERimasta(item, plan) {
+  if (item.completato) return false;
+  return giornoPassato(carryData(item, plan) || bpDataGiorno(plan.settimana, plan.anno, 6));
+}
+
+async function caricaRimaste() {
+  if (!state.bpTableOk) return;
+  try {
+    const cur = bpSettimanaCorrente(), inizio = getWeekStart(cur.week, cur.year);
+    const limite = new Date(inizio); limite.setDate(limite.getDate() - 7 * CARRY.SETTIMANE);
+    const { data: piani, error } = await db.from('battle_plan').select('id,settimana,anno,stato').in('stato', ['attivo', 'bozza']);
+    if (error) throw error;
+    const validi = (piani || []).filter(p => { const d = getWeekStart(p.settimana, p.anno); return d >= limite && d <= inizio; });
+    if (!validi.length) { ui.carry = []; render(); return; }
+    const { data: items, error: e2 } = await db.from('battle_plan_items').select('*').in('battle_plan_id', validi.map(p => p.id)).eq('completato', false);
+    if (e2) throw e2;
+    const perId = new Map(validi.map(p => [p.id, p]));
+    ui.carry = (items || []).map(item => ({ item, plan: perId.get(item.battle_plan_id) })).filter(r => carryERimasta(r.item, r.plan));
+    render();
+  } catch (e) { console.warn('[Rimaste indietro] lettura:', e.message); }
+}
+
+// Quelle da mostrare adesso: il piano della settimana in vista (state.bpItems) è più fresco di ui.carry.
+function rimasteVisibili() {
+  return ui.carry.filter(({ item, plan }) => {
+    const c = ciclo(item.ciclo_id);
+    if (!c || c.done || isParcheggiato(c) || isGiornaliero(c) || c.ctx !== state.ctx) return false;
+    if (state.bp && state.bp.id === plan.id) {
+      const fresco = state.bpItems.find(i => i.id === item.id);
+      return !!fresco && !fresco.completato && fresco.giorno === item.giorno;
+    }
+    return true;
+  }).sort((a, b) => (carryData(a.item, a.plan) || bpDataGiorno(a.plan.settimana, a.plan.anno, 7)) - (carryData(b.item, b.plan) || bpDataGiorno(b.plan.settimana, b.plan.anno, 7)));
+}
+
+function carryNascosto() { return localStorage.getItem(CARRY.LS) === oggiLocale(); }
+
+function bloccoRimaste() {
+  const lista = rimasteVisibili();
+  if (!lista.length || carryNascosto()) return '';
+  const righe = lista.map(({ item, plan }) => {
+    const c = ciclo(item.ciclo_id), d = carryData(item, plan);
+    const era = d ? `era ${d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric' })}` : `era nella settimana del ${fmtCorta(getWeekStart(plan.settimana, plan.anno))}`;
+    const aperto = ui.carryScegli === item.id;
+    const chip = (v, testo, extra) => `<button type="button" class="chip" data-act="carry" data-v="${v}" data-item="${item.id}"${extra || ''}>${testo}</button>`;
+    const giorni = aperto ? `<div class="carry-giorni"><div class="gchips" role="group" aria-label="Giorno di questa settimana">${GIORNI.map((g, idx) => {
+        const dd = bpDataGiorno(bpSettimanaCorrente().week, bpSettimanaCorrente().year, idx);
+        return `<button type="button" class="gchip" data-act="carry" data-v="giorno" data-g="${idx}" data-item="${item.id}" aria-label="${g.label} ${dd.getDate()}"${giornoPassato(dd) ? ' disabled' : ''}>${g.label.slice(0, 1)}</button>`;
+      }).join('')}</div>${chip('prossima', 'Prossima settimana')}</div>` : '';
+    return `<div class="item carry-riga" data-id="${c.id}">
+      <div class="item-row"><label class="check"><input type="checkbox" data-act="carry-fatta" aria-label="Fatta: ${esc(c.title)}"><span class="check-box">${SVG_SPUNTA}</span></label>
+        <div class="carry-main"><span class="item-title">${escHtml(c.title)}</span><span class="item-meta"><span class="ritardo">${era}</span></span></div></div>
+      <div class="chips chips-wrap carry-azioni" role="group" aria-label="Quando la fai">${chip('oggi', 'Oggi')}${chip('domani', 'Domani')}${chip('scegli', 'Scegli giorno', ` aria-expanded="${aperto}" aria-pressed="${aperto}"`)}${chip('lascia', 'Lascia stare')}</div>
+      ${giorni}</div>`;
+  }).join('');
+  return `<section class="group carry" aria-label="Rimaste indietro">
+    <div class="carry-h"><b>Rimaste indietro <span class="mono">(${lista.length})</span></b>
+      <button type="button" class="btn btn-icon" data-act="carry-chiudi" aria-label="Chiudi per oggi" data-tip="Chiudi per oggi"><i class="ti ti-x"></i></button>
+      <button type="button" class="btn btn-secondary btn-sm carry-tutte" data-act="carry-tutte"><i class="ti ti-sun"></i>Porta tutte a oggi</button></div>
+    ${righe}</section>`;
+}
+
+// Piano di una settimana, creato in bozza se non c'è. `cache` evita di crearlo due volte in un giro.
+async function pianoPer(w, cache) {
+  const k = settKey(w.week, w.year);
+  if (cache.has(k)) return cache.get(k).plan;
+  const { data, error } = await db.from('battle_plan').select('*').eq('settimana', w.week).eq('anno', w.year).maybeSingle();
+  if (error) throw error;
+  if (data) { cache.set(k, { plan: data, creato: false }); return data; }
+  const { data: nuovo, error: e2 } = await db.from('battle_plan').insert({ settimana: w.week, anno: w.year, stato: 'bozza' }).select();
+  if (e2) throw e2;
+  cache.set(k, { plan: nuovo[0], creato: true });
+  return nuovo[0];
+}
+
+async function overrideDi(cicloId, w) {
+  const { data } = await db.from('agenda_override').select('*').eq('ciclo_id', cicloId).eq('settimana', w.week).eq('anno', w.year).maybeSingle();
+  return data || null;
+}
+
+// Sposta una riga rimasta indietro in un giorno (`data`) o nella prossima settimana senza giorno.
+// Restituisce la funzione che rimette tutto com'era.
+async function carrySposta(rec, dest, cache) {
+  const { item } = rec;
+  const c = ciclo(item.ciclo_id);
+  const ricorrente = ripetizioneDi(c) !== 'nessuna';
+  const cur = bpSettimanaCorrente();
+  const w = dest.data ? isoWeekParts(dest.data) : bpSettimanaSuccessiva(cur.week, cur.year);
+  const giorno = dest.data ? giornoKeyDi(dest.data) : 'settimana';
+  const fascia = dest.data ? (item.fascia || c.fascia_oraria || 'mattina') : null;
+  const piano = await pianoPer(w, cache);
+  const annulla = [];
+
+  // 1. la riga del piano
+  if (piano.id === item.battle_plan_id) {
+    await db.from('battle_plan_items').update({ giorno, fascia }).eq('id', item.id).then(r => { if (r.error) throw r.error; });
+    annulla.push(() => db.from('battle_plan_items').update({ giorno: item.giorno, fascia: item.fascia }).eq('id', item.id));
+  } else {
+    const { data: gia } = await db.from('battle_plan_items').select('*').eq('battle_plan_id', piano.id).eq('ciclo_id', c.id).maybeSingle();
+    if (gia) {   // la cosa è già nel piano di quella settimana: si aggiorna quella riga, la vecchia va via
+      await db.from('battle_plan_items').update({ giorno, fascia, completato: false }).eq('id', gia.id).then(r => { if (r.error) throw r.error; });
+      await db.from('battle_plan_items').delete().eq('id', item.id).then(r => { if (r.error) throw r.error; });
+      annulla.push(() => db.from('battle_plan_items').update({ giorno: gia.giorno, fascia: gia.fascia, completato: gia.completato }).eq('id', gia.id));
+      annulla.push(() => db.from('battle_plan_items').insert(item));
+    } else {     // la riga passa al piano della nuova settimana, con lo stesso id
+      await db.from('battle_plan_items').update({ battle_plan_id: piano.id, giorno, fascia }).eq('id', item.id).then(r => { if (r.error) throw r.error; });
+      annulla.push(() => db.from('battle_plan_items').update({ battle_plan_id: item.battle_plan_id, giorno: item.giorno, fascia: item.fascia }).eq('id', item.id));
+    }
+  }
+
+  // 2. l'agenda, come «Domani»: data della cosa + override di quella settimana
+  const prima = campi(c, ['giorno_settimana', 'fascia_oraria', 'pianificato_data', 'parcheggiato', 'parcheggiato_at']);
+  if (dest.data && state.agendaColsOk) {
+    const ovPrima = state.agendaTableOk ? await overrideDi(c.id, w) : null;
+    if (ricorrente) await upsertOverride(c.id, w, giorno, fascia);
+    else await pianificaInData(c, dest.data, fascia);
+    annulla.push(async () => {
+      if (!ricorrente) await patchCiclo(c.id, prima);
+      if (!state.agendaTableOk) return;
+      if (ovPrima) await upsertOverride(c.id, w, ovPrima.giorno_settimana, ovPrima.fascia_oraria); else await togliOverride(c.id, w);
+    });
+  } else if (!dest.data && !ricorrente && state.pianificaColsOk && state.agendaColsOk) {
+    // prossima settimana, senza giorno: la data passa al lunedì e non resta un giorno vecchio in agenda
+    const wCur = { week: cur.week, year: cur.year };
+    const ovPrima = state.agendaTableOk ? await overrideDi(c.id, wCur) : null;
+    await patchCiclo(c.id, { pianificato_data: toISODate(getWeekStart(w.week, w.year)), giorno_settimana: null });
+    if (ovPrima) await togliOverride(c.id, wCur);
+    annulla.push(async () => {
+      await patchCiclo(c.id, prima);
+      if (ovPrima) await upsertOverride(c.id, wCur, ovPrima.giorno_settimana, ovPrima.fascia_oraria);
+    });
+  }
+  return async () => { for (const fn of annulla.reverse()) await fn(); };
+}
+
+// Dopo uno spostamento: ricarica il piano in vista e l'elenco.
+async function dopoCarry() { await loadBattlePlan(); await caricaRimaste(); render(); }
+
+// Toglie dal piano i piani creati in bozza durante il giro, se l'utente annulla.
+async function annullaPianiCreati(cache) {
+  for (const { plan, creato } of cache.values()) if (creato) await db.from('battle_plan').delete().eq('id', plan.id);
+}
+
+async function azioneCarry(itemId, v, idxGiorno) {
+  const rec = ui.carry.find(r => r.item.id === itemId);
+  if (!rec) return;
+  if (v === 'scegli') { ui.carryScegli = ui.carryScegli === itemId ? null : itemId; render(); return; }
+  const c = ciclo(rec.item.ciclo_id);
+  ui.carryScegli = null;
+  try {
+    if (v === 'lascia') {
+      if (!state.parcheggioColsOk) { showToast('Migration parcheggio non applicata', 'error'); return; }
+      const prima = campi(c, ['q', 'parcheggiato', 'parcheggiato_at']);
+      await patchCiclo(c.id, { q: 4, parcheggiato: true, parcheggiato_at: new Date().toISOString() });
+      const { error } = await db.from('battle_plan_items').delete().eq('id', itemId);
+      if (error) throw error;
+      ui.carry = ui.carry.filter(r => r.item.id !== itemId);
+      await dopoCarry();
+      showToast('Messa in attesa e tolta dal piano', 'success', { annulla: async () => {
+        await patchCiclo(c.id, prima);
+        await db.from('battle_plan_items').insert(rec.item);
+        await dopoCarry();
+      } });
+      return;
+    }
+    const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    const cur = bpSettimanaCorrente();
+    const data = v === 'oggi' ? oggi
+      : v === 'domani' ? new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + 1)
+      : v === 'giorno' ? bpDataGiorno(cur.week, cur.year, idxGiorno) : null;
+    const cache = new Map();
+    const annulla = await carrySposta(rec, { data }, cache);
+    ui.carry = ui.carry.filter(r => r.item.id !== itemId);
+    await dopoCarry();
+    const msg = v === 'oggi' ? 'Spostata a oggi' : v === 'domani' ? 'Spostata a domani' : data ? `Spostata a ${fmtGiorno(data)}` : 'Nel piano della prossima settimana';
+    showToast(msg, 'success', { annulla: async () => { await annulla(); await annullaPianiCreati(cache); await dopoCarry(); } });
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); dopoCarry(); }
+}
+
+async function carryTutteAOggi() {
+  const lista = rimasteVisibili();
+  if (!lista.length) return;
+  const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+  const cache = new Map(), annulla = [];
+  try {
+    for (const rec of lista) annulla.push(await carrySposta(rec, { data: oggi }, cache));
+    const ids = new Set(lista.map(r => r.item.id));
+    ui.carry = ui.carry.filter(r => !ids.has(r.item.id));
+    await dopoCarry();
+    showToast(`${plurale(lista.length, 'cosa portata', 'cose portate')} a oggi`, 'success', { annulla: async () => {
+      for (const fn of annulla.reverse()) await fn();
+      await annullaPianiCreati(cache);
+      await dopoCarry();
+    } });
+  } catch (e) {
+    showToast('Errore: ' + e.message, 'error');
+    for (const fn of annulla.reverse()) await fn().catch(() => {});   // niente a metà
+    await dopoCarry();
+  }
+}
+
+function carryChiudiPerOggi() {
+  localStorage.setItem(CARRY.LS, oggiLocale());
+  render();
+  showToast('Le ritrovi domani', 'info', { annulla: () => localStorage.removeItem(CARRY.LS) });
+}
+
+// ══════════════════════════════════════════════════════════════
+// v2 · SETTIMANE PASSATE (Altro → Fatte → Settimane)
+// ══════════════════════════════════════════════════════════════
+ui.fatte = 'cose';      // cose | settimane
+ui.settimane = null;    // piani passati, letti quando si apre il tab
+
+async function caricaSettimane() {
+  ui.settimane = 'carico';
+  try {
+    const { data, error } = await db.from('battle_plan').select('id,settimana,anno,stato,note,battle_plan_items(ciclo_id,completato)')
+      .order('anno', { ascending: false }).order('settimana', { ascending: false });
+    if (error) throw error;
+    const cur = bpSettimanaCorrente(), inizio = getWeekStart(cur.week, cur.year);
+    ui.settimane = (data || []).filter(p => p.stato === 'chiuso' || getWeekStart(p.settimana, p.anno) < inizio).map(p => {
+      const items = (p.battle_plan_items || []).filter(i => { const c = ciclo(i.ciclo_id); return c && c.ctx === state.ctx; });
+      return { ...p, ...bpStats(items) };
+    });
+  } catch (e) {
+    ui.settimane = [];
+    showToast('Non riesco a leggere le settimane: ' + e.message, 'error');
+  }
+  render();
+}
+
+function fatteSettimane() {
+  if (ui.settimane === null) { caricaSettimane(); return '<div class="skel"></div>'.repeat(3); }
+  if (ui.settimane === 'carico') return '<div class="skel"></div>'.repeat(3);
+  if (!ui.settimane.length) return vuoto('ti-calendar-week', 'Nessuna settimana passata', 'Quando una settimana con un piano finisce, la ritrovi qui con quante cose hai fatto.');
+  return `<div class="group">${ui.settimane.map(p => {
+    const da = getWeekStart(p.settimana, p.anno), a = new Date(da); a.setDate(da.getDate() + 6);
+    return `<button type="button" class="riga-link" data-act="vai-sett" data-w="${p.settimana}" data-y="${p.anno}"><i class="ti ti-calendar-week"></i>
+      <span>Settimana ${p.settimana}<small>${fmtCorta(da)} – ${fmtCorta(a)} ${p.anno}${p.stato === 'chiuso' ? ' · chiusa' : ''}</small></span>
+      <small class="mono">${p.done}/${p.tot} · ${p.pct}%</small><i class="ti ti-chevron-right"></i></button>`;
+  }).join('')}</div>`;
+}
+
+function vaiASettimana(week, year) {
+  state.week = week; state.year = year;
+  localStorage.setItem(LS.WEEK, state.week);
+  ui.giorno = 0;
+  vai('pianifica', { pian: 'settimana' });
+  reloadWeekData().then(() => { caricaEventi(state.week, state.year); render(); });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -5830,7 +6216,13 @@ const AZIONI = {
   'bpw-giorno': el => bpwImpostaGiorno(el.dataset.id, el.dataset.g),
   'bpw-ora': el => bpSlotOpen(el.dataset.id, (_bpwSel.get(el.dataset.id) || {}).giorno || 'lunedi'),
   'bpw-togli': el => { _bpwSel.delete(el.dataset.id); bpwRenderStep2(); },
-  'det-giorno': el => impostaGiorno(editingId, el.dataset.g)
+  'det-giorno': el => impostaGiorno(editingId, el.dataset.g),
+  'bpw-sett': el => bpwCambiaSettimana(parseInt(el.dataset.dir, 10)),
+  carry: el => azioneCarry(el.dataset.item, el.dataset.v, parseInt(el.dataset.g, 10)),
+  'carry-tutte': () => carryTutteAOggi(),
+  'carry-chiudi': () => carryChiudiPerOggi(),
+  fatte: el => { ui.fatte = el.dataset.v; if (ui.fatte === 'settimane') ui.settimane = null; render(); },
+  'vai-sett': el => vaiASettimana(parseInt(el.dataset.w, 10), parseInt(el.dataset.y, 10))
 };
 function daDettaglio(fn) { const id = editingId; if (!id) return; closeModal('modalOverlay'); fn(id); }
 
@@ -5861,6 +6253,7 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('[data-act="spunta"]')) { const item = t.closest('.item'); if (item) azioneFatto(item.dataset.id); return; }
+  if (t.matches('[data-act="carry-fatta"]')) { const item = t.closest('.item'); if (item) azioneFatto(item.dataset.id); return; }
   if (t.matches('[data-act="raggruppa"]')) { ui.raggruppa = t.value; localStorage.setItem(LS2.RAGGRUPPA, t.value); render(); return; }
   if (t.matches('[data-act="rev-data"]')) { ui.rev.date.set(t.dataset.item, t.value); return; }
   if (t.id === 'f-cat' && t.value === '__nuova__') { t.selectedIndex = 0; apriCategoria(null, 'dettaglio'); }
@@ -5895,6 +6288,7 @@ function initPullToRefresh() {
     if (!tirato || _sw) { y0 = null; return; }
     y0 = null; tirato = false;
     await loadAll();
+    caricaRimaste();
     showToast('Aggiornato', 'success');
   });
 }
@@ -5903,8 +6297,8 @@ function initPullToRefresh() {
 // v2 · AIUTO DELLA SCHERMATA («?» accanto al titolo)
 // ══════════════════════════════════════════════════════════════
 const AIUTI = {
-  oggi:      { titolo: 'Oggi',      testo: ['L\'unica schermata da guardare durante il giorno. Qui trovi la routine, il piano di oggi e gli appuntamenti. Spunta quello che fai.'] },
-  pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Senza data = cose ancora da piazzare. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
+  oggi:      { titolo: 'Oggi',      testo: ['L\'unica schermata da guardare durante il giorno. Qui trovi la routine, il piano di oggi e gli appuntamenti. Spunta quello che fai. Quello che era in programma nei giorni scorsi e non hai fatto compare in cima, in Rimaste indietro: decidi tu quando rifarlo.'] },
+  pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Con le frecce puoi preparare anche le settimane che vengono, e rivedere quelle passate. Senza data = cose ancora da piazzare. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
   settimana: { titolo: 'Settimana', base: 'pianifica', testo: ['Qui vedi un giorno alla volta: tocca un giorno per aprire quello che c\'è in programma.'] },
   mese:      { titolo: 'Mese',      base: 'pianifica', testo: ['Un puntino per ogni cosa in programma, colorato per tipo. Tocca un giorno per aprirlo.'] },
   agenda:    { titolo: 'Agenda',    base: 'pianifica', testo: ['Ogni giorno diviso in mattina, pomeriggio e sera. Su computer puoi trascinare una cosa in un altro giorno: vale solo per quella settimana.'] },
@@ -5912,7 +6306,7 @@ const AIUTI = {
   matrice:   { titolo: 'Matrice',   testo: ['Le cose aperte divise per tipo: Subito (urgente e importante), Importante (da mettere in agenda), Delega, Lascia stare.'] },
   persone:   { titolo: 'Persone',   testo: ['Prima di una riunione, apri la persona: vedi tutto quello che hai in sospeso con lei.'] },
   attesa:    { titolo: 'In attesa', testo: ['Cose messe da parte di proposito. Non sparisce niente, ma non ti disturbano.'] },
-  fatte:     { titolo: 'Fatte',     testo: ['Tutto quello che hai chiuso. Puoi riaprire una cosa se serve.'] }
+  fatte:     { titolo: 'Fatte',     testo: ['Tutto quello che hai chiuso. Puoi riaprire una cosa se serve. In Settimane trovi i piani passati: tocca una settimana per rivederla.'] }
 };
 function btnAiuto(k) { return `<button type="button" class="aiuto-btn" data-act="aiuto" data-k="${k}" aria-label="A cosa serve questa schermata"><i class="ti ti-help-circle"></i></button>`; }
 // Il «?» sta sul titolo della schermata: l'aiuto è quello della sotto-vista aperta in quel momento.
@@ -6249,6 +6643,7 @@ _handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); car
     setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
     initPullToRefresh();
     caricaEventi(state.week, state.year);
+    caricaRimaste();
     const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
     if (salite.length) setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
   });

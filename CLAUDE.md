@@ -57,6 +57,27 @@ Accanto al titolo di Oggi, Pianifica, Tutto, In attesa e Fatte c'è `btnAiuto(k)
 
 Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) viene scritto da `mettiPianoSuCalendar`.
 
+### Piano di qualsiasi settimana (2026-10-15)
+
+- **Wizard**: nell'intestazione `‹ Settimana 42 · 12/10–18/10 ›` (`bpwDisegnaSettimana`, `bpwCambiaSettimana`): cambiare settimana riapre il wizard per quella (pre-spunte comprese); non si va prima della settimana corrente. Titolo da `bpwFrase()`: «questa settimana» / «la prossima settimana» / «la settimana del 26/10».
+- **Modalità modifica** (`bpwModifica()` = la settimana ha un piano `attivo` o `bozza`): titolo «Modifica il piano di…», passo 1 con il gruppo «Già nel piano» in cima (`_bpwNelPiano`), passo 2 con i giorni già assegnati, bottone «Salva il piano». Il salvataggio è sempre `bpAttiva()` (upsert degli item, elimina i deselezionati, stato → `attivo`).
+- `apriWizard(week, year)`: senza argomenti usa la settimana in vista in Pianifica (in Oggi quella corrente). `etichettaWizard()` dà «Prepara la settimana» o «Modifica il piano».
+- Gli appuntamenti Google Calendar della settimana del wizard si caricano con `bpwConEventi()` e finiscono nel carico per giorno (passo 2) e in «Appuntamenti in calendario» nel riepilogo (passo 1).
+- **Pianifica → Settimana**: in cima `cardPiano()` (N cose · tempo previsto · fatte N/M · barra · «Modifica il piano»), matita in alto a destra se il piano si può modificare. Settimana chiusa: «Settimana chiusa», nota della chiusura, righe in sola lettura (`riga(..., { solaLettura })`). Settimana futura senza piano: «Nessun piano» + «Prepara la settimana».
+- Righe di un giorno passato non fatte: puntino `--q1` + «in ritardo» (`riga(..., { passato })`, opzioni da `opzRighe(d)`).
+- **Altro → Fatte → Settimane** (`ui.fatte`, `caricaSettimane`, `fatteSettimane`): piani passati o chiusi con fatte/totali e %; tap → `vaiASettimana(w, y)`.
+
+### Rimaste indietro (2026-10-15)
+
+`caricaRimaste()` legge gli item non completati dei piani `attivo`/`bozza` delle ultime 4 settimane (`CARRY.SETTIMANE`) con giorno prima di oggi (o senza giorno, se la settimana è finita). Parte all'avvio, all'apertura di Oggi, dopo il wizard e con il pull-to-refresh. `rimasteVisibili()` scarta le cose fatte, in attesa, routine o dell'altro contesto.
+
+`bloccoRimaste()` è un blocco in pagina in cima a Oggi e in Pianifica → Settimana (solo settimana corrente). Ogni riga: spunta (= `azioneFatto`), «era lunedì 13», chip [Oggi] [Domani] [Scegli giorno] [Lascia stare]. Scegli giorno = L–D della settimana corrente (i giorni passati sono spenti) + «Prossima settimana».
+
+- `carrySposta(rec, { data }, cache)`: sposta l'item nel piano della settimana di destinazione (`pianoPer` lo crea in **bozza** se manca; se la cosa c'è già in quel piano aggiorna quella riga e cancella la vecchia), poi scrive l'agenda come «Domani» (`pianificaInData` o, se si ripete, solo `upsertOverride`). Senza `data` = prossima settimana, giorno `settimana`, `pianificato_data` al lunedì. Restituisce la funzione di annullamento.
+- Lascia stare: `q = 4` + `parcheggiato`, item tolto dal piano.
+- «Porta tutte a oggi» (`carryTutteAOggi`): un toast con Annulla che rimette ogni riga com'era e cancella i piani creati in bozza nel giro.
+- X «Chiudi per oggi»: `localStorage carry_dismissed = YYYY-MM-DD`, il blocco torna domani; le righe restano nel piano col giorno vecchio.
+
 ### Chip dei giorni
 
 `chipGiorni(act, id, attivo)` disegna L M M G V S D + «Sett.» (in settimana, senza giorno).
@@ -70,7 +91,7 @@ Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) v
 
 ### localStorage in più
 
-`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`. `cicli_theme` vuoto = segue il tema del sistema.
+`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi). `cicli_theme` vuoto = segue il tema del sistema.
 
 ### Per modificare la v2
 
