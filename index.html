@@ -26,6 +26,11 @@
   try { t = localStorage.getItem('cicli_theme'); } catch (e) {}
   if (t !== 'light' && t !== 'dark') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', t);
+  // dimensione del testo (100 / 112 / 125 %) e contrasto alto: anche loro prima del primo disegno
+  var scala = null, contrasto = null;
+  try { scala = localStorage.getItem('testo_scala'); contrasto = localStorage.getItem('contrasto'); } catch (e) {}
+  if (scala === '112' || scala === '125') document.documentElement.style.fontSize = scala + '%';
+  if (contrasto === 'alto') document.documentElement.setAttribute('data-contrast', 'alto');
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,11 +45,12 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* scala tipografica: 5 livelli */
-  --fs-display: 28px; --lh-display: 34px;
-  --fs-title: 20px;   --lh-title: 26px;
-  --fs-body: 16px;    --lh-body: 24px;
-  --fs-label: 14px;   --lh-label: 20px;
-  --fs-caption: 12px; --lh-caption: 16px;
+  /* in rem: «Dimensione testo» (Impostazioni) scala la radice a 100 / 112 / 125 % */
+  --fs-display: 1.75rem; --lh-display: 2.125rem;
+  --fs-title: 1.25rem;   --lh-title: 1.625rem;
+  --fs-body: 1rem;       --lh-body: 1.5rem;
+  --fs-label: .875rem;   --lh-label: 1.25rem;
+  --fs-caption: .75rem;  --lh-caption: 1rem;
   --fw-regular: 500;
   --fw-strong: 700;
 
@@ -146,7 +152,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-regular); -webkit-font-smoothing: antialiased; }
-button, input { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1, h2, h3, p { margin: 0; }
 .ti { font-size: 20px; line-height: 1; }
@@ -267,7 +273,7 @@ h1, h2, h3, p { margin: 0; }
 .bar-sm { width: 40px; height: 6px; }
 
 /* --- Toast --- */
-.toast { display: flex; align-items: center; gap: var(--sp-2); min-height: 52px; padding: 4px 4px 4px var(--sp-3); border-radius: var(--r-md); background: var(--inverse-bg); color: var(--inverse-text); box-shadow: var(--shadow-2); font-size: var(--fs-label); line-height: var(--lh-label); }
+.toast { max-width: 100%; display: flex; align-items: center; gap: var(--sp-2); min-height: 52px; padding: 4px 4px 4px var(--sp-3); border-radius: var(--r-md); background: var(--inverse-bg); color: var(--inverse-text); box-shadow: var(--shadow-2); font-size: var(--fs-label); line-height: var(--lh-label); }
 [data-theme="dark"] .toast { box-shadow: 0 6px 16px rgba(0, 0, 0, .4); }
 .toast .ti { flex: none; color: var(--inverse-accent); }
 .toast-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -512,6 +518,80 @@ a { color: var(--primary-ink); }
 .bpw-sett { display: inline-flex; align-items: center; gap: 2px; margin-left: -12px; }
 .bpw-sett .btn-icon:disabled { background: none; opacity: .35; }
 .bpw-sett b { color: var(--primary-ink); }
+
+/* ══ v3 ══ */
+/* inserimento a un campo */
+.rapido-campo { position: relative; margin-top: var(--sp-2); }
+.rapido-campo .input { display: block; width: 100%; min-height: 96px; padding: var(--sp-3) 56px var(--sp-3) var(--sp-4); font-size: var(--fs-title); line-height: var(--lh-title); resize: none; }
+.rapido-mic { position: absolute; top: 6px; right: 6px; }
+.rapido-mic.ascolta { background: var(--q1-soft); color: var(--q1); }
+.rapido-nota { margin: var(--sp-2) var(--sp-1) var(--sp-1); color: var(--text-2); }
+#rapido-chips { margin-top: var(--sp-1); }
+#rapido-persone { margin-top: var(--sp-2); }
+.rapido .sheet-cta { margin-top: var(--sp-3); }
+
+/* chip «Rapida» accanto al titolo, stellina delle 3 */
+.rapida { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; padding: 0 6px; border-radius: var(--r-full); background: var(--q2-soft); color: var(--q2); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-strong); vertical-align: 2px; white-space: nowrap; }
+.rapida .ti { font-size: 12px; }
+.stella .ti { color: var(--text-3); }
+.stella[aria-pressed="true"] .ti { color: var(--q1); }
+.lh-ico { font-size: 16px; margin-right: 6px; vertical-align: -2px; color: var(--text-3); }
+.carry-azioni.tre.chips-wrap { display: flex; }
+.ctrl-riga .item-row { grid-template-columns: minmax(0, 1fr); padding-left: var(--sp-4); }
+.ctrl-riga .carry-azioni { padding-left: var(--sp-4); }
+
+/* avvisi in cima: banner del piano, migration mancante */
+.banner-piano { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: start; gap: var(--sp-3); margin-bottom: var(--sp-4); padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-4); border-radius: var(--r-lg); background: var(--primary-soft); color: var(--primary-ink); }
+.banner-piano > .ti { margin-top: 2px; }
+.banner-piano b { display: block; margin: 2px 0 var(--sp-2); color: var(--text); }
+.banner-piano .btn-icon { margin-top: -6px; color: var(--primary-ink); }
+.avviso { display: grid; grid-template-columns: 20px 1fr; gap: var(--sp-2); margin-bottom: var(--sp-3); padding: var(--sp-3); border-radius: var(--r-md); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-label); line-height: var(--lh-label); }
+
+/* fine giornata: una riga sola */
+.fine-giornata { margin: var(--sp-6) var(--sp-1) var(--sp-2); text-align: center; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.fine-giornata b { color: var(--text); }
+
+/* limite di carico: avviso, non blocco */
+.troppo { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: var(--fs-caption); font-weight: var(--fw-strong); white-space: nowrap; }
+.troppo .ti { font-size: 14px; }
+.list-head.giorno-troppo { padding: var(--sp-1) var(--sp-2); margin-inline: 0; border-radius: var(--r-sm); background: var(--warn-soft); }
+.col-h.giorno-troppo { padding: 2px var(--sp-2); margin-inline: 0; border-radius: var(--r-sm); background: var(--warn-soft); color: var(--warn); }
+.day.carico-troppo i { background: var(--warn); }
+.bpw-riepilogo .pieno { color: var(--warn); font-weight: var(--fw-strong); }
+.bpw-riepilogo .pieno .ti { font-size: 12px; margin-right: 2px; }
+.troppo-riga { flex-basis: 100%; white-space: normal; }
+.slot-unica { border-top: 0; }
+
+/* impostazioni */
+.riga-scelta { grid-template-columns: 24px 1fr; padding-block: var(--sp-3); row-gap: var(--sp-2); }
+.riga-scelta > .seg, .riga-scelta > .tools-row { grid-column: 1 / -1; }
+.riga-scelta .tools-row { display: flex; gap: var(--sp-2); }
+.riga-scelta .input { min-height: var(--tap); }
+.onb-modo { display: flex; gap: var(--sp-2); }
+.delega-nuova { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2); margin-top: var(--sp-3); }
+#delega-data { margin-top: var(--sp-3); }
+#delega-errore { margin-top: var(--sp-2); color: var(--danger); }
+#delega-persone .chip { padding-left: 4px; }
+#focus-lista { margin-top: var(--sp-2); }
+#focus-lista .bp-pick:first-child { border-top: 0; }
+
+/* modalità semplice: solo Oggi · + · Cose */
+.semplice .nav [data-tab="pianifica"], .semplice .nav [data-tab="altro"],
+.semplice .side [data-tab="pianifica"], .semplice .side [data-tab="altro"],
+.semplice .solo-completa, .semplice .q2-nudge { display: none !important; }
+.semplice .tabbar { grid-template-columns: repeat(3, 1fr); }
+
+/* contrasto alto: bordi più marcati, testo secondario più scuro, badge con bordo */
+[data-contrast="alto"] { --border: #84918C; --border-strong: #46544F; --text-2: #26332F; --text-3: #37443F; --done-meta: #37443F; --done-opacity: 1; }
+[data-contrast="alto"][data-theme="dark"] { --border: #71807B; --border-strong: #B7C2BE; --text-2: #E2E9E6; --text-3: #CBD5D1; --done-meta: #CBD5D1; }
+[data-contrast="alto"] .tag, [data-contrast="alto"] .rapida, [data-contrast="alto"] .badge, [data-contrast="alto"] .hint-quando { padding: 0 6px; border: 1px solid currentColor; border-radius: var(--r-full); }
+[data-contrast="alto"] .chip, [data-contrast="alto"] .gchip, [data-contrast="alto"] .input { border-width: 2px; }
+[data-contrast="alto"] .group { border-color: var(--border-strong); }
+
+/* niente animazioni se il sistema lo chiede */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 .riga-link span small { display: block; font-size: var(--fs-caption); line-height: var(--lh-caption); }
 
 /* mese */
@@ -762,7 +842,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .recon-riga .azioni { display: flex; gap: var(--sp-2); }
 
 /* --- Toast e tooltip --- */
-#toast-container { position: fixed; z-index: 90; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + var(--sp-3) + env(safe-area-inset-bottom)); display: grid; gap: var(--sp-2); pointer-events: none; }
+#toast-container { position: fixed; z-index: 90; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + var(--sp-3) + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); pointer-events: none; }
 #toast-container .toast { pointer-events: auto; animation: sale var(--t-base) var(--ease-out); }
 .toast.error .ti:first-child, .toast.warn .ti:first-child { color: #F98B82; }
 [data-theme="dark"] .toast.error .ti:first-child, [data-theme="dark"] .toast.warn .ti:first-child { color: #B42318; }
@@ -790,7 +870,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     <div class="logo logo-side">CICLI <span>APERTI</span></div>
     <button type="button" class="side-btn" data-tab="oggi"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
     <button type="button" class="side-btn" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
-    <button type="button" class="side-btn" data-tab="tutto"><span class="nav-ico"><i class="ti ti-stack-2"></i></span>Tutto</button>
+    <button type="button" class="side-btn" data-tab="tutto"><span class="nav-ico"><i class="ti ti-stack-2"></i></span><span class="l-tutto">Tutto</span></button>
     <button type="button" class="side-btn" data-tab="altro"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
   </aside>
 
@@ -820,7 +900,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     <button type="button" data-tab="oggi"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
     <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
     <button type="button" class="tab-add" data-act="nuovo" aria-label="Aggiungi una cosa da fare"><span class="fab"><i class="ti ti-plus"></i></span></button>
-    <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-stack-2"></i></span>Tutto</button>
+    <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-stack-2"></i></span><span class="l-tutto">Tutto</span></button>
     <button type="button" data-tab="altro"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
   </nav>
 </div>
@@ -839,8 +919,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
     <div id="det-azioni" class="det-azioni" hidden></div>
 
-    <span class="field-label">Che tipo di cosa è?</span>
-    <div class="quads q-picker" role="group" aria-label="Tipo">
+    <span class="field-label solo-completa">Che tipo di cosa è?</span>
+    <div class="quads q-picker solo-completa" role="group" aria-label="Tipo">
       <button type="button" class="quad quad-1 q-pick-btn" data-q="1" onclick="selectQ(1)" data-tip="Q1 · Crisi: urgente e importante"><span class="quad-ico"><i class="ti ti-flame"></i></span><span><b>Subito</b><small>Va fatta oggi</small></span></button>
       <button type="button" class="quad quad-2 q-pick-btn" data-q="2" onclick="selectQ(2)" data-tip="Q2 · Qualità: importante, non urgente"><span class="quad-ico"><i class="ti ti-target"></i></span><span><b>Importante</b><small>Scegli quando</small></span></button>
       <button type="button" class="quad quad-3 q-pick-btn" data-q="3" onclick="selectQ(3)" data-tip="Q3 · Inganno: urgente, non importante"><span class="quad-ico"><i class="ti ti-user-share"></i></span><span><b>Delega</b><small>La fa un altro</small></span></button>
@@ -848,7 +928,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     </div>
 
     <div class="nudge q2-nudge" id="q2-nudge">
-      <p>Le cose importanti vanno messe in agenda nei prossimi mesi, altrimenti le urgenze le mangiano.</p>
+      <p>Alle cose importanti va dato un giorno nei prossimi mesi, altrimenti le urgenze le mangiano.</p>
       <button type="button" class="btn btn-secondary btn-sm" onclick="pianificaProssimiMesi()"><i class="ti ti-calendar-plus"></i>Pianifica nei prossimi 3 mesi</button>
     </div>
 
@@ -858,7 +938,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
         <button type="button" class="chip" data-v="oggi" aria-pressed="false">Oggi</button>
         <button type="button" class="chip" data-v="domani" aria-pressed="false">Domani</button>
         <button type="button" class="chip" data-v="scegli" aria-pressed="false">Scegli quando</button>
-        <button type="button" class="chip" data-v="nessuna" aria-pressed="true">Senza data</button>
+        <button type="button" class="chip" data-v="nessuna" aria-pressed="true">Da piazzare</button>
       </div>
     </div>
 
@@ -879,7 +959,13 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
       <label class="field-label" for="f-note">Note</label>
       <textarea class="input textarea" id="f-note" placeholder="Dettagli, riferimenti, cosa serve"></textarea>
 
-      <div class="form-row">
+      <label class="field-label" for="f-durata">Quanto ci vuole?</label>
+      <select class="input" id="f-durata">
+        <option value="">Non lo so</option><option value="5">5 min</option><option value="15">15 min</option>
+        <option value="30">30 min</option><option value="60">1 ora</option><option value="120">2 ore</option><option value="240">Mezza giornata</option>
+      </select>
+
+      <div class="form-row solo-completa">
         <div>
           <label class="field-label" for="f-cat">Categoria</label>
           <select class="input" id="f-cat"></select>
@@ -890,8 +976,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
         </div>
       </div>
 
-      <label class="field-label" for="f-macro-area">Area <small id="auto-cat-hint">si riempie da sola dal titolo</small></label>
-      <div class="auto-cat-wrap">
+      <label class="field-label solo-completa" for="f-macro-area">Area <small id="auto-cat-hint">si riempie da sola dal titolo</small></label>
+      <div class="auto-cat-wrap solo-completa">
         <select class="input macro-area-select" id="f-macro-area">
           <option value="">Scegli da sola</option>
           <option>Management</option><option>Marketing</option><option>Vendite</option>
@@ -1282,9 +1368,18 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
       <p>Apri l'app, guardi la lista di oggi, spunti.</p>
       <span class="onb-dove"><i class="ti ti-sun"></i>Oggi</span>
     </section>
+    <section class="onb-slide">
+      <span class="onb-ico"><i class="ti ti-adjustments"></i></span>
+      <h2 class="t-display">Vuoi la versione semplice o completa?</h2>
+      <p>La semplice ha solo Oggi e le tue cose. Puoi cambiare quando vuoi da Impostazioni.</p>
+      <div class="onb-modo" role="group" aria-label="Versione" data-scelta="onb-modo">
+        <button type="button" class="chip" data-v="completa" aria-pressed="true">Completa</button>
+        <button type="button" class="chip" data-v="semplice" aria-pressed="false">Semplice</button>
+      </div>
+    </section>
   </div>
   <div class="onb-foot">
-    <div class="onb-dots" id="onb-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <div class="onb-dots" id="onb-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     <button type="button" class="btn btn-primary btn-block" id="onb-avanti" data-act="onb-avanti">Avanti</button>
   </div>
 </div>
@@ -1317,6 +1412,60 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     <button type="button" class="btn btn-secondary btn-sm btn-block" data-act="recon-tutte"><i class="ti ti-checks"></i>Segna tutte come fatte</button>
     <div id="recon-lista" class="recon-lista"></div>
     <div class="sheet-cta"><button type="button" class="btn btn-ghost btn-sm btn-block" data-act="recon-dopo">Chiedimelo dopo</button></div>
+  </div>
+</div>
+
+
+<!-- ══════════ FOGLIO: INSERIMENTO A UN CAMPO ══════════ -->
+<div class="modal-overlay" id="rapidoOverlay" onclick="closeModalOnBg(event,'rapidoOverlay')">
+  <div class="modal sheet sheet-narrow rapido" role="dialog" aria-label="Aggiungi">
+    <div class="sheet-grab"></div>
+    <div class="rapido-campo">
+      <textarea class="input" id="rapido-testo" rows="2" placeholder="Cosa hai in testa?" autocomplete="off" aria-label="Cosa hai in testa?" enterkeyhint="send"></textarea>
+      <button type="button" class="btn btn-icon rapido-mic" id="rapido-mic" data-act="rapido-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
+    </div>
+    <p class="t-caption muted rapido-nota">Una riga, una cosa. Più righe, più cose.</p>
+    <div class="chips" role="group" aria-label="Opzioni" id="rapido-chips"></div>
+    <div class="chips chips-wrap" id="rapido-persone" hidden></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="rapido-salva"><i class="ti ti-corner-down-left"></i>Invio</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: COSA PORTI A CASA OGGI (le tue 3) ══════════ -->
+<div class="modal-overlay" id="focusOverlay" onclick="closeModalOnBg(event,'focusOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="focus-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="focus-titolo">Cosa porti a casa oggi?</h3>
+        <p class="t-label muted" id="focus-sub">Scegline fino a 3</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('focusOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="group" id="focus-lista"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="focus-conferma">Conferma</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: DELEGA (a chi, quando controlli) ══════════ -->
+<div class="modal-overlay" id="delegaOverlay" onclick="closeModalOnBg(event,'delegaOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="delega-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="delega-titolo">A chi?</h3>
+        <p class="t-label muted clamp1" id="delega-cosa">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('delegaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="chips chips-wrap" id="delega-persone" role="group" aria-label="Persona"></div>
+    <div class="delega-nuova"><input type="text" class="input" id="delega-nuova" placeholder="Nuova persona" aria-label="Nuova persona" autocomplete="off">
+      <button type="button" class="btn btn-secondary btn-sm" data-act="delega-nuova">Aggiungi</button></div>
+    <span class="field-label">Quando controlli?</span>
+    <div class="chips chips-wrap" id="delega-quando" role="group" aria-label="Quando controlli"></div>
+    <input type="date" class="input" id="delega-data" aria-label="Data del controllo" hidden>
+    <p class="t-caption" id="delega-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="delega-salva">Delega</button></div>
   </div>
 </div>
 
@@ -2479,7 +2628,7 @@ document.addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input, textarea, select')) { if (!(e.metaKey || e.ctrlKey)) return; }
   if (e.key === 'ArrowLeft'  && ui.tab === 'pianifica') { e.preventDefault(); changeWeek(-1); }
   if (e.key === 'ArrowRight' && ui.tab === 'pianifica') { e.preventDefault(); changeWeek(1); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); apriNuovo(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); apriRapido(); }
   if ((e.metaKey || e.ctrlKey) && e.key === 'p') { e.preventDefault(); openPlaudModal(); }
   if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); focusRicerca(); }
 });
@@ -4267,6 +4416,7 @@ async function bpAttiva() {
     ui.pian = 'settimana';
     vai('pianifica');
     caricaRimaste();
+    ui.pianoProssima = null;
     showToast(modifica ? `Piano aggiornato: ${n} cose` : `Piano della settimana pronto: ${n} cose`, 'success');
   } catch (err) {
     showToast('Errore attivazione: ' + err.message, 'error');
@@ -4354,7 +4504,7 @@ const FASCIA_ORE = { mattina: 13, pomeriggio: 18 };   // senza momento: lo si de
 
 const ui = {
   tab: 'oggi',                 // oggi | pianifica | tutto | altro
-  pian: 'settimana',           // settimana | mese | agenda
+  pian: 'settimana',           // settimana | mese (l'agenda è dentro la settimana)
   tutto: 'lista',              // lista | matrice | persone
   sub: null,                   // sottopagina: attesa | fatte | guida | impostazioni
   giorno: 0,                   // giorno selezionato in Pianifica (0 = lunedì)
@@ -4477,6 +4627,8 @@ function toggleTheme() {
 // v2 · NAVIGAZIONE
 // ══════════════════════════════════════════════════════════════
 function vai(tab, opz) {
+  if (modoSemplice() && tab === 'pianifica') tab = 'oggi';
+  if (modoSemplice() && tab === 'altro' && !(opz && opz.sub)) opz = { ...(opz || {}), sub: 'impostazioni' };
   ui.tab = tab;
   ui.sub = (opz && opz.sub) || null;
   if (opz && opz.pian) ui.pian = opz.pian;
@@ -4484,7 +4636,7 @@ function vai(tab, opz) {
   localStorage.setItem(LS2.TAB, tab);
   chiudiSwipe();
   $('main').scrollTop = 0;
-  if (tab === 'oggi') { setTimeout(reconMostra, 300); caricaRimaste(); }
+  if (tab === 'oggi') { setTimeout(reconMostra, 300); setTimeout(controllaMattino, 400); caricaRimaste(); }
   if (tab === 'oggi' && !eSettimanaCorrente()) { tornaAOggi(); return; }
   render();
 }
@@ -4502,7 +4654,7 @@ function tornaAOggi() {
 function switchView(v) {
   const mappa = {
     oggi: ['oggi'], bp: ['pianifica', { pian: 'settimana' }], settimana: ['pianifica', { pian: 'settimana' }],
-    mese: ['pianifica', { pian: 'mese' }], agenda: ['pianifica', { pian: 'agenda' }],
+    mese: ['pianifica', { pian: 'mese' }], agenda: ['pianifica', { pian: 'settimana' }],
     matrix: ['tutto', { tutto: 'matrice' }], list: ['tutto', { tutto: 'lista' }], persone: ['tutto', { tutto: 'persone' }],
     aree: ['tutto', { tutto: 'lista' }], parcheggio: ['tutto', { sub: 'attesa' }],
     storico: ['altro', { sub: 'fatte' }], guida: ['altro', { sub: 'guida' }]
@@ -4567,7 +4719,8 @@ function disegna() {
   view.classList.toggle('wide', larga);
 
   // Tutto tiene fermo il campo di ricerca mentre si scrive: aggiorna solo l'elenco
-  if (ui.tab === 'tutto' && !ui.sub && view.dataset.vista === 'tutto' && $('tutto-corpo')) { aggiornaTutto(); return; }
+  const vista = (modoSemplice() ? 'semplice:' : '') + (ui.sub ? ui.tab + ':' + ui.sub : ui.tab);
+  if (ui.tab === 'tutto' && !ui.sub && view.dataset.vista === vista && $('tutto-corpo')) { aggiornaTutto(); return; }
 
   const aperto = document.querySelector('.item.is-swiped');
   const apertoId = aperto ? aperto.dataset.id : null;
@@ -4576,10 +4729,10 @@ function disegna() {
   else if (ui.tab === 'pianifica') html = vistaPianifica();
   else if (ui.tab === 'tutto') html = ui.sub === 'attesa' ? vistaAttesa() : vistaTutto();
   else html = ui.sub === 'fatte' ? vistaFatte() : ui.sub === 'guida' ? vistaGuida() : ui.sub === 'impostazioni' ? vistaImpostazioni() : vistaAltro();
-  view.dataset.vista = ui.sub ? ui.tab + ':' + ui.sub : ui.tab;
+  view.dataset.vista = vista;
   view.innerHTML = html;
   if (ui.tab === 'tutto' && !ui.sub) aggiornaTutto();
-  if (ui.tab === 'pianifica' && ui.pian === 'agenda') agganciaAgenda();
+  if (ui.tab === 'pianifica' && ui.pian === 'settimana' && window.innerWidth >= 768) agganciaAgenda();
   if (apertoId) { const el = view.querySelector(`.item[data-id="${apertoId}"]`); if (el && el.querySelector('.swipe-actions')) el.classList.add('is-swiped'); }
 }
 
@@ -4618,8 +4771,11 @@ function riga(r, opz) {
   const q = computeEffectiveQ(c);
   const fatto = !!r.fatto;
   const inRitardo = !fatto && !!c.due_date && getDaysLeft(c.due_date) < 0;
-  const meta = [tagTipo(q)];
+  // modalità semplice: dei tipi resta solo «Subito», come icona
+  const meta = !modoSemplice() ? [tagTipo(q)] : q === 1 ? [`<span class="tag tag-q1" aria-label="Subito"><i class="ti ti-flame"></i></span>`] : [];
+  const delega = c.q === 3 && !fatto ? delegaTesto(c) : '';
   if (o.passato && !fatto) meta.unshift('<span class="ritardo">in ritardo</span>');   // giorno passato, non fatta
+  else if (delega) meta.push(`<span>${escHtml(delega)}</span>`);
   else if (o.routine) { meta.length = 0; meta.push(`<i class="ti ti-repeat" style="font-size:14px"></i><span>ogni giorno${r.durata ? ' · ' + formatDurata(r.durata) : ''}</span>`); }
   else if (!fatto && q === 2 && !haPianificazione(c) && o.suggerisci) meta.push(`<span class="hint-quando"><i class="ti ti-calendar-plus"></i>Scegli quando</span>`);
   else if (c.due_date && !fatto) meta.push(scadenzaHtml(c));
@@ -4627,12 +4783,15 @@ function riga(r, opz) {
   else if (ripetizioneDi(c) !== 'nessuna') meta.push(`<span><i class="ti ti-repeat" style="font-size:12px"></i> ${RIP_LABELS[ripetizioneDi(c)].toLowerCase()}</span>`);
   else if ((c.persone_menzionate || []).length) meta.push(`<span>${escHtml(c.persone_menzionate[0])}</span>`);
   const sep = '<span class="sep">·</span>';
-  const titolo = o.evidenzia ? evidenzia(c.title, o.evidenzia) : escHtml(c.title);
+  const titolo = (o.evidenzia ? evidenzia(c.title, o.evidenzia) : escHtml(c.title)) + (!fatto && !o.routine && eRapida(c, r.item) ? RAPIDA_CHIP : '');
+  const stella = o.stellaDi ? o.stellaDi(r) : null;   // 'on' | 'off' | null (righe fuori dal piano)
+  const btnStella = stella ? `<button type="button" class="btn btn-icon stella" data-act="stella" aria-pressed="${stella === 'on'}" aria-label="${stella === 'on' ? 'Togli dalle tue 3' : 'Metti tra le tue 3'}" data-tip="${stella === 'on' ? 'Togli dalle tue 3' : 'Metti tra le tue 3'}"><i class="ti ${stella === 'on' ? 'ti-star-filled' : 'ti-star'}"></i></button>` : '';
   const data = o.data ? ` data-data="${o.data}"` : '';
   const azioni = o.senzaAzioni ? '' : `<div class="swipe-actions" aria-hidden="true">
       <button type="button" class="a-fatto" data-act="q-fatto" tabindex="-1"><i class="ti ti-check"></i>Fatto</button>
       <button type="button" data-act="q-domani" tabindex="-1"><i class="ti ti-arrow-right"></i>Domani</button>
       <button type="button" data-act="q-quando" tabindex="-1"><i class="ti ti-calendar-event"></i>Quando</button>
+      <button type="button" data-act="q-delega" tabindex="-1"><i class="ti ti-user-share"></i>Delega</button>
       <button type="button" data-act="q-ripeti" tabindex="-1"><i class="ti ti-repeat"></i>Ripeti</button>
       <button type="button" class="a-lascia" data-act="q-lascia" tabindex="-1"><i class="ti ti-wind"></i>Lascia</button>
     </div>`;
@@ -4641,7 +4800,7 @@ function riga(r, opz) {
     <div class="item-row">
       <label class="check"><input type="checkbox" data-act="spunta"${fatto ? ' checked' : ''}${o.solaLettura ? ' disabled' : ''} aria-label="Fatta: ${esc(c.title)}"><span class="check-box">${SVG_SPUNTA}</span></label>
       <button type="button" class="item-main" data-act="apri"><span class="item-title">${titolo}</span><span class="item-meta">${meta.join(sep)}</span></button>
-      <span class="item-side">${r.ora ? `<span class="mono">${r.ora}</span>` : (o.lato || '')}${o.senzaAzioni ? '' : `<button type="button" class="btn btn-icon" data-act="menu" aria-label="Azioni per ${esc(c.title)}"><i class="ti ti-dots"></i></button>`}</span>
+      <span class="item-side">${r.ora ? `<span class="mono">${r.ora}</span>` : (o.lato || '')}${btnStella}${o.senzaAzioni ? '' : `<button type="button" class="btn btn-icon" data-act="menu" aria-label="Azioni per ${esc(c.title)}"><i class="ti ti-dots"></i></button>`}</span>
     </div>
   </div>`;
 }
@@ -4682,7 +4841,7 @@ function righeGiorno(gk) {
       const c = bpCiclo(i);
       if (c.ctx !== state.ctx || isParcheggiato(c)) return;
       const ora = bpOra(i) || oraDi(c);
-      out.set(c.id, { c, item: i, fascia: fasciaDi(i.fascia, ora), ora, durata: bpDurata(i), fatto: !!i.completato || !!c.done });
+      out.set(c.id, { c, item: i, fascia: fasciaDi(i.fascia, ora), conFascia: !!(i.fascia || ora), ora, durata: bpDurata(i), fatto: !!i.completato || !!c.done });
     });
   }
   if (gk !== 'settimana') {
@@ -4692,7 +4851,7 @@ function righeGiorno(gk) {
       const slot = agendaSlotForWeek(c, state.week, state.year);
       if (slot.giorno !== gk || !fattaVisibile(c, slot)) return;
       const ora = oraDi(c);
-      out.set(c.id, { c, item: null, fascia: fasciaDi(slot.fascia, ora), ora, durata: c.durata_minuti || null, fatto: !!c.done });
+      out.set(c.id, { c, item: null, fascia: fasciaDi(slot.fascia, ora), conFascia: !!(slot.fascia || ora), ora, durata: c.durata_minuti || null, fatto: !!c.done });
     });
   }
   const ordine = { mattina: 0, pomeriggio: 1, sera: 2 };
@@ -4703,6 +4862,12 @@ function dataDelGiorno(idx) { return bpDataGiorno(state.week, state.year, idx); 
 const giornoPassato = d => toISODate(d) < oggiLocale();
 // righe della settimana chiusa: si guardano, non si toccano
 const opzRighe = d => ({ data: toISODate(d), passato: giornoPassato(d), solaLettura: !!state.bp && state.bp.stato === 'chiuso' });
+
+// Le righe di un giorno: per fascia solo se almeno una ha una fascia o un'ora, altrimenti lista piatta.
+function htmlGiorno(righe, opz) {
+  if (righe.some(r => r.conFascia)) return htmlFasce(righe, opz);
+  return `<div class="group">${righe.map(r => riga(r, opz)).join('')}</div>`;
+}
 
 function htmlFasce(righe, opz) {
   return FASCE.map(f => {
@@ -4939,7 +5104,7 @@ function azioneQuando(id, evidenziaMesi) {
   if (evidenziaMesi) pfSelectQuando('mese1');
 }
 
-// Lascia stare: diventa «Lascia stare» (Q4) e va In attesa.
+// Lascia stare: diventa «Lascia stare» (Q4) e va in Un giorno.
 async function azioneLascia(id) {
   const c = ciclo(id);
   if (!c) return;
@@ -4948,7 +5113,7 @@ async function azioneLascia(id) {
   try {
     await patchCiclo(id, { q: 4, parcheggiato: true, parcheggiato_at: new Date().toISOString() });
     render();
-    showToast('Messa in attesa', 'success', { annulla: () => patchCiclo(id, prima) });
+    showToast('Spostata in Un giorno', 'success', { annulla: () => patchCiclo(id, prima) });
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 
@@ -4985,6 +5150,7 @@ function impostaScelta(nome, v) {
   if (nome === 'ripeti') { ui.rip.v = v; $('rip-oradurata').hidden = v !== 'giornaliera'; }
   if (nome === 'quando') ui.nuovoQuando = v;
   if (nome === 'cat-ctx') ui.cat.ctx = v;
+  if (nome === 'onb-modo') ui.onbModo = v;
 }
 async function salvaRipeti() {
   const c = ciclo(ui.rip.id), v = ui.rip.v;
@@ -5026,6 +5192,7 @@ function apriNuovo(q) {
   $('det-pianificazione').hidden = true;
   $('det-log').hidden = true;
   impostaScelta('quando', ui.tab === 'oggi' ? 'oggi' : 'nessuna');
+  impostaDurata(null);
   $('q2-nudge').classList.remove('show');   // su una cosa nuova compare solo se tocchi «Importante»
 }
 
@@ -5034,7 +5201,7 @@ function apriDettaglio(id) {
   if (!c) return;
   openModal(null, id);
   closeMoreOpts();
-  $('sheetTitle').textContent = c.done ? 'Fatta' : isParcheggiato(c) ? 'In attesa' : 'Dettagli';
+  $('sheetTitle').textContent = c.done ? 'Fatta' : isParcheggiato(c) ? 'Un giorno' : 'Dettagli';
   $('btn-save').textContent = 'Salva';
   $('nuovo-quando').hidden = true;
 
@@ -5050,6 +5217,8 @@ function apriDettaglio(id) {
          <button type="button" class="btn btn-ghost btn-sm" data-act="d-lascia">Lascia stare</button>`;
 
   const pianificata = disegnaPianificazione(c);
+  impostaDurata(c.durata_minuti);
+  $('f-durata').disabled = !state.ritualiColsOk;
 
   // il suggerimento «mettila in agenda» serve solo se è Importante e non ha ancora una data
   $('q2-nudge').classList.toggle('show', selectedQ === 2 && !pianificata && !c.done);
@@ -5064,8 +5233,15 @@ function apriDettaglio(id) {
 async function salvaDalFoglio() {
   const nuova = !editingId;
   const quando = ui.nuovoQuando;
+  const prima = editingId ? ciclo(editingId) : null;
+  const durata = parseInt($('f-durata').value, 10) || null;
+  const diventaDelega = selectedQ === 3 && (!prima || prima.q !== 3);
   const saved = await inSilenzio(() => saveCiclo());
   if (!saved || !saved.id) { if (!$('f-title').value.trim()) showToast('Scrivi cosa devi fare', 'warn', {}); return; }
+  if (state.ritualiColsOk && durata !== ((prima && prima.durata_minuti) || null)) {
+    try { await patchCiclo(saved.id, { durata_minuti: durata }); } catch (e) { showToast('Salvata, ma senza durata: ' + e.message, 'error'); }
+  }
+  if (diventaDelega) { render(); setTimeout(() => apriDelega(saved.id), 150); return; }   // «A chi? Quando controlli?»
   if (nuova && (quando === 'oggi' || quando === 'domani')) {
     const d = new Date(); if (quando === 'domani') d.setDate(d.getDate() + 1);
     try { await pianificaInData(saved, d, null); } catch (e) { showToast('Salvata, ma senza data: ' + e.message, 'error'); }
@@ -5073,6 +5249,19 @@ async function salvaDalFoglio() {
   render();
   if (nuova && quando === 'scegli') { setTimeout(() => azioneQuando(saved.id), 150); return; }
   showToast(nuova ? 'Aggiunta' : 'Salvata', 'success');
+}
+
+// «Quanto ci vuole?»: una durata fuori dall'elenco (es. 45 min di una routine) diventa una voce in più
+function impostaDurata(min) {
+  const sel = $('f-durata');
+  [...sel.options].filter(o => o.dataset.extra).forEach(o => o.remove());
+  const v = min ? String(min) : '';
+  if (v && ![...sel.options].some(o => o.value === v)) {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = formatDurata(min); o.dataset.extra = '1';
+    sel.appendChild(o);
+  }
+  sel.value = v;
 }
 
 function pianificaProssimiMesi() {
@@ -5187,7 +5376,7 @@ document.addEventListener('touchend', () => {
 function apriMenu(btn, id, data) {
   const m = $('rigaMenu');
   const voce = (act, icona, testo) => `<button type="button" role="menuitem" data-act="${act}" data-id="${id}"${data ? ` data-data="${data}"` : ''}><i class="ti ${icona}"></i>${testo}</button>`;
-  m.innerHTML = voce('q-fatto', 'ti-check', 'Fatto') + voce('q-domani', 'ti-arrow-right', 'Domani') + voce('q-quando', 'ti-calendar-event', 'Scegli quando') + voce('q-ripeti', 'ti-repeat', 'Ripeti') + voce('q-lascia', 'ti-wind', 'Lascia stare');
+  m.innerHTML = voce('q-fatto', 'ti-check', 'Fatto') + voce('q-domani', 'ti-arrow-right', 'Domani') + voce('q-quando', 'ti-calendar-event', 'Scegli quando') + voce('q-delega', 'ti-user-share', 'Delega') + voce('q-ripeti', 'ti-repeat', 'Ripeti') + voce('q-lascia', 'ti-wind', 'Lascia stare');
   m.hidden = false;
   const r = btn.getBoundingClientRect(), mh = m.offsetHeight, mw = m.offsetWidth;
   m.style.left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw)) + 'px';
@@ -5202,16 +5391,28 @@ function chiudiMenu() { $('rigaMenu').hidden = true; }
 function vistaOggi() {
   const oggi = oggiData();
   const gk = giornoKeyDi(oggi), iso = toISODate(oggi);
+  const semplice = modoSemplice();
   const righe = eSettimanaCorrente() ? righeGiorno(gk) : [];
-  const routine = ritualiQuotidiani().map(c => ({ c, fatto: rituraleFattoOggi(c.id), ora: formatOra(c.ora_inizio), durata: c.durata_minuti }));
+  const routine = semplice ? [] : ritualiQuotidiani().map(c => ({ c, fatto: rituraleFattoOggi(c.id), ora: formatOra(c.ora_inizio), durata: c.durata_minuti }));
   const tot = righe.length + routine.length;
   const fatte = righe.filter(r => r.fatto).length + routine.filter(r => r.fatto).length;
-  const inVista = new Set(righe.map(r => r.c.id));
+
+  // le tue 3, poi le rapide, poi il resto (chiuso) — le righe non si ripetono tra le sezioni
+  const focusIds = focusDiOggi(righe);
+  const focus = righe.filter(r => focusIds.has(r.c.id));
+  const rapide = rapideDiOggi(righe, focusIds);
+  const rapideIds = new Set(rapide.map(r => r.c.id));
+  const resto = righe.filter(r => !focusIds.has(r.c.id) && !rapideIds.has(r.c.id));
+  const controllo = daControllare();
+  const inVista = new Set([...righe, ...rapide].map(r => r.c.id).concat(controllo.map(c => c.id)));
   const scadenza = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !inVista.has(c.id) && getEscalation(c) === 'crit')
     .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
   const eventi = eventiDelGiorno(oggi);
+  const opz = { data: iso, stellaDi: r => r.item && state.focusColOk ? (focusIds.has(r.c.id) ? 'on' : 'off') : null };
 
-  let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi${btnAiuto('oggi')}</h1></div></div>`;
+  const impostazioni = semplice ? `<button type="button" class="btn btn-icon" data-act="sub" data-tab="altro" data-sub="impostazioni" aria-label="Impostazioni"><i class="ti ti-settings"></i></button>` : '';
+  let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi${btnAiuto('oggi')}</h1></div>${impostazioni}</div>`;
+  h += bannerPiano();
   h += bloccoRimaste();
   if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> di <b class="mono">${tot}</b> fatte</span></div>`;
 
@@ -5224,10 +5425,22 @@ function vistaOggi() {
     h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('routine', 'Routine', `<span class="mono">${nf}/${routine.length}</span>`,
       routine.map(r => riga(r, { routine: true, senzaAzioni: true })).join(''))}</div>`;
   }
-  if (righe.length) h += htmlFasce(righe, { data: iso });
-  else if (tot && fatte === tot) h += `<div style="margin-top:var(--sp-5)">${vuoto('ti-confetti', 'Per oggi hai finito', 'Le routine sono fatte e non hai altro in programma.')}</div>`;
 
-  if (!tot) {
+  if (focus.length) {
+    const nf = focus.filter(r => r.fatto).length;
+    h += `<p class="list-head"><span><i class="ti ti-star-filled lh-ico"></i>Le tue 3</span><span class="mono">${nf}/${focus.length}</span></p><div class="group">${focus.map(r => riga(r, opz)).join('')}</div>`;
+  } else if (resto.length) h += htmlGiorno(resto, opz);
+  if (rapide.length) {
+    h += `<p class="list-head"><span><i class="ti ti-bolt lh-ico"></i>Ci vogliono 2 minuti? Falle ora.</span><span class="mono">Rapide (${rapide.length})</span></p><div class="group">${rapide.map(r => riga(r, opz)).join('')}</div>`;
+  }
+  if (controllo.length) h += `<p class="list-head"><span><i class="ti ti-user-check lh-ico"></i>Da controllare</span><span class="mono">${controllo.length}</span></p><div class="group">${controllo.map(rigaControllo).join('')}</div>`;
+  if (focus.length && resto.length) {
+    const nf = resto.filter(r => r.fatto).length;
+    h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('resto', 'Il resto di oggi', `<span class="mono">${nf}/${resto.length}</span>`, htmlGiorno(resto, opz).replace(/<div class="group">/g, '<div>'))}</div>`;
+  }
+  if (!righe.length && tot && fatte === tot) h += `<div style="margin-top:var(--sp-5)">${vuoto('ti-confetti', 'Per oggi hai finito', 'Le routine sono fatte e non hai altro in programma.')}</div>`;
+
+  if (!tot && !semplice) {
     h += vuoto('ti-calendar-week', 'Nessun piano per oggi', 'Scegli le cose che vuoi portare a casa questa settimana e dai a ognuna un giorno.',
       `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">${etichettaWizard()}</button>`);
   }
@@ -5235,11 +5448,14 @@ function vistaOggi() {
     h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('scadenza', 'In scadenza', `<span class="mono">${scadenza.length}</span>`,
       scadenza.map(c => riga({ c, fatto: false }, { data: iso })).join(''))}</div>`;
   }
+  // modalità semplice: niente Pianifica, il piano si prepara da qui
+  if (semplice) h += `<div style="margin-top:var(--sp-5)"><button type="button" class="btn btn-secondary btn-block" data-act="wizard"><i class="ti ti-calendar-week"></i>Pianifica la settimana</button></div>`;
+  h += fineGiornata(fatte, tot);
   return h;
 }
 
 // ══════════════════════════════════════════════════════════════
-// v2 · PIANIFICA (Settimana · Mese · Agenda)
+// v2 · PIANIFICA (Settimana · Mese)
 // ══════════════════════════════════════════════════════════════
 function navSettimana() {
   const da = getWeekStart(state.week, state.year), a = new Date(da); a.setDate(a.getDate() + 6);
@@ -5252,14 +5468,15 @@ function navSettimana() {
 }
 
 function vistaPianifica() {
-  const seg = [['settimana', 'Settimana'], ['mese', 'Mese'], ['agenda', 'Agenda']].map(([k, l]) =>
+  if (ui.pian !== 'mese') ui.pian = 'settimana';   // l'agenda è dentro la Settimana
+  const seg = [['settimana', 'Settimana'], ['mese', 'Mese']].map(([k, l]) =>
     `<button type="button" data-act="pian" data-v="${k}" aria-pressed="${ui.pian === k}">${l}</button>`).join('');
   const matita = ui.pian === 'settimana' && state.bp && !bpSolaLettura()
     ? '<button type="button" class="btn btn-icon" data-act="wizard" aria-label="Modifica il piano" data-tip="Modifica il piano"><i class="ti ti-pencil"></i></button>' : '';
   let h = `<div class="vh"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div>${matita}</div><div class="seg" role="group" aria-label="Vista">${seg}</div>`;
   if (ui.pian === 'mese') return h + pianMese();
   h += navSettimana();
-  h += ui.pian === 'agenda' ? pianAgenda() : pianSettimana();
+  h += pianSettimana();
   return h + pianFondo();
 }
 
@@ -5306,48 +5523,49 @@ function pianSettimana() {
 
   // telefono: un giorno alla volta
   const giorni = GIORNI.map((g, idx) => {
-    const d = dataDelGiorno(idx), n = righeGiorno(g.key).length;
-    return `<button type="button" class="day${eOggi(idx) ? ' oggi' : ''}${n ? ' ha' : ''}" data-act="giorno" data-i="${idx}" aria-pressed="${ui.giorno === idx}" aria-label="${g.label} ${d.getDate()}, ${plurale(n, 'cosa', 'cose')}">${g.label.slice(0, 1)}<b>${d.getDate()}</b><i></i></button>`;
+    const d = dataDelGiorno(idx), rs = righeGiorno(g.key), n = rs.length, troppo = caricoGiorno(rs, d).troppo;
+    return `<button type="button" class="day${eOggi(idx) ? ' oggi' : ''}${n ? ' ha' : ''}${troppo ? ' carico-troppo' : ''}" data-act="giorno" data-i="${idx}" aria-pressed="${ui.giorno === idx}" aria-label="${g.label} ${d.getDate()}, ${plurale(n, 'cosa', 'cose')}${troppo ? ', troppo per un giorno' : ''}">${g.label.slice(0, 1)}<b>${d.getDate()}</b><i></i></button>`;
   }).join('');
   const g = GIORNI[ui.giorno], dSel = dataDelGiorno(ui.giorno), righe = righeGiorno(g.key);
-  const occ = minutiOccupati(dSel);
+  const occ = minutiOccupati(dSel), carico = caricoGiorno(righe, dSel);
   h += `<div><div class="days" role="group" aria-label="Giorno">${giorni}</div>
-    <p class="list-head"><span>${fmtGiornoLungo(dSel)}</span>${occ ? `<span class="mono">${bpFormatMin(occ)} di appuntamenti</span>` : ''}</p>
-    ${righe.length ? htmlFasce(righe, opzRighe(dSel)).replace('<p class="list-head">', '<p class="list-head" style="margin-top:var(--sp-3)">')
+    <p class="list-head${carico.troppo ? ' giorno-troppo' : ''}"><span>${fmtGiornoLungo(dSel)}</span>${carico.troppo ? troppoHtml(carico) : occ ? `<span class="mono">${bpFormatMin(occ)} di appuntamenti</span>` : ''}</p>
+    ${righe.length ? htmlGiorno(righe, opzRighe(dSel)).replace('<p class="list-head">', '<p class="list-head" style="margin-top:var(--sp-3)">')
       : `<div class="group"><div class="col-vuota">Niente in programma per ${g.label.toLowerCase()}</div></div>`}</div>`;
   return h + coda;
 }
 
-// desktop: Lun–Ven in colonne, Sab e Dom a richiesta
+// desktop: Lun–Ven in colonne (Sab e Dom a richiesta). Ogni giorno è una zona di rilascio:
+// per momenti se almeno una riga ha una fascia o un'ora, altrimenti una sola zona.
+// Trascinare = override solo per questa settimana (moveCicloInAgenda).
 function pianSettimanaColonne(eOggi) {
   const quanti = ui.weekend ? 7 : 5;
+  const puoiTrascinare = state.agendaColsOk && state.agendaTableOk;
   return `<div><div class="tools-row" style="justify-content:flex-end;margin-bottom:var(--sp-2)"><button type="button" class="btn btn-ghost btn-sm" data-act="weekend">${ui.weekend ? 'Nascondi sabato e domenica' : 'Mostra sabato e domenica'}</button></div>
     <div class="cols${ui.weekend ? ' sette' : ''}">${GIORNI.slice(0, quanti).map((gg, idx) => {
-      const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), o = minutiOccupati(d);
-      return `<div><div class="col-h${eOggi(idx) ? ' oggi' : ''}"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${o ? `<span class="mono t-caption" data-tip="Appuntamenti su Google Calendar">${bpFormatMin(o)}</span>` : ''}</div>
-        <div class="group">${rs.length ? rs.map(r => riga(r, opzRighe(d))).join('') : '<div class="col-vuota">—</div>'}</div></div>`;
+      const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), o = minutiOccupati(d), carico = caricoGiorno(rs, d);
+      const op = opzRighe(d);
+      const trascina = r => ({ ...op, trascina: puoiTrascinare && !r.fatto && !op.solaLettura });
+      const zona = (fascia, titolo, righe) => `<div class="slot${titolo ? '' : ' slot-unica'}" data-giorno="${gg.key}" data-fascia="${fascia}">${titolo ? `<div class="fascia-h">${titolo}</div>` : ''}${righe.map(r => riga(r, trascina(r))).join('')}${!righe.length && !titolo ? '<div class="col-vuota">—</div>' : ''}</div>`;
+      const corpo = rs.some(r => r.conFascia)
+        ? FASCE.map(f => zona(f.key, f.label, rs.filter(r => r.fascia === f.key))).join('')
+        : zona('mattina', '', rs);
+      return `<div><div class="col-h${eOggi(idx) ? ' oggi' : ''}${carico.troppo ? ' giorno-troppo' : ''}"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${carico.troppo ? troppoHtml(carico, true) : o ? `<span class="mono t-caption" data-tip="Appuntamenti su Google Calendar">${bpFormatMin(o)}</span>` : ''}</div>
+        <div class="group">${corpo}</div></div>`;
     }).join('')}</div></div>`;
 }
 
-// Agenda: giorni × momenti. Su desktop le righe si trascinano (override solo per questa settimana).
-function pianAgenda() {
-  if (!state.agendaColsOk) return vuoto('ti-alert-triangle', 'Agenda non disponibile', 'La migration dell\'agenda non è applicata.');
-  const oggi = oggiData();
-  const desk = window.innerWidth >= 768;
-  const colonne = GIORNI.map((g, idx) => {
-    const d = dataDelGiorno(idx), righe = righeGiorno(g.key);
-    const eOggi = eSettimanaCorrente() && giornoIdxDi(oggi) === idx;
-    const fasce = FASCE.map(f => {
-      const rs = righe.filter(r => r.fascia === f.key);
-      if (!desk && !rs.length) return '';
-      return `<div class="slot" data-giorno="${g.key}" data-fascia="${f.key}"><div class="fascia-h">${f.label}</div>${rs.map(r => riga(r, { ...opzRighe(d), trascina: desk && !r.fatto && !opzRighe(d).solaLettura })).join('')}</div>`;
-    }).join('');
-    if (!desk && !righe.length) return '';
-    return `<div><div class="col-h${eOggi ? ' oggi' : ''}"><span>${desk ? g.label.slice(0, 3) : g.label} <span class="mono">${d.getDate()}</span></span></div><div class="group">${fasce}</div></div>`;
-  }).join('');
-  if (!colonne.trim()) return vuoto('ti-calendar-week', 'Agenda vuota', 'Non hai ancora dato un giorno a niente, questa settimana.',
-    bpSettimanaPassata() ? '' : `<button type="button" class="btn btn-primary btn-sm" data-act="wizard">${etichettaWizard()}</button>`);
-  return desk ? `<div class="cols sette agenda">${colonne}</div>` : `<div class="pv-stack" style="display:grid;gap:var(--sp-4)">${colonne}</div>`;
+// Limite di carico: più di 3 «Subito» o più di 5 ore (cose + appuntamenti). Avvisa, non blocca.
+const CARICO = { SUBITO: 3, MINUTI: 5 * 60 };
+const TROPPO_TIP = 'Il piano che non sta nelle ore è un desiderio. Sposta qualcosa.';
+function caricoGiorno(righe, d) {
+  const subito = righe.filter(r => !r.fatto && computeEffectiveQ(r.c) === 1).length;
+  const minuti = righe.reduce((s, r) => s + (r.durata || BP_DURATA_DEFAULT), 0) + (d ? minutiOccupati(d) : 0);
+  return { subito, minuti, troppo: subito > CARICO.SUBITO || minuti > CARICO.MINUTI };
+}
+function troppoHtml(carico, corto) {
+  const perche = carico.subito > CARICO.SUBITO ? `${carico.subito} Subito` : bpFormatMin(carico.minuti);
+  return `<span class="troppo" data-tip="${TROPPO_TIP}" aria-label="Troppo per un giorno: ${perche}. ${TROPPO_TIP}"><i class="ti ti-alert-triangle"></i>${corto ? 'Troppo' : 'Troppo per un giorno'}</span>`;
 }
 
 function agganciaAgenda() {
@@ -5409,7 +5627,7 @@ function pianMese() {
     <div class="legenda">${[1, 2, 3, 4].map(q => `<span><i class="dot q${q}"></i>${TIPI[q].label}</span>`).join('')}</div>`;
 }
 
-// --- In fondo a Pianifica: Senza data · Riepilogo · Stampa · Chiudi la settimana ---
+// --- In fondo a Pianifica: Da piazzare · Riepilogo · Stampa · Chiudi la settimana ---
 function pianFondo() {
   const senza = agendaDaPianificare();
   const tutte = [...GIORNI.map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k));
@@ -5419,7 +5637,7 @@ function pianFondo() {
   const perTipo = [1, 2, 3, 4].map(q => `<div><b>${tutte.filter(r => computeEffectiveQ(r.c) === q).length}</b><span>${TIPI[q].label}</span></div>`).join('');
   const sola = bpSolaLettura();
   return `<div class="group" style="margin-top:var(--sp-6)">
-    ${accordion('senza', 'Senza data', `<span class="mono">${senza.length}</span>`,
+    ${accordion('senza', 'Da piazzare', `<span class="mono">${senza.length}</span>`,
       senza.length ? senza.map(c => riga({ c, fatto: false }, { suggerisci: true, data: oggiLocale() })).join('') : '<div class="col-vuota">Ogni cosa aperta ha già un giorno</div>')}
     ${accordion('riepilogo', 'Riepilogo', `<span class="mono">${fatte}/${tutte.length}</span>`,
       `<div class="stat"><div><b>${fatte}/${tutte.length}</b><span>fatte</span></div><div><b>${bpFormatMin(minuti)}</b><span>tempo previsto</span></div>${perTipo}${occ ? `<div><b>${bpFormatMin(occ)}</b><span>già occupato da appuntamenti</span></div>` : ''}</div>`)}
@@ -5429,12 +5647,14 @@ function pianFondo() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// v2 · TUTTO (Cose aperte): Lista · Matrice · Persone, filtri, In attesa
+// v2 · TUTTO (Cose aperte): Lista · Matrice · Persone, filtri, Un giorno
 // ══════════════════════════════════════════════════════════════
 function cicliFiltrati() {
   const q = ui.q.trim().toLowerCase();
+  const semplice = modoSemplice();   // in modalità semplice niente filtri, solo la ricerca
   return state.cicli.filter(c => {
     if (c.ctx !== state.ctx || !isAttivo(c)) return false;
+    if (semplice) return !q || (c.title || '').toLowerCase().includes(q) || (c.note || '').toLowerCase().includes(q);
     if (ui.filtri.cats.size && !ui.filtri.cats.has(String(c.cat))) return false;
     if (ui.filtri.tipi.size && !ui.filtri.tipi.has(String(computeEffectiveQ(c)))) return false;
     if (ui.filtri.aree.size && !ui.filtri.aree.has(String(c.macro_area))) return false;
@@ -5446,6 +5666,9 @@ function cicliFiltrati() {
 function vistaTutto() {
   const seg = [['lista', 'Lista'], ['matrice', 'Matrice'], ['persone', 'Persone']].map(([k, l]) =>
     `<button type="button" data-act="tutto" data-v="${k}" aria-pressed="${ui.tutto === k}">${l}</button>`).join('');
+  if (modoSemplice()) return `<div class="vh"><div><h1>Cose</h1></div></div>
+    <div class="tools"><label class="cerca solo-tel"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="searchInputM" name="q-nofill-m" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose" value="${esc(ui.q)}"></label></div>
+    <div id="tutto-corpo"></div>`;
   return `<div class="vh"><div><h1>Cose aperte${btnAiuto('tutto')}</h1></div></div>
     <div class="tools">
       <label class="cerca solo-tel"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="searchInputM" name="q-nofill-m" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose aperte" value="${esc(ui.q)}"></label>
@@ -5458,6 +5681,13 @@ function vistaTutto() {
 function aggiornaTutto() {
   const corpo = $('tutto-corpo');
   if (!corpo) return;
+  if (modoSemplice()) {
+    const lista = cicliFiltrati();
+    corpo.innerHTML = lista.length
+      ? `<div class="group">${lista.map(c => riga({ c, fatto: false }, { evidenzia: ui.q.trim() || null, data: oggiLocale() })).join('')}</div>`
+      : ui.q ? vuoto('ti-search', 'Nessuna cosa trovata', 'Prova con un\'altra parola.') : vuoto('ti-stack-2', 'Qui dentro va tutto quello che hai in testa', 'Tocca + e scrivi la prima cosa.', `<button type="button" class="btn btn-primary btn-sm" data-act="nuovo">Aggiungi la prima cosa</button>`);
+    return;
+  }
   document.querySelectorAll('[data-act="tutto"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === ui.tutto)));
   const nf = nFiltri();
   $('btn-filtri').innerHTML = `<i class="ti ti-adjustments-horizontal"></i>Filtri${nf ? ` <span class="badge">${nf}</span>` : ''}`;
@@ -5472,7 +5702,7 @@ function aggiornaTutto() {
   } else if (ui.tutto === 'matrice') h = tuttoMatrice(lista);
   else if (ui.tutto === 'persone') h = tuttoPersone(lista);
   else h = tuttoLista(lista);
-  h += `<div class="group" style="margin-top:var(--sp-5)"><button type="button" class="riga-link" data-act="sub" data-tab="tutto" data-sub="attesa"><i class="ti ti-hourglass-empty"></i><span>In attesa</span><small class="mono">${attesa}</small><i class="ti ti-chevron-right"></i></button></div>`;
+  h += `<div class="group" style="margin-top:var(--sp-5)"><button type="button" class="riga-link" data-act="sub" data-tab="tutto" data-sub="attesa"><i class="ti ti-hourglass-empty"></i><span>Un giorno</span><small class="mono">${attesa}</small><i class="ti ti-chevron-right"></i></button></div>`;
   corpo.innerHTML = h;
 }
 
@@ -5523,8 +5753,8 @@ function indietro(tab, etichetta) { return `<button type="button" class="back" d
 function vistaAttesa() {
   const lista = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c))
     .sort((a, b) => String(b.parcheggiato_at || '').localeCompare(String(a.parcheggiato_at || '')));
-  let h = `${indietro('tutto', 'Cose aperte')}<div class="vh"><div><h1>In attesa${btnAiuto('attesa')}</h1></div></div>`;
-  if (!lista.length) return h + vuoto('ti-hourglass-empty', 'Niente in attesa', 'Quello che decidi di lasciar stare finisce qui, fuori dalla vista.', `<button type="button" class="btn btn-secondary btn-sm" data-act="sub" data-tab="tutto" data-sub="">Torna alle cose aperte</button>`);
+  let h = `${indietro('tutto', 'Cose aperte')}<div class="vh"><div><h1>Un giorno${btnAiuto('attesa')}</h1></div></div>`;
+  if (!lista.length) return h + vuoto('ti-hourglass-empty', 'Niente qui', 'Quello che decidi di lasciar stare finisce qui: un giorno, forse. Fuori dalla vista.', `<button type="button" class="btn btn-secondary btn-sm" data-act="sub" data-tab="tutto" data-sub="">Torna alle cose aperte</button>`);
   return h + `<div class="group">${lista.map(c => `<div class="item" data-id="${c.id}"><div class="item-row no-check">
       <button type="button" class="item-main" data-act="apri"><span class="item-title">${escHtml(c.title)}</span><span class="item-meta">${tagTipo(c.q)}${c.parcheggiato_at ? `<span class="sep">·</span><span>dal ${fmtCorta(new Date(c.parcheggiato_at))}</span>` : ''}</span></button>
       <span class="item-side"><button type="button" class="btn btn-secondary btn-sm" data-act="riattiva">Riprendi</button></span></div></div>`).join('')}</div>`;
@@ -5564,7 +5794,7 @@ function vistaFatte() {
 }
 
 const MAPPA_PAROLE = [['Subito', 'Q1 · Crisi'], ['Importante', 'Q2 · Qualità'], ['Delega', 'Q3 · Inganno'], ['Lascia stare', 'Q4 · Spreco'], ['Cose aperte', 'Cicli aperti'],
-  ['Tutto', 'Armadio'], ['Piano della settimana', 'Battle Plan'], ['Chiudi la settimana', 'Review'], ['In attesa', 'Parcheggio'], ['Routine', 'Rituali'], ['Fatte', 'Storico']];
+  ['Tutto', 'Armadio'], ['Piano della settimana', 'Battle Plan'], ['Chiudi la settimana', 'Review'], ['Da piazzare', 'Da pianificare'], ['Un giorno', 'Parcheggio'], ['Routine', 'Rituali'], ['Fatte', 'Storico']];
 function vistaGuida() {
   return `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Guida</h1></div></div>
     <p class="list-head"><span>Come funziona in 1 minuto</span></p>
@@ -5580,7 +5810,8 @@ function vistaImpostazioni() {
   const collegato = !!isGcalTokenValid();
   const cats = (state.categorie || []).slice().sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0));
   const senzaArea = state.cicli.filter(c => !c.macro_area && c.ctx === 'lavoro').length;
-  return `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Impostazioni</h1></div></div>
+  return `${modoSemplice() ? indietro('oggi', 'Oggi') : indietro('altro', 'Altro')}<div class="vh"><div><h1>Impostazioni</h1></div></div>
+    ${sezioneAspetto()}
     <p class="list-head"><span>Google Calendar</span></p>
     <div class="group"><button type="button" class="riga-link" data-act="gcal"><i class="ti ti-calendar-event"></i><span>${collegato ? 'Collegato' : 'Connetti'}</span><small>${collegato ? escHtml(gcal.email || '') : 'appuntamenti in Oggi'}</small><i class="ti ti-chevron-right"></i></button></div>
 
@@ -5724,7 +5955,7 @@ async function bpChiudiSettimana() {
     state.bp = { ...state.bp, stato: 'chiuso', chiuso_at, note };
     closeModal('bpRevOverlay');
     render();
-    showToast(`Settimana chiusa. ${plurale(presel.length, 'cosa passa', 'cose passano')} alla prossima${lasciate ? `, ${lasciate} in attesa` : ''}.`, 'success');
+    showToast(`Settimana chiusa. ${plurale(presel.length, 'cosa passa', 'cose passano')} alla prossima${lasciate ? `, ${lasciate} in Un giorno` : ''}.`, 'success');
     setTimeout(() => openBpWizard(next.week, next.year, presel), 400);
   } catch (err) {
     showToast('Errore chiusura: ' + err.message, 'error');
@@ -5951,7 +6182,7 @@ async function azioneCarry(itemId, v, idxGiorno) {
       if (error) throw error;
       ui.carry = ui.carry.filter(r => r.item.id !== itemId);
       await dopoCarry();
-      showToast('Messa in attesa e tolta dal piano', 'success', { annulla: async () => {
+      showToast('Spostata in Un giorno e tolta dal piano', 'success', { annulla: async () => {
         await patchCiclo(c.id, prima);
         await db.from('battle_plan_items').insert(rec.item);
         await dopoCarry();
@@ -6134,17 +6365,19 @@ function onbIndice() { const t = $('onb-track'); return Math.round(t.scrollLeft 
 function onbAggiorna() {
   const i = onbIndice();
   [...$('onb-dots').children].forEach((d, k) => d.classList.toggle('on', k === i));
-  $('onb-avanti').textContent = i >= 2 ? 'Crea la tua prima cosa' : 'Avanti';
+  $('onb-avanti').textContent = i >= ONB_ULTIMA ? 'Crea la tua prima cosa' : 'Avanti';
 }
+const ONB_ULTIMA = 3;   // l'ultima pagina chiede «semplice o completa?» (predefinita: completa)
 function onbChiudi(crea) {
   localStorage.setItem(LS2.ONB, '1');
   $('onb').hidden = true;
+  if (crea) impostaSemplice(ui.onbModo === 'semplice');   // «Salta» non cambia la versione
   vai('oggi');   // dopo l'introduzione si parte sempre da Oggi
-  if (crea) setTimeout(() => apriNuovo(), 150);
+  if (crea) setTimeout(() => apriRapido(), 150);
 }
 function onbAvanti() {
   const t = $('onb-track'), i = onbIndice();
-  if (i >= 2) { onbChiudi(true); return; }
+  if (i >= ONB_ULTIMA) { onbChiudi(true); return; }
   t.scrollTo({ left: (i + 1) * t.clientWidth, behavior: 'smooth' });
 }
 
@@ -6152,7 +6385,7 @@ function onbAvanti() {
 // v2 · EVENTI (un solo ascoltatore: data-act)
 // ══════════════════════════════════════════════════════════════
 const AZIONI = {
-  nuovo: () => apriNuovo(),
+  nuovo: () => apriRapido(),
   ctx: el => switchCtx(el.dataset.ctx),
   tema: () => toggleTheme(),
   gcal: () => openGcalModal(),
@@ -6218,6 +6451,27 @@ const AZIONI = {
   'bpw-togli': el => { _bpwSel.delete(el.dataset.id); bpwRenderStep2(); },
   'det-giorno': el => impostaGiorno(editingId, el.dataset.g),
   'bpw-sett': el => bpwCambiaSettimana(parseInt(el.dataset.dir, 10)),
+  'rapido-salva': () => salvaRapido(),
+  'rapido-mic': () => dettatura(),
+  'rapido-subito': () => { ui.rapido = { ...ui.rapido, subito: !ui.rapido.subito }; disegnaRapido(); },
+  'rapido-oggi': () => { ui.rapido = { ...ui.rapido, oggi: !ui.rapido.oggi }; disegnaRapido(); },
+  'rapido-con': () => { const r = ui.rapido; ui.rapido = r.persona || r.con ? { ...r, persona: null, con: false } : { ...r, con: true }; disegnaRapido(); },
+  'rapido-persona': el => { const p = el.dataset.p; ui.rapido = { ...ui.rapido, persona: String(ui.rapido.persona) === p ? null : p, con: false }; disegnaRapido(); $('rapido-testo').focus(); },
+  stella: (el, id) => azioneStella(id),
+  'focus-conferma': () => confermaFocus(),
+  'q-delega': (el, id) => apriDelega(id),
+  'delega-persona': el => { ui.delega = { ...ui.delega, persona: el.dataset.p }; disegnaDelega(); },
+  'delega-quando': el => { ui.delega = { ...ui.delega, quando: el.dataset.v }; disegnaDelega(); if (el.dataset.v === 'data') $('delega-data').focus(); },
+  'delega-nuova': () => delegaNuovaPersona(),
+  'delega-salva': () => salvaDelega(),
+  'ctrl-fatto': (el, id) => azioneControllo(id, 'fatto'),
+  'ctrl-rimanda': (el, id) => azioneControllo(id, 'rimanda'),
+  'ctrl-riprendi': (el, id) => azioneControllo(id, 'riprendi'),
+  'banner-piano': () => apriWizardProssima(),
+  'banner-chiudi': () => { lsScrivi(LS3.PIANO_CHIUSO, oggiLocale()); render(); },
+  semplice: () => impostaSemplice(!modoSemplice()),
+  testo: el => { lsScrivi(LS3.TESTO, el.dataset.v === '100' ? null : el.dataset.v); applicaAspetto(); render(); },
+  contrasto: () => { lsScrivi(LS3.CONTRASTO, lsLeggi(LS3.CONTRASTO) === 'alto' ? null : 'alto'); applicaAspetto(); render(); },
   carry: el => azioneCarry(el.dataset.item, el.dataset.v, parseInt(el.dataset.g, 10)),
   'carry-tutte': () => carryTutteAOggi(),
   'carry-chiudi': () => carryChiudiPerOggi(),
@@ -6254,6 +6508,10 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('[data-act="spunta"]')) { const item = t.closest('.item'); if (item) azioneFatto(item.dataset.id); return; }
   if (t.matches('[data-act="carry-fatta"]')) { const item = t.closest('.item'); if (item) azioneFatto(item.dataset.id); return; }
+  if (t.matches('[data-act="focus-scelta"]')) { const id = t.dataset.item; if (t.checked && ui.focusScelta.size < FOCUS_MAX) ui.focusScelta.add(id); else ui.focusScelta.delete(id); disegnaFocus(); return; }
+  if (t.matches('[data-act="piano-giorno"]')) { lsScrivi(LS3.PIANO_GIORNO, t.value); lsScrivi(LS3.PIANO_CHIUSO, null); return; }
+  if (t.matches('[data-act="piano-ora"]')) { if (t.value) lsScrivi(LS3.PIANO_ORA, t.value); lsScrivi(LS3.PIANO_CHIUSO, null); return; }
+  if (t.id === 'delega-data') { ui.delega = { ...ui.delega, data: t.value }; return; }
   if (t.matches('[data-act="raggruppa"]')) { ui.raggruppa = t.value; localStorage.setItem(LS2.RAGGRUPPA, t.value); render(); return; }
   if (t.matches('[data-act="rev-data"]')) { ui.rev.date.set(t.dataset.item, t.value); return; }
   if (t.id === 'f-cat' && t.value === '__nuova__') { t.selectedIndex = 0; apriCategoria(null, 'dettaglio'); }
@@ -6298,14 +6556,13 @@ function initPullToRefresh() {
 // ══════════════════════════════════════════════════════════════
 const AIUTI = {
   oggi:      { titolo: 'Oggi',      testo: ['L\'unica schermata da guardare durante il giorno. Qui trovi la routine, il piano di oggi e gli appuntamenti. Spunta quello che fai. Quello che era in programma nei giorni scorsi e non hai fatto compare in cima, in Rimaste indietro: decidi tu quando rifarlo.'] },
-  pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Con le frecce puoi preparare anche le settimane che vengono, e rivedere quelle passate. Senza data = cose ancora da piazzare. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
-  settimana: { titolo: 'Settimana', base: 'pianifica', testo: ['Qui vedi un giorno alla volta: tocca un giorno per aprire quello che c\'è in programma.'] },
+  pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Con le frecce puoi preparare anche le settimane che vengono, e rivedere quelle passate. Da piazzare = cose che non hanno ancora un giorno. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
+  settimana: { titolo: 'Settimana', base: 'pianifica', testo: ['Qui vedi un giorno alla volta: tocca un giorno per aprire quello che c\'è in programma. Se le cose hanno un momento o un\'ora, il giorno è diviso in mattina, pomeriggio e sera. Su computer puoi trascinare una cosa in un altro giorno: vale solo per quella settimana. Un giorno in arancio ha troppo: più di 3 Subito o più di 5 ore.'] },
   mese:      { titolo: 'Mese',      base: 'pianifica', testo: ['Un puntino per ogni cosa in programma, colorato per tipo. Tocca un giorno per aprirlo.'] },
-  agenda:    { titolo: 'Agenda',    base: 'pianifica', testo: ['Ogni giorno diviso in mattina, pomeriggio e sera. Su computer puoi trascinare una cosa in un altro giorno: vale solo per quella settimana.'] },
   tutto:     { titolo: 'Tutto',     testo: ['Il tuo armadio: ogni cosa aperta, di lavoro e personale, finisce qui. Cercala, filtrala, vedila per persona o nella matrice.'] },
-  matrice:   { titolo: 'Matrice',   testo: ['Le cose aperte divise per tipo: Subito (urgente e importante), Importante (da mettere in agenda), Delega, Lascia stare.'] },
+  matrice:   { titolo: 'Matrice',   testo: ['Le cose aperte divise per tipo: Subito (urgente e importante), Importante (a cui dare un giorno), Delega, Lascia stare.'] },
   persone:   { titolo: 'Persone',   testo: ['Prima di una riunione, apri la persona: vedi tutto quello che hai in sospeso con lei.'] },
-  attesa:    { titolo: 'In attesa', testo: ['Cose messe da parte di proposito. Non sparisce niente, ma non ti disturbano.'] },
+  attesa:    { titolo: 'Un giorno', testo: ['Cose messe da parte di proposito: un giorno, forse. Non sparisce niente, ma non ti disturbano.'] },
   fatte:     { titolo: 'Fatte',     testo: ['Tutto quello che hai chiuso. Puoi riaprire una cosa se serve. In Settimane trovi i piani passati: tocca una settimana per rivederla.'] }
 };
 function btnAiuto(k) { return `<button type="button" class="aiuto-btn" data-act="aiuto" data-k="${k}" aria-label="A cosa serve questa schermata"><i class="ti ti-help-circle"></i></button>`; }
@@ -6507,10 +6764,17 @@ function bpwChipGiorni() {
 
   let riep = $('bpw-riepilogo');
   if (!riep) { riep = document.createElement('div'); riep.id = 'bpw-riepilogo'; riep.className = 'bpw-riepilogo'; passo.insertBefore(riep, passo.firstChild); }
+  // limite di carico: più di 3 Subito o più di 5 ore (cose + appuntamenti)
+  const troppi = [];
   riep.innerHTML = GIORNI.map((g, idx) => {
     const cose = minutiDi(g.key), app = minutiOccupati(bpDataGiorno(_bpwWeek, _bpwYear, idx));
-    return `<span class="${cose + app > 8 * 60 ? 'pieno' : ''}"${app ? ` data-tip="${fmtTempo(cose)} di cose + ${fmtTempo(app)} di appuntamenti"` : ''}>${g.label.slice(0, 3)} <b class="mono">${fmtTempo(cose + app)}</b></span>`;
-  }).join('<span aria-hidden="true">·</span>') + `<span aria-hidden="true">·</span><span>Sett. <b class="mono">${fmtTempo(minutiDi('settimana'))}</b></span>`;
+    const subito = voci.filter(([id, v]) => v.giorno === g.key && ciclo(id) && computeEffectiveQ(ciclo(id)) === 1).length;
+    const troppo = subito > CARICO.SUBITO || cose + app > CARICO.MINUTI;
+    if (troppo) troppi.push(g.label.slice(0, 3));
+    const tip = troppo ? TROPPO_TIP : app ? `${fmtTempo(cose)} di cose + ${fmtTempo(app)} di appuntamenti` : '';
+    return `<span class="${troppo ? 'pieno' : ''}"${tip ? ` data-tip="${tip}"` : ''}>${troppo ? '<i class="ti ti-alert-triangle"></i>' : ''}${g.label.slice(0, 3)} <b class="mono">${fmtTempo(cose + app)}</b></span>`;
+  }).join('<span aria-hidden="true">·</span>') + `<span aria-hidden="true">·</span><span>Sett. <b class="mono">${fmtTempo(minutiDi('settimana'))}</b></span>`
+    + (troppi.length ? `<span class="troppo troppo-riga" data-tip="${TROPPO_TIP}">Troppo per un giorno: ${troppi.join(', ')}</span>` : '');
 
   const ordine = Object.fromEntries(GIORNI_CHIP.map((g, i) => [g.k, i]));
   $('bpw-pool-hd').hidden = true;
@@ -6549,7 +6813,7 @@ function disegnaPianificazione(c) {
   const chip = isGiornaliero(c) || !state.agendaColsOk ? '' : `<div><span class="t-caption muted">${eSettimanaCorrente() ? 'Questa settimana' : 'Settimana ' + state.week}</span>
       ${chipGiorni('det-giorno', c.id, giornoInSettimana(c), state.bp && !bpSolaLettura() ? null : ['settimana'])}
       ${c.durata_minuti ? `<div class="gchips-sotto">${formatDurata(c.durata_minuti)}</div>` : ''}</div>`;
-  box.innerHTML = `<div><b>Pianificazione</b> · ${pianificata ? 'in agenda' : 'senza data'}${dove.length ? ' · ' + dove.join(' · ') : ''}</div>
+  box.innerHTML = `<div><b>Pianificazione</b> · ${pianificata ? 'ha un giorno' : 'da piazzare'}${dove.length ? ' · ' + dove.join(' · ') : ''}</div>
     ${chip}
     <div class="azioni"><button type="button" class="btn btn-secondary btn-sm" data-act="d-quando"><i class="ti ti-calendar-event"></i>Scegli quando</button>
     <button type="button" class="btn btn-ghost btn-sm" data-act="d-ripeti"><i class="ti ti-repeat"></i>Ripeti</button></div>`;
@@ -6589,6 +6853,427 @@ async function impostaGiorno(id, g) {
     showToast(g === 'settimana' ? 'In settimana, senza giorno' : `Spostata a ${GIORNI_MAP[g].label.toLowerCase()}`, 'success');
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
+
+// ══════════════════════════════════════════════════════════════
+// v3 · COLONNE NUOVE (migration v3): senza, le funzioni che ne dipendono si spengono
+// ══════════════════════════════════════════════════════════════
+async function rilevaColonneV3() {
+  const prova = async (tabella, colonne) => {
+    try { const { error } = await db.from(tabella).select(colonne).limit(1); return !error; } catch (_) { return false; }
+  };
+  [state.focusColOk, state.delegaColsOk] = await Promise.all([
+    prova('battle_plan_items', 'id,in_focus'),
+    prova('cicli', 'id,delega_persona_id,delega_controllo')
+  ]);
+  render();
+}
+
+const LS3 = { SEMPLICE: 'modo_semplice', TESTO: 'testo_scala', CONTRASTO: 'contrasto', FOCUS: 'focus_date',
+  PIANO_GIORNO: 'piano_giorno', PIANO_ORA: 'piano_ora', PIANO_CHIUSO: 'banner_piano_chiuso' };
+const lsLeggi = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+const lsScrivi = (k, v) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (_) {} };
+function modoSemplice() { return lsLeggi(LS3.SEMPLICE) === '1'; }
+const dataPiu = n => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
+const fmtGgMm = iso => { const d = parseISODate(iso); return d ? `${d.getDate()}/${d.getMonth() + 1}` : ''; };
+
+// ══════════════════════════════════════════════════════════════
+// v3 · RAPIDE (≤ 15 minuti) — «Ci vogliono 2 minuti? Falle ora.»
+// ══════════════════════════════════════════════════════════════
+const RAPIDA_MIN = 15, RAPIDE_DA_TUTTO = 3;
+const RAPIDA_CHIP = '<span class="rapida"><i class="ti ti-bolt"></i>Rapida</span>';
+function eRapida(c, item) {
+  const min = (item && item.durata_prevista && item.durata_prevista !== BP_DURATA_DEFAULT ? item.durata_prevista : null) || c.durata_minuti;
+  return !!min && min <= RAPIDA_MIN && !isGiornaliero(c);
+}
+// le rapide di oggi (fuori dalle 3) e, se sono meno di 3, quelle ancora da piazzare
+function rapideDiOggi(righe, focusIds) {
+  const diOggi = righe.filter(r => !r.fatto && !focusIds.has(r.c.id) && eRapida(r.c, r.item));
+  if (diOggi.length >= RAPIDE_DA_TUTTO) return diOggi;
+  const gia = new Set(righe.map(r => r.c.id));
+  const senzaData = state.cicli
+    .filter(c => c.ctx === state.ctx && isAttivo(c) && !gia.has(c.id) && !haPianificazione(c) && eRapida(c, null))
+    .slice(0, RAPIDE_DA_TUTTO - diOggi.length)
+    .map(c => ({ c, fatto: false }));
+  return [...diOggi, ...senzaData];
+}
+
+// ══════════════════════════════════════════════════════════════
+// v3 · LE TUE 3 (in_focus sulle righe del piano di oggi)
+// ══════════════════════════════════════════════════════════════
+const FOCUS_MAX = 3;
+function righePianoOggi() {
+  if (!eSettimanaCorrente()) return [];
+  return righeGiorno(giornoKeyDi(oggiData())).filter(r => r.item);
+}
+// Le tue 3: quelle segnate; se non ne è segnata nessuna e il piano di oggi ha ≤ 3 righe, tutte.
+function focusDiOggi(righe) {
+  if (!state.focusColOk) return new Set();
+  const piano = righe.filter(r => r.item);
+  const segnate = piano.filter(r => r.item.in_focus);
+  if (segnate.length) return new Set(segnate.slice(0, FOCUS_MAX).map(r => r.c.id));
+  return piano.length && piano.length <= FOCUS_MAX ? new Set(piano.map(r => r.c.id)) : new Set();
+}
+function focusAperte() {
+  const righe = eSettimanaCorrente() ? righeGiorno(giornoKeyDi(oggiData())) : [];
+  const ids = focusDiOggi(righe);
+  return { tot: ids.size, aperte: righe.filter(r => ids.has(r.c.id) && !r.fatto).length };
+}
+
+// Il foglio del mattino: prima apertura di Oggi nel giorno, piano di oggi con più di 3 righe.
+function controllaMattino() {
+  if (!state.focusColOk || !state.bp || ui.tab !== 'oggi') return;
+  if (lsLeggi(LS3.FOCUS) === oggiLocale()) return;
+  if (!$('onb').hidden || document.querySelector('.modal-overlay.open')) return;
+  const righe = righePianoOggi().filter(r => !r.fatto);
+  if (righe.length <= FOCUS_MAX || righe.some(r => r.item.in_focus)) return;
+  lsScrivi(LS3.FOCUS, oggiLocale());
+  apriFocus();
+}
+function apriFocus() {
+  const righe = righePianoOggi().filter(r => !r.fatto);
+  const segnate = righe.filter(r => r.item.in_focus);
+  const base = segnate.length ? segnate : righe.filter(r => computeEffectiveQ(r.c) === 1);   // le Subito pre-spuntate
+  ui.focusScelta = new Set(base.slice(0, FOCUS_MAX).map(r => r.item.id));
+  disegnaFocus();
+  $('focusOverlay').classList.add('open');
+}
+function disegnaFocus() {
+  const righe = righePianoOggi().filter(r => !r.fatto);
+  const pieno = ui.focusScelta.size >= FOCUS_MAX;
+  $('focus-sub').textContent = `Scegline fino a 3 · ${ui.focusScelta.size} di ${FOCUS_MAX}`;
+  $('focus-lista').innerHTML = righe.map(r => {
+    const sel = ui.focusScelta.has(r.item.id);
+    return `<label class="bp-pick${sel ? ' sel' : ''}"><input type="checkbox" data-act="focus-scelta" data-item="${r.item.id}"${sel ? ' checked' : ''}${!sel && pieno ? ' disabled' : ''}>
+      <div class="bp-pick-main"><div class="bp-pick-title">${escHtml(r.c.title)}</div><div class="bp-pick-meta">${modoSemplice() ? '' : tagTipo(computeEffectiveQ(r.c))}${r.ora ? `<span class="mono">${r.ora}</span>` : ''}</div></div></label>`;
+  }).join('');
+}
+async function scriviFocus(scelti, tutti) {
+  const si = tutti.filter(id => scelti.has(id)), no = tutti.filter(id => !scelti.has(id));
+  if (si.length) { const { error } = await db.from('battle_plan_items').update({ in_focus: true }).in('id', si); if (error) throw error; }
+  if (no.length) { const { error } = await db.from('battle_plan_items').update({ in_focus: false }).in('id', no); if (error) throw error; }
+  state.bpItems = state.bpItems.map(i => tutti.includes(i.id) ? { ...i, in_focus: scelti.has(i.id) } : i);
+}
+async function confermaFocus() {
+  const tutti = righePianoOggi().map(r => r.item.id);
+  try {
+    await scriviFocus(ui.focusScelta, tutti);
+    closeModal('focusOverlay');
+    render();
+    showToast(ui.focusScelta.size ? `Le tue ${ui.focusScelta.size} di oggi sono in cima` : 'Nessuna scelta: vedi tutto il piano di oggi', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+// La stellina: entra o esce dalle 3. Se le 3 erano «tutte, perché poche», la scelta diventa esplicita.
+async function azioneStella(cicloId) {
+  const righe = righePianoOggi();
+  const r = righe.find(x => x.c.id === cicloId);
+  if (!r) return;
+  const ora = focusDiOggi(righeGiorno(giornoKeyDi(oggiData())));
+  const scelti = new Set(righe.filter(x => ora.has(x.c.id)).map(x => x.item.id));
+  if (scelti.has(r.item.id)) scelti.delete(r.item.id);
+  else if (scelti.size >= FOCUS_MAX) { showToast('Ne hai già 3: togline una prima', 'warn'); return; }
+  else scelti.add(r.item.id);
+  try { await scriviFocus(scelti, righe.map(x => x.item.id)); render(); } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// v3 · DELEGA CON DATA DI CONTROLLO
+// ══════════════════════════════════════════════════════════════
+const DELEGA_QUANDO = [{ k: '2', l: 'Tra 2 giorni' }, { k: '7', l: 'Tra una settimana' }, { k: 'data', l: 'Scegli data' }];
+function personaDi(id) { return id ? state.persone.find(p => String(p.id) === String(id)) || null : null; }
+function delegaTesto(c) {
+  if (!state.delegaColsOk) return '';
+  const p = personaDi(c.delega_persona_id);
+  const parti = [p ? `a ${p.nome}` : null, c.delega_controllo ? `controlla il ${fmtGgMm(c.delega_controllo)}` : null].filter(Boolean);
+  return parti.join(' · ');
+}
+function daControllare() {
+  if (!state.delegaColsOk) return [];
+  const oggi = oggiLocale();
+  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && c.q === 3 && c.delega_controllo && c.delega_controllo <= oggi)
+    .sort((a, b) => String(a.delega_controllo).localeCompare(String(b.delega_controllo)));
+}
+function rigaControllo(c) {
+  const p = personaDi(c.delega_persona_id);
+  const quando = c.delega_controllo < oggiLocale() ? `<span class="ritardo">dovevi controllare il ${fmtGgMm(c.delega_controllo)}</span>` : '<span>oggi</span>';
+  return `<div class="item carry-riga ctrl-riga" data-id="${c.id}">
+    <div class="item-row no-check"><button type="button" class="item-main" data-act="apri"><span class="item-title">${p ? `Chiedi a ${escHtml(p.nome)}: ` : 'Controlla: '}${escHtml(c.title)}</span><span class="item-meta">${quando}</span></button></div>
+    <div class="chips chips-wrap carry-azioni tre" role="group" aria-label="Com'è andata">
+      <button type="button" class="chip" data-act="ctrl-fatto">Fatto</button>
+      <button type="button" class="chip" data-act="ctrl-rimanda">Rimanda 2 giorni</button>
+      <button type="button" class="chip" data-act="ctrl-riprendi">Riprendila io</button></div></div>`;
+}
+async function azioneControllo(id, v) {
+  const c = ciclo(id);
+  if (!c) return;
+  if (v === 'fatto') { await azioneFatto(id); return; }
+  const prima = campi(c, ['q', 'delega_persona_id', 'delega_controllo']);
+  const patch = v === 'rimanda' ? { delega_controllo: toISODate(dataPiu(2)) } : { q: 2, delega_persona_id: null, delega_controllo: null };
+  try {
+    await patchCiclo(id, patch);
+    render();
+    showToast(v === 'rimanda' ? `Controlli il ${fmtGgMm(patch.delega_controllo)}` : 'Ripresa: è di nuovo Importante', 'success', { annulla: () => patchCiclo(id, prima) });
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+function apriDelega(id) {
+  const c = ciclo(id);
+  if (!c) return;
+  if (!state.delegaColsOk) {   // senza migration: resta il tipo «Delega», senza persona né controllo
+    if (c.q !== 3) patchCiclo(id, { q: 3 }).then(render);
+    showToast('Delega senza data di controllo: manca la migration v3 (vedi Impostazioni)', 'warn');
+    return;
+  }
+  ui.delega = { id, persona: c.delega_persona_id || null, quando: c.delega_controllo ? 'data' : '2', data: c.delega_controllo || '' };
+  $('delega-cosa').textContent = c.title || '';
+  $('delega-nuova').value = '';
+  $('delega-errore').hidden = true;
+  disegnaDelega();
+  $('delegaOverlay').classList.add('open');
+}
+function disegnaDelega() {
+  const d = ui.delega;
+  $('delega-persone').innerHTML = state.persone.length
+    ? state.persone.map(p => `<button type="button" class="chip" data-act="delega-persona" data-p="${p.id}" aria-pressed="${String(d.persona) === String(p.id)}"><span class="avatar">${escHtml((p.nome || '?').charAt(0).toUpperCase())}</span>${escHtml(p.nome)}</button>`).join('')
+    : '<p class="t-label muted">Nessuna persona ancora: aggiungila qui sotto.</p>';
+  $('delega-quando').innerHTML = DELEGA_QUANDO.map(q => `<button type="button" class="chip" data-act="delega-quando" data-v="${q.k}" aria-pressed="${d.quando === q.k}">${q.l}</button>`).join('');
+  const inp = $('delega-data');
+  inp.hidden = d.quando !== 'data';
+  inp.min = oggiLocale();
+  if (d.quando === 'data' && d.data) inp.value = d.data;
+}
+async function delegaNuovaPersona() {
+  const nome = ($('delega-nuova').value || '').trim();
+  if (!nome) { $('delega-nuova').focus(); return; }
+  try {
+    const { data, error } = await db.from('persone').insert({ nome, colore: personColor({ nome }), created_at: new Date().toISOString() }).select();
+    if (error) throw error;
+    const p = data && data[0];
+    if (p) { state.persone = [...state.persone, p].sort((a, b) => a.nome.localeCompare(b.nome)); ui.delega = { ...ui.delega, persona: p.id }; }
+    $('delega-nuova').value = '';
+    disegnaDelega();
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+async function salvaDelega() {
+  const d = ui.delega, c = ciclo(d.id);
+  if (!c) return;
+  const errore = msg => { const e = $('delega-errore'); e.textContent = msg; e.hidden = false; };
+  if (!d.persona) { errore('Scegli a chi la deleghi'); return; }
+  const quando = d.quando === 'data' ? $('delega-data').value : toISODate(dataPiu(parseInt(d.quando, 10)));
+  if (!quando) { errore('Scegli quando controlli'); return; }
+  const p = personaDi(d.persona);
+  const persone = (c.persone_menzionate || []).includes(p.nome) ? c.persone_menzionate : [...(c.persone_menzionate || []), p.nome];
+  const prima = campi(c, ['q', 'delega_persona_id', 'delega_controllo', 'persone_menzionate']);
+  try {
+    await patchCiclo(c.id, { q: 3, delega_persona_id: p.id, delega_controllo: quando, persone_menzionate: persone });
+    closeModal('delegaOverlay');
+    render();
+    showToast(`Delegata a ${p.nome} · controlli il ${fmtGgMm(quando)}`, 'success', { annulla: () => patchCiclo(c.id, prima) });
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// v3 · INSERIMENTO A UN CAMPO («+»): Invio = salvata, una riga = una cosa
+// ══════════════════════════════════════════════════════════════
+const Riconoscimento = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let _ascolto = null;
+ui.rapido = { subito: false, oggi: false, persona: null, con: false };
+
+function apriRapido() {
+  ui.rapido = { subito: false, oggi: false, persona: null, con: false };
+  $('rapido-testo').value = '';
+  $('rapido-mic').hidden = !Riconoscimento;
+  disegnaRapido();
+  $('rapidoOverlay').classList.add('open');
+  setTimeout(() => $('rapido-testo').focus(), 150);
+}
+function disegnaRapido() {
+  const r = ui.rapido, p = personaDi(r.persona);
+  const chip = (act, testo, on, icona) => `<button type="button" class="chip" data-act="${act}" aria-pressed="${on}">${icona ? `<i class="ti ${icona}"></i>` : ''}${testo}</button>`;
+  $('rapido-chips').innerHTML = chip('rapido-subito', 'Subito', r.subito, 'ti-flame') + chip('rapido-oggi', 'Oggi', r.oggi, 'ti-sun')
+    + chip('rapido-con', p ? `Con ${escHtml(p.nome)}` : 'Con…', !!p || r.con, 'ti-user');
+  const box = $('rapido-persone');
+  box.hidden = !r.con;
+  box.innerHTML = state.persone.length
+    ? state.persone.map(x => `<button type="button" class="chip" data-act="rapido-persona" data-p="${x.id}" aria-pressed="${String(r.persona) === String(x.id)}">${escHtml(x.nome)}</button>`).join('')
+    : '<p class="t-label muted">Nessuna persona: aggiungile in Impostazioni.</p>';
+}
+function chiudiRapido() { fermaDettatura(); closeModal('rapidoOverlay'); }
+
+function rigaNuova(title, r, ctx) {
+  const oggi = todayISO();
+  const p = personaDi(r.persona);
+  return { title, note: null, cat: ctx === 'personale' ? 'salute' : 'management', due_date: null, week: state.week, year: state.year,
+    q: r.subito ? 1 : 2, ctx, persone_menzionate: p ? [p.nome] : [], done: false, da_plaud: false, scheduled_date: oggi, scheduled_time: null,
+    macro_area: null, execution_status: 'planned', sync_status: 'pending', settimana_anno: isoWeekStr(new Date(oggi)) };
+}
+async function salvaRapido() {
+  const righe = ($('rapido-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean);
+  if (!righe.length) { $('rapido-testo').focus(); return; }
+  fermaDettatura();
+  const r = { ...ui.rapido }, ctx = state.ctx;
+  try {
+    const salvate = [];
+    for (const t of righe) salvate.push(await upsertCiclo(rigaNuova(t, r, ctx)));
+    const nuove = salvate.filter(Boolean);
+    state.cicli = [...nuove, ...state.cicli.filter(c => !nuove.some(n => n.id === c.id))];
+    if (r.oggi) for (const c of nuove) await pianificaInData(c, new Date(), null);
+    closeModal('rapidoOverlay');
+    render();
+    nuove.forEach(c => {
+      syncCicloToGcal(c).catch(() => {});
+      if (ctx === 'lavoro') autoCategoria(c.title, '').then(area => area && patchCiclo(c.id, { macro_area: area })).catch(() => {});
+    });
+    const dove = `${r.oggi ? 'Oggi' : 'Tutto'} · ${r.subito ? 'Subito' : 'Importante'}`;
+    if (nuove.length === 1) showToast(`Aggiunta a ${dove}`, 'success', { annulla: () => apriDettaglio(nuove[0].id), etichetta: 'Dettagli' });
+    else showToast(`${nuove.length} cose aggiunte a ${dove}`, 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+
+// Dettatura (Web Speech API, it-IT): il testo finisce nel campo, dopo quello già scritto.
+function dettatura() {
+  if (!Riconoscimento) return;
+  if (_ascolto) { fermaDettatura(); return; }
+  const campo = $('rapido-testo'), mic = $('rapido-mic');
+  const base = campo.value.trim() ? campo.value.replace(/\s*$/, ' ') : '';
+  const rec = new Riconoscimento();
+  rec.lang = 'it-IT';
+  rec.interimResults = true;
+  rec.continuous = false;
+  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; };
+  rec.onerror = e => { if (e.error !== 'aborted' && e.error !== 'no-speech') showToast('Dettatura non riuscita: ' + e.error, 'error'); };
+  rec.onend = () => { _ascolto = null; mic.setAttribute('aria-pressed', 'false'); mic.classList.remove('ascolta'); };
+  try { rec.start(); } catch (e) { showToast('Dettatura non disponibile', 'error'); return; }
+  _ascolto = rec;
+  mic.setAttribute('aria-pressed', 'true');
+  mic.classList.add('ascolta');
+}
+function fermaDettatura() { if (_ascolto) { try { _ascolto.stop(); } catch (_) {} } }
+
+$('rapido-testo').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); salvaRapido(); }
+});
+
+// ══════════════════════════════════════════════════════════════
+// v3 · VENERDÌ: È ORA DEL PIANO (giorno e ora in Impostazioni)
+// ══════════════════════════════════════════════════════════════
+ui.pianoProssima = null;   // { k, esiste } per la settimana dopo quella corrente
+function quandoPiano() {
+  const g = parseInt(lsLeggi(LS3.PIANO_GIORNO), 10);
+  return { giorno: g >= 0 && g <= 6 ? g : 4, ora: /^\d{2}:\d{2}$/.test(lsLeggi(LS3.PIANO_ORA) || '') ? lsLeggi(LS3.PIANO_ORA) : '14:00' };
+}
+// dal giorno e ora scelti fino a domenica sera
+function inFinestraPiano(adesso) {
+  const { giorno, ora } = quandoPiano(), idx = giornoIdxDi(adesso);
+  if (idx > giorno) return true;
+  if (idx < giorno) return false;
+  const hhmm = `${String(adesso.getHours()).padStart(2, '0')}:${String(adesso.getMinutes()).padStart(2, '0')}`;
+  return hhmm >= ora;
+}
+async function caricaPianoProssima() {
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year), k = settKey(n.week, n.year);
+  if (!state.bpTableOk || (ui.pianoProssima && ui.pianoProssima.k === k)) return;
+  ui.pianoProssima = { k, esiste: true };   // finché non si sa, niente banner
+  try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan }; render(); }
+  catch (e) { ui.pianoProssima = null; }
+}
+function bannerPiano() {
+  if (!inFinestraPiano(new Date()) || lsLeggi(LS3.PIANO_CHIUSO) === oggiLocale()) return '';
+  caricaPianoProssima();
+  if (!ui.pianoProssima || ui.pianoProssima.esiste) return '';
+  return `<section class="banner-piano" aria-label="Piano della settimana"><i class="ti ti-calendar-plus"></i>
+    <div><b>È ora del piano della settimana</b><button type="button" class="btn btn-primary btn-sm" data-act="banner-piano">Prepara la settimana prossima</button></div>
+    <button type="button" class="btn btn-icon" data-act="banner-chiudi" aria-label="Chiudi per oggi" data-tip="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
+}
+function apriWizardProssima() {
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
+  apriWizard(n.week, n.year);
+}
+
+// ══════════════════════════════════════════════════════════════
+// v3 · FINE GIORNATA (dopo le 18): «Oggi N su M» · bella giornata · giorni di fila
+// ══════════════════════════════════════════════════════════════
+const FINE = { ORA: 18, SOGLIA: .8, SETTIMANE: 9 };
+ui.serie = null;   // { giorno, n }
+function fineGiornata(fatte, tot) {
+  if (!tot || new Date().getHours() < FINE.ORA) return '';
+  const bella = fatte / tot >= FINE.SOGLIA;
+  if (bella && (!ui.serie || ui.serie.giorno !== oggiLocale())) caricaSerie();
+  const serie = bella && ui.serie && ui.serie.n >= 2 ? ` · <b class="mono">${ui.serie.n}</b> giorni di fila` : '';
+  return `<p class="fine-giornata">Oggi <b class="mono">${fatte}</b> su <b class="mono">${tot}</b>${bella ? ' · Bella giornata.' : ''}${serie}</p>`;
+}
+// Giorni consecutivi con almeno l'80 % del piano fatto (completato_at entro quel giorno).
+// I giorni senza niente in programma non interrompono la serie.
+async function caricaSerie() {
+  const giorno = oggiLocale();
+  ui.serie = { giorno, n: 0 };
+  try {
+    const cur = bpSettimanaCorrente(), inizio = getWeekStart(cur.week, cur.year);
+    const limite = new Date(inizio); limite.setDate(limite.getDate() - 7 * FINE.SETTIMANE);
+    const { data, error } = await db.from('battle_plan').select('settimana,anno,battle_plan_items(ciclo_id,giorno,completato,completato_at)');
+    if (error) throw error;
+    const perGiorno = new Map();
+    (data || []).filter(p => getWeekStart(p.settimana, p.anno) >= limite).forEach(p => (p.battle_plan_items || []).forEach(i => {
+      const idx = GIORNI.findIndex(g => g.key === i.giorno), c = ciclo(i.ciclo_id);
+      if (idx < 0 || !c || c.ctx !== state.ctx) return;
+      const iso = toISODate(bpDataGiorno(p.settimana, p.anno, idx));
+      const v = perGiorno.get(iso) || { tot: 0, fatte: 0 };
+      const fatta = i.completato && i.completato_at && toISODate(new Date(i.completato_at)) <= iso;
+      perGiorno.set(iso, { tot: v.tot + 1, fatte: v.fatte + (fatta ? 1 : 0) });
+    }));
+    let n = 0;
+    for (let k = 0; k < FINE.SETTIMANE * 7; k++) {
+      const v = perGiorno.get(toISODate(dataPiu(-k)));
+      if (!v || !v.tot) continue;
+      if (v.fatte / v.tot < FINE.SOGLIA) break;
+      n++;
+    }
+    ui.serie = { giorno, n };
+    render();
+  } catch (e) { console.warn('[Fine giornata] serie:', e.message); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// v3 · IMPOSTAZIONI: modalità semplice, testo, contrasto, quando preparo la settimana
+// ══════════════════════════════════════════════════════════════
+const TESTO_SCALE = [{ v: '100', l: 'Normale' }, { v: '112', l: 'Grande' }, { v: '125', l: 'Molto grande' }];
+function applicaAspetto() {
+  const scala = lsLeggi(LS3.TESTO);
+  document.documentElement.style.fontSize = scala === '112' || scala === '125' ? scala + '%' : '';
+  if (lsLeggi(LS3.CONTRASTO) === 'alto') document.documentElement.setAttribute('data-contrast', 'alto');
+  else document.documentElement.removeAttribute('data-contrast');
+  document.body.classList.toggle('semplice', modoSemplice());
+  document.querySelectorAll('.l-tutto').forEach(e => { e.textContent = modoSemplice() ? 'Cose' : 'Tutto'; });
+}
+function impostaSemplice(on) {
+  lsScrivi(LS3.SEMPLICE, on ? '1' : null);
+  applicaAspetto();
+  render();
+}
+function sezioneAspetto() {
+  const semplice = modoSemplice(), alto = lsLeggi(LS3.CONTRASTO) === 'alto', scala = lsLeggi(LS3.TESTO) || '100';
+  const { giorno, ora } = quandoPiano();
+  const mancano = [!state.focusColOk && 'Le tue 3', !state.delegaColsOk && 'delega con data di controllo'].filter(Boolean);
+  return `${mancano.length && state.focusColOk !== undefined ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>Spente: ${mancano.join(', ')}. Manca la migration v3: esegui <span class="mono">supabase_migration_v3.sql</span> nel SQL Editor di Supabase.</span></div>` : ''}
+    <p class="list-head"><span>Come la vedi</span></p>
+    <div class="group">
+      <button type="button" class="riga-link" data-act="semplice" role="switch" aria-checked="${semplice}"><i class="ti ti-layout-bottombar"></i><span>Modalità semplice<small>Solo Oggi e le tue cose</small></span><span></span><span class="switch"></span></button>
+      <div class="riga-link riga-scelta"><i class="ti ti-text-size"></i><span id="lbl-testo">Dimensione testo</span>
+        <div class="seg" role="group" aria-labelledby="lbl-testo">${TESTO_SCALE.map(t => `<button type="button" data-act="testo" data-v="${t.v}" aria-pressed="${scala === t.v}">${t.l}</button>`).join('')}</div></div>
+      <button type="button" class="riga-link" data-act="contrasto" role="switch" aria-checked="${alto}"><i class="ti ti-contrast"></i><span>Contrasto alto<small>Bordi e testi più marcati</small></span><span></span><span class="switch"></span></button>
+      <div class="riga-link riga-scelta"><i class="ti ti-calendar-time"></i><span id="lbl-piano">Quando preparo la settimana<small>Da quel momento a domenica, in Oggi compare l'avviso</small></span>
+        <div class="tools-row"><select class="input sel-inline" data-act="piano-giorno" aria-label="Giorno">${GIORNI.map((g, i) => `<option value="${i}"${i === giorno ? ' selected' : ''}>${g.label}</option>`).join('')}</select>
+          <input type="time" class="input" data-act="piano-ora" value="${ora}" aria-label="Ora"></div></div>
+    </div>`;
+}
+
+// La logica di «Fatto» resta quella: qui si aggiunge solo il «le tue 3 sono fatte».
+const _azioneFattoBase = azioneFatto;
+azioneFatto = async function (id) {
+  const prima = focusAperte();
+  await _azioneFattoBase(id);
+  const dopo = focusAperte();
+  if (prima.tot && prima.aperte > 0 && dopo.aperte === 0) setTimeout(() => showToast('Le tue 3 sono fatte. Il resto è bonus.', 'success', {}), 600);
+};
 
 // ══════════════════════════════════════════════════════════════
 // v2 · AGGANCI ALLA LOGICA E AVVIO
@@ -6637,7 +7322,9 @@ _handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); car
   ui.tab = 'oggi';   // Oggi è la schermata di apertura
   render();
   if (!localStorage.getItem(LS2.ONB)) onbApri();
+  applicaAspetto();
   loadAll().then(() => {
+    rilevaColonneV3().then(() => setTimeout(controllaMattino, 600));
     initGcal();
     db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
     setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token

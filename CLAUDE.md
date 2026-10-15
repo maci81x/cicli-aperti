@@ -12,18 +12,18 @@ Riferimenti: `DESIGN_SYSTEM.md` (token, componenti, mappa del linguaggio), `desi
 
 | Sezione | Cosa c'è |
 |---|---|
-| **Oggi** (apertura) | data, «N di M fatte», Appuntamenti (Google Calendar, sola lettura), Routine, Mattina / Pomeriggio / Sera, «In scadenza» |
-| **Pianifica** | Settimana (chip dei giorni su telefono, colonne Lun–Ven su desktop) · Mese (puntini per tipo, tap → quel giorno) · Agenda (giorni × momenti, drag & drop su desktop). In fondo: Senza data, Riepilogo, Stampa la settimana, Chiudi la settimana |
-| **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «Raggruppa per», In attesa |
-| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
+| **Oggi** (apertura) | data, banner del piano (venerdì), Rimaste indietro, «N di M fatte», Appuntamenti (Google Calendar, sola lettura), Routine, **Le tue 3**, **Rapide**, **Da controllare**, «Il resto di oggi» (chiuso), «In scadenza», fine giornata (dopo le 18) |
+| **Pianifica** | Settimana (chip dei giorni su telefono, colonne Lun–Ven su desktop con drag & drop; per fasce solo se serve) · Mese (puntini per tipo, tap → quel giorno). In fondo: Da piazzare, Riepilogo, Stampa la settimana, Chiudi la settimana |
+| **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «Raggruppa per», Un giorno |
+| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Come la vedi: modalità semplice, dimensione testo, contrasto alto, quando preparo la settimana · Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
 
-Telefono: barra in basso Oggi · Pianifica · [+] · Tutto · Altro. Desktop (≥ 768px): barra laterale stretta + intestazione con Lavoro/Personale, ricerca, tema, Google Calendar, Aggiungi.
+Telefono: barra in basso Oggi · Pianifica · [+] · Tutto · Altro (modalità semplice: Oggi · [+] · Cose). Desktop (≥ 768px): barra laterale stretta + intestazione con Lavoro/Personale, ricerca, tema, Google Calendar, Aggiungi.
 
 Il file ha un solo `<script>` in due parti: **Parte 1 — Logica** (codice di prima, invariato) e **Parte 2 — Interfaccia v2**. Lo stato dell'interfaccia sta in `ui`; `render()` ridisegna la vista corrente; i click passano da un solo ascoltatore (`data-act` → `AZIONI`).
 
 ### Mappa del linguaggio
 
-Subito / Importante / Delega / Lascia stare (Q1–Q4 nel suggerimento) · Cose aperte (cicli) · Tutto (armadio) · Piano della settimana (Battle Plan) · Prepara la settimana (wizard) · Chiudi la settimana (review) · In attesa (parcheggio) · Routine (rituali) · Agenda (giorni × momenti) · Senza data (da pianificare) · Fatte (storico) · Domani (posticipa). «Calendario» si usa solo per Google Calendar. Niente emoji nell'interfaccia: icone Tabler.
+Subito / Importante / Delega / Lascia stare (Q1–Q4 nel suggerimento) · Cose aperte (cicli) · Tutto (armadio) · Piano della settimana (Battle Plan) · Prepara la settimana (wizard) · Chiudi la settimana (review) · Un giorno (parcheggio) · Routine (rituali) · Da piazzare (da pianificare) · Le tue 3 (focus del giorno) · Rapida (≤ 15 min) · Da controllare (delega con follow-up) · Fatte (storico) · Domani (posticipa). «Calendario» si usa solo per Google Calendar. Niente emoji nell'interfaccia: icone Tabler.
 
 ### Azioni rapide su ogni riga
 
@@ -67,6 +67,22 @@ Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) v
 - Righe di un giorno passato non fatte: puntino `--q1` + «in ritardo» (`riga(..., { passato })`, opzioni da `opzRighe(d)`).
 - **Altro → Fatte → Settimane** (`ui.fatte`, `caricaSettimane`, `fatteSettimane`): piani passati o chiusi con fatte/totali e %; tap → `vaiASettimana(w, y)`.
 
+### v3 (2026-10-15) — vedi anche `DECISIONI.md`
+
+Migration `supabase_migration_v3.sql` (applicata): `battle_plan_items.in_focus`, `cicli.delega_persona_id` (FK persone), `cicli.delega_controllo`. `rilevaColonneV3()` imposta `state.focusColOk` / `state.delegaColsOk`; senza, le funzioni si spengono e Impostazioni mostra un avviso.
+
+- **«+» a un campo** (`#rapidoOverlay`, `apriRapido`, `salvaRapido`): Invio salva, una riga = una cosa; chip Subito / Oggi / Con…; dettatura Web Speech it-IT (`dettatura`, icona nascosta se non supportata). Toast «Aggiunta a Tutto · Importante» con [Dettagli]. Anche «Aggiungi» desktop e Cmd+K. Il dettaglio ha «Quanto ci vuole?» (`#f-durata` → `durata_minuti`).
+- **Le tue 3** (`focusDiOggi`, `controllaMattino`, `#focusOverlay`, `azioneStella`): foglio del mattino alla prima apertura di Oggi del giorno (`localStorage focus_date`) se il piano di oggi ha più di 3 righe; Subito pre-spuntate. Con ≤ 3 righe sono tutte in focus senza scrivere niente. Stellina sulle righe del piano. `azioneFatto` è avvolta per il toast «Le tue 3 sono fatte».
+- **Rapide** (`eRapida`, `rapideDiOggi`): durata ≤ 15 (`RAPIDA_MIN`), chip `RAPIDA_CHIP`; se meno di 3 oggi, si aggiungono quelle Da piazzare.
+- **Settimana unica**: `htmlGiorno()` = per fasce solo se una riga ha `conFascia` (fascia o ora), altrimenti lista piatta. Desktop: `pianSettimanaColonne` con zone `.slot` (drag & drop → `moveCicloInAgenda`). `pianAgenda` non c'è più; `ui.pian` = settimana | mese.
+- **Limite di carico** (`caricoGiorno`, `CARICO`, `troppoHtml`, `TROPPO_TIP`): più di 3 Subito o più di 5 ore (cose + appuntamenti) → `--warn` «Troppo per un giorno». In Pianifica e nel wizard (`bpwChipGiorni`). Non blocca.
+- **Delega** (`apriDelega`, `salvaDelega`, `#delegaOverlay`, `daControllare`, `rigaControllo`, `azioneControllo`): si apre quando il tipo diventa Delega dal dettaglio o con l'azione «Delega» (swipe e «···»). Righe Delega: «a Marco · controlla il 20/10» (`delegaTesto`).
+- **Modalità semplice** (`modoSemplice()`, `localStorage modo_semplice`, `body.semplice`, classe `.solo-completa`): barra Oggi · + · Cose, `vai()` reindirizza Pianifica → Oggi e Altro → Impostazioni; in Oggi icona Impostazioni e «Pianifica la settimana». L'onboarding ha una quarta pagina (semplice / completa).
+- **Banner venerdì** (`bannerPiano`, `quandoPiano`, `inFinestraPiano`, `caricaPianoProssima`): da `piano_giorno`/`piano_ora` (predefiniti venerdì 14:00) a domenica, se la settimana dopo non ha un piano. X = `banner_piano_chiuso`.
+- **Fine giornata** (`fineGiornata`, `caricaSerie`): dopo le 18, «Oggi N su M · Bella giornata. · N giorni di fila».
+- **Testo e contrasto**: token tipografici in rem; `testo_scala` (100/112/125) sulla radice, `contrasto = alto` → `html[data-contrast="alto"]`; applicati nello script del tema (prima del primo disegno) e da `applicaAspetto()`. `prefers-reduced-motion` azzera animazioni e transizioni.
+- Nomi: «Senza data» → **Da piazzare**, «In attesa» → **Un giorno** (nel codice resta `parcheggiato`), «Agenda» non compare più.
+
 ### Rimaste indietro (2026-10-15)
 
 `caricaRimaste()` legge gli item non completati dei piani `attivo`/`bozza` delle ultime 4 settimane (`CARRY.SETTIMANE`) con giorno prima di oggi (o senza giorno, se la settimana è finita). Parte all'avvio, all'apertura di Oggi, dopo il wizard e con il pull-to-refresh. `rimasteVisibili()` scarta le cose fatte, in attesa, routine o dell'altro contesto.
@@ -91,7 +107,7 @@ Non chiude mai niente da sola. `cicli.calendar_event_id` (migration applicata) v
 
 ### localStorage in più
 
-`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi). `cicli_theme` vuoto = segue il tema del sistema.
+`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi), `focus_date`, `modo_semplice`, `testo_scala`, `contrasto`, `piano_giorno` (0 = lunedì), `piano_ora`, `banner_piano_chiuso`. `cicli_theme` vuoto = segue il tema del sistema.
 
 ### Per modificare la v2
 

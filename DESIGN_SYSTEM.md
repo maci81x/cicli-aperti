@@ -26,11 +26,14 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 | Battle Plan | **Piano della settimana** | — | Battle Plan |
 | Wizard del piano | **Prepara la settimana** | — | — |
 | Review di chiusura | **Chiudi la settimana** | — | Review |
-| Parcheggio / parcheggiare | **In attesa** / «Metti in attesa» | — | Parcheggio |
+| Parcheggio / parcheggiare | **Un giorno** / «Lascia stare» la porta lì | Fuori dalla vista, non sparisce | Parcheggio |
 | Rituali | **Routine** | — | Rituali quotidiani |
-| Agenda (giorni × fasce) | **Agenda** | — | Agenda |
 | Google Calendar | **Calendario** | solo per Google Calendar | — |
-| Da pianificare | **Senza data** | — | — |
+| Da pianificare | **Da piazzare** | non ha ancora un giorno | — |
+| Focus del giorno | **Le tue 3** | Cosa porti a casa oggi? | — |
+| Regola dei 2 minuti | **Rapida** (≤ 15 min) · «Ci vogliono 2 minuti? Falle ora.» | — | — |
+| Delega con follow-up | **Da controllare** · «Chiedi a Marco: …» | Quando controlli? | Q3 delegato |
+| Sovraccarico | **Troppo per un giorno** | più di 3 Subito o più di 5 ore | — |
 | Pianifica (azione) | **Pianifica** | Scegli un giorno | — |
 | Posticipa +1g | **Domani** | — | — |
 | Macro area | **Area** | — | Macro area |
@@ -40,7 +43,7 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 
 Regole di scrittura: frasi brevi, verbo all'inizio nei bottoni («Aggiungi», «Prepara la settimana»), niente maiuscole gridate, niente sigle. I messaggi dicono cosa è successo e cosa si può fare («Non salvata: sei senza rete · Riprova»).
 
-Nomi fissati: la voce di menu dell'armadio è «Tutto» e il titolo della pagina è «Cose aperte». La vista settimanale a giorni e fasce è «Agenda»; «Calendario» si usa solo per Google Calendar.
+Nomi fissati: la voce di menu dell'armadio è «Tutto» e il titolo della pagina è «Cose aperte» (in modalità semplice entrambi diventano «Cose»). Pianifica ha solo **Settimana** e **Mese**: l'agenda a fasce sta dentro la Settimana, e le fasce compaiono solo quando almeno una cosa del giorno ha un momento o un'ora. La parola «Agenda» non si usa più nell'interfaccia; «Calendario» si usa solo per Google Calendar.
 
 ## Colori
 
@@ -90,6 +93,8 @@ Regole:
 ```html
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
 ```
+
+I token sono in `rem` (28px = 1.75rem…): «Dimensione testo» in Impostazioni porta la radice a 100 / 112 / 125 % e tutto il testo scala insieme. Ogni layout deve reggere 125 % a 375px senza scroll orizzontale.
 
 | Livello | Token | Corpo / interlinea | Peso | Uso |
 |---|---|---|---|---|
@@ -156,7 +161,7 @@ Pillola alta 36 con area di tocco estesa a 44. Spento: superficie + bordo. Acces
 Binario `--surface-2` raggio 12, padding 4; voci alte 44. La voce attiva è `--surface-3` con ombra 1 e peso 700. Da 2 a 4 voci, mai di più.
 
 ### Bottom nav
-Quattro voci: Oggi, Pianifica, Tutto, Altro. Icona 22 + etichetta 12 sempre visibile. La voce attiva ha una pastiglia `--primary-soft` 56×28 dietro l'icona, testo `--primary-ink` 700 e `aria-current="page"`. Altezza 56 + safe area. Il bottone **+** (56×56, raggio 16) sta 16px sopra la barra, a destra.
+Quattro voci: Oggi, Pianifica, Tutto, Altro (modalità semplice: solo Oggi · + · Cose). Icona 22 + etichetta 12 sempre visibile. La voce attiva ha una pastiglia `--primary-soft` 56×28 dietro l'icona, testo `--primary-ink` 700 e `aria-current="page"`. Altezza 56 + safe area. Il bottone **+** (56×56, raggio 16) sta 16px sopra la barra, a destra.
 
 ### Accordion
 Intestazione alta 52: freccia che ruota di 90°, nome in 700 (con «oggi» accanto al giorno corrente), a destra barretta di avanzamento e conteggio `2/6` in mono. `aria-expanded` sul bottone. Oggi aperto di default.
@@ -177,6 +182,18 @@ Cerchio da 64 `--primary-soft` con icona 30, titolo 20/700, una frase in 14px (m
 - **Campo di testo**: alto 52, bordo 1.5px `--border-strong`, raggio 12; a fuoco bordo `--primary` e alone `--primary-soft`.
 - **Barra di avanzamento**: alta 8 (6 nella versione piccola), binario `--surface-2`, riempimento `--primary`.
 
+### Inserimento a un campo
+Il **+** apre un foglio con un solo campo grande («Cosa hai in testa?», corpo 20) e il microfono a destra se il browser ha la dettatura (Web Speech API, it-IT). Invio salva; Maiusc+Invio va a capo e ogni riga diventa una cosa. Sotto, tre chip spenti: Subito, Oggi, Con…. Predefinito: Importante, contesto attivo. Il toast «Aggiunta a Tutto · Importante» ha l'azione **Dettagli**.
+
+### Oggi
+Dall'alto: avviso del piano (venerdì) · Rimaste indietro · avanzamento · appuntamenti · Routine · **Le tue 3** (stellina `--q1` per entrare/uscire) · **Rapide** · **Da controllare** · «Il resto di oggi» chiuso · In scadenza · dopo le 18 una riga sola «Oggi N su M · Bella giornata. · N giorni di fila».
+
+### Avvisi
+Limite di carico e migration mancante: fondo `--warn-soft`, testo `--warn`, icona `ti-alert-triangle`, sempre con le parole («Troppo per un giorno»), mai solo il colore. Non bloccano niente. Il banner del piano usa `--primary-soft`.
+
+### Contrasto alto e movimento
+`html[data-contrast="alto"]`: `--border` e `--border-strong` più scuri, `--text-2`/`--text-3` più scuri, tipi e badge con bordo, chip e campi con bordo 2px. Con `prefers-reduced-motion: reduce` animazioni e transizioni durano 0.
+
 ## Icone
 
 Tabler Icons, contorno, via CDN (versione fissata):
@@ -192,7 +209,10 @@ Tabler Icons, contorno, via CDN (versione fissata):
 | Pianifica | `ti-calendar-week` | Importante | `ti-target` |
 | Tutto (Armadio) | `ti-stack-2` | Delega | `ti-user-share` |
 | Altro | `ti-dots` | Lascia stare | `ti-wind` |
-| Routine | `ti-repeat` | In attesa | `ti-hourglass-empty` |
+| Routine | `ti-repeat` | Un giorno | `ti-hourglass-empty` |
+| Le tue 3 | `ti-star` / `ti-star-filled` | Rapida | `ti-bolt` |
+| Da controllare | `ti-user-check` | Troppo per un giorno | `ti-alert-triangle` |
+| Dettatura | `ti-microphone` | Invio | `ti-corner-down-left` |
 | Piano della settimana | `ti-map-2` | Persone | `ti-users` |
 | Aggiungi | `ti-plus` | Fatto | `ti-check` / `ti-circle-check` |
 | Quando | `ti-calendar-event` | Con chi | `ti-user` |
