@@ -79,10 +79,12 @@ Token semantici. Nell'app stanno su `:root` (chiaro) e `:root[data-theme="dark"]
 | `--primary-ink` | `#0B5F58` | `#5EEAD4` | testo e icone color primario |
 | `--primary-soft` | `#DDF2EE` | `#12332F` | fondo tenue (bottone secondario, voce attiva del menu) |
 | `--on-primary` | `#FFFFFF` | `#04201D` | testo sopra `--primary` |
-| `--q1` / `--q1-soft` | `#B93C0B` / `#FCE9DF` | `#FB8F63` / `#3A2015` | Subito, ritardi |
-| `--q2` / `--q2-soft` | `#0B5F58` / `#DDF2EE` | `#5EEAD4` / `#12332F` | Importante (= primario) |
-| `--q3` / `--q3-soft` | `#4F4FC4` / `#E9E8FB` | `#AAA8F7` / `#272750` | Delega |
-| `--q4` / `--q4-soft` | `#5F6C67` / `#ECF0EE` | `#93A09B` / `#202A28` | Lascia stare (volutamente grigio) |
+| `--q1-mark` / `--q1` / `--q1-soft` | `#D92D20` / `#B42318` / `#FFF4F3` | `#F97066` / = / `#3A1D1A` | **Subito**: casella, puntini / testo / fondo della riga. Nel PDF anche «!» davanti al titolo |
+| `--q2-mark` / `--q2` / `--q2-soft` | `#0F766E` / `#0B5F58` / `#DDF2EE` | `#2DD4BF` / = / `#12332F` | **Importante** (= primario) |
+| `--q3-mark` / `--q3` / `--q3-soft` | `#2563EB` / `#1D4ED8` / `#E8EFFE` | `#93B4FF` / = / `#1B2A4A` | **Delega** |
+| `--q4-mark` / `--q4` / `--q4-soft` | `#8A9692` / `#5F6C67` / `#ECF0EE` | `#8A9692` / = / `#202A28` | **Lascia stare** (grigio) |
+| `--evt-mark` / `--evt` / `--evt-soft` | `#7C3AED` / `#6D28D9` / `#F3EEFE` | `#B9A2F7` / = / `#261E3D` | **Appuntamento** (Google Calendar): cerchio, ora, fondo |
+| `--pensa` / `--pensa-bordo` / `--pensa-ink` | `#FDF6D8` / `#E3C65A` / `#6B5300` | `#2E2810` / `#7A6420` / `#F2D675` | colonna gialla «In settimana · pensaci dopo» |
 | `--danger` / `--danger-soft` | `#B42318` / `#FCE8E6` | `#F98B82` / `#3B1A17` | eliminare, errori |
 | `--warn` / `--warn-soft` | `#92500A` / `#FBEFD5` | `#F5C261` / `#3A2C10` | avvisi |
 | `--inverse-bg` / `--inverse-text` / `--inverse-accent` | `#14201D` / `#FFFFFF` / `#5EEAD4` | `#ECF1EF` / `#14201D` / `#0B5F58` | toast |
@@ -91,9 +93,19 @@ Token semantici. Nell'app stanno su `:root` (chiaro) e `:root[data-theme="dark"]
 
 I sei colori portanti: primario, Subito, Delega, testo, sfondo, superficie.
 
+### Colori = priorità (v6, 20/10/2026)
+
+Ogni cosa porta il colore del suo tipo, uguale nell'app (chiaro e scuro) e nel foglio PDF:
+
+- **La casella da spuntare** è un quadratino (raggio 7) con il bordo 2px del colore del tipo (`--qN-mark`); spuntata si riempie dello stesso colore. Gli **appuntamenti** hanno un **cerchio** viola al posto del quadratino, su fondo `--evt-soft`.
+- **Subito** ha anche il fondo della riga `--q1-soft`. Nessuna barra colorata laterale, da nessuna parte.
+- Due livelli per colore: `-mark` è il colore esatto per i segni (casella, puntino, cerchio, ≥ 3:1); il token senza suffisso è per il **testo** (≥ 4,5:1 su tutte le superfici). In chiaro sono diversi perché alcuni colori dei segni non arrivano a 4,5:1 come testo (Subito `#D92D20` sul suo fondo: 4,48; Lascia stare `#8A9692`: 3,06). In scuro coincidono.
+- Verificato con a11y-audit (`contrast_checker.py`): tutte le coppie di testo passano 4,5:1 nei due temi; i segni passano 3:1. Le uniche coppie sotto sono la casella di Lascia stare su fondo Subito o appuntamento, combinazioni che non esistono.
+- Legenda (testata di Pianifica a colonne e foglio PDF): quadratino rosso col fondo rosato «Subito», verde «Importante», blu «Delega», grigio «Lascia stare», cerchio viola «Appuntamento».
+
 Regole:
 - «Importante» usa il colore del marchio di proposito: è il posto dove il metodo vuole farti stare.
-- L'arancio compare solo su Subito e sui ritardi. Una cosa fatta perde il colore del tipo.
+- Il rosso compare solo su Subito e sui ritardi. Una cosa fatta resta barrata e attenuata; la casella spuntata tiene il colore del tipo.
 - Tutte le coppie testo/fondo usate stanno a 4,5:1 o più, i contorni dei controlli a 3:1 o più, in entrambi i temi (verificato in automatico sull'anteprima).
 - Rispetto alla proposta di `ui-ux-pro-max`: sfondo e bordi resi neutri (erano verde acqua pieni, troppo presenti per un'app calma) e primario scurito da `#0D9488` a `#0F766E` perché il testo bianco sopra non arrivava a 4,5:1.
 
@@ -173,7 +185,10 @@ Pillola alta 36 con area di tocco estesa a 44. Spento: superficie + bordo. Acces
 Binario `--surface-2` raggio 12, padding 4; voci alte 44. La voce attiva è `--surface-3` con ombra 1 e peso 700. Da 2 a 4 voci, mai di più.
 
 ### Bottom nav
-Quattro voci: Oggi, Pianifica, Tutto, Altro (modalità semplice: solo Oggi · + · Cose). Icona 22 + etichetta 12 sempre visibile. La voce attiva ha una pastiglia `--primary-soft` 56×28 dietro l'icona, testo `--primary-ink` 700 e `aria-current="page"`. Altezza 56 + safe area. Il bottone **+** (56×56, raggio 16) sta 16px sopra la barra, a destra.
+Quattro voci: **Oggi · Settimana · Tutto · Altro** (v6; «Settimana» apre Pianifica; modalità semplice: Oggi · Cose). Icona 22 + etichetta 12 sempre visibile. La voce attiva ha una pastiglia `--primary-soft` 56×28 dietro l'icona, testo `--primary-ink` 700 e `aria-current="page"`. Altezza 56 + safe area.
+
+### Campo fisso (telefono, v6)
+Sopra la barra in basso, sempre visibile: campo «Cosa hai in testa?» (44px, cresce fino a 120px), microfono (se c'è la dettatura) e **[+]** 44×44 `--primary`. Invio salva in Tutto come Importante senza data; più righe = più cose (Maiusc+Invio va a capo). Con il campo vuoto, [+] apre il foglio completo (Subito / Oggi / Con…). I toast stanno sopra il campo.
 
 ### Accordion
 Intestazione alta 52: freccia che ruota di 90°, nome in 700 (con «oggi» accanto al giorno corrente), a destra barretta di avanzamento e conteggio `2/6` in mono. `aria-expanded` sul bottone. Oggi aperto di default.
@@ -214,7 +229,22 @@ Uno alla volta, in quest'ordine: **incontro con il coach** («Hai l'incontro con
 ### Appuntamenti (v5)
 Titolo senza l'orario davanti; sotto «09:45–11:15 · Lavoro». Avvisi su righe proprie, in `--warn` a peso normale, una riga sola: `ti-alert-triangle` «si sovrappone a … e altri N» (e la riga ha un bordo sinistro da 3px `--warn`), `ti-clock-exclamation` «orario nel titolo diverso (10:00)». Con il coach: icona `ti-user-check` ed etichetta «Coach» su `--q3-soft`. La routine del mattino del Privato sta nell'accordion Routine, non nella giornata.
 
-### Il foglio PDF (v5)
+### Pianifica a colonne (computer ≥ 1100px, v6)
+Testata: «Business Plan · Settimana N», ‹ date ›, «N cose · Xh · sett. scorsa F su T (P%)», legenda, a destra [Modifica il piano] [Stampa il foglio] [Invia al coach]. Poi la card «Per il coach» e le colonne: **Da pianificare** 250px (ricerca, chip Subito/Importante/Delega con il conteggio, avviso giallo «N senza giorno né data · Riordina in 10 minuti», elenco trascinabile) · **In settimana** 190px gialla («pensaci dopo») · **Lun–Ven** (Sab/Dom solo se hanno qualcosa) con totale ore in testa, appuntamenti e cose in ordine di ora, cuscinetti e spazi liberi tratteggiati, in fondo «+ Ciclo» e «+ Appuntamento». Si trascinano cose e appuntamenti; con la tastiera Alt + freccia sposta la cosa che ha il fuoco nella colonna accanto. Sotto i 1100px resta la vista a lista.
+
+### Riordina (v6)
+Schermo pieno, una cosa alla volta (le più vecchie prima): in alto «Interrompi», «Riordina», «12 / 92» e la barra; la carta con area, «aperta da N giorni», titolo in corpo display, nota. Quattro tasti grandi 2×2 (≥ 88px) col colore del tipo: Subito (questa settimana), Importante (poi chip Questa sett. / Prossima / Tra 1 mese / Tra 3 mesi / Data), Delega (foglio a chi + quando), Lascia stare. Sotto: È fatta · Spacchettala · Salta. In fondo il riepilogo. Ogni scelta ha il toast con Annulla; chiudendo si riprende dallo stesso punto.
+
+### Sposta un appuntamento (v6)
+Foglio «Sposta a»: chip Domani + giorni della settimana, campi Giorno / Ora / Durata, «Solo questa volta / Anche le prossime» se si ripete, avviso giallo se si sovrappone con [Usa … alle hh:mm] (primo spazio libero da adesso), «X riceve l'aggiornamento» se ci sono invitati (il bottone diventa «Sposta e avvisa»). Se lo organizza un altro: «Lo organizza X: chiedigli di spostarlo» + [Crea un promemoria].
+
+### Per il coach (v6)
+Card con bordo viola: «Per il coach», prossimo incontro e conto alla rovescia, quattro voci con quadratino spuntato dai dati (verde quando è fatta) e un bottone per quella aperta.
+
+### Il foglio PDF (v6: a colori)
+A4 a colori (stampa a colori come nel mockup; in scala di grigi le Subito si riconoscono dal «!» e dal fondo): testata con nome e settimana, «Fatte ____ / N», «Q2 spostate ____», legenda; riquadro giallo «Settimana (pensaci dopo)»; per giorno cerchio viola + ora viola per gli appuntamenti, quadratino col bordo del colore del tipo per le cose (Subito su fondo rosato `253,226,223` e «!»), cuscinetti tratteggiati con la riga da compilare; colonna destra «APPUNTI · NUOVE COSE EMERSE» a righe fino in fondo; piè di pagina «Stampato il … · Inviato a … il …» e «1 / 1». Un giorno non si spezza mai tra due pagine; testo ≥ 9 pt (anche in A5).
+
+### Il foglio PDF (v5, sostituito)
 Formato del piano i-Time, leggibile in bianco e nero: titolo «Business Plan Settimanale — Nome — Settimana N (gg/mm–gg/mm)»; riquadro «Settimana (pensaci dopo)» giallo chiaro (255, 244, 179) con bordo grigio; un blocco per giorno separato da una riga sottile; quadratino = cosa (spuntato se fatta, Subito su fondo grigio in grassetto), cerchio = appuntamento o routine con orario inizio–fine, quadratino tratteggiato = cuscinetto con una riga vuota sotto, nota in grigio piccolo, asterisco = sovrapposto; colonna destra «APPUNTI» a righe punteggiate; in fondo «Nuove cose emerse» (8 righe) e «Fatte ____ / ____». A4 o A5.
 
 ### Avvisi

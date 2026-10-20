@@ -92,10 +92,13 @@
   --primary-soft: #DDF2EE;
   --on-primary: #FFFFFF;
 
-  --q1: #B93C0B;  --q1-soft: #FCE9DF;
-  --q2: #0B5F58;  --q2-soft: #DDF2EE;
-  --q3: #4F4FC4;  --q3-soft: #E9E8FB;
-  --q4: #5F6C67;  --q4-soft: #ECF0EE;
+  /* colori = priorità. --qN: testo (≥ 4.5:1 su tutte le superfici); --qN-mark: segni (casella, puntini) col colore esatto */
+  --q1: #B42318;  --q1-mark: #D92D20;  --q1-soft: #FFF4F3;   /* Subito */
+  --q2: #0B5F58;  --q2-mark: #0F766E;  --q2-soft: #DDF2EE;   /* Importante */
+  --q3: #1D4ED8;  --q3-mark: #2563EB;  --q3-soft: #E8EFFE;   /* Delega */
+  --q4: #5F6C67;  --q4-mark: #8A9692;  --q4-soft: #ECF0EE;   /* Lascia stare */
+  --evt: #6D28D9; --evt-mark: #7C3AED; --evt-soft: #F3EEFE;  /* Appuntamento (Google Calendar) */
+  --pensa: #FDF6D8; --pensa-bordo: #E3C65A; --pensa-ink: #6B5300;   /* «In settimana · pensaci dopo» */
 
   --danger: #B42318; --danger-soft: #FCE8E6;
   --warn: #92500A;   --warn-soft: #FBEFD5;
@@ -131,10 +134,12 @@
   --primary-soft: #12332F;
   --on-primary: #04201D;
 
-  --q1: #FB8F63;  --q1-soft: #3A2015;
-  --q2: #5EEAD4;  --q2-soft: #12332F;
-  --q3: #AAA8F7;  --q3-soft: #272750;
-  --q4: #93A09B;  --q4-soft: #202A28;
+  --q1: #F97066;  --q1-mark: #F97066;  --q1-soft: #3A1D1A;
+  --q2: #2DD4BF;  --q2-mark: #2DD4BF;  --q2-soft: #12332F;
+  --q3: #93B4FF;  --q3-mark: #93B4FF;  --q3-soft: #1B2A4A;
+  --q4: #8A9692;  --q4-mark: #8A9692;  --q4-soft: #202A28;
+  --evt: #B9A2F7; --evt-mark: #B9A2F7; --evt-soft: #261E3D;
+  --pensa: #2E2810; --pensa-bordo: #7A6420; --pensa-ink: #F2D675;
 
   --danger: #F98B82; --danger-soft: #3B1A17;
   --warn: #F5C261;   --warn-soft: #3A2C10;
@@ -205,13 +210,20 @@ h1, h2, h3, p { margin: 0; }
 /* --- Checkbox con animazione di completamento --- */
 .check { position: relative; flex: none; display: grid; place-items: center; width: var(--tap); height: var(--tap); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .check input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
-.check-box { position: relative; display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--r-full); border: 2px solid var(--border-strong); background: transparent; transition: background-color var(--t-base) var(--ease-out), border-color var(--t-base) var(--ease-out); }
+.check-box { position: relative; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; border: 2px solid var(--border-strong); background: transparent; transition: background-color var(--t-base) var(--ease-out), border-color var(--t-base) var(--ease-out); }
 .check-box svg { width: 16px; height: 16px; fill: none; stroke: var(--on-primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 22; stroke-dashoffset: 22; transition: stroke-dashoffset var(--t-base) var(--ease-out) 80ms; }
 .check-box::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; border: 2px solid var(--primary); opacity: 0; }
 @media (hover: hover) { .check:hover .check-box { border-color: var(--primary); } }
 .check input:focus-visible + .check-box { outline: 2px solid var(--ring); outline-offset: 3px; }
 .check input:checked + .check-box { background: var(--primary); border-color: var(--primary); animation: check-pop var(--t-slow) var(--ease-pop); }
 .check input:checked + .check-box svg { stroke-dashoffset: 0; }
+/* priorità: bordo della casella (e fondo quando è spuntata) col colore del tipo; Subito ha anche il fondo rosato */
+.item.p-q1 .check-box { border-color: var(--q1-mark); } .item.p-q2 .check-box { border-color: var(--q2-mark); }
+.item.p-q3 .check-box { border-color: var(--q3-mark); } .item.p-q4 .check-box { border-color: var(--q4-mark); }
+.item.p-q1 .check input:checked + .check-box { background: var(--q1-mark); border-color: var(--q1-mark); }
+.item.p-q2 .check input:checked + .check-box { background: var(--q2-mark); border-color: var(--q2-mark); }
+.item.p-q3 .check input:checked + .check-box { background: var(--q3-mark); border-color: var(--q3-mark); }
+.item.p-q4 .check input:checked + .check-box { background: var(--q4-mark); border-color: var(--q4-mark); }
 .check input:checked + .check-box::after { animation: check-ring 480ms var(--ease-out); }
 @keyframes check-pop { 0% { transform: scale(.8); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
 @keyframes check-ring { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(2); } }
@@ -341,7 +353,15 @@ a { color: var(--primary-ink); }
 .logo span { color: var(--primary-ink); }
 
 /* --- Impalcatura: telefono --- */
-#app { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; height: 100dvh; }
+#app { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; height: 100%; height: 100dvh; }
+/* campo fisso sopra la barra in basso */
+.cattura { display: flex; align-items: flex-end; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); background: var(--surface); border-top: 1px solid var(--border); }
+.cattura textarea { flex: 1; min-width: 0; min-height: var(--tap); max-height: 120px; padding: 10px var(--sp-3); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); font-size: var(--fs-body); line-height: 22px; resize: none; }
+.cattura textarea:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.cattura-mic.ascolta { background: var(--q1-soft); color: var(--q1); }
+.cattura-add { display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); }
+.cattura-add .ti { font-size: 24px; }
+.cattura-add:active { transform: translateY(1px); }
 .side { display: none; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: calc(var(--sp-2) + env(safe-area-inset-top)) var(--sp-4) var(--sp-2); background: var(--bg); }
 .top .seg { padding: 3px; }
@@ -350,7 +370,7 @@ a { color: var(--primary-ink); }
 .top-search, .top-actions { display: none; }
 #main { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 #view { max-width: 720px; margin: 0 auto; padding: var(--sp-2) var(--sp-4) var(--sp-7); }
-.tabbar { grid-template-columns: repeat(5, 1fr); }
+.tabbar { grid-template-columns: repeat(4, 1fr); }
 .tabbar .tab-add { align-content: center; }
 .tabbar .fab { width: 48px; height: 48px; border-radius: var(--r-lg); box-shadow: 0 3px 0 var(--primary-deep); margin-top: -6px; }
 .tabbar .fab .ti { font-size: 24px; }
@@ -359,7 +379,7 @@ a { color: var(--primary-ink); }
 /* --- Impalcatura: desktop --- */
 @media (min-width: 768px) {
   #app { grid-template-columns: 88px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .tabbar { display: none; }
+  .tabbar, .cattura { display: none; }
   .side { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-1); grid-row: 1 / 3; padding: var(--sp-4) var(--sp-2); background: var(--surface); border-right: 1px solid var(--border); }
   .logo-side { font-size: 18px; letter-spacing: 1.5px; text-align: center; white-space: normal; line-height: 1.05; margin-bottom: var(--sp-4); }
   .logo-top { display: none; }
@@ -419,6 +439,7 @@ a { color: var(--primary-ink); }
 /* --- Riga con azioni rapide --- */
 .item { position: relative; background: var(--surface); }
 .item-row { position: relative; z-index: 1; background: var(--surface); transition: transform var(--t-base) var(--ease-out); touch-action: pan-y; }
+.item.p-q1:not(.is-done) .item-row { background: var(--q1-soft); }
 .item.is-dragging .item-row { transition: none; }
 .item-title mark { background: var(--warn-soft); color: inherit; border-radius: 3px; }
 .item-side { gap: var(--sp-1); }
@@ -536,6 +557,7 @@ a { color: var(--primary-ink); }
 .rapida .ti { font-size: 12px; }
 .stella .ti { color: var(--text-3); }
 .stella[aria-pressed="true"] .ti { color: var(--q1); }
+.lh-subito, .lh-subito .lh-ico { color: var(--q1); }
 .lh-ico { font-size: 16px; margin-right: 6px; vertical-align: -2px; color: var(--text-3); }
 .carry-azioni.tre.chips-wrap { display: flex; }
 .ctrl-riga .item-row { grid-template-columns: minmax(0, 1fr); padding-left: var(--sp-4); }
@@ -571,7 +593,7 @@ a { color: var(--primary-ink); }
 .semplice .nav [data-tab="pianifica"], .semplice .nav [data-tab="altro"],
 .semplice .side [data-tab="pianifica"], .semplice .side [data-tab="altro"],
 .semplice .solo-completa, .semplice .q2-nudge { display: none !important; }
-.semplice .tabbar { grid-template-columns: repeat(3, 1fr); }
+.semplice .tabbar { grid-template-columns: repeat(2, 1fr); }
 
 /* contrasto alto: bordi più marcati, testo secondario più scuro, badge con bordo */
 [data-contrast="alto"] { --border: #84918C; --border-strong: #46544F; --text-2: #26332F; --text-3: #37443F; --done-meta: #37443F; --done-opacity: 1; }
@@ -596,7 +618,7 @@ a { color: var(--primary-ink); }
 .mese-g:hover { background: var(--surface-2); }
 .dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; max-width: 34px; min-height: 6px; }
 .dot { width: 6px; height: 6px; border-radius: var(--r-full); background: var(--q4); }
-.dot.q1 { background: var(--q1); } .dot.q2 { background: var(--q2); } .dot.q3 { background: var(--q3); } .dot.q4 { background: var(--q4); }
+.dot.q1 { background: var(--q1-mark); } .dot.q2 { background: var(--q2-mark); } .dot.q3 { background: var(--q3-mark); } .dot.q4 { background: var(--q4-mark); } .dot.evt { background: var(--evt-mark); }
 .legenda { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin: var(--sp-3) var(--sp-1) 0; font-size: var(--fs-caption); color: var(--text-2); }
 .legenda span { display: inline-flex; align-items: center; gap: 6px; }
 @media (min-width: 768px) { .mese-g { min-height: 76px; } }
@@ -739,8 +761,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .bp-occ { flex-basis: 100%; font-weight: var(--fw-regular); color: var(--text-3); }
 .bp-drop-body { display: grid; gap: 6px; padding: 0 var(--sp-2) var(--sp-2); }
 .bp-col-empty { padding: var(--sp-2); font-size: var(--fs-caption); color: var(--text-3); text-align: center; }
-.bp-mini { position: relative; min-height: var(--tap); padding: 6px 36px 6px var(--sp-3); border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--q4); font-size: var(--fs-label); line-height: var(--lh-label); cursor: pointer; }
-.bp-mini.q1 { border-left-color: var(--q1); } .bp-mini.q2 { border-left-color: var(--q2); } .bp-mini.q3 { border-left-color: var(--q3); }
+.bp-mini { position: relative; min-height: var(--tap); padding: 6px 36px 6px var(--sp-3); border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); font-size: var(--fs-label); line-height: var(--lh-label); cursor: pointer; }
+.bp-mini.q1 { background: var(--q1-soft); }
 .bp-mini.dragging { opacity: .4; }
 .bp-mini-meta { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--text-3); }
 .bp-mini-x { position: absolute; right: 0; top: 0; display: grid; place-items: center; width: 36px; height: 100%; color: var(--text-3); }
@@ -851,6 +873,12 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .group > .evt-riga + *, .group > * + .evt-riga, .group > .cusc-riga + *, .group > * + .cusc-riga, .slot.dopo-sequenza { border-top: 1px solid var(--border); }
 .evt-ico { display: grid; place-items: center; width: var(--tap); height: var(--tap); color: var(--text-3); }
 .evt-ico .ti { font-size: 20px; }
+/* appuntamento: cerchio viola al posto della casella, fondo viola chiaro */
+.evt-riga.evt-app { background: var(--evt-soft); }
+.evt-cerchio { display: block; width: 22px; height: 22px; border-radius: var(--r-full); border: 2px solid var(--evt-mark); }
+.evt-app .evt-ico { color: var(--evt); }
+.evt-app .item-title { color: var(--text); }
+.evt-app .item-meta .mono { color: var(--evt); font-weight: var(--fw-strong); }
 .evt-main { display: flex; flex-direction: column; min-width: 0; }
 .evt-riga .item-title { color: var(--text-2); -webkit-line-clamp: 1; }
 .evt-riga .item-meta .mono { color: var(--text-2); }
@@ -962,13 +990,13 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
 /* ══ v5 · metodo i-Time ══ */
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
-.tag-coach { display: inline-flex; align-items: center; margin-right: 6px; padding: 0 6px; border-radius: var(--r-sm); background: var(--q3-soft); color: var(--q3); font-size: var(--fs-caption); line-height: 18px; font-weight: var(--fw-strong); vertical-align: 1px; }
+.tag-coach { display: inline-flex; align-items: center; margin-right: 6px; padding: 0 6px; border-radius: var(--r-sm); background: var(--surface); color: var(--evt); border: 1px solid var(--evt-mark); font-size: var(--fs-caption); line-height: 18px; font-weight: var(--fw-strong); vertical-align: 1px; }
 .evt-diverso { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); }
 .evt-diverso .ti { font-size: 13px; }
 .evt-nota { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 2px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--warn); }
 .evt-nota > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .evt-nota .ti { flex: none; font-size: 13px; }
-.evt-riga.evt-sovrapposto { box-shadow: inset 3px 0 0 var(--warn); }
+
 .evt-sovrapposto .evt-ico { color: var(--warn); }
 .cols .evt-riga .evt-nota > span { white-space: normal; }
 .acc-body > .evt-riga + .item, .acc-body > .evt-riga + .evt-riga { border-top: 1px solid var(--border); }
@@ -1084,7 +1112,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .riga-scelta .seg { min-width: 0; }
 
 /* --- Toast e tooltip --- */
-#toast-container { position: fixed; z-index: 90; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + var(--sp-3) + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); pointer-events: none; }
+#toast-container { position: fixed; z-index: 90; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + 61px + var(--sp-3) + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); pointer-events: none; }
 #toast-container .toast { pointer-events: auto; animation: sale var(--t-base) var(--ease-out); }
 .toast.error .ti:first-child, .toast.warn .ti:first-child { color: #F98B82; }
 [data-theme="dark"] .toast.error .ti:first-child, [data-theme="dark"] .toast.warn .ti:first-child { color: #B42318; }
@@ -1095,7 +1123,126 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 @keyframes skel { 50% { opacity: .5; } }
 .ptr { display: grid; place-items: center; height: 0; overflow: hidden; color: var(--text-3); transition: height var(--t-base); }
 .ptr.on { height: 40px; }
-@media print { .top, .side, .tabbar { display: none; } }
+@media print { .top, .side, .tabbar, .cattura { display: none; } html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+/* ══ v6 · colori = priorità, colonne, Riordina, coach ══ */
+.aperte-azioni { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-2); }
+.dl-label { display: block; margin: var(--sp-3) 0 var(--sp-1); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-strong); color: var(--text-2); }
+.link-btn { min-height: 24px; padding: 0; border: 0; background: none; color: var(--primary-ink); font: inherit; text-decoration: underline; }
+/* legenda */
+.legenda { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.leg-voce { display: inline-flex; align-items: center; gap: 6px; }
+.leg-segno { width: 14px; height: 14px; border-radius: 4px; border: 2px solid var(--q4-mark); }
+.leg-segno.q1 { border-color: var(--q1-mark); background: var(--q1-soft); } .leg-segno.q2 { border-color: var(--q2-mark); }
+.leg-segno.q3 { border-color: var(--q3-mark); } .leg-segno.leg-app { border-color: var(--evt-mark); border-radius: var(--r-full); background: var(--evt-soft); }
+/* Pianifica a colonne (≥ 1100px) */
+#view.largo { max-width: none; }
+.vh-board { align-items: center; }
+.vh-board .seg { min-width: 220px; }
+.board-testa { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-4); align-items: center; margin-bottom: var(--sp-4); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); }
+.bt-titolo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
+.bt-titolo h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
+.bt-nav { display: flex; align-items: center; gap: var(--sp-1); color: var(--text-2); font-size: var(--fs-label); }
+.bt-stat { grid-column: 1; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.bt-stat b { color: var(--text); }
+.board-testa .legenda { grid-column: 1; }
+.bt-azioni { grid-column: 2; grid-row: 1 / 4; display: flex; flex-direction: column; gap: var(--sp-2); }
+.board-scorri { overflow-x: auto; padding-bottom: var(--sp-2); }
+.cols.board { grid-template-columns: 250px 190px repeat(var(--giorni), minmax(148px, 1fr)); min-width: calc(440px + var(--giorni) * 148px + (var(--giorni) + 1) * var(--sp-3)); }
+.bcol { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.bcol-h { display: flex; align-items: baseline; justify-content: space-between; margin: 0 var(--sp-1); font-size: var(--fs-label); font-weight: var(--fw-strong); color: var(--text-2); }
+.bcol.oggi .bcol-h { color: var(--primary-ink); }
+.bcol-sotto { margin: -6px var(--sp-1) 0; font-size: var(--fs-caption); color: var(--pensa-ink); }
+.bzona { min-height: 120px; }
+.bzona.drag-over { outline: 2px dashed var(--primary); outline-offset: 2px; }
+.bcol-sett .bzona { background: var(--pensa); border-color: var(--pensa-bordo); }
+.bcol-sett .bzona .item, .bcol-sett .bzona .item-row { background: transparent; }
+.bcol-sett .col-vuota { color: var(--pensa-ink); }
+.bcol-dp .cerca { min-height: var(--tap); }
+.dp-chips { row-gap: var(--sp-2); }
+.dp-chips .chip { height: var(--tap); padding: 0 10px; }
+.chip-q1 { color: var(--q1); } .chip-q2 { color: var(--q2); } .chip-q3 { color: var(--q3); }
+.dp-avviso { display: flex; align-items: flex-start; gap: var(--sp-2); min-height: var(--tap); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--warn); border-radius: var(--r-md); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-caption); line-height: var(--lh-caption); text-align: left; }
+.dp-avviso .ti { flex: none; font-size: 16px; }
+#dp-lista { max-height: 70vh; overflow-y: auto; }
+.bcol-piu { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.bcol-piu .btn { min-height: var(--tap); padding: 0 var(--sp-2); }
+.board .fascia-h { padding: 6px var(--sp-2) 2px; font-size: var(--fs-caption); font-weight: var(--fw-strong); color: var(--text-3); border-top: 1px solid var(--border); }
+.board .cusc-riga, .spazio-riga { margin: 4px; border: 1.5px dashed var(--border-strong); border-radius: var(--r-sm); background: transparent; }
+.spazio-riga { min-height: 36px; padding: 2px var(--sp-2) 2px 2px; border-color: var(--border); }
+.spazio-riga .item-title { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.spazio-riga .item-meta { display: none; }
+.cols .spazio-riga .evt-ico { width: 24px; height: 24px; }
+.cols .spazio-riga .evt-ico .ti { font-size: 14px; }
+.board .cusc-riga .evt-riga { background: transparent; }
+.spazio-riga .item-title, .spazio-riga .evt-ico { color: var(--text-3); }
+.board .evt-riga[draggable="true"] { cursor: grab; }
+.board .dragging { opacity: .45; }
+.board-piede { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-2); }
+.evt-riga[data-act="evt-sposta"] { cursor: pointer; }
+.evt-riga[data-act="evt-sposta"]:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+@media (hover: hover) { .evt-riga[data-act="evt-sposta"]:hover { filter: brightness(.98); } }
+/* Sposta a */
+.sevt-campi { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--sp-2); }
+.sevt-campi .input { min-height: var(--tap); padding: 0 var(--sp-2); }
+.sevt-avviso { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--sp-1) var(--sp-2); align-items: start; margin-top: var(--sp-3); padding: var(--sp-3); border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-label); line-height: var(--lh-label); }
+.sevt-avviso.warn { background: var(--warn-soft); color: var(--warn); }
+.sevt-avviso .btn { grid-column: 2; justify-self: start; }
+#sevt-errore, #nevt-errore { margin-top: var(--sp-2); color: var(--danger); }
+#nevt-corpo > label .input { min-height: var(--tap); }
+/* Riordina: a schermo pieno */
+.riordina-overlay { z-index: 39; align-items: stretch !important; padding: 0 !important; background: var(--bg); }
+.riordina { display: flex; flex-direction: column; width: 100%; max-width: 640px; margin: 0 auto; padding: calc(var(--sp-3) + env(safe-area-inset-top)) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom)); overflow-y: auto; }
+#rio-corpo { display: flex; flex-direction: column; gap: var(--sp-4); min-height: 100%; }
+.rio-testa { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-2); }
+.rio-testa h2 { font-size: var(--fs-title); line-height: var(--lh-title); text-align: center; }
+.rio-conto { font-size: var(--fs-label); color: var(--text-2); }
+.rio-carta { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-1); }
+.rio-carta.p-q1 { background: var(--q1-soft); }
+.rio-meta { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-3); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.rio-area { font-weight: var(--fw-strong); color: var(--text); }
+.rio-cosa { margin-top: var(--sp-3); font-size: var(--fs-display); line-height: var(--lh-display); font-weight: var(--fw-strong); overflow-wrap: anywhere; }
+.rio-nota { margin-top: var(--sp-3); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--text-2); white-space: pre-line; }
+.rio-tasti { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.rio-tasto { display: grid; justify-items: start; align-content: center; gap: 2px; min-height: 88px; padding: var(--sp-3) var(--sp-4); border: 2px solid var(--q4-mark); border-radius: var(--r-lg); background: var(--surface); color: var(--text); text-align: left; transition: transform var(--t-fast); }
+.rio-tasto .ti { font-size: 22px; }
+.rio-tasto b { font-size: var(--fs-body); line-height: var(--lh-body); }
+.rio-tasto small { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.rio-tasto:active { transform: scale(.98); }
+.rio-tasto:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.rio-tasto.t-q1 { border-color: var(--q1-mark); background: var(--q1-soft); } .rio-tasto.t-q1 .ti, .rio-tasto.t-q1 b { color: var(--q1); }
+.rio-tasto.t-q2 { border-color: var(--q2-mark); background: var(--q2-soft); } .rio-tasto.t-q2 .ti, .rio-tasto.t-q2 b { color: var(--q2); }
+.rio-tasto.t-q3 { border-color: var(--q3-mark); background: var(--q3-soft); } .rio-tasto.t-q3 .ti, .rio-tasto.t-q3 b { color: var(--q3); }
+.rio-tasto.t-q4 { border-color: var(--q4-mark); background: var(--q4-soft); } .rio-tasto.t-q4 .ti, .rio-tasto.t-q4 b { color: var(--q4); }
+.rio-tasto[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px currentColor; }
+.rio-date { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.rio-date .chip { height: var(--tap); }
+.rio-data-scelta { position: relative; }
+.rio-data-scelta input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.rio-altro { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.rio-altro .btn { min-height: var(--tap); }
+.rio-altro .btn-ghost { margin-left: auto; }
+.rio-piede { margin-top: auto; display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); padding-top: var(--sp-3); border-top: 1px solid var(--border); font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.rio-fine { flex: 1; display: grid; place-items: center; }
+/* Per il coach */
+.coach-card { margin: 0 0 var(--sp-4); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--evt-mark); }
+.cc-testa { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; }
+.cc-testa > .ti { font-size: 22px; color: var(--evt); }
+.cc-testa h2 { font-size: var(--fs-body); line-height: var(--lh-body); }
+.cc-testa p { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.cc-n { font-size: var(--fs-label); color: var(--text-2); }
+.cc-lista { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0 0; padding: 0; list-style: none; }
+.cc-lista li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: center; min-height: var(--tap); }
+.cc-lista li div { display: flex; flex-direction: column; min-width: 0; }
+.cc-lista li b { font-size: var(--fs-label); line-height: var(--lh-label); }
+.cc-lista li span:not(.cc-check):not(.sr-only) { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.cc-lista li .btn { min-height: var(--tap); }
+.cc-check { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border-strong); }
+.cc-lista li.ok .cc-check { background: var(--primary); border-color: var(--primary); }
+.cc-check svg { width: 14px; height: 14px; fill: none; stroke: var(--on-primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.cc-lista li.ok b { color: var(--text-2); }
+@media (min-width: 1100px) { .board-piede + .group, .coach-card { max-width: none; } }
+@media print { .cattura, .riordina-overlay { display: none !important; } }
+
 
 .acc + .riga-link, .riga-link + .acc { border-top: 1px solid var(--border); }
 .chip.suggerito:not(.selected) { border-color: var(--primary); color: var(--primary-ink); }
@@ -1137,11 +1284,18 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
   <!-- CONTENUTO -->
   <main id="main"><div id="view"></div></main>
 
+  <!-- CAMPO FISSO (telefono): una riga = una cosa, Importante senza data -->
+  <form class="cattura" id="cattura" autocomplete="off" aria-label="Aggiungi al volo">
+    <label class="sr-only" for="cattura-testo">Cosa hai in testa?</label>
+    <textarea id="cattura-testo" rows="1" placeholder="Cosa hai in testa?" enterkeyhint="done" autocomplete="off" spellcheck="true"></textarea>
+    <button type="button" class="btn btn-icon cattura-mic" id="cattura-mic" data-act="cattura-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
+    <button type="submit" class="cattura-add" aria-label="Aggiungi a Tutto"><i class="ti ti-plus"></i></button>
+  </form>
+
   <!-- BARRA IN BASSO (telefono) -->
   <nav class="nav tabbar" aria-label="Sezioni">
     <button type="button" data-tab="oggi"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
-    <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
-    <button type="button" class="tab-add" data-act="nuovo" aria-label="Aggiungi una cosa da fare"><span class="fab"><i class="ti ti-plus"></i></span></button>
+    <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Settimana</button>
     <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-stack-2"></i></span><span class="l-tutto">Tutto</span></button>
     <button type="button" data-tab="altro"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
   </nav>
@@ -3139,8 +3293,16 @@ const gcal = {
   calendarId: localStorage.getItem('gcal_cal_id') || null,
   email:      localStorage.getItem('gcal_email') || null,
   expiresAt:  parseInt(localStorage.getItem('gcal_expires') || '0'),
+  scope:      localStorage.getItem('gcal_scope') || '',
   client:     null   // GIS token client
 };
+// Per spostare gli appuntamenti serve poter scrivere gli eventi: lo scope «calendar» (completo) o «calendar.events».
+const GCAL_SCOPE_EVENTI = 'https://www.googleapis.com/auth/calendar.events';
+function haScopeEventi() {
+  const s = (gcal.scope || '').split(/\s+/);
+  return !gcal.scope || s.includes(GCAL_SCOPE) || s.includes(GCAL_SCOPE_EVENTI);   // vuoto = token di prima, chiesto con «calendar»
+}
+const gcalEraCollegato = () => !!gcal.email;
 
 let areesWeekOffset  = 0;
 let settimanaOffset  = 0;
@@ -3259,7 +3421,8 @@ function isGcalTokenValid() {
 }
 
 function initGcal() {
-  // Carica token da DB se non in localStorage
+  // Carica token da DB se non in localStorage (si chiama solo dopo il login: user_tokens è visibile solo all'utente collegato)
+  if (localStorage.getItem('gcal_da_salvare') && isGcalTokenValid()) saveGcalTokenToDB();
   loadGcalTokenFromDB();
   updateGcalButton();
   // Schedule retry ogni 5 min per sync falliti
@@ -3281,7 +3444,10 @@ function _tryInitGis() {
 }
 
 async function _handleGcalToken(resp) {
-  if (resp.error) { showToast('Errore Google: ' + resp.error, 'error'); return; }
+  if (resp.error) { showToast(resp.error === 'access_denied' ? 'Google non ha dato il permesso: riprova e accetta l\'accesso al calendario.' : 'Errore Google: ' + resp.error, 'error'); return; }
+  gcal.scope = resp.scope || GCAL_SCOPE;
+  localStorage.setItem('gcal_scope', gcal.scope);
+  if (!haScopeEventi()) showToast('Google non ha dato il permesso di modificare gli eventi: ricollega e lascia spuntato «Vedere, modificare… i calendari».', 'warn');
   gcal.token     = resp.access_token;
   gcal.expiresAt = Date.now() + (resp.expires_in * 1000);
   gcal.email     = GCAL_USER_EMAIL;
@@ -3324,7 +3490,11 @@ function checkImplicitCallback() {
   localStorage.setItem('gcal_token',   gcal.token);
   localStorage.setItem('gcal_expires', gcal.expiresAt);
   localStorage.setItem('gcal_email',   gcal.email);
+  gcal.scope = p.get('scope') || GCAL_SCOPE;
+  localStorage.setItem('gcal_scope', gcal.scope);
   history.replaceState(null, '', window.location.pathname);
+  // prima del login il database non accetta scritture: si salva dopo, da initGcal
+  if (typeof _appAvviata === 'undefined' || !_appAvviata) { localStorage.setItem('gcal_da_salvare', '1'); return; }
   saveGcalTokenToDB().then(() => {
     updateGcalButton();
     ensureGcalCalendar().then(() => showToast('Google Calendar connesso ✓', 'success'));
@@ -3334,7 +3504,8 @@ checkImplicitCallback();
 
 async function loadGcalTokenFromDB() {
   try {
-    const { data } = await db.from('user_tokens').select('*').eq('user_email', GCAL_USER_EMAIL).maybeSingle();
+    const { data, error } = await db.from('user_tokens').select('*').eq('user_email', GCAL_USER_EMAIL).maybeSingle();
+    if (error) { console.warn('[GCal] lettura token:', error.message); return; }
     if (!data) return;
     if (!gcal.token && data.google_access_token) {
       gcal.token      = data.google_access_token;
@@ -3352,14 +3523,16 @@ async function loadGcalTokenFromDB() {
 
 async function saveGcalTokenToDB() {
   try {
-    await db.from('user_tokens').upsert({
+    const { error } = await db.from('user_tokens').upsert({
       user_email:           GCAL_USER_EMAIL,
       google_access_token:  gcal.token,
       google_refresh_token: null,
       google_calendar_id:   gcal.calendarId,
       expires_at:           new Date(gcal.expiresAt).toISOString()
     }, { onConflict: 'user_email' });
-  } catch (_) {}
+    if (error) throw error;
+    localStorage.removeItem('gcal_da_salvare');
+  } catch (e) { console.warn('[GCal] salvataggio token:', e.message); localStorage.setItem('gcal_da_salvare', '1'); }
 }
 
 async function ensureGcalCalendar() {
@@ -3475,7 +3648,7 @@ async function retryFailedSyncs() {
 
 function disconnectGcal() {
   gcal.token = null; gcal.calendarId = null; gcal.email = null; gcal.expiresAt = 0;
-  ['gcal_token','gcal_expires','gcal_cal_id','gcal_email'].forEach(k => localStorage.removeItem(k));
+  ['gcal_token','gcal_expires','gcal_cal_id','gcal_email','gcal_scope'].forEach(k => localStorage.removeItem(k));
   db.from('user_tokens').delete().eq('user_email', GCAL_USER_EMAIL).then(() => {});
   updateGcalButton();
   closeModal('gcalOverlay');
@@ -5258,7 +5431,7 @@ function updateGcalButton() {
   if (!btn) return;
   const ok = !!isGcalTokenValid();
   btn.classList.toggle('connected', ok);
-  btn.dataset.tip = ok ? 'Google Calendar collegato' : 'Collega Google Calendar';
+  btn.dataset.tip = ok ? 'Google Calendar collegato' : gcalEraCollegato() ? 'Ricollega Google Calendar' : 'Collega Google Calendar';
   btn.setAttribute('aria-label', btn.dataset.tip);
 }
 
@@ -5310,7 +5483,7 @@ function riga(r, opz) {
     </div>`;
   const blocco = fatto ? '' : c.inderogabile && state.inderoColOk ? '<i class="ti ti-lock blocco-ico" role="img" aria-label="Importante bloccata in agenda: inderogabile" data-tip="Importante bloccata in agenda: non si sposta"></i>'
     : c.calendar_event_id ? '<i class="ti ti-calendar-check blocco-ico" role="img" aria-label="Bloccata in agenda" data-tip="Bloccata in agenda su Google Calendar"></i>' : '';
-  return `<div class="item${fatto ? ' is-done' : ''}${inRitardo ? ' is-late' : ''}" data-id="${c.id}"${data}${o.trascina ? ' draggable="true"' : ''}>
+  return `<div class="item p-q${q}${fatto ? ' is-done' : ''}${inRitardo ? ' is-late' : ''}" data-id="${c.id}"${data}${o.trascina ? ' draggable="true"' : ''}>
     ${azioni}
     <div class="item-row">
       <label class="check"><input type="checkbox" data-act="spunta"${fatto ? ' checked' : ''}${o.solaLettura ? ' disabled' : ''} aria-label="Fatta: ${esc(c.title)}"><span class="check-box">${SVG_SPUNTA}</span></label>
@@ -5926,10 +6099,7 @@ function vistaOggi() {
 
   // le tue 3, poi le rapide, poi il resto (chiuso) — le righe non si ripetono tra le sezioni
   const focusIds = focusDiOggi(righe);
-  const focus = righe.filter(r => focusIds.has(r.c.id));
   const rapide = rapideDiOggi(righe, focusIds);
-  const rapideIds = new Set(rapide.map(r => r.c.id));
-  const resto = righe.filter(r => !focusIds.has(r.c.id) && !rapideIds.has(r.c.id));
   const controllo = daControllare();
   const inVista = new Set([...righe, ...rapide].map(r => r.c.id).concat(controllo.map(c => c.id)));
   const scadenza = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !inVista.has(c.id) && getEscalation(c) === 'crit')
@@ -5943,32 +6113,35 @@ function vistaOggi() {
   h += bannerQ2();
   h += bannerCicliCal();
   h += bloccoRimaste();
-  if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> di <b class="mono">${tot}</b> fatte</span></div>`;
+  if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> / <b class="mono">${tot}</b> fatte</span></div>`;
 
-  // appuntamenti di Google Calendar e cuscinetti, in ordine di ora
-  const giornata = sequenzaGiorno([], oggi).conOra;
-  if (giornata.length) {
-    h += `<p class="list-head"><span>La giornata</span><span class="mono">${eventi.length ? 'Google Calendar' : ''}</span></p><div class="group">${giornata.map(x =>
-      x.tipo === 'evento' ? rigaEvento(x.e) : rigaCuscinetto(x.item, { azioni: !semplice })).join('')}</div>`;
+  // v6 · 1. SUBITO in cima (quelle con un'ora stanno nella giornata, al loro posto)
+  const subito = righe.filter(r => computeEffectiveQ(r.c) === 1 && !r.ora);
+  if (subito.length) {
+    const nf = subito.filter(r => r.fatto).length;
+    h += `<p class="list-head lh-subito"><span><i class="ti ti-flame lh-ico"></i>Subito</span><span class="mono">${nf}/${subito.length}</span></p><div class="group">${subito.map(r => riga(r, opz)).join('')}</div>`;
   }
+  // 2. La giornata ora per ora: appuntamenti (viola), cuscinetti, cose con ora; sotto quelle senza ora (le tue 3 per prime)
+  const altre = righe.filter(r => !subito.includes(r));
+  const { conOra, senzaOra } = sequenzaGiorno(altre, oggi);
+  const senza = [...senzaOra].sort((a, b) => (focusIds.has(b.c.id) ? 1 : 0) - (focusIds.has(a.c.id) ? 1 : 0) || (a.fatto ? 1 : 0) - (b.fatto ? 1 : 0));
+  if (conOra.length || senza.length) {
+    h += `<p class="list-head"><span>La giornata</span><span class="mono">${eventi.length ? plurale(eventi.length, 'appuntamento', 'appuntamenti') : ''}</span></p>`;
+    if (conOra.length) h += `<div class="group giornata">${conOra.map(x => x.tipo === 'evento' ? rigaEvento(x.e) : x.tipo === 'cuscinetto' ? rigaCuscinetto(x.item, { azioni: !semplice }) : riga(x.r, opz)).join('')}</div>`;
+    if (senza.length) h += `${conOra.length ? '<p class="list-head"><span>Senza ora</span></p>' : ''}<div class="group">${senza.map(r => riga(r, opz)).join('')}</div>`;
+  }
+  const inGiorno = new Set(righe.map(r => r.c.id));
+  const rapideFuori = rapide.filter(r => !inGiorno.has(r.c.id));
+  if (rapideFuori.length) {
+    h += `<p class="list-head"><span><i class="ti ti-bolt lh-ico"></i>Ci vogliono 2 minuti? Falle ora.</span><span class="mono">Rapide (${rapideFuori.length})</span></p><div class="group">${rapideFuori.map(r => riga(r, opz)).join('')}</div>`;
+  }
+  // 3. Da controllare: le deleghe, con [Fatto]
+  if (controllo.length) h += `<p class="list-head"><span><i class="ti ti-user-check lh-ico"></i>Da controllare</span><span class="mono">${controllo.length}</span></p><div class="group">${controllo.map(rigaControllo).join('')}</div>`;
   const routineCal = semplice ? [] : routineDelGiorno(oggi);   // la routine del mattino del calendario Privato
   if (routine.length || routineCal.length) {
     const nf = routine.filter(r => r.fatto).length, arco = arcoRoutine(routineCal);
     h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('routine', 'Routine', routine.length ? `<span class="mono">${nf}/${routine.length}</span>` : `<span class="mono">${arco.da}–${arco.a}</span>`,
       routineCal.map(rigaEvento).join('') + routine.map(r => riga(r, { routine: true, senzaAzioni: true })).join(''))}</div>`;
-  }
-
-  if (focus.length) {
-    const nf = focus.filter(r => r.fatto).length;
-    h += `<p class="list-head"><span><i class="ti ti-star-filled lh-ico"></i>Le tue 3</span><span class="mono">${nf}/${focus.length}</span></p><div class="group">${focus.map(r => riga(r, opz)).join('')}</div>`;
-  } else if (resto.length) h += htmlGiorno(resto, opz);
-  if (rapide.length) {
-    h += `<p class="list-head"><span><i class="ti ti-bolt lh-ico"></i>Ci vogliono 2 minuti? Falle ora.</span><span class="mono">Rapide (${rapide.length})</span></p><div class="group">${rapide.map(r => riga(r, opz)).join('')}</div>`;
-  }
-  if (controllo.length) h += `<p class="list-head"><span><i class="ti ti-user-check lh-ico"></i>Da controllare</span><span class="mono">${controllo.length}</span></p><div class="group">${controllo.map(rigaControllo).join('')}</div>`;
-  if (focus.length && resto.length) {
-    const nf = resto.filter(r => r.fatto).length;
-    h += `<div class="group" style="margin-top:var(--sp-5)">${accordion('resto', 'Il resto di oggi', `<span class="mono">${nf}/${resto.length}</span>`, htmlGiorno(resto, opz).replace(/<div class="group">/g, '<div>'))}</div>`;
   }
   if (!righe.length && tot && fatte === tot) h += `<div style="margin-top:var(--sp-5)">${vuoto('ti-confetti', 'Per oggi hai finito', 'Le routine sono fatte e non hai altro in programma.')}</div>`;
 
@@ -6378,6 +6551,12 @@ function openGcalModal() {
     az.innerHTML = `<button type="button" class="btn btn-secondary btn-block" onclick="batchSyncAll()"><i class="ti ti-refresh"></i>Sincronizza tutto di nuovo</button>
       <button type="button" class="btn btn-ghost btn-danger btn-sm btn-block" onclick="disconnectGcal()">Scollega</button>`;
   } else {
+    if (gcalEraCollegato()) {
+      body.innerHTML = `<div class="gcal-stato"><b>Il collegamento è scaduto</b><span>Google lo chiude dopo un'ora: ricollega con un tocco, non perdi niente.</span></div>`;
+      az.innerHTML = `<button type="button" class="btn btn-primary btn-block" id="gcal-connetti" onclick="connectGoogleCalendar()"><i class="ti ti-refresh"></i>Ricollega</button>`;
+      $('gcalOverlay').classList.add('open');
+      return;
+    }
     body.innerHTML = `<p class="t-label muted">Collega Google Calendar per vedere gli appuntamenti in Oggi e mettere in calendario le cose pianificate. Nel tuo account viene creato il calendario «${escHtml(GCAL_CAL_NAME)}».</p>`;
     az.innerHTML = `<button type="button" class="btn btn-primary btn-block" id="gcal-connetti" onclick="connectGoogleCalendar()"><i class="ti ti-link"></i>Connetti</button>`;
   }
@@ -6885,46 +7064,55 @@ function creaPdfSettimana() {
   const nota = v => v.tipo === 'cosa' && v.r.c.note ? pdfTxt(String(v.r.c.note).split(/\r?\n/)[0]) : '';
   const peso = v => 1 + (nota(v) ? .85 : 0) + (v.tipo === 'cuscinetto' ? .7 : 0);
   const righeZona = voci => Math.max(MIN_RIGHE, voci.reduce((t, v) => t + peso(v), 0));
-  const fissi = (22 + 12 + 60) * s;                                           // intestazione, riquadro giallo, fondo
+  const fissi = (30 + 12 + 10) * s;                                           // intestazione con legenda, riquadro giallo, piè di pagina
   const totRighe = righeZona(inSett) + giorni.reduce((t, z) => t + righeZona(z.voci) + 1.5 + (z.pieno ? .6 : 0), 0);
-  const stima = Math.max(4 * s, Math.min(7.2 * s, (LIMITE - M - fissi) / totRighe));
+  const RIGA_MIN = 4.6;                                                       // con il corpo a 9 pt sotto non si legge
+  const stima = Math.max(RIGA_MIN, Math.min(7.2 * s, (LIMITE - M - fissi) / totRighe));
+  // v6 · colori del foglio = colori dell'app (tema chiaro); il fondo delle Subito è un po' più carico, sulla carta #FFF4F3 non si vede
+  const PDF_COL = { 1: [217, 45, 32], 2: [15, 118, 110], 3: [37, 99, 235], 4: [138, 150, 146], evt: [124, 58, 237], evtInk: [109, 40, 217], subitoFondo: [253, 226, 223], giallo: [255, 244, 179] };
+  const nPiano = cose.length;
   // tutto su un foglio quando si può: se esce su due pagine si rifà con le righe più strette, fino al minimo leggibile
   const costruisci = RIGA => {
     const doc = new jsPDFCtor({ unit: 'mm', format: formato, orientation: 'portrait' });
-    const corpo = (RIGA < 5.4 * s ? 8.5 : 10) * s, piccolo = corpo - 1.8 * s;
+    const corpo = RIGA < 5.4 ? 9.5 : 10.5, piccolo = 9;                       // corpo ≥ 9 pt anche in A5
     let y = M;
     const spazio = h => { if (y + h > LIMITE) { doc.addPage(); y = M + 2; } };
+    const colore = (rgb, fn) => { doc[fn](...rgb); };
     const punteggiata = (x, yy, w) => { doc.setDrawColor(150); doc.setLineDashPattern([.8, 1.1], 0); doc.line(x, yy, x + w, yy); doc.setLineDashPattern([], 0); doc.setDrawColor(0); };
     const taglia = (t, largo) => { let x = pdfTxt(t); const orig = x; while (x.length > 4 && doc.getTextWidth(x) > largo) x = x.slice(0, -2); return x === orig ? x : x.trimEnd() + '...'; };
-    const quadratino = (fatto, tratteggiato) => {
-      doc.setDrawColor(tratteggiato ? 120 : 40); doc.setLineWidth(.3);
+    const quadratino = (fatto, tratteggiato, rgb) => {
+      if (rgb) colore(rgb, 'setDrawColor'); else doc.setDrawColor(tratteggiato ? 120 : 40);
+      doc.setLineWidth(rgb ? .5 : .3);
       if (tratteggiato) doc.setLineDashPattern([.7, .7], 0);
       doc.rect(M + .5, y - 3 * s, 3.2 * s, 3.2 * s);
       doc.setLineDashPattern([], 0);
       if (fatto) { doc.setLineWidth(.45); doc.line(M + 1.1, y - 1.5 * s, M + 1.9 * s, y - .6 * s); doc.line(M + 1.9 * s, y - .6 * s, M + 3.2 * s, y - 2.6 * s); }
       doc.setLineWidth(.2); doc.setDrawColor(0);
     };
-    const cerchio = () => { doc.setDrawColor(90); doc.setLineWidth(.3); doc.circle(M + 2.1 * s, y - 1.4 * s, 1.6 * s); doc.setLineWidth(.2); doc.setDrawColor(0); };
+    const cerchio = viola => { if (viola) colore(PDF_COL.evt, 'setDrawColor'); else doc.setDrawColor(90); doc.setLineWidth(viola ? .5 : .3); doc.circle(M + 2.1 * s, y - 1.4 * s, 1.6 * s); doc.setLineWidth(.2); doc.setDrawColor(0); };
     const orario = (da, a) => a ? `${da}-${a}` : da;
 
     const rigaCosa = v => {
       const r = v.r, q = computeEffectiveQ(r.c);
-      if (q === 1 && !r.fatto) { doc.setFillColor(228); doc.rect(M, y - 3.7 * s, COL_L, RIGA - .5, 'F'); }   // le Subito si vedono anche in bianco e nero
-      quadratino(r.fatto);
+      if (q === 1 && !r.fatto) { colore(PDF_COL.subitoFondo, 'setFillColor'); doc.rect(M - .5, y - RIGA * .72, COL_L + 1, RIGA - .4, 'F'); }   // fondo rosato; in bianco e nero c'è il «!»
+      quadratino(r.fatto, false, PDF_COL[q]);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(piccolo); doc.setTextColor(70);
       doc.text(r.ora || '', X_ORA, y);
       const tipo = pdfTxt(TIPI[q].label + (r.c.inderogabile && q === 2 ? ' - fissa' : ''));
       doc.setTextColor(100); doc.text(tipo, M + COL_L, y, { align: 'right' });
       doc.setFont('helvetica', q === 1 ? 'bold' : 'normal'); doc.setFontSize(corpo); doc.setTextColor(0);
-      doc.text(taglia(r.c.title, COL_L - (X_TIT - M) - doc.getTextWidth(tipo) - 3), X_TIT, y);
+      const pre = q === 1 ? '! ' : '';
+      doc.text(pre + taglia(r.c.title, COL_L - (X_TIT - M) - doc.getTextWidth(tipo) - doc.getTextWidth(pre) - 3), X_TIT, y);
       punteggiata(COL_R_X, y, COL_R_W);
       const n = nota(v);
       if (n) { y += RIGA * .85; doc.setFont('helvetica', 'normal'); doc.setFontSize(piccolo); doc.setTextColor(110); doc.text(taglia(n, COL_L - (X_TIT - M)), X_TIT, y - .2); doc.setTextColor(0); }
     };
     const rigaGrigia = (marca, quando, testo) => {
-      if (marca === 'cerchio') cerchio(); else quadratino(false, true);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(piccolo); doc.setTextColor(80);
+      if (marca === 'cerchio' || marca === 'viola') cerchio(marca === 'viola'); else quadratino(false, true);
+      if (marca === 'viola') { doc.setFont('helvetica', 'bold'); doc.setFontSize(piccolo); colore(PDF_COL.evtInk, 'setTextColor'); }
+      else { doc.setFont('helvetica', 'normal'); doc.setFontSize(piccolo); doc.setTextColor(80); }
       doc.text(quando, X_ORA, y);
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(corpo); doc.setTextColor(60);
       doc.text(taglia(testo, COL_L - (X_TIT - M)), X_TIT, y);
       doc.setTextColor(0);
@@ -6932,7 +7120,7 @@ function creaPdfSettimana() {
     };
     const disegnaVoce = v => {
       spazio(RIGA * peso(v));
-      if (v.tipo === 'evento') rigaGrigia('cerchio', v.e.ora ? orario(v.e.ora, v.e.fine) : 'tutto il g.', `${v.e.titolo}${v.e.coach ? '  (coach)' : ''}${v.e.sovrapposto ? '  *' : ''}`);
+      if (v.tipo === 'evento') rigaGrigia('viola', v.e.ora ? orario(v.e.ora, v.e.fine) : 'tutto il g.', `${v.e.coach ? 'Coach: ' : ''}${v.e.titolo}${v.e.sovrapposto && v.e.sovrapposto.length ? '  *' : ''}`);
       else if (v.tipo === 'routine') rigaGrigia('cerchio', orario(v.routine.da, v.routine.a), 'Routine del mattino');
       else if (v.tipo === 'cuscinetto') {
         const o = bpOra(v.item) || CUSC.META;
@@ -6952,19 +7140,32 @@ function creaPdfSettimana() {
     doc.setFontSize(ft);
     while (ft > 10 * s && doc.getTextWidth(titolo) > W - 2 * M) { ft -= .5; doc.setFontSize(ft); }
     doc.text(titolo, M, y + 6 * s);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5 * s); doc.setTextColor(90);
-    doc.text(`${state.ctx === 'personale' ? 'Personale' : 'Lavoro'}  ·  quadratino = cosa da fare   cerchio = appuntamento   * = si sovrappone a un altro`, M, y + 11.5 * s);
+    // da compilare a penna: Fatte ___ / N · Q2 spostate ___
+    y += 13 * s;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(`Fatte ____ / ${nPiano}`, M, y);
+    doc.text('Q2 spostate ____', M + 52 * s, y);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text(state.ctx === 'personale' ? 'Personale' : 'Lavoro', W - M, y, { align: 'right' });
+    // legenda
+    y += 6 * s;
+    let lx = M;
+    const voceLeg = (disegna, testo) => { disegna(lx, y); doc.setTextColor(60); doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(testo, lx + 5, y); lx += 5 + doc.getTextWidth(testo) + 5; };
+    const qLeg = q => (x, yy) => { colore(PDF_COL[q], 'setDrawColor'); doc.setLineWidth(.5); if (q === 1) { colore(PDF_COL.subitoFondo, 'setFillColor'); doc.rect(x, yy - 3, 3.2, 3.2, 'FD'); } else doc.rect(x, yy - 3, 3.2, 3.2); doc.setLineWidth(.2); doc.setDrawColor(0); };
+    voceLeg(qLeg(1), '! Subito'); voceLeg(qLeg(2), 'Importante'); voceLeg(qLeg(3), 'Delega'); voceLeg(qLeg(4), 'Lascia stare');
+    voceLeg((x, yy) => { colore(PDF_COL.evt, 'setDrawColor'); doc.setLineWidth(.5); doc.circle(x + 1.6, yy - 1.4, 1.6); doc.setLineWidth(.2); doc.setDrawColor(0); }, 'Appuntamento');
+    voceLeg((x, yy) => { doc.setDrawColor(120); doc.setLineDashPattern([.7, .7], 0); doc.rect(x, yy - 3, 3.2, 3.2); doc.setLineDashPattern([], 0); doc.setDrawColor(0); }, 'Cuscinetto');
     doc.setTextColor(0);
-    y += 14 * s; doc.setLineWidth(.4); doc.line(M, y, W - M, y); doc.setLineWidth(.2);
+    y += 3.5 * s; doc.setLineWidth(.4); doc.line(M, y, W - M, y); doc.setLineWidth(.2);
+    y += 5 * s;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(70); doc.text('APPUNTI · NUOVE COSE EMERSE', COL_R_X, y); doc.setTextColor(0);
     y += 4.5 * s;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5 * s); doc.setTextColor(90); doc.text('APPUNTI', COL_R_X, y); doc.setTextColor(0);
-    y += 4 * s;
 
     // riquadro giallo: le cose senza giorno
     const hBox = 8 * s + righeZona(inSett) * RIGA + 1.5 * s;
     spazio(hBox);
-    doc.setFillColor(255, 244, 179); doc.setDrawColor(190); doc.roundedRect(M - 2 * s, y - 4.5 * s, COL_L + 4 * s, hBox, 1.5, 1.5, 'FD'); doc.setDrawColor(0);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5 * s); doc.text('Settimana (pensaci dopo)', M, y);
+    colore(PDF_COL.giallo, 'setFillColor'); doc.setDrawColor(190); doc.roundedRect(M - 2 * s, y - 4.5 * s, COL_L + 4 * s, hBox, 1.5, 1.5, 'FD'); doc.setDrawColor(0);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(Math.max(9.5, 10.5 * s)); doc.text('Settimana (pensaci dopo)', M, y);
     punteggiata(COL_R_X, y, COL_R_W);
     y += RIGA;
     inSett.forEach(disegnaVoce);
@@ -6973,9 +7174,9 @@ function creaPdfSettimana() {
 
     // un blocco per giorno
     giorni.forEach(z => {
-      spazio(RIGA * 2.5);
+      spazio(RIGA * (2 + Math.max(MIN_RIGHE, z.voci.reduce((t, v) => t + peso(v), 0))));   // un giorno non si spezza tra due pagine
       doc.setDrawColor(200); doc.line(M, y - 4.6 * s, M + COL_L, y - 4.6 * s); doc.setDrawColor(0);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5 * s); doc.text(pdfTxt(z.titolo), M, y);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(Math.max(9.5, 10.5 * s)); doc.text(pdfTxt(z.titolo), M, y);
       if (z.pieno) { doc.setFont('helvetica', 'italic'); doc.setFontSize(piccolo); doc.setTextColor(90); doc.text('giornata piena: nessun cuscinetto possibile', M + COL_L, y, { align: 'right' }); doc.setTextColor(0); }
       punteggiata(COL_R_X, y, COL_R_W);
       y += RIGA;
@@ -6985,17 +7186,22 @@ function creaPdfSettimana() {
       y += RIGA * .5;
     });
 
-    // fondo: nuove cose emerse, fatte __ / __
-    spazio(60 * s);
-    y += 1 * s;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5 * s); doc.text('Nuove cose emerse', M, y); y += 6 * s;
-    for (let i = 0; i < 8; i++) { quadratino(false); punteggiata(X_ORA, y, W - M - X_ORA); y += 5.2 * s; }
-    y += 3 * s;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12 * s); doc.text('Fatte  ____ / ____', M, y);
+    // le righe libere a destra continuano fino in fondo: lì vanno le cose nuove scritte a penna
+    while (y + RIGA < LIMITE - 6) { punteggiata(COL_R_X, y, COL_R_W); y += RIGA; }
+    // piè di pagina su ogni foglio: Stampato il … · Inviato a …
+    const oggi = new Date(), inv = inviatoIl(state.week, state.year);
+    const piede = pdfTxt(`Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()}  ·  Inviato a ${emailCoach()}${inv ? ' il ' + inv : ' ________'}`);
+    for (let pg = 1; pg <= doc.getNumberOfPages(); pg++) {
+      doc.setPage(pg);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
+      doc.text(piede, M, H - M / 2);
+      doc.text(`${pg} / ${doc.getNumberOfPages()}`, W - M, H - M / 2, { align: 'right' });
+      doc.setTextColor(0);
+    }
     return doc;
   };
   let RIGA = stima, doc = costruisci(RIGA);
-  while (doc.getNumberOfPages() > 1 && RIGA > 4 * s) { RIGA = Math.max(4 * s, RIGA - .25 * s); doc = costruisci(RIGA); }
+  while (doc.getNumberOfPages() > 1 && RIGA > RIGA_MIN) { RIGA = Math.max(RIGA_MIN, RIGA - .25 * s); doc = costruisci(RIGA); }
 
   const cusc = state.bp ? state.bpItems.filter(i => i.tipo_slot === 'cuscinetto' && !i.ciclo_id) : [];
   const riepilogo = {
@@ -7118,6 +7324,7 @@ const AZIONI = {
   'bpw-sett': el => bpwCambiaSettimana(parseInt(el.dataset.dir, 10)),
   'rapido-salva': () => salvaRapido(),
   'rapido-mic': () => dettatura(),
+  'cattura-mic': () => dettatura('cattura-testo', 'cattura-mic'),
   'rapido-subito': () => { ui.rapido = { ...ui.rapido, subito: !ui.rapido.subito }; disegnaRapido(); },
   'rapido-oggi': () => { ui.rapido = { ...ui.rapido, oggi: !ui.rapido.oggi }; disegnaRapido(); },
   'rapido-con': () => { const r = ui.rapido; ui.rapido = r.persona || r.con ? { ...r, persona: null, con: false } : { ...r, con: true }; disegnaRapido(); },
@@ -7834,16 +8041,19 @@ async function salvaRapido() {
   const righe = ($('rapido-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean);
   if (!righe.length) { $('rapido-testo').focus(); return; }
   fermaDettatura();
-  const r = { ...ui.rapido }, ctx = state.ctx;
+  if (await aggiungiRighe(righe, { ...ui.rapido })) closeModal('rapidoOverlay');
+}
+// Una riga = una cosa. Restituisce le cose salvate (o null se il salvataggio non riesce).
+async function aggiungiRighe(righe, r) {
+  const ctx = state.ctx;
   try {
     const salvate = [];
     for (const t of righe) salvate.push(await upsertCiclo(rigaNuova(t, r, ctx)));
     const nuove = salvate.filter(Boolean);
     state.cicli = [...nuove, ...state.cicli.filter(c => !nuove.some(n => n.id === c.id))];
     if (r.oggi) for (const c of nuove) await pianificaInData(c, new Date(), null);
-    closeModal('rapidoOverlay');
     render();
-    if (r.cusc && nuove[0]) { await riempiCuscinetto(r.cusc, nuove[0].id); return; }   // urgenza arrivata: va nel cuscinetto
+    if (r.cusc && nuove[0]) { await riempiCuscinetto(r.cusc, nuove[0].id); return nuove; }   // urgenza arrivata: va nel cuscinetto
     nuove.forEach(c => {
       syncCicloToGcal(c).catch(() => {});
       if (ctx === 'lavoro') autoCategoria(c.title, '').then(area => area && patchCiclo(c.id, { macro_area: area })).catch(() => {});
@@ -7851,20 +8061,21 @@ async function salvaRapido() {
     const dove = `${r.oggi ? 'Oggi' : 'Tutto'} · ${r.subito ? 'Subito' : 'Importante'}`;
     if (nuove.length === 1) showToast(`Aggiunta a ${dove}`, 'success', { annulla: () => apriDettaglio(nuove[0].id), etichetta: 'Dettagli' });
     else showToast(`${nuove.length} cose aggiunte a ${dove}`, 'success');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+    return nuove;
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
 }
 
 // Dettatura (Web Speech API, it-IT): il testo finisce nel campo, dopo quello già scritto.
-function dettatura() {
+function dettatura(campoId, micId) {
   if (!Riconoscimento) return;
   if (_ascolto) { fermaDettatura(); return; }
-  const campo = $('rapido-testo'), mic = $('rapido-mic');
+  const campo = $(campoId || 'rapido-testo'), mic = $(micId || 'rapido-mic');
   const base = campo.value.trim() ? campo.value.replace(/\s*$/, ' ') : '';
   const rec = new Riconoscimento();
   rec.lang = 'it-IT';
   rec.interimResults = true;
   rec.continuous = false;
-  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; };
+  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; campo.dispatchEvent(new Event('input', { bubbles: true })); };
   rec.onerror = e => { if (e.error !== 'aborted' && e.error !== 'no-speech') showToast('Dettatura non riuscita: ' + e.error, 'error'); };
   rec.onend = () => { _ascolto = null; mic.setAttribute('aria-pressed', 'false'); mic.classList.remove('ascolta'); };
   try { rec.start(); } catch (e) { showToast('Dettatura non disponibile', 'error'); return; }
@@ -8789,7 +9000,8 @@ function eventoDa(e, cal) {
   if (!inizio) return null;
   const fine = e.end && e.end.dateTime ? new Date(e.end.dateTime) : null;
   const ora = e.start.dateTime ? hhmm(inizio) : null;
-  const pref = prefissoOrario(e.summary);
+  const conCoach = /^\s*coach\s*:\s*/i;   // i miei eventi «Coach: …» sono incontri col coach
+  const pref = prefissoOrario(String(e.summary || '').replace(conCoach, ''));
   const persone = [...(e.attendees || []).map(x => x.email), e.organizer && e.organizer.email, e.creator && e.creator.email].filter(Boolean).map(m => m.toLowerCase());
   const mia = x => !!x && (x.self || MIE_EMAIL.has(String(x.email || '').toLowerCase()));
   return {
@@ -8798,7 +9010,11 @@ function eventoDa(e, cal) {
     giorno: toISODate(inizio), ora, fine: fine ? hhmm(fine) : null, minuti: fine ? Math.max(0, Math.round((fine - inizio) / 60000)) : 0,
     inizioMs: inizio.getTime(), fineMs: fine ? fine.getTime() : inizio.getTime(), tuttoIlGiorno: !e.start.dateTime,
     invitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).length,
-    mio: mia(e.creator) || mia(e.organizer), coach: persone.includes(COACH_PERSONA),
+    mio: mia(e.creator) || mia(e.organizer), coach: persone.includes(COACH_PERSONA) || conCoach.test(e.summary || ''),
+    // per spostarlo dall'app: chi lo organizza, chi riceve l'aggiornamento, orari originali
+    orgIo: !e.organizer || !!e.organizer.self || mia(e.organizer), org: e.organizer ? (e.organizer.displayName || e.organizer.email || '') : '',
+    nomiInvitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).map(x => x.displayName || x.email),
+    startRaw: e.start, endRaw: e.end, ricorrente: !!e.recurringEventId,
     routine: cal.tipo === 'privato' && !!e.recurringEventId && !!ora && ora < ROUTINE_ENTRO
   };
 }
@@ -8865,7 +9081,8 @@ rigaEvento = function (e) {
     e.sovrapposto && e.sovrapposto.length ? `<span class="evt-nota"><i class="ti ti-alert-triangle"></i><span>si sovrappone a ${escHtml(e.sovrapposto[0])}${e.sovrapposto.length > 1 ? ` e altri ${e.sovrapposto.length - 1}` : ''}</span></span>` : '',
     e.orarioDiverso ? `<span class="evt-nota evt-diverso" data-tip="Nel titolo c'è ${e.oraTitolo}, l'evento è alle ${e.ora}"><i class="ti ti-clock-exclamation"></i><span>orario nel titolo diverso (${e.oraTitolo})</span></span>` : ''];
   const sovr = note.join('');
-  return `<div class="evt-riga${sovr ? ' evt-sovrapposto' : ''}"><span class="evt-ico" aria-hidden="true"><i class="ti ${e.coach ? 'ti-user-check' : 'ti-calendar-event'}"></i></span>
+  const sposta = e.id && e.ora && !e.routine ? ` data-act="evt-sposta" data-evt="${esc(e.id)}" data-cal="${esc(e.calId || '')}" role="button" tabindex="0" aria-label="Sposta l'appuntamento ${esc(e.titolo)}"` : '';
+  return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}"${sposta}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}><span class="evt-ico" aria-hidden="true"><span class="evt-cerchio"></span></span>
     <span class="evt-main"><span class="item-title">${e.coach ? '<span class="tag-coach">Coach</span>' : ''}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
 };
 
@@ -9385,7 +9602,8 @@ function htmlAperte() {
   const var_ = delta < 0 ? `<span class="delta meglio"><i class="ti ti-trending-down"></i>${-delta} in meno di 7 giorni fa</span>`
     : delta > 0 ? `<span class="delta peggio"><i class="ti ti-trending-up"></i>${delta} in più di 7 giorni fa</span>` : '<span class="delta">come 7 giorni fa</span>';
   return `<div class="aperte-stato"><div><b class="mono">${ora}</b> ${ora === 1 ? 'cosa aperta' : 'cose aperte'}<br>${var_}</div>
-    <button type="button" class="btn btn-secondary btn-sm" data-act="svuota"><i class="ti ti-brain"></i>Svuota la testa</button></div>`;
+    <div class="aperte-azioni"><button type="button" class="btn btn-secondary btn-sm" data-act="riordina"><i class="ti ti-arrows-sort"></i>Riordina</button>
+    <button type="button" class="btn btn-secondary btn-sm" data-act="svuota"><i class="ti ti-brain"></i>Svuota la testa</button></div></div>`;
 }
 const _aggiornaTuttoV4 = aggiornaTutto;
 aggiornaTutto = function () {
@@ -9980,6 +10198,871 @@ function avvioV5() {
   rilevaColonneV5();
   setTimeout(avvioCalendarV5, 2800);   // dopo che initGcal ha ripreso il token
 }
+
+// ══════════════════════════════════════════════════════════════
+// v6 · colori = priorità, telefono, Pianifica a colonne, Riordina, ripetibili,
+// appuntamenti spostabili, la parte per il coach (vedi privata/DECISIONI.md, solo in locale)
+// ══════════════════════════════════════════════════════════════
+const V6 = { LARGO: 1100, RIO_LS: 'riordina_stato', COACH_GIORNI: 60, Q2_GIORNI: 92 };
+const eLargo = () => window.innerWidth >= V6.LARGO;
+const giornoDi = (w, y, k) => bpDataGiorno(w, y, GIORNI.findIndex(g => g.key === k));
+
+document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="serieOverlay" onclick="closeModalOnBg(event,'serieOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="serie-titolo" aria-describedby="serie-testo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><h3 class="t-title" id="serie-titolo">Si ripete: cosa sposti?</h3><button type="button" class="btn btn-icon" data-act="serie-annulla" aria-label="Annulla"><i class="ti ti-x"></i></button></div>
+    <p class="t-label muted" id="serie-testo"></p>
+    <div class="sheet-cta">
+      <button type="button" class="btn btn-primary btn-block" data-act="serie-una"><i class="ti ti-point"></i>Solo questa volta</button>
+      <button type="button" class="btn btn-secondary btn-block" data-act="serie-tutte"><i class="ti ti-repeat"></i>Anche le prossime</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="spostaEvtOverlay" onclick="closeModalOnBg(event,'spostaEvtOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="sevt-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><div class="sheet-head-txt"><h3 class="t-title" id="sevt-titolo">Sposta a</h3><p class="t-label muted" id="sevt-sotto"></p></div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('spostaEvtOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="sevt-corpo"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="nuovoEvtOverlay" onclick="closeModalOnBg(event,'nuovoEvtOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="nevt-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><div class="sheet-head-txt"><h3 class="t-title" id="nevt-titolo">Nuovo appuntamento</h3><p class="t-label muted" id="nevt-sotto"></p></div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('nuovoEvtOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="nevt-corpo"></div>
+  </div>
+</div>
+<div class="modal-overlay riordina-overlay" id="riordinaOverlay">
+  <div class="riordina" role="dialog" aria-modal="true" aria-labelledby="rio-titolo"><div id="rio-corpo"></div></div>
+</div>`);
+
+// Un div con role="button" (riga di un appuntamento) risponde anche a Invio e Spazio
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); }
+});
+
+// ─── 3. CAMPO FISSO DEL TELEFONO ─────────────────────────────
+function righeCattura() { return ($('cattura-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean); }
+async function salvaCattura() {
+  const righe = righeCattura();
+  if (!righe.length) { apriRapido(); return; }       // campo vuoto: [+] apre il foglio con Subito / Oggi / Con…
+  fermaDettatura();
+  const campo = $('cattura-testo');
+  campo.disabled = true;
+  const nuove = await aggiungiRighe(righe, { subito: false, oggi: false, persona: null });
+  campo.disabled = false;
+  if (nuove) { campo.value = ''; allungaCattura(); }
+  campo.focus();
+}
+function allungaCattura() {
+  const t = $('cattura-testo');
+  t.style.height = 'auto';
+  t.style.height = Math.min(t.scrollHeight + 2, 120) + 'px';
+}
+$('cattura').addEventListener('submit', e => { e.preventDefault(); salvaCattura(); });
+$('cattura-testo').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); salvaCattura(); }
+});
+$('cattura-testo').addEventListener('input', allungaCattura);
+$('cattura-mic').hidden = !Riconoscimento;
+
+// «+ Ciclo» di una colonna: il foglio rapido con il giorno già scelto
+const _disegnaRapidoV5 = disegnaRapido;
+disegnaRapido = function () {
+  _disegnaRapidoV5();
+  const r = ui.rapido;
+  if (r.data) $('rapido-chips').insertAdjacentHTML('beforeend', `<button type="button" class="chip" data-act="rapido-giorno" aria-pressed="true"><i class="ti ti-calendar"></i>${fmtGiorno(parseISODate(r.data))}</button>`);
+};
+function apriRapidoGiorno(iso) { apriRapido(); ui.rapido = { ...ui.rapido, data: iso }; disegnaRapido(); }
+const _aggiungiRigheV5 = aggiungiRighe;
+aggiungiRighe = async function (righe, r) {
+  if (!r.data) return _aggiungiRigheV5(righe, r);
+  const nuove = await inSilenzio(() => _aggiungiRigheV5(righe, { ...r, data: null }));
+  if (!nuove) return nuove;
+  try {
+    for (const c of nuove) await pianificaInData(ciclo(c.id) || c, parseISODate(r.data), null);
+    render();
+    showToast(`${nuove.length === 1 ? 'Aggiunta' : plurale(nuove.length, 'cosa aggiunta', 'cose aggiunte')} a ${fmtGiorno(parseISODate(r.data))}`, 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  return nuove;
+};
+
+// ─── 5a. CICLI CHE SI RIPETONO: solo questa volta / anche le prossime ───
+let _serie = null;
+const siRipete = c => !!c && !isGiornaliero(c) && ripetizioneDi(c) !== 'nessuna';
+function chiediSerie(c, unaVolta, tutte) {
+  _serie = { unaVolta, tutte };
+  $('serie-testo').textContent = `«${c.title}» si ripete (${(RIP_LABELS[ripetizioneDi(c)] || '').toLowerCase()}). La sposti solo questa volta o anche le prossime?`;
+  $('serieOverlay').classList.add('open');
+  setTimeout(() => document.querySelector('[data-act="serie-una"]').focus(), 60);
+}
+function rispondiSerie(v) {
+  const s = _serie;
+  _serie = null;
+  closeModal('serieOverlay');
+  if (!s) return;
+  if (v === 'una') s.unaVolta();
+  else if (v === 'tutte') s.tutte();
+}
+// Anche le prossime: la serie cambia giorno (e momento) da qui in avanti; l'eccezione di questa settimana non serve più.
+async function spostaSerie(c, data, fascia) {
+  const g = giornoKeyDi(data), w = isoWeekParts(data);
+  const prima = campi(c, ['giorno_settimana', 'fascia_oraria', 'pianificato_data']);
+  const ovPrima = state.agendaOverrides.find(o => o.ciclo_id === c.id && o.settimana === w.week && o.anno === w.year) || null;
+  const patch = { giorno_settimana: g, fascia_oraria: fascia || c.fascia_oraria || 'mattina' };
+  if (c.pianificato_data && state.pianificaColsOk) patch.pianificato_data = toISODate(data);
+  try {
+    await patchCiclo(c.id, patch);
+    if (state.agendaTableOk) await togliOverride(c.id, w);
+    const item = state.bp && w.week === state.week && w.year === state.year ? itemDelPiano(c.id) : null;
+    if (item && item.giorno !== g) {
+      const { error } = await db.from('battle_plan_items').update({ giorno: g }).eq('id', item.id);
+      if (error) throw error;
+      state.bpItems = state.bpItems.map(i => i.id === item.id ? { ...i, giorno: g } : i);
+    }
+    render();
+    aggiornaBlocco(c.id);
+    showToast(`Da qui in avanti: ${GIORNI_MAP[g].label.toLowerCase()}`, 'success', { annulla: async () => {
+      await patchCiclo(c.id, prima);
+      if (ovPrima) await upsertOverride(c.id, w, ovPrima.giorno_settimana, ovPrima.fascia_oraria);
+      render();
+    } });
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); render(); }
+}
+const conProtezione = (c, fn) => eInderogabile(c) ? chiediSpostamento(c, fn) : fn();
+const _azioneDomaniV5 = azioneDomani;
+azioneDomani = function (id, daISO) {
+  const c = ciclo(id);
+  if (!siRipete(c)) return _azioneDomaniV5(id, daISO);
+  const a = parseISODate(daISO) || new Date(); a.setDate(a.getDate() + 1);
+  chiediSerie(c, () => _azioneDomaniV5(id, daISO), () => conProtezione(c, () => spostaSerie(c, a, null)));
+};
+const _impostaGiornoV5 = impostaGiorno;
+impostaGiorno = function (id, g) {
+  const c = ciclo(id);
+  if (!siRipete(c) || g === 'settimana') return _impostaGiornoV5(id, g);
+  chiediSerie(c, () => _impostaGiornoV5(id, g), () => conProtezione(c, () => spostaSerie(c, giornoDi(state.week, state.year, g), null)));
+};
+const _moveCicloV5 = moveCicloInAgenda;
+moveCicloInAgenda = function (id, giorno, fascia) {
+  const c = ciclo(id);
+  if (!siRipete(c)) return _moveCicloV5(id, giorno, fascia);
+  chiediSerie(c, () => _moveCicloV5(id, giorno, fascia), () => conProtezione(c, () => spostaSerie(c, giornoDi(state.week, state.year, giorno), fascia)));
+};
+
+// ─── 5b. APPUNTAMENTI DI GOOGLE CALENDAR SPOSTABILI ──────────
+function eventoPerId(id) { return Object.values(ui.eventi).flat().find(e => e.id === id) || null; }
+function ricaricaEventi(...date) {
+  const settimane = new Set(date.filter(Boolean).map(d => { const w = isoWeekParts(d); return settKey(w.week, w.year); }));
+  settimane.forEach(k => { delete ui.eventi[k]; });
+  date.filter(Boolean).forEach(d => { const w = isoWeekParts(d); caricaEventi(w.week, w.year); });
+}
+const isoLocale = (iso, hm) => `${iso}T${hm}:00`;
+const fusoEvento = e => (e.startRaw && e.startRaw.timeZone) || 'Europe/Rome';
+function serveScopeEventi() {
+  if (!isGcalTokenValid()) return 'Il collegamento a Google Calendar è scaduto: ricollegalo per spostare gli appuntamenti.';
+  if (!haScopeEventi()) return 'Google non ha dato all\'app il permesso di modificare gli eventi. Ricollega Google e lascia spuntato il permesso sul calendario.';
+  return '';
+}
+// Il primo spazio libero di quel giorno lungo «min», dalle 9 alle 19 (esclusi l'evento stesso e le cose con ora)
+function primoLibero(iso, min, tranne, daOra) {
+  const d = parseISODate(iso);
+  const occ = [...eventiDelGiorno(d).filter(e => e.id !== tranne && e.ora && e.fine).map(e => [minDi(e.ora), Math.max(minDi(e.fine), minDi(e.ora) + 1)]),
+    ...righeGiornoData(d).filter(r => r.ora).map(r => [minDi(r.ora), minDi(r.ora) + (r.durata || BP_DURATA_DEFAULT)])];
+  const inizio = Math.max(minDi(GIORNATA.INIZIO), daOra != null ? daOra : 0);
+  const spazio = spaziLiberi(occ, inizio, minDi(GIORNATA.FINE)).find(([a, b]) => b - a >= min);
+  return spazio ? hmDi(spazio[0]) : null;
+}
+// Da quel giorno in avanti (al massimo una settimana): oggi si parte da adesso, arrotondato al quarto d'ora
+function primoLiberoDa(iso, min, tranne) {
+  const d0 = parseISODate(iso);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(d0); d.setDate(d0.getDate() + i);
+    const g = toISODate(d);
+    if (g < oggiLocale()) continue;
+    const adesso = new Date(), daOra = g === oggiLocale() ? Math.ceil((adesso.getHours() * 60 + adesso.getMinutes()) / 15) * 15 : null;
+    const ora = primoLibero(g, min, tranne, daOra);
+    if (ora) return { iso: g, ora };
+  }
+  return null;
+}
+function righeGiornoData(d) {
+  const w = isoWeekParts(d);
+  return w.week === state.week && w.year === state.year ? righeGiorno(giornoKeyDi(d)) : [];
+}
+function sovrapposti(iso, ora, min, tranne) {
+  const d = parseISODate(iso), s = minDi(ora), f = s + min;
+  const ev = eventiDelGiorno(d).filter(e => e.id !== tranne && e.ora && e.fine && minDi(e.ora) < f && s < minDi(e.fine)).map(e => e.titolo);
+  const cose = righeGiornoData(d).filter(r => r.ora && minDi(r.ora) < f && s < minDi(r.ora) + (r.durata || BP_DURATA_DEFAULT)).map(r => r.c.title);
+  return [...ev, ...cose];
+}
+ui.sevt = null;
+function apriSpostaEvento(id, isoDest) {
+  const e = eventoPerId(id);
+  if (!e) return;
+  $('sevt-titolo').textContent = 'Sposta a';
+  $('sevt-sotto').textContent = `${e.titolo} · ${fmtGiorno(parseISODate(e.giorno))} ${orarioEvento(e)}`;
+  const durata = e.minuti || 60;
+  ui.sevt = { id, giorno: isoDest || e.giorno, ora: e.ora || '09:00', durata, tutte: false };
+  $('spostaEvtOverlay').classList.add('open');
+  disegnaSpostaEvento();
+}
+function disegnaSpostaEvento() {
+  const s = ui.sevt, e = eventoPerId(s.id), corpo = $('sevt-corpo');
+  if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
+  if (!e.orgIo) {
+    corpo.innerHTML = `<div class="sevt-avviso"><i class="ti ti-user-exclamation"></i><p>Lo organizza ${escHtml(e.org || 'un\'altra persona')}: chiedigli di spostarlo. Da qui non lo sposto, cambierebbe solo nel tuo calendario.</p></div>
+      <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="sevt-promemoria"><i class="ti ti-bell-plus"></i>Crea un promemoria per chiederglielo</button></div>`;
+    return;
+  }
+  const manca = serveScopeEventi();
+  if (manca) {
+    corpo.innerHTML = `<div class="sevt-avviso"><i class="ti ti-lock-open"></i><p>${escHtml(manca)}</p></div>
+      <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="sevt-ricollega"><i class="ti ti-refresh"></i>Ricollega Google</button></div>`;
+    return;
+  }
+  const dopo = parseISODate(e.giorno); dopo.setDate(dopo.getDate() + 1);
+  const domani = toISODate(dopo);
+  const w = isoWeekParts(parseISODate(s.giorno));
+  const giorni = GIORNI.map((g, i) => { const iso = toISODate(bpDataGiorno(w.week, w.year, i)); return `<button type="button" class="chip" data-act="sevt-giorno" data-v="${iso}" aria-pressed="${iso === s.giorno}" aria-label="${g.label} ${fmtGgMm(iso)}">${g.label.slice(0, 3)} ${parseISODate(iso).getDate()}</button>`; }).join('');
+  const sovr = sovrapposti(s.giorno, s.ora, s.durata, e.id);
+  const libero = sovr.length ? primoLiberoDa(s.giorno, s.durata, e.id) : null;
+  const doveLibero = libero ? (libero.iso === s.giorno ? `alle <b class="mono">${libero.ora}</b>` : `${fmtGiorno(parseISODate(libero.iso))} alle <b class="mono">${libero.ora}</b>`) : '';
+  const avvisoSovr = sovr.length ? `<div class="sevt-avviso warn"><i class="ti ti-alert-triangle"></i><p>Alle ${s.ora} si sovrappone a ${escHtml(sovr[0])}${sovr.length > 1 ? ` e altri ${sovr.length - 1}` : ''}.${libero ? ` Il primo spazio libero è ${doveLibero}.` : ' Nei prossimi giorni non trovo uno spazio libero abbastanza lungo.'}</p>${libero ? `<button type="button" class="btn btn-secondary btn-sm" data-act="sevt-libero" data-v="${libero.ora}" data-g="${libero.iso}">Usa ${libero.iso === s.giorno ? '' : fmtGiorno(parseISODate(libero.iso)) + ' '}alle ${libero.ora}</button>` : ''}</div>` : '';
+  const passato = new Date(isoLocale(s.giorno, s.ora)) < new Date();
+  const avvisoPassato = passato ? '<div class="sevt-avviso warn"><i class="ti ti-clock-x"></i><p>Questo orario è già passato: scegline uno da adesso in poi.</p></div>' : '';
+  const invitati = e.nomiInvitati || [];
+  const avvisoInv = invitati.length ? `<div class="sevt-avviso"><i class="ti ti-mail"></i><p>${escHtml(invitati.slice(0, 2).join(', '))}${invitati.length > 2 ? ` e altri ${invitati.length - 2}` : ''} ${invitati.length === 1 ? 'riceve' : 'ricevono'} l'aggiornamento.</p></div>` : '';
+  const serie = e.ricorrente ? `<p class="dl-label">Si ripete</p><div class="seg" role="group" aria-label="Quali spostare">
+      <button type="button" data-act="sevt-serie" data-v="una" aria-pressed="${!s.tutte}">Solo questa volta</button>
+      <button type="button" data-act="sevt-serie" data-v="tutte" aria-pressed="${s.tutte}">Anche le prossime</button></div>` : '';
+  const durate = [15, 30, 45, 60, 90, 120, 180];
+  if (!durate.includes(s.durata)) durate.push(s.durata);
+  corpo.innerHTML = `<div class="chips chips-wrap" role="group" aria-label="Quando">
+      <button type="button" class="chip" data-act="sevt-giorno" data-v="${domani}" aria-pressed="${domani === s.giorno}"><i class="ti ti-arrow-right"></i>Domani</button>${giorni}</div>
+    <div class="sevt-campi">
+      <label><span class="dl-label">Giorno</span><input type="date" class="input" id="sevt-data" value="${s.giorno}"></label>
+      <label><span class="dl-label">Ora</span><input type="time" class="input" id="sevt-ora" value="${s.ora}" step="300"></label>
+      <label><span class="dl-label">Durata</span><select class="input" id="sevt-durata">${durate.sort((a, b) => a - b).map(m => `<option value="${m}"${m === s.durata ? ' selected' : ''}>${fmtTempo(m)}</option>`).join('')}</select></label>
+    </div>
+    ${serie}${avvisoPassato}${avvisoSovr}${avvisoInv}
+    <p class="t-caption" id="sevt-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="sevt-conferma" id="sevt-conferma"><i class="ti ti-check"></i>${invitati.length ? 'Sposta e avvisa' : 'Sposta'}</button></div>`;
+}
+document.addEventListener('change', e => {
+  if (!ui.sevt) return;
+  const t = e.target;
+  if (t.id === 'sevt-data' && t.value) { ui.sevt = { ...ui.sevt, giorno: t.value }; disegnaSpostaEvento(); }
+  else if (t.id === 'sevt-ora' && t.value) { ui.sevt = { ...ui.sevt, ora: t.value }; disegnaSpostaEvento(); }
+  else if (t.id === 'sevt-durata') { ui.sevt = { ...ui.sevt, durata: parseInt(t.value, 10) || 60 }; disegnaSpostaEvento(); }
+});
+const rruleDi = master => (master.recurrence || []).find(r => /^RRULE:/i.test(r)) || null;
+const utcCompatto = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+// «Anche le prossime» su un evento che si ripete: la serie vecchia finisce prima di questa volta, ne parte una nuova da qui.
+async function spostaSerieEvento(e, inizio, fine, invia) {
+  const calPath = `/calendars/${encodeURIComponent(e.calId)}/events`;
+  const master = await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}`, 'GET');
+  const rr = master && rruleDi(master);
+  if (!rr) throw new Error('non trovo la regola della serie');
+  let nuovaRegola = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '');
+  const count = /COUNT=(\d+)/i.exec(rr), until = /UNTIL=([^;]+)/i.exec(rr);
+  if (count) {   // quante volte restano da qui
+    const qs = new URLSearchParams({ timeMin: new Date(e.inizioMs).toISOString(), maxResults: '2500', showDeleted: 'false' });
+    const ist = await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}/instances?${qs}`, 'GET');
+    nuovaRegola += `;COUNT=${Math.max(1, ((ist && ist.items) || []).length)}`;
+  } else if (until) nuovaRegola += `;UNTIL=${until[1]}`;
+  const vecchioGiorno = BYDAY[(new Date(e.inizioMs).getDay() + 6) % 7], nuovoGiorno = BYDAY[(inizio.getDay() + 6) % 7];
+  nuovaRegola = nuovaRegola.replace(new RegExp(`BYDAY=${vecchioGiorno}(?=;|$)`), `BYDAY=${nuovoGiorno}`);
+  const tz = fusoEvento(e);
+  const nuovo = {
+    summary: master.summary, description: master.description, location: master.location, colorId: master.colorId,
+    attendees: master.attendees, reminders: master.reminders, transparency: master.transparency, visibility: master.visibility,
+    start: { dateTime: isoLocale(toISODate(inizio), hhmm(inizio)), timeZone: tz }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz },
+    recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), nuovaRegola]
+  };
+  const creato = await gcalFetch(`${calPath}?sendUpdates=${invia}`, 'POST', nuovo);
+  if (!creato || !creato.id) throw new Error('la serie nuova non è stata creata');
+  const fineVecchia = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '') + `;UNTIL=${utcCompatto(new Date(e.inizioMs - 1000))}`;
+  try {
+    await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), fineVecchia] });
+  } catch (err) {   // non sono riuscito a chiudere la vecchia: tolgo la nuova, così non resta doppia
+    await gcalFetch(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=none`, 'DELETE').catch(() => {});
+    throw err;
+  }
+  return async () => {   // annulla
+    await gcalFetch(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=${invia}`, 'DELETE');
+    await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: master.recurrence });
+  };
+}
+async function confermaSpostaEvento() {
+  const s = ui.sevt, e = eventoPerId(s.id);
+  if (!e) return;
+  const errore = msg => { const el = $('sevt-errore'); el.textContent = msg; el.hidden = false; };
+  const manca = serveScopeEventi();
+  if (manca) { errore(manca); return; }
+  const inizio = new Date(isoLocale(s.giorno, s.ora)), fine = new Date(inizio.getTime() + s.durata * 60000);
+  if (isNaN(inizio)) { errore('Scegli giorno e ora'); return; }
+  if (inizio < new Date()) { errore('Questo orario è già passato: scegline uno da adesso in poi.'); return; }
+  const invia = (e.nomiInvitati || []).length ? 'all' : 'none';
+  const btn = $('sevt-conferma');
+  btn.disabled = true;
+  const tz = fusoEvento(e);
+  const path = `/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(e.id)}`;
+  try {
+    let annulla;
+    if (e.ricorrente && s.tutte) annulla = await spostaSerieEvento(e, inizio, fine, invia);
+    else {
+      await gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { dateTime: isoLocale(s.giorno, s.ora), timeZone: tz }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz } });
+      annulla = () => gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
+    }
+    closeModal('spostaEvtOverlay');
+    ui.sevt = null;
+    const da = parseISODate(e.giorno), a = parseISODate(s.giorno);
+    ricaricaEventi(da, a);
+    showToast(`${e.titolo}: ${fmtGiorno(a)} alle ${s.ora}${invia === 'all' ? ' · invitati avvisati' : ''}`, 'success', { annulla: async () => {
+      try { await annulla(); ricaricaEventi(da, a); } catch (err) { showToast('Non riesco a rimetterlo com\'era: ' + err.message, 'error'); }
+    } });
+  } catch (err) {
+    btn.disabled = false;
+    console.warn('[GCal] sposta appuntamento:', err.message);
+    errore(/insufficient|permission|forbidden|403/i.test(err.message) ? 'Google non permette di modificare questo evento: ricollega Google o chiedi a chi lo organizza.' : 'Non sono riuscito a spostarlo: ' + err.message);
+  }
+}
+async function promemoriaOrganizzatore() {
+  const e = eventoPerId(ui.sevt && ui.sevt.id);
+  if (!e) return;
+  closeModal('spostaEvtOverlay');
+  ui.sevt = null;
+  await aggiungiRighe([`Chiedi a ${e.org || 'chi lo organizza'} di spostare «${e.titolo}» (${fmtGgMm(e.giorno)})`], { subito: false, oggi: true, persona: null });
+}
+
+// «+ Appuntamento» in una colonna: un evento nel calendario Lavoro (Privato se sei su Personale)
+ui.nevt = null;
+function apriNuovoEvento(iso) {
+  const manca = serveScopeEventi();
+  if (manca) { showToast(manca, 'warn'); openGcalModal(); return; }
+  const cal = CAL_LETTURA.find(c => c.tipo === (state.ctx === 'personale' ? 'privato' : 'lavoro')) || CAL_LETTURA[0];
+  ui.nevt = { iso, cal: cal.id };
+  $('nevt-sotto').textContent = `${fmtGiornoLungo(parseISODate(iso))} · calendario ${cal.nome}`;
+  const lib = primoLiberoDa(iso, 60);
+  const ora = lib && lib.iso === iso ? lib.ora : '09:00';
+  $('nevt-corpo').innerHTML = `<label><span class="dl-label">Cosa</span><input type="text" class="input" id="nevt-titolo-in" maxlength="200" autocomplete="off" placeholder="Es. Incontro con Marco"></label>
+    <div class="sevt-campi"><label><span class="dl-label">Ora</span><input type="time" class="input" id="nevt-ora" value="${ora}" step="300"></label>
+      <label><span class="dl-label">Durata</span><select class="input" id="nevt-durata">${[15, 30, 45, 60, 90, 120].map(m => `<option value="${m}"${m === 60 ? ' selected' : ''}>${fmtTempo(m)}</option>`).join('')}</select></label></div>
+    <p class="t-caption" id="nevt-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="nevt-crea" id="nevt-crea"><i class="ti ti-calendar-plus"></i>Crea l'appuntamento</button></div>`;
+  $('nuovoEvtOverlay').classList.add('open');
+  setTimeout(() => $('nevt-titolo-in').focus(), 80);
+}
+async function creaNuovoEvento() {
+  const n = ui.nevt, titolo = $('nevt-titolo-in').value.trim(), ora = $('nevt-ora').value, durata = parseInt($('nevt-durata').value, 10) || 60;
+  const errore = msg => { const el = $('nevt-errore'); el.textContent = msg; el.hidden = false; };
+  if (!titolo) { errore('Scrivi cos\'è'); $('nevt-titolo-in').focus(); return; }
+  if (!ora) { errore('Scegli l\'ora'); return; }
+  const inizio = new Date(isoLocale(n.iso, ora)), fine = new Date(inizio.getTime() + durata * 60000);
+  const sovr = sovrapposti(n.iso, ora, durata, null);
+  if (sovr.length && !n.confermato) {
+    const lib = primoLiberoDa(n.iso, durata), libero = lib && lib.iso === n.iso ? lib.ora : null;
+    errore(`Si sovrappone a ${sovr[0]}.${libero ? ` Ho messo il primo spazio libero, alle ${libero}.` : ''} Tocca di nuovo per crearlo.`);
+    if (libero) $('nevt-ora').value = libero;
+    ui.nevt = { ...n, confermato: true };
+    return;
+  }
+  $('nevt-crea').disabled = true;
+  try {
+    const creato = await gcalFetch(`/calendars/${encodeURIComponent(n.cal)}/events`, 'POST', {
+      summary: titolo, start: { dateTime: isoLocale(n.iso, ora), timeZone: 'Europe/Rome' }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: 'Europe/Rome' } });
+    if (!creato || !creato.id) throw new Error('Google non ha risposto');
+    closeModal('nuovoEvtOverlay');
+    ricaricaEventi(inizio);
+    showToast(`Appuntamento creato: ${fmtGiorno(inizio)} alle ${ora}`, 'success', { annulla: async () => {
+      await gcalFetch(`/calendars/${encodeURIComponent(n.cal)}/events/${encodeURIComponent(creato.id)}`, 'DELETE').catch(() => {});
+      ricaricaEventi(inizio);
+    } });
+  } catch (e) { $('nevt-crea').disabled = false; errore('Non sono riuscito a crearlo: ' + e.message); }
+}
+
+// ─── 2. COMPUTER: PIANIFICA A COLONNE (da 1100px) ────────────
+ui.dp = { q: '', tipo: null };
+ui.scorsa = {};
+ui.boardSel = null;
+function boardAttiva() { return ui.tab === 'pianifica' && !ui.sub && ui.pian === 'settimana' && eLargo(); }
+function legendaColori() {
+  const voce = (cl, l) => `<span class="leg-voce"><span class="leg-segno ${cl}" aria-hidden="true"></span>${l}</span>`;
+  return `<div class="legenda" aria-label="Legenda dei colori">${voce('q1', 'Subito')}${voce('q2', 'Importante')}${voce('q3', 'Delega')}${voce('q4', 'Lascia stare')}${voce('leg-app', 'Appuntamento')}</div>`;
+}
+async function caricaScorsa(week, year) {
+  const k = settKey(week, year);
+  if (k in ui.scorsa || !state.bpTableOk) return;
+  ui.scorsa[k] = null;
+  const prima = new Date(getWeekStart(week, year)); prima.setDate(prima.getDate() - 7);
+  const w = isoWeekParts(prima);
+  try {
+    const { data, error } = await db.from('battle_plan').select('id,battle_plan_items(ciclo_id,completato,tipo_slot)').eq('settimana', w.week).eq('anno', w.year).maybeSingle();
+    if (error) throw error;
+    const items = ((data && data.battle_plan_items) || []).filter(i => i.ciclo_id && i.tipo_slot !== 'cuscinetto').filter(i => { const c = ciclo(i.ciclo_id); return c && c.ctx === state.ctx; });
+    ui.scorsa[k] = items.length ? bpStats(items) : { tot: 0 };
+    if (boardAttiva()) render();
+  } catch (e) { console.warn('[Pianifica] settimana scorsa:', e.message); }
+}
+function righeSettimana() { return [...GIORNI.map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k)); }
+function testaBoard() {
+  const da = getWeekStart(state.week, state.year), a = new Date(da); a.setDate(a.getDate() + 6);
+  const tutte = righeSettimana(), minuti = tutte.reduce((s, r) => s + (r.durata || BP_DURATA_DEFAULT), 0);
+  caricaScorsa(state.week, state.year);
+  const sc = ui.scorsa[settKey(state.week, state.year)];
+  const scorsa = sc && sc.tot ? ` · sett. scorsa <b class="mono">${sc.done}</b> su <b class="mono">${sc.tot}</b> (${sc.pct}%)` : '';
+  const sola = bpSolaLettura();
+  const piano = sola ? '' : `<button type="button" class="btn btn-secondary btn-sm" data-act="wizard"><i class="ti ${state.bp ? 'ti-pencil' : 'ti-calendar-plus'}"></i>${state.bp ? 'Modifica il piano' : 'Prepara la settimana'}</button>`;
+  return `<div class="board-testa">
+    <div class="bt-titolo"><h2>Business Plan · Settimana <span class="mono">${state.week}</span></h2>
+      <div class="bt-nav"><button type="button" class="btn btn-icon" data-act="sett" data-dir="-1" aria-label="Settimana prima"><i class="ti ti-chevron-left"></i></button>
+        <span class="mono">${fmtGgMm(toISODate(da))} – ${fmtGgMm(toISODate(a))}</span>
+        <button type="button" class="btn btn-icon" data-act="sett" data-dir="1" aria-label="Settimana dopo"><i class="ti ti-chevron-right"></i></button>
+        ${eSettimanaCorrente() ? '' : '<button type="button" class="btn btn-ghost btn-sm" data-act="sett-oggi">Questa settimana</button>'}</div></div>
+    <p class="bt-stat"><b class="mono">${tutte.length}</b> ${tutte.length === 1 ? 'cosa' : 'cose'} · <b class="mono">${fmtTempo(minuti)}</b>${scorsa}</p>
+    ${legendaColori()}
+    <div class="bt-azioni">${piano}
+      <button type="button" class="btn btn-secondary btn-sm" data-act="pdf"${tutte.length ? '' : ' disabled'}><i class="ti ti-printer"></i>Stampa il foglio</button>
+      <button type="button" class="btn btn-primary btn-sm" data-act="invia"${tutte.length ? '' : ' disabled'}><i class="ti ti-send"></i>Invia al coach</button></div>
+  </div>`;
+}
+function daPianificareFiltrate() {
+  const q = ui.dp.q.trim().toLowerCase();
+  return agendaDaPianificare().filter(c => !haPassiAperti(c))
+    .filter(c => !q || String(c.title || '').toLowerCase().includes(q))
+    .filter(c => !ui.dp.tipo || computeEffectiveQ(c) === ui.dp.tipo)
+    .sort((a, b) => computeEffectiveQ(a) - computeEffectiveQ(b) || String(a.created_at).localeCompare(String(b.created_at)));
+}
+function htmlDaPianificareLista() {
+  const lista = daPianificareFiltrate();
+  return lista.length ? lista.map(c => riga({ c, fatto: false }, { trascina: true, data: oggiLocale() })).join('') : '<div class="col-vuota">Niente da pianificare</div>';
+}
+function colonnaDaPianificare() {
+  const tutte = agendaDaPianificare().filter(c => !haPassiAperti(c));
+  const n = q => tutte.filter(c => computeEffectiveQ(c) === q).length;
+  const chip = (q, l) => `<button type="button" class="chip chip-q${q}" data-act="dp-tipo" data-v="${q}" aria-pressed="${ui.dp.tipo === q}">${l} <span class="mono">${n(q)}</span></button>`;
+  const senza = tutte.filter(c => !c.due_date).length;
+  return `<section class="bcol bcol-dp" aria-label="Da pianificare">
+    <div class="bcol-h"><span>Da pianificare</span><span class="mono">${tutte.length}</span></div>
+    <label class="cerca"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="dp-cerca" placeholder="Cerca" autocomplete="off" aria-label="Cerca tra le cose da pianificare" value="${esc(ui.dp.q)}"></label>
+    <div class="chips chips-wrap dp-chips" role="group" aria-label="Filtra per tipo">${chip(1, 'Subito')}${chip(2, 'Importante')}${chip(3, 'Delega')}</div>
+    ${senza ? `<button type="button" class="dp-avviso" data-act="riordina"><i class="ti ti-arrows-sort"></i><span><b class="mono">${senza}</b> senza giorno né data · Riordina in 10 minuti</span></button>` : ''}
+    <div class="group bzona" data-zona="dapiano" id="dp-lista">${htmlDaPianificareLista()}</div>
+  </section>`;
+}
+// Spazi liberi del giorno senza cuscinetto nel piano: tratteggiati, «pensaci tu»
+function rigaSpazio(p) {
+  return `<div class="evt-riga spazio-riga" aria-label="Spazio libero alle ${p.ora}"><span class="evt-ico" aria-hidden="true"><i class="ti ti-lifebuoy"></i></span>
+    <span class="evt-main"><span class="item-title">Spazio libero <span class="sep">·</span> <span class="mono">${p.ora}</span></span><span class="item-meta"><span class="mono">${fmtTempo(p.durata)}</span><span class="sep">·</span><span>buono per un cuscinetto</span></span></span></div>`;
+}
+function colonnaGiorno(gg, idx) {
+  const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), tot = minutiGiorno(rs, d), op = opzRighe(d);
+  const oggi = eSettimanaCorrente() && giornoIdxDi(oggiData()) === idx;
+  const muovi = r => ({ ...op, trascina: !r.fatto && !op.solaLettura });
+  const { conOra, senzaOra } = sequenzaGiorno(rs, d);
+  const spazi = !giornoPassato(d) && !cuscinettiDelGiorno(d).length && !op.solaLettura ? postiCuscinetto(d, occupatiPiano(gg.key)).map(p => ({ tipo: 'spazio', ora: p.ora, p })) : [];
+  const seq = [...conOra, ...spazi].sort((a, b) => a.ora.localeCompare(b.ora));
+  const evt = e => rigaEvento(e).replace('<div class="evt-riga', `<div draggable="${e.orgIo && !e.routine ? 'true' : 'false'}" class="evt-riga`);
+  const corpo = seq.map(x => x.tipo === 'evento' ? evt(x.e) : x.tipo === 'cuscinetto' ? rigaCuscinetto(x.item, op) : x.tipo === 'spazio' ? rigaSpazio(x.p) : riga(x.r, muovi(x.r))).join('')
+    + (senzaOra.length && seq.length ? '<div class="fascia-h">Senza ora</div>' : '') + senzaOra.map(r => riga(r, muovi(r))).join('');
+  const piu = op.solaLettura ? '' : `<div class="bcol-piu"><button type="button" class="btn btn-ghost btn-sm" data-act="b-ciclo" data-v="${toISODate(d)}"><i class="ti ti-plus"></i>Ciclo</button>
+    <button type="button" class="btn btn-ghost btn-sm" data-act="b-evento" data-v="${toISODate(d)}"><i class="ti ti-calendar-plus"></i>Appuntamento</button></div>`;
+  return `<section class="bcol${oggi ? ' oggi' : ''}" aria-label="${gg.label} ${d.getDate()}">
+    <div class="bcol-h"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${tot ? `<span class="mono" data-tip="Cose, appuntamenti e cuscinetti">${fmtTempo(tot)}</span>` : ''}</div>
+    <div class="group bzona" data-zona="${gg.key}">${corpo || '<div class="col-vuota">—</div>'}</div>${piu}
+  </section>`;
+}
+function giorniVisibili() {
+  return GIORNI.map((g, idx) => ({ g, idx })).filter(({ g, idx }) => idx < 5 || ui.weekend || righeGiorno(g.key).length || eventiDelGiorno(dataDelGiorno(idx)).length);
+}
+function pianLargo() {
+  const inSett = righeGiorno('settimana'), fineSett = dataDelGiorno(6);
+  const giorni = giorniVisibili();
+  const weekend = giorni.length < 7 ? `<button type="button" class="btn btn-ghost btn-sm" data-act="weekend">${ui.weekend ? 'Nascondi sabato e domenica' : 'Mostra sabato e domenica'}</button>` : '';
+  const pensaci = `<section class="bcol bcol-sett" aria-label="In settimana, pensaci dopo">
+      <div class="bcol-h"><span>In settimana</span><span class="mono">${inSett.length}</span></div><p class="bcol-sotto">pensaci dopo</p>
+      <div class="group bzona" data-zona="settimana">${inSett.map(r => riga(r, { ...opzRighe(fineSett), data: oggiLocale(), trascina: !r.fatto })).join('') || '<div class="col-vuota">Trascina qui le cose della settimana senza un giorno</div>'}</div></section>`;
+  return `${testaBoard()}${eSettimanaCorrente() ? bloccoRimaste() : ''}${cardCoach()}
+    <div class="board-scorri"><div class="cols board" style="--giorni:${giorni.length}">${colonnaDaPianificare()}${pensaci}${giorni.map(({ g, idx }) => colonnaGiorno(g, idx)).join('')}</div></div>
+    <div class="board-piede">${weekend}<span class="t-caption muted">Trascina le cose e gli appuntamenti tra le colonne · con la tastiera: seleziona una cosa e premi Alt + freccia</span></div>
+    ${pianFondoLargo()}`;
+}
+function pianFondoLargo() {
+  const sola = bpSolaLettura();
+  return `<div class="group" style="margin-top:var(--sp-5)">
+    <button type="button" class="riga-link" data-act="review"${state.bp && !sola ? '' : ' disabled'}><i class="ti ti-flag"></i><span>Chiudi la settimana</span><small>${!state.bp ? 'serve un piano' : state.bp.stato === 'chiuso' ? 'già chiusa' : ''}</small><i class="ti ti-chevron-right"></i></button></div>`;
+}
+const _vistaPianificaV5 = vistaPianifica;
+vistaPianifica = function () {
+  if (!boardAttiva()) return _vistaPianificaV5();
+  const seg = [['settimana', 'Settimana'], ['mese', 'Mese']].map(([k, l]) => `<button type="button" data-act="pian" data-v="${k}" aria-pressed="${ui.pian === k}">${l}</button>`).join('');
+  return `<div class="vh vh-board"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div><div class="seg" role="group" aria-label="Vista">${seg}</div></div>${pianLargo()}`;
+};
+// sotto i 1100px resta la lista: in più la card del coach, sopra «Da piazzare»
+const _pianFondoV5 = pianFondo;
+pianFondo = function () { return cardCoach() + _pianFondoV5(); };
+
+// Spostare dalla colonna: giorno = come i chip del dettaglio; «In settimana» = riga del piano senza giorno (si crea il piano in bozza se manca).
+async function bordoSposta(id, zona) {
+  const c = ciclo(id);
+  if (!c || zona === 'dapiano') return;
+  try {
+    if (zona === 'settimana' && !state.bp) {
+      await pianoPer({ week: state.week, year: state.year }, new Map());
+      await loadBattlePlan();
+    }
+    const eraNelPiano = !!(state.bp && itemDelPiano(id));
+    await impostaGiorno(id, zona);
+    if (state.bp && !eraNelPiano && zona !== 'settimana' && !siRipete(c) && !itemDelPiano(id)) {
+      const riga = { battle_plan_id: state.bp.id, ciclo_id: id, giorno: zona, fascia: null, durata_prevista: c.durata_minuti || BP_DURATA_DEFAULT, ordine: state.bpItems.length };
+      const { data, error } = await db.from('battle_plan_items').upsert(riga, { onConflict: 'battle_plan_id,ciclo_id' }).select();
+      if (error) throw error;
+      state.bpItems = [...state.bpItems.filter(i => i.ciclo_id !== id), (data && data[0]) || riga];
+      render();
+    }
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+let _bDrag = null;
+document.addEventListener('dragstart', e => {
+  const board = e.target.closest && e.target.closest('.board');
+  if (!board) return;
+  const it = e.target.closest('.item[draggable="true"]'), ev = e.target.closest('.evt-riga[draggable="true"]');
+  if (it) _bDrag = { tipo: 'cosa', id: it.dataset.id };
+  else if (ev) _bDrag = { tipo: 'evento', id: ev.dataset.evtId };
+  else return;
+  try { e.dataTransfer.setData('text/plain', `${_bDrag.tipo}:${_bDrag.id}`); e.dataTransfer.effectAllowed = 'move'; } catch (_) {}
+  (it || ev).classList.add('dragging');
+});
+document.addEventListener('dragend', () => {
+  _bDrag = null;
+  document.querySelectorAll('.board .dragging').forEach(x => x.classList.remove('dragging'));
+  document.querySelectorAll('.bzona.drag-over').forEach(z => z.classList.remove('drag-over'));
+});
+document.addEventListener('dragover', e => {
+  const z = _bDrag && e.target.closest && e.target.closest('.board .bzona');
+  if (!z || z.dataset.zona === 'dapiano' || (_bDrag.tipo === 'evento' && z.dataset.zona === 'settimana')) return;
+  e.preventDefault();
+  document.querySelectorAll('.bzona.drag-over').forEach(x => { if (x !== z) x.classList.remove('drag-over'); });
+  z.classList.add('drag-over');
+});
+document.addEventListener('drop', e => {
+  const z = _bDrag && e.target.closest && e.target.closest('.board .bzona');
+  if (!z) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const d = _bDrag;
+  _bDrag = null;
+  z.classList.remove('drag-over');
+  if (d.tipo === 'evento') { if (z.dataset.zona !== 'settimana') apriSpostaEvento(d.id, toISODate(giornoDi(state.week, state.year, z.dataset.zona))); return; }
+  bordoSposta(d.id, z.dataset.zona);
+}, true);
+// Tastiera: Alt + freccia sposta la cosa selezionata nella colonna accanto
+function zoneBoard() { return ['settimana', ...giorniVisibili().map(x => x.g.key)]; }
+document.addEventListener('keydown', async e => {
+  if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+  const it = e.target.closest && e.target.closest('.board .item');
+  if (!it) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();   // le frecce da sole cambiano settimana: con Alt no
+  const zone = zoneBoard(), da = it.closest('.bzona').dataset.zona;
+  const i = zone.indexOf(da), passo = e.key === 'ArrowRight' ? 1 : -1;
+  const dest = da === 'dapiano' ? (passo > 0 ? zone[0] : null) : zone[i + passo];
+  if (!dest) return;
+  const id = it.dataset.id;
+  await bordoSposta(id, dest);
+  setTimeout(() => { const el = document.querySelector(`.board .item[data-id="${id}"] .item-main`); if (el) el.focus(); }, 80);
+}, true);
+document.addEventListener('input', e => {
+  if (e.target.id !== 'dp-cerca') return;
+  ui.dp = { ...ui.dp, q: e.target.value };
+  const l = $('dp-lista');
+  if (l) l.innerHTML = htmlDaPianificareLista();
+});
+window.matchMedia(`(min-width: ${V6.LARGO}px)`).addEventListener('change', () => render());
+const _disegnaV5 = disegna;
+disegna = function () {
+  _disegnaV5();
+  $('view').classList.toggle('largo', boardAttiva());
+};
+
+// ─── 4. RIORDINA: una cosa alla volta, le più vecchie prima ──
+ui.rio = null;
+function rioCoda() {
+  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c) && !c.parent_id)
+    .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || ''))).map(c => c.id);
+}
+function rioSalva() { if (ui.rio) lsScrivi(V6.RIO_LS, JSON.stringify({ ids: ui.rio.ids, i: ui.rio.i, conta: ui.rio.conta, ctx: state.ctx })); }
+function apriRiordina(daCapo) {
+  let salvato = null;
+  try { salvato = JSON.parse(lsLeggi(V6.RIO_LS) || 'null'); } catch (_) { salvato = null; }
+  const valido = salvato && !daCapo && salvato.ctx === state.ctx && salvato.i < (salvato.ids || []).length;
+  ui.rio = valido ? { ids: salvato.ids.filter(id => ciclo(id)), i: 0, conta: salvato.conta || {}, ripreso: true } : { ids: rioCoda(), i: 0, conta: {}, ripreso: false };
+  if (valido) ui.rio.i = Math.min(salvato.ids.slice(0, salvato.i).filter(id => ciclo(id)).length, ui.rio.ids.length);
+  ui.rio.scelta = null;
+  $('riordinaOverlay').classList.add('open');
+  rioSalta(0);
+}
+function chiudiRiordina() { rioSalva(); ui.rio = null; closeModal('riordinaOverlay'); render(); }
+// salta in avanti le cose già chiuse o tolte nel frattempo
+function rioSalta(passo) {
+  const r = ui.rio;
+  r.i += passo;
+  while (r.i < r.ids.length && !(ciclo(r.ids[r.i]) && isAttivo(ciclo(r.ids[r.i])))) r.i++;
+  r.scelta = null;
+  rioSalva();
+  disegnaRiordina();
+}
+const RIO_TASTI = [
+  { k: 'subito', q: 1, l: 'Subito', s: 'questa settimana', i: 'ti-flame' },
+  { k: 'importante', q: 2, l: 'Importante', s: 'scegli una data', i: 'ti-target-arrow' },
+  { k: 'delega', q: 3, l: 'Delega', s: 'a chi e quando controlli', i: 'ti-user-share' },
+  { k: 'lascia', q: 4, l: 'Lascia stare', s: 'fuori dalla vista', i: 'ti-wind' }];
+const RIO_DATE = [{ k: 'sett', l: 'Questa sett.' }, { k: 'prossima', l: 'Prossima' }, { k: 'mese', l: 'Tra 1 mese' }, { k: 'tre', l: 'Tra 3 mesi' }];
+function rioRiepilogo() {
+  const c = ui.rio.conta, voci = [['subito', 'Subito'], ['importante', 'Importante'], ['delega', 'Delega'], ['lascia', 'Lascia stare'], ['fatta', 'Fatte'], ['spacchettata', 'Spacchettate'], ['saltata', 'Saltate']]
+    .filter(([k]) => c[k]).map(([k, l]) => `<span><b class="mono">${c[k]}</b> ${l}</span>`);
+  return voci.length ? voci.join('<span class="sep">·</span>') : '<span>Ancora niente: comincia dalla prima.</span>';
+}
+function disegnaRiordina() {
+  const r = ui.rio, tot = r.ids.length, corpo = $('rio-corpo');
+  const testa = `<div class="rio-testa"><button type="button" class="btn btn-ghost btn-sm" data-act="rio-chiudi"><i class="ti ti-x"></i>Interrompi</button>
+    <h2 id="rio-titolo">Riordina</h2><span class="mono rio-conto" aria-live="polite">${Math.min(r.i + 1, tot)} / ${tot}</span></div>
+    <div class="bar" role="progressbar" aria-label="Riordinate" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${r.i}"><i style="width:${tot ? Math.round(r.i / tot * 100) : 100}%"></i></div>`;
+  const piede = `<div class="rio-piede" aria-label="Riepilogo">${rioRiepilogo()}</div>`;
+  if (r.i >= tot) {
+    lsScrivi(V6.RIO_LS, null);
+    corpo.innerHTML = testa + `<div class="rio-fine">${vuoto('ti-circle-check', 'Riordinate tutte', 'Ogni cosa aperta ha un tipo e, se serve, una data. Le trovi in Tutto e in Pianifica.',
+      '<button type="button" class="btn btn-primary btn-sm" data-act="rio-chiudi">Chiudi</button>')}</div>` + piede;
+    return;
+  }
+  const c = ciclo(r.ids[r.i]);
+  const giorni = c.created_at ? Math.max(0, Math.floor((Date.now() - new Date(c.created_at).getTime()) / 864e5)) : null;
+  const area = areaDi(c);
+  const q = computeEffectiveQ(c);
+  const scelta = r.scelta === 'importante' ? `<div class="rio-date" role="group" aria-label="Quando la fai">
+      ${RIO_DATE.map(x => `<button type="button" class="chip" data-act="rio-data" data-v="${x.k}">${x.l}</button>`).join('')}
+      <label class="chip rio-data-scelta"><i class="ti ti-calendar"></i><span>Data</span><input type="date" id="rio-data" min="${oggiLocale()}" aria-label="Scegli la data"></label></div>` : '';
+  corpo.innerHTML = testa + `<article class="rio-carta p-q${q}">
+      <p class="rio-meta">${area ? `<span class="rio-area">${escHtml(area)}</span>` : ''}${giorni != null ? `<span>${giorni === 0 ? 'aperta oggi' : giorni === 1 ? 'aperta da 1 giorno' : `aperta da ${giorni} giorni`}</span>` : ''}<span>ora: ${TIPI[q].label}</span></p>
+      <h3 class="rio-cosa">${escHtml(c.title)}</h3>
+      ${c.note ? `<p class="rio-nota">${escHtml(c.note)}</p>` : ''}
+    </article>
+    <div class="rio-tasti">${RIO_TASTI.map(t => `<button type="button" class="rio-tasto t-q${t.q}" data-act="rio-tipo" data-v="${t.k}" aria-pressed="${r.scelta === t.k}"><i class="ti ${t.i}"></i><b>${t.l}</b><small>${t.s}</small></button>`).join('')}</div>
+    ${scelta}
+    <div class="rio-altro"><button type="button" class="btn btn-secondary btn-sm" data-act="rio-fatta"><i class="ti ti-check"></i>È fatta</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="rio-spacchetta"><i class="ti ti-list-tree"></i>Spacchettala</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="rio-salta">Salta<i class="ti ti-arrow-right"></i></button></div>
+    ${r.ripreso && r.i > 0 ? '<p class="t-caption muted rio-ripresa">Ripreso da dove eri rimasto · <button type="button" class="link-btn" data-act="rio-dacapo">ricomincia</button></p>' : ''}` + piede;
+  setTimeout(() => { const b = corpo.querySelector('.rio-tasto'); if (b && !r.scelta) b.focus({ preventScroll: true }); }, 30);
+}
+function rioConta(k, d) { ui.rio.conta = { ...ui.rio.conta, [k]: Math.max(0, (ui.rio.conta[k] || 0) + d) }; }
+// ogni scelta: salva, toast con Annulla (che rimette la cosa com'era e torna indietro), avanti
+async function rioApplica(k, fn) {
+  const r = ui.rio, id = r.ids[r.i], c = ciclo(id);
+  const prima = campi(c, ['q', 'parcheggiato', 'parcheggiato_at', 'pianificato_data', 'giorno_settimana', 'fascia_oraria']);
+  try {
+    const dopo = await fn(c);
+    rioConta(k, 1);
+    rioSalta(1);
+    render();
+    showToast(`«${c.title}» · ${dopo}`, 'success', { annulla: async () => {
+      await patchCiclo(id, prima);
+      if (ui.rio) { rioConta(k, -1); ui.rio.i = Math.max(0, ui.rio.ids.indexOf(id)); rioSalva(); disegnaRiordina(); }
+      render();
+    } });
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+async function rioInSettimana(c, q) {
+  await patchCiclo(c.id, { q, ...(isParcheggiato(c) ? { parcheggiato: false, parcheggiato_at: null } : {}), ...(state.pianificaColsOk ? { pianificato_data: oggiLocale() } : {}) });
+  const cur = bpSettimanaCorrente(), cache = new Map();
+  const plan = await pianoPer(cur, cache);
+  const { error } = await db.from('battle_plan_items').upsert({ battle_plan_id: plan.id, ciclo_id: c.id, giorno: 'settimana', fascia: null, durata_prevista: c.durata_minuti || BP_DURATA_DEFAULT },
+    { onConflict: 'battle_plan_id,ciclo_id' });
+  if (error) throw error;
+  if (state.week === cur.week && state.year === cur.year) await loadBattlePlan();
+}
+function rioDataDi(k) {
+  const d = new Date();
+  if (k === 'prossima') { const n = bpSettimanaSuccessiva(bpSettimanaCorrente().week, bpSettimanaCorrente().year); return getWeekStart(n.week, n.year); }
+  if (k === 'mese') return addMesi(d, 1);
+  if (k === 'tre') return addMesi(d, 3);
+  return parseISODate(k);
+}
+function rioTipo(k) {
+  if (k === 'importante') { ui.rio.scelta = 'importante'; disegnaRiordina(); setTimeout(() => { const b = document.querySelector('[data-act="rio-data"]'); if (b) b.focus(); }, 30); return; }
+  if (k === 'subito') return rioApplica('subito', async c => { await rioInSettimana(c, 1); return 'Subito, questa settimana'; });
+  if (k === 'lascia') return rioApplica('lascia', async c => { await patchCiclo(c.id, { q: 4, ...(state.parcheggioColsOk ? { parcheggiato: true, parcheggiato_at: new Date().toISOString() } : {}) }); return 'Lascia stare'; });
+  if (k === 'delega') { ui.rio.delega = ui.rio.ids[ui.rio.i]; apriDelega(ui.rio.delega); }
+}
+async function rioData(k) {
+  if (k === 'sett') return rioApplica('importante', async c => { await rioInSettimana(c, 2); return 'Importante, questa settimana'; });
+  const d = rioDataDi(k);
+  if (!d || isNaN(d)) return;
+  return rioApplica('importante', async c => { await patchCiclo(c.id, { q: 2 }); await pianificaInData(ciclo(c.id), d, null); return `Importante, ${fmtGiorno(d)}`; });
+}
+// la Delega passa dal suo foglio (a chi + quando controlli): quando è salvata, avanti
+const _salvaDelegaV5 = salvaDelega;
+salvaDelega = async function () {
+  const id = ui.delega && ui.delega.id;
+  await _salvaDelegaV5();
+  if (ui.rio && ui.rio.delega === id && !$('delegaOverlay').classList.contains('open') && ciclo(id) && ciclo(id).q === 3) {
+    ui.rio.delega = null; rioConta('delega', 1); rioSalta(1);
+  }
+};
+async function rioFatta() {
+  const id = ui.rio.ids[ui.rio.i];
+  await azioneFatto(id);
+  if (!ui.rio) return;
+  rioConta('fatta', 1);
+  rioSalta(1);
+}
+function rioSpacchetta() {
+  const id = ui.rio.ids[ui.rio.i];
+  rioConta('spacchettata', 1);
+  rioSalta(1);
+  azioneScomponi(id);   // il dettaglio si apre sopra Riordina; chiudendolo si torna qui
+}
+document.addEventListener('change', e => {
+  if (e.target.id === 'rio-data' && e.target.value && ui.rio) rioData(e.target.value);
+});
+document.addEventListener('keydown', e => {
+  if (!ui.rio || !$('riordinaOverlay').classList.contains('open') || document.querySelector('.modal-overlay.open:not(#riordinaOverlay)')) return;
+  if (e.key === 'Escape') { e.preventDefault(); chiudiRiordina(); }
+});
+
+// ─── 7. LA PARTE PER IL COACH ────────────────────────────────
+ui.coach = { evento: null, letto: false, chiusa: null, prossimo: null };
+// il prossimo incontro: eventi con il coach o che iniziano con «Coach:», nei prossimi 60 giorni
+async function caricaCoach(forza) {
+  if (!isGcalTokenValid() || (ui.coach.letto && !forza) || ui.coach.carico) return;
+  ui.coach = { ...ui.coach, carico: true };
+  try {
+    const da = new Date(), a = new Date(Date.now() + V6.COACH_GIORNI * 864e5);
+    const trovati = [];
+    for (const cal of CAL_LETTURA) {
+      for (const q of ['beretta', 'Coach']) {
+        const qs = new URLSearchParams({ timeMin: da.toISOString(), timeMax: a.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '20', q });
+        const res = await gcalFetch(`/calendars/${encodeURIComponent(cal.id)}/events?${qs}`, 'GET').catch(() => null);
+        ((res && res.items) || []).map(x => eventoDa(x, cal)).filter(x => x && x.coach && x.inizioMs > Date.now()).forEach(x => trovati.push(x));
+      }
+    }
+    trovati.sort((x, y) => x.inizioMs - y.inizioMs);
+    ui.coach = { ...ui.coach, evento: trovati[0] || null, letto: true };
+    await caricaPianiCoach();
+    render();
+  } catch (e) { console.warn('[Coach] prossimo incontro:', e.message); }
+  finally { ui.coach = { ...ui.coach, carico: false }; }
+}
+// la settimana da chiudere (quella prima dell'incontro) e il piano della settimana dell'incontro
+function settimaneCoach() {
+  const e = ui.coach.evento;
+  const dIncontro = e ? new Date(e.inizioMs) : null;
+  const wInc = dIncontro ? isoWeekParts(dIncontro) : bpSettimanaSuccessiva(bpSettimanaCorrente().week, bpSettimanaCorrente().year);
+  const prima = new Date(getWeekStart(wInc.week, wInc.year)); prima.setDate(prima.getDate() - 7);
+  const cur = bpSettimanaCorrente();
+  const wChiudi = getWeekStart(wInc.week, wInc.year) <= getWeekStart(cur.week, cur.year) ? cur : isoWeekParts(prima);
+  return { wInc, wChiudi };
+}
+async function caricaPianiCoach() {
+  if (!state.bpTableOk) return;
+  const { wInc, wChiudi } = settimaneCoach();
+  const leggi = async w => {
+    const { data, error } = await db.from('battle_plan').select(`id,stato,${state.statsColOk ? 'motivi,' : ''}battle_plan_items(id)`).eq('settimana', w.week).eq('anno', w.year).maybeSingle();
+    if (error) throw error;
+    return data;
+  };
+  try { ui.coach = { ...ui.coach, chiusa: await leggi(wChiudi), prossimo: await leggi(wInc) }; }
+  catch (e) { console.warn('[Coach] piani:', e.message); }
+}
+function importantiSenzaData() {
+  return state.cicli.filter(c => isAttivo(c) && !isGiornaliero(c) && computeEffectiveQ(c) === 2 && !c.due_date && !haPianificazione(c) && !haPassiAperti(c)).length;
+}
+function vociCoach() {
+  const { wInc, wChiudi } = settimaneCoach();
+  const mancano = importantiSenzaData();
+  const ultimoQ2 = state.ultimoQ2 ? new Date(state.ultimoQ2) : null;
+  const q2ok = !!ultimoQ2 && Date.now() - ultimoQ2.getTime() <= V6.Q2_GIORNI * 864e5;
+  const ch = ui.coach.chiusa, motivi = ch && ch.motivi && Object.keys(ch.motivi).length;
+  const pr = ui.coach.prossimo, pronto = !!(pr && pr.stato === 'attivo' && (pr.battle_plan_items || []).length);
+  const st = stampatoIl(wInc.week, wInc.year), inv = inviatoIl(wInc.week, wInc.year);
+  ui.coachSett = wInc;   // «Invia» della checklist manda il piano della settimana dell'incontro
+  return [
+    { k: 'foglio', ok: mancano === 0, l: 'Foglio cicli aperti sistemato', d: mancano ? `${plurale(mancano, 'Importante', 'Importanti')} senza giorno né data` : 'nessuna Importante senza giorno né data', az: mancano ? '<button type="button" class="btn btn-secondary btn-sm" data-act="riordina"><i class="ti ti-arrows-sort"></i>Riordina</button>' : '' },
+    { k: 'q2', ok: q2ok, l: 'Esercizio Q2 fatto negli ultimi 3 mesi', d: ultimoQ2 ? `l'ultimo il ${fmtGgMm(toISODate(ultimoQ2))}` : 'mai fatto', az: q2ok ? '' : '<button type="button" class="btn btn-secondary btn-sm" data-act="q2-apri">Fallo ora</button>' },
+    { k: 'chiusa', ok: !!(ch && ch.stato === 'chiuso' && motivi), l: `Settimana ${wChiudi.week} chiusa con i perché`, d: !ch ? 'nessun piano' : ch.stato !== 'chiuso' ? 'non ancora chiusa' : motivi ? 'chiusa, con i perché' : 'chiusa, ma senza i perché', az: ch && ch.stato !== 'chiuso' ? `<button type="button" class="btn btn-secondary btn-sm" data-act="coach-chiudi" data-w="${wChiudi.week}" data-y="${wChiudi.year}">Chiudi</button>` : '' },
+    { k: 'bp', ok: pronto && !!st && !!inv, l: `Business Plan della settimana ${wInc.week}`, d: [pronto ? 'pronto' : pr ? 'in bozza' : 'da preparare', st ? `stampato il ${st}` : 'da stampare', inv ? `inviato il ${inv}` : 'da inviare'].join(' · '),
+      az: !pronto ? `<button type="button" class="btn btn-secondary btn-sm" data-act="coach-prepara" data-w="${wInc.week}" data-y="${wInc.year}">Prepara</button>` : !inv ? '<button type="button" class="btn btn-secondary btn-sm" data-act="coach-invia">Invia</button>' : '' }];
+}
+function contoAllaRovescia(ms) {
+  const min = Math.max(0, Math.round((ms - Date.now()) / 60000));
+  const g = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+  return g ? `tra ${g} ${g === 1 ? 'giorno' : 'giorni'}${h ? ` e ${h} ${h === 1 ? 'ora' : 'ore'}` : ''}` : h ? `tra ${h} ${h === 1 ? 'ora' : 'ore'}${m ? ` e ${m} min` : ''}` : `tra ${m} min`;
+}
+function cardCoach() {
+  caricaCoach();
+  if (!isGcalTokenValid() && !ui.coach.evento) return '';
+  const e = ui.coach.evento;
+  const voci = vociCoach(), fatte = voci.filter(v => v.ok).length;
+  const quando = e ? `${fmtGiornoLungo(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> · ${contoAllaRovescia(e.inizioMs)}` : 'nessun incontro in calendario nei prossimi 60 giorni';
+  return `<section class="coach-card" aria-label="Per il coach">
+    <div class="cc-testa"><i class="ti ti-user-check" aria-hidden="true"></i><div><h2>Per il coach</h2><p>${quando}</p></div><span class="mono cc-n">${fatte}/${voci.length}</span></div>
+    <ul class="cc-lista">${voci.map(v => `<li class="${v.ok ? 'ok' : ''}"><span class="cc-check" aria-hidden="true">${v.ok ? SVG_SPUNTA : ''}</span>
+      <div><b>${v.l}</b><span>${escHtml(v.d)}</span></div><span class="sr-only">${v.ok ? 'fatto' : 'da fare'}</span>${v.az}</li>`).join('')}</ul>
+  </section>`;
+}
+// Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
+const _bannerCoachV5 = bannerCoach;
+bannerCoach = function () {
+  const e = ui.coach.evento;
+  if (!e || e.inizioMs - Date.now() > COACH_ORE * 3600e3 || e.inizioMs < Date.now()) return _bannerCoachV5();
+  const aperte = vociCoach().filter(v => !v.ok);
+  if (!aperte.length) return '';
+  return `<section class="banner-piano banner-coach" aria-label="Incontro con il coach"><i class="ti ti-user-check"></i>
+    <div><b>Incontro con il coach ${fmtGiorno(new Date(e.inizioMs))} alle ${e.ora}: ${aperte.length === 1 ? 'manca una cosa' : `mancano ${aperte.length} cose`}</b>
+      <p class="t-caption muted">${aperte.map(v => escHtml(v.l)).join(' · ')}</p>
+      <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="coach-vedi">Vedi cosa manca</button></div></div>${chiudiBanner}</section>`;
+};
+// la checklist si aggiorna con i dati: dopo la chiusura, l'invio, la stampa, l'esercizio Q2
+['bpChiudiSettimana', 'inviaPiano', 'salvaEsercizioQ2', 'bpAttiva'].forEach(nome => {
+  const base = window[nome];
+  if (typeof base !== 'function') return;
+  window[nome] = async function (...args) { const r = await base.apply(this, args); caricaPianiCoach().then(() => render()); return r; };
+});
+const _segnaStampatoV5 = segnaStampato;
+segnaStampato = function (w, y) { _segnaStampatoV5(w, y); setTimeout(render, 0); };
+
+Object.assign(AZIONI, {
+  'serie-una': () => rispondiSerie('una'),
+  'serie-tutte': () => rispondiSerie('tutte'),
+  'serie-annulla': () => rispondiSerie(null),
+  'evt-sposta': el => apriSpostaEvento(el.dataset.evt),
+  'sevt-giorno': el => { ui.sevt = { ...ui.sevt, giorno: el.dataset.v }; disegnaSpostaEvento(); },
+  'sevt-libero': el => { ui.sevt = { ...ui.sevt, ora: el.dataset.v, giorno: el.dataset.g || ui.sevt.giorno }; disegnaSpostaEvento(); },
+  'sevt-serie': el => { ui.sevt = { ...ui.sevt, tutte: el.dataset.v === 'tutte' }; disegnaSpostaEvento(); },
+  'sevt-conferma': () => confermaSpostaEvento(),
+  'sevt-promemoria': () => promemoriaOrganizzatore(),
+  'sevt-ricollega': () => { closeModal('spostaEvtOverlay'); connectGoogleCalendar(); },
+  'nevt-crea': () => creaNuovoEvento(),
+  'b-ciclo': el => apriRapidoGiorno(el.dataset.v),
+  'b-evento': el => apriNuovoEvento(el.dataset.v),
+  'rapido-giorno': () => { ui.rapido = { ...ui.rapido, data: null }; disegnaRapido(); },
+  'dp-tipo': el => { const q = parseInt(el.dataset.v, 10); ui.dp = { ...ui.dp, tipo: ui.dp.tipo === q ? null : q }; render(); },
+  riordina: () => apriRiordina(false),
+  'rio-chiudi': () => chiudiRiordina(),
+  'rio-dacapo': () => apriRiordina(true),
+  'rio-tipo': el => rioTipo(el.dataset.v),
+  'rio-data': el => rioData(el.dataset.v),
+  'rio-fatta': () => rioFatta(),
+  'rio-spacchetta': () => rioSpacchetta(),
+  'rio-salta': () => { rioConta('saltata', 1); rioSalta(1); },
+  'coach-vedi': () => vai('pianifica'),
+  'coach-chiudi': el => vaiSettimanaE({ week: +el.dataset.w, year: +el.dataset.y }, () => openBpReview()),
+  'coach-prepara': el => apriWizard(+el.dataset.w, +el.dataset.y)
+});
 
 // ══════════════════════════════════════════════════════════════
 // ACCESSO · Supabase Auth con codice personale (password), un solo utente.
