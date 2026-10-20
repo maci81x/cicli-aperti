@@ -23,7 +23,7 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 | Cicli aperti | **Cose aperte** | — | Cicli aperti |
 | Ciclo (singolo) | **cosa da fare** | nei bottoni basta «Aggiungi» | Ciclo |
 | Armadio | **Tutto** (voce di menu) → pagina «Cose aperte» | Tutte le cose aperte | Armadio dei cicli |
-| Battle Plan | **Piano della settimana** | — | Battle Plan |
+| Battle Plan / Business Plan settimanale | **Piano della settimana** · il foglio stampato si chiama «Business Plan Settimanale» · banner «È ora del Business Plan» | — | Business Plan settimanale |
 | Wizard del piano | **Prepara la settimana** | — | — |
 | Review di chiusura | **Chiudi la settimana** | — | Review |
 | Parcheggio / parcheggiare | **Un giorno** / «Lascia stare» la porta lì | Fuori dalla vista, non sparisce | Parcheggio |
@@ -41,7 +41,12 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 | Motivi della review | **Perché?** · «Questa settimana ti hanno rallentato soprattutto: …» | suggerimenti Importanti | — |
 | Pianifica (azione) | **Pianifica** | Scegli un giorno | — |
 | Posticipa +1g | **Domani** | — | — |
-| Macro area | **Area** | — | Macro area |
+| Macro area | **Area** · le 8 di i-Time (Management, Marketing, Vendite, Amministrazione, Produzione, Ricerca e sviluppo, Famiglia / cose personali, Formazione); la categoria sta sotto l'area | «Dalla categoria» | Macro area |
+| Q2 in agenda inderogabile | **Importante bloccata** · lucchetto · «È un'attività importante bloccata. La sposti davvero?» | [Sposta comunque] / [Lasciala] | Q2 inderogabile |
+| Esercizio Q2 | **Esercizio Q2 · prossimi 3 mesi** | «Questa è una categoria: rendila un'attività a cui dare una data» | Esercizio focus sul Q2 |
+| Esercizio dei cicli aperti | **Svuota la testa** · «Scrivi tutto, al resto pensi dopo» · «Spacchettala» | una colonna per area | Matrice dei cicli aperti |
+| Depennare il piano stampato | **Riporta il foglio** (primo passo di Chiudi la settimana) | «Cose nuove che hai scritto sul foglio» | — |
+| Lavoro delegato che torna | **Mi è tornata indietro** («Tornata» nello swipe) | «Deleghe tornate indietro: N» | Q3 |
 | Contesto | **Lavoro / Personale** | — | — |
 | Storico | **Fatte** | — | — |
 | Import Plaud | **Da una registrazione** | — | Plaud |
@@ -195,6 +200,23 @@ Il **+** apre un foglio con un solo campo grande («Cosa hai in testa?», corpo 
 ### Oggi
 Dall'alto: avviso del piano (venerdì) · Rimaste indietro · avanzamento · «La giornata» (appuntamenti e cuscinetti in ordine di ora) · Routine · **Le tue 3** (stellina `--q1` per entrare/uscire) · **Rapide** · **Da controllare** · «Il resto di oggi» chiuso · In scadenza · dopo le 18 una riga sola «Oggi N su M · Bella giornata. · N giorni di fila».
 
+### Banner di Oggi (v5)
+Uno alla volta, in quest'ordine: **incontro con il coach** («Hai l'incontro con il coach mer 21 ott alle 19:00 — invia il piano», icona `ti-user-check`, [Invia al coach]) da 48 ore prima; **«È ora del Business Plan»** dal momento fissato a domenica, [Prepara] [Stampa] [Invia al coach] (il bottone principale è Prepara se il piano non c'è, Stampa se c'è; i secondari su `--surface` per vedersi sul fondo `--primary-soft`). Poi, separati: **Esercizio Q2** e, su `--surface-2`, **«N appuntamenti sembrano un ciclo aperto»** [Guarda]. Ognuno si chiude per oggi con la X.
+
+### Fogli nuovi (v5)
+- **Il piano è pronto** (fine del wizard): due bottoni grandi a tutta larghezza (`.btn-grande`, alti 64, testo `--fs-title`): [Stampa il foglio] principale, [Invia al coach] secondario; sotto lo stato con `ti-circle-check` (fatto, `--primary-ink`) o `ti-circle-dashed`.
+- **La sposti davvero?**: lucchetto in un cerchio `--q2-soft`, la cosa in un riquadro `--surface-2`, una frase sul metodo, chip del motivo, [Sposta comunque] ghost a sinistra e [Lasciala] principale a destra.
+- **Riporta il foglio**: le righe sono bottoni grandi con un quadrato di spunta da 24 (pieno `--primary` quando spuntata, titolo barrato); il riquadro «Settimana (pensaci dopo)» ha fondo `--warn-soft` come il giallo del foglio.
+- **Svuota la testa**: telefono una colonna per schermata con scroll-snap e ‹ 1 di 8 ›; computer griglia 4 × 2. Titolo dell'area con la sua icona e il numero di righe in mono.
+- **Esercizio Q2**: tre trattini di avanzamento come nel wizard; chip delle voci che vanno a capo; avviso categoria su `--warn-soft` sotto il campo; calendario di 14 settimane con celle da 44px: pieno = tratteggio `--surface-2`, qualche appuntamento = sottolineatura `--warn-soft`, già preso = bordo `--q2`, scelto = pieno `--text` come i chip premuti; legenda sotto.
+- **Questi sembrano cicli**: come «Trovate sul calendario», tre chip per riga; togliere dal calendario chiede sempre conferma.
+
+### Appuntamenti (v5)
+Titolo senza l'orario davanti; sotto «09:45–11:15 · Lavoro». Avvisi su righe proprie, in `--warn` a peso normale, una riga sola: `ti-alert-triangle` «si sovrappone a … e altri N» (e la riga ha un bordo sinistro da 3px `--warn`), `ti-clock-exclamation` «orario nel titolo diverso (10:00)». Con il coach: icona `ti-user-check` ed etichetta «Coach» su `--q3-soft`. La routine del mattino del Privato sta nell'accordion Routine, non nella giornata.
+
+### Il foglio PDF (v5)
+Formato del piano i-Time, leggibile in bianco e nero: titolo «Business Plan Settimanale — Nome — Settimana N (gg/mm–gg/mm)»; riquadro «Settimana (pensaci dopo)» giallo chiaro (255, 244, 179) con bordo grigio; un blocco per giorno separato da una riga sottile; quadratino = cosa (spuntato se fatta, Subito su fondo grigio in grassetto), cerchio = appuntamento o routine con orario inizio–fine, quadratino tratteggiato = cuscinetto con una riga vuota sotto, nota in grigio piccolo, asterisco = sovrapposto; colonna destra «APPUNTI» a righe punteggiate; in fondo «Nuove cose emerse» (8 righe) e «Fatte ____ / ____». A4 o A5.
+
 ### Avvisi
 Migration mancante: fondo `--warn-soft`, testo `--warn`, icona `ti-alert-triangle`, sempre con le parole, mai solo il colore. Non bloccano niente. Il banner del piano usa `--primary-soft` e ha due stati: «È ora del piano» [Prepara] e «Il piano della prossima settimana è pronto» [Invia il piano] [Modifica]. Il limite di carico («Troppo per un giorno») non c'è più: accanto a ogni giorno solo il totale ore (cose + appuntamenti + cuscinetti), in mono.
 
@@ -239,6 +261,12 @@ Tabler Icons, contorno, via CDN (versione fissata):
 | Modifica | `ti-pencil` | Chiudi | `ti-x` |
 | Apri / chiudi riga | `ti-chevron-down` / `ti-chevron-right` | Senza rete | `ti-wifi-off` |
 | Tema | `ti-sun` / `ti-moon` | Festa di fine giornata | `ti-confetti` |
+| Importante bloccata (inderogabile) | `ti-lock` | Mi è tornata indietro | `ti-arrow-back-up` |
+| Svuota la testa | `ti-brain` | Spacchettala | `ti-list-tree` |
+| Esercizio Q2 | `ti-target` | Incontro con il coach | `ti-user-check` |
+| Si sovrappone | `ti-alert-triangle` | Orario nel titolo diverso | `ti-clock-exclamation` |
+| Sembrano cicli | `ti-arrows-exchange` | Promemoria su Calendar | `ti-bell` |
+| Aree: Management · Marketing · Vendite · Amministrazione | `ti-crown` · `ti-speakerphone` · `ti-trending-up` · `ti-file-text` | Produzione · Ricerca e sviluppo · Famiglia · Formazione | `ti-building-factory-2` · `ti-flask` · `ti-home` · `ti-school` |
 
 Misure: 24 nel menu e negli empty state, 20 nei bottoni, 16 nei chip, 14 accanto al tipo. Un'icona per concetto, sempre con la parola accanto. Nessuna emoji nell'interfaccia (le emoji delle categorie salvate nel database vanno sostituite da un'icona o tolte).
 

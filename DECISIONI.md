@@ -1,3 +1,111 @@
+# Decisioni — v5, metodo i-Time (2026-10-20)
+
+Undici punti dal metodo i-Time (guida «Metodo Time Management», `metodo I-time & delega.pdf`) e dai calendari veri del 20/10. Lavorato in autonomia; qui le scelte dove la richiesta lasciava spazio.
+
+## Migration: divisa in due, su tua richiesta
+
+- La prima proposta (tutto insieme) l'hai rifiutata perché Supabase la segnalava come distruttiva. Ora:
+  - **(a) `supabase_migration_itime_a.sql`, applicata**: solo aggiunte (`cicli.inderogabile`, `cicli.ritorni_delega`, `battle_plan.q2_spostate`, `battle_plan.riportato_at`, tabella `esercizi_q2` con la sua policy, `macro_aree.categorie`). Nessun UPDATE, DELETE o DROP.
+  - **(b) `supabase_migration_itime_b.sql`, NON applicata**: rinomina tre aree, toglie «Da Delegare», scrive le categorie di ogni area, aggiorna `cicli.macro_area`. Ogni istruzione ha un WHERE esplicito. Aspetta che tu controlli la mappatura in `STATO.md`.
+- Backup prima della (b): `backup_2026-10-20.json` con cicli (114), categorie (5), macro_aree (9), persone (8), ciclo_persone (0) e in più assegnazioni (0). Esportato con l'API REST, conteggi verificati sul database. Il file è nel `.gitignore`: il repository è pubblico (GitHub Pages) e dentro ci sono i tuoi dati.
+- Finché la (b) non c'è, l'app usa la stessa mappatura scritta nel codice (`AREE_ITIME`) e legge i vecchi nomi (`R&D`, `Personale`, `HR`) come quelli nuovi. Spostare categorie e aggiungere aree da Impostazioni si accende solo dopo la (b): prima c'è un avviso.
+
+## 0. Ripresa e guida
+
+- Repository pulito, ultimo commit `92c0e73`: niente da committare prima di iniziare.
+- La guida i-Time era in `~/Downloads` (il sandbox non la apriva) e nella copia su iCloud: testo estratto con pdftotext. In Altro → Guida c'è «Il metodo i-Time» in sette voci scritte da me (Parkinson, quadranti, pianificare dalle Q2, esercizio Q2, cicli aperti e unità di attenzione, Business Plan settimanale, il 3 %), senza copiare il PDF. La mappa delle parole dice «Business Plan settimanale» al posto di «Battle Plan».
+
+## 1. Aree i-Time
+
+- Riuso la tabella `macro_aree` (come chiesto): le righe 1–5 restano, `R&D` → «Ricerca e sviluppo», `Personale` → «Famiglia / cose personali», `HR` → «Formazione», «Da Delegare» si toglie (la delega è già un tipo di cosa e nessuna cosa la usa). Le categorie di un'area stanno in `macro_aree.categorie` (chiavi come `cicli.cat`).
+- **Area di una cosa** (`areaDi`): quella scelta a mano o dall'assegnazione automatica (`cicli.macro_area`), altrimenti quella della sua categoria. Così le 3 cose che avevano già un'area la tengono, e tutte le altre ne hanno una dalla categoria (oggi 98 aperte su 98).
+- Mappatura (tabella completa in STATO.md): HR, Delega e SSI - Socio → Management; SSI - Direttore Vendita e SSI - Commerciale → Vendite; Yoga Tribe e tutte le personali → Famiglia; Crescita → Formazione; Idee → Ricerca e sviluppo. «SSI Generale» e «Incassi» non esistono come categorie: non c'era niente da mappare.
+- Nel dettaglio di una cosa il campo Area ha «Dalla categoria» come prima voce. L'assegnazione automatica con Claude non parte più quando la categoria scelta ha già un'area; in «+» (inserimento rapido) continua, perché lì la categoria è sempre quella predefinita.
+- Spostare una categoria aggiorna anche `cicli.macro_area` di tutte le sue cose (con «Annulla»). Un'area tua si aggiunge in fondo.
+
+## 2. Promemoria del Business Plan
+
+- Impostazioni → «Quando preparo il piano»: giorno, ora, durata (predefiniti venerdì 15:00, 2 ore; prima era venerdì 14:00).
+- Un solo evento ricorrente «Prepara il Business Plan» nel calendario di scrittura, con avvisi a 0 e 30 minuti e il link all'app. Lo ritrovo per id (salvato in `localStorage promemoria_cal`) o, da un altro dispositivo, per la proprietà privata `cicli_aperti=bp`: si aggiorna, non si duplica. Si sincronizza all'avvio, al collegamento di Google Calendar e quando cambi giorno, ora o durata.
+- Banner «È ora del Business Plan» con [Prepara] [Stampa] [Invia al coach] da quel momento a domenica, finché il piano della settimana dopo non è inviato **o** stampato. Senza piano, Stampa e Invia sono spenti e la frase dice di prepararlo prima.
+- «Stampato il …» è salvato su questo dispositivo (`piano_stampato`), come «Inviato il …» nel giro precedente.
+- Fine del wizard: foglio «Il piano è pronto» con [Stampa il foglio] e [Invia al coach] grandi e lo stato («Piano inviato il …» / «Stampato il …»).
+
+## 3. Il foglio
+
+- Titolo «Business Plan Settimanale — Roberto Macinai — Settimana N (gg/mm–gg/mm)», si rimpicciolisce fino a stare su una riga. Riquadro giallo chiaro «Settimana (pensaci dopo)», sempre presente, con due righe vuote se non c'è niente.
+- Righe: cose con quadratino (spuntato se già fatte; Subito con fondo grigio e in grassetto; «Importante - fissa» se inderogabile), appuntamenti con cerchio e orario inizio–fine, cuscinetti con quadratino tratteggiato, «Cuscinetto: cosa ci hai messo?» e una riga vuota sotto, nota in grigio sotto la cosa. Routine del mattino in una riga sola. Asterisco sugli appuntamenti sovrapposti; «giornata piena: nessun cuscinetto possibile» accanto al giorno.
+- Colonna destra con le righe per gli appunti a penna; in fondo «Nuove cose emerse» (8 righe con quadratino) e «Fatte ____ / ____». Legenda sotto il titolo. In bianco e nero il giallo diventa un grigio chiarissimo.
+- Su un foglio quando si può: il PDF si costruisce e, se va su due pagine, si rifà con righe più strette fino a 4 mm. Una settimana molto piena va comunque su due pagine.
+- Sabato e domenica compaiono solo con una cosa, un cuscinetto o un appuntamento non ricorrente (i promemoria quotidiani non bastano).
+- Formato A4 (predefinito) o A5 in Impostazioni → «Formato del foglio». Il nome del file è `business-plan-2026-W43.pdf`.
+
+## 4. Riporta il foglio
+
+- Primo passo di «Chiudi la settimana»: le righe del piano raggruppate come sul foglio (riquadro «Settimana» in giallo, poi i giorni), un tocco = spuntata. Le cose già fatte sono spuntate e bloccate. Sotto, «Cose nuove che hai scritto sul foglio»: una riga = una cosa Importante in Tutto (area dopo, cioè quella della categoria predefinita).
+- Le spunte si applicano su «Avanti», tutte insieme, come «Fatto» (ricorrenze comprese) ma senza un toast per riga. Si salva `riportato_at`, poi la review di sempre. «Indietro» dalla review torna al foglio.
+
+## 5. Q2 inderogabili
+
+- Diventa inderogabile un'Importante bloccata a mano («Blocca in agenda» o il foglio Blocca) e ogni attività dell'esercizio Q2. «Metti il piano su Calendar» invece no: altrimenti ogni cosa con un'ora diventerebbe intoccabile. Togliere il blocco la libera. Sulla riga il lucchetto prende il posto dell'icona del calendario.
+- Domani, Scegli quando, Lascia stare, trascinamento e anche i chip dei giorni nel dettaglio aprono «È un'attività importante bloccata. La sposti davvero?». [Lasciala] è il bottone principale. Ogni «Sposta comunque» incrementa `q2_spostate` del piano della settimana corrente e conta il motivo in `motivi.q2` (si tiene anche alla chiusura). Senza piano della settimana corrente non si conta.
+- Lascia stare su un'inderogabile toglie anche l'evento dal calendario e il lucchetto: non è più un impegno con te stesso. L'«Annulla» del toast rimette la cosa, non l'evento.
+- Impostazioni → «Proteggi le attività importanti»: Conferma (predefinito) / Solo avviso (sposta e avvisa, conta lo stesso) / Spento.
+
+## 6. Esercizio Q2
+
+- Altro → «Esercizio Q2 · prossimi 3 mesi» (anche da Impostazioni e dal banner). La lista della guida ha **23** voci, non 24: le ho prese tutte dalla guida, con l'area i-Time di ognuna.
+- Passo 1: in cima «Le Q2 che hai già in agenda» (vedi punto 11), poi le voci come chip. Passo 2: una o più attività per voce; avviso «Questa è una categoria…» se il testo è una voce della lista (o il suo inizio) o è fatto di una o due parole generiche, e «Avanti» resta spento finché c'è un avviso. Passo 3: per ogni attività Giornata intera (9–18) / Mattina (9–13) / Pomeriggio (14–18) e un calendario di 14 settimane: tratteggiati i giorni pieni (≥ 5 ore di appuntamenti per la giornata, ≥ 2 ore per la mezza), sottolineati quelli con qualche appuntamento, bordati quelli già presi da un'altra attività. Scelto un giorno si passa da soli all'attività dopo.
+- Alla fine: una cosa Importante inderogabile per attività (data, momento, ora e durata), l'evento nel calendario di scrittura, una riga in `esercizi_q2` (`attivita` = quante, `note` = l'elenco in JSON) e l'evento ricorrente «Esercizio Q2» ogni 3 mesi a partire da 90 giorni dopo. Senza Google Calendar le cose si creano lo stesso, senza eventi, e lo dico nel passo 3.
+- Banner in Oggi «Esercizio Q2 · prossimi 3 mesi» se non è mai stato fatto (quindi da subito) o se sono passati 90 giorni; si chiude per oggi.
+
+## 7. Svuota la testa
+
+- In Tutto, accanto a «N cose aperte». Telefono: un'area per schermata, si scorre di lato (con ‹ ›); computer: le 8 aree in una griglia 4 × 2. Una riga = una cosa Importante con l'area di quella colonna (Famiglia → ambito personale, le altre → lavoro).
+- Generiche (una parola, o che iniziano con gestione / organizzare / recupero / inaugurazione / progetto): mentre scrivi c'è una nota; dopo il salvataggio ognuna ha il bottone «Spacchettala» che apre i Passi. Nelle righe di Tutto la stessa cosa compare come etichetta «Spacchettala».
+
+## 8. Dopo una Subito
+
+- Chiusa una Subito: «Cosa l'ha generata? Evitiamo che si ripeta» con un campo e [Crea attività importante] / [Salta]. La cosa nuova è Importante, stessa categoria e area, con la Subito nella nota. Al massimo una volta al giorno per area (`subito_chiesto`), che tu crei o salti. Non si apre se c'è già un altro foglio aperto.
+
+## 9. Delega che torna indietro
+
+- Sulle Delega l'azione «Delega» del menu e dello swipe diventa «Mi è tornata indietro» («Tornata» nello swipe, che non ha spazio per un bottone in più); c'è anche in «Da controllare». Fa: `q = 2`, `ritorni_delega + 1`, toglie la data di controllo e registra persona e titolo in `motivi.deleghe` del piano corrente. La persona resta sulla cosa, per la storia. La review mostra «Deleghe tornate indietro: N» con i nomi.
+
+## 10. Schede aperte e ordine del wizard
+
+- In cima a Tutto: «N cose aperte» e la differenza con 7 giorni fa, in verde se calano. Sette giorni fa = cose create prima, non ancora chiuse allora (per quelle chiuse uso la data dell'ultima modifica, perché la data di chiusura non c'è) e non in Un giorno. È una stima: la prima settimana può esagerare se in questi giorni hai aggiunto molto.
+- Wizard in tre passi: 1. «Le tue Q2 della settimana» (solo Importanti: «In agenda o bloccate» già scelte, poi «Altre Importanti»), 2. «Cicli aperti realistici in 7 giorni» (Subito, Delega, Lascia stare), 3. «Distribuisci nei giorni» (il passo 2 di prima).
+
+## 11. Incrocio con Google Calendar
+
+- Leggo solo «Roberto Macinai - Lavoro» e «Roberto Macinai - Privato» (elenco fisso in `CAL_LETTURA`, mostrato in Impostazioni). Lo stesso invito presente in tutti e due si mostra una volta. Gli eventi che hai rifiutato non compaiono.
+- **Coach**: «Invia il piano» va a `l.beretta@osmanagement.it` con `timemanagement@osmanagement.it` in copia, tutti e due modificabili in Impostazioni (la copia si può svuotare). Se avevi salvato timemanagement come destinatario, all'avvio torna il nuovo predefinito.
+- **Calendario di scrittura**: cerco prima per id (predefinito `c_4f57b6…@group.calendar.google.com`, modificabile in Impostazioni), poi per nome, e creo solo se non ce n'è nessuno. Il secondo (`c_88d981…`) non lo tocco.
+- **Prefisso orario**: «10 - …», «17.45 - …», «8.30 - …» tolti dal titolo in app e nel PDF; se non coincide con l'ora vera, sotto c'è «orario nel titolo diverso (10:00)» (solo in app).
+- **Sovrapposizioni**: bordo e icona arancio, «si sovrappone a …» (il primo, più «e altri N»); asterisco nel PDF.
+- **Cuscinetti**: nei due spazi liberi più lunghi tra le 9 e le 19 (almeno 45 minuti), uno prima delle 14 e uno dopo, in fondo allo spazio (fanno da cuscinetto dopo il lavoro di quella mezza giornata), di un'ora o meno se lo spazio è più corto. Contano anche le cose del piano con un'ora. Senza spazi: «Giornata piena: nessun cuscinetto possibile» nel wizard e nel PDF. Si ricalcolano quando arrivano gli appuntamenti, finché non li tocchi. Senza Google Calendar restano alle 13:00 e alle 18:00.
+- **Routine personali**: gli eventi ricorrenti del Privato che iniziano prima delle 8:30 vanno nella sezione Routine di Oggi (in sola lettura) e nel PDF diventano «Routine del mattino hh:mm–hh:mm»; non contano nel tempo del giorno.
+- **Appuntamenti che sembrano cicli**: creati da te, senza invitati, con una delle parole (chiamare, chiamata, scrivere, inviare, mandare, chiedere, recuperare, sentire, controllare, export) o ripetuti ogni giorno da più di 30 giorni. Esclusi routine e incontri con il coach. Li cerco nella settimana corrente una volta per sessione; in Oggi un banner leggero apre il foglio con [Porta in Tutto] / [Porta in Tutto e toglilo dal calendario] / [È un appuntamento]. Togliere chiede conferma e cancella la serie intera (è un promemoria); le scelte si ricordano (`cal_cicli_scelte`). Nella tua settimana vera ce ne sono cinque: un promemoria che si ripete ogni giorno dal gennaio 2025, un export, due messaggi da mandare e una telefonata.
+- **Q2 già in agenda** (passo 1 dell'esercizio): eventi ricorrenti di Lavoro creati da te con revisione, obiettivi, controllo settimanale, preparazione, gestione finanziaria, aggiornamento normativo, formazione, allineamento (prossime 4 settimane). [È una Q2] crea un'Importante inderogabile collegata all'evento (`calendar_event_id = 'ext:' + id della serie`) che si ripete come l'evento; se esiste già una cosa con lo stesso titolo, collega quella. Le cose collegate così non toccano mai l'evento del calendario Lavoro: «Sblocca» scollega soltanto, e spostarle o chiuderle non lo modifica.
+- **Coach in Pianifica**: etichetta «Coach» sugli eventi con l.beretta. Dal momento in cui mancano 48 ore all'incontro, se il piano della settimana dell'incontro non è inviato, il banner di Oggi diventa «Hai l'incontro con il coach mer 21 ott alle 19:00 — invia il piano» e ha la precedenza sul banner del Business Plan. All'avvio leggo anche gli appuntamenti della settimana dopo, per gli incontri di lunedì.
+
+## Verifica
+
+- 84 controlli automatici a 375px su un browser vero, con il database vero e Google Calendar simulato: eventi costruiti sui casi della tua settimana (prefissi, sovrapposizioni, rifiutati, routine, promemoria quotidiano, coach, giornata piena). Tutti passano; console senza errori; niente scroll orizzontale a 375px (anche col testo al 125 %) e a 1280px.
+- Dati di prova solo su cose «[TEST]» e sulla settimana 50; alla fine cancellati per id (piani nuovi, esercizi, cose). Controllato dopo: 114 cose come nel backup, solo il piano vero della settimana 42, `macro_aree` invariata.
+- Schermate in `design-screenshots/v4/`, PDF in `design-screenshots/v4-business-plan-A4.pdf` e `-A5.pdf`, risultati in `design-screenshots/v4-test-risultati.json`.
+- Corretti dopo la critica di design: avvisi degli appuntamenti su righe proprie in peso normale (prima troncavano l'ora e pesavano troppo); bottoni secondari bianchi nel banner (sul fondo verde chiaro non si vedevano); nota «spacchettala» mentre scrivi senza aspetto da bottone; Q2 in agenda con i bottoni sotto il titolo; «Svuota la testa» su computer in griglia (prima le colonne oltre la quinta erano nascoste); nota del PDF più staccata dal titolo; spazio sopra e sotto nelle righe di Impostazioni con due righe di testo; settimana del wizard su una riga.
+
+## Rimasto aperto
+
+- Parte (b) della migration: aspetta il tuo via dopo la tabella in STATO.md.
+- Google Calendar vero non l'ho toccato: la lettura dei due calendari, l'evento ricorrente, i blocchi e la cancellazione di una serie vanno provati una volta con l'account.
+- «Stampato il» e «Inviato il» restano su questo dispositivo.
+- Le parole che fanno sembrare un evento un ciclo e quelle delle Q2 sono un elenco fisso: se un tuo titolo sfugge, dimmelo.
+
+---
+
 # Decisioni — v4, coaching del 19/10 (2026-10-20)
 
 Sei interventi dalla sessione di coaching, fatti in autonomia. Qui le scelte dove la richiesta lasciava spazio. Le osservazioni sulla registrazione sono in `CALL_19-10_SCHERMATE.md`.

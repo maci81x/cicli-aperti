@@ -12,10 +12,10 @@ Riferimenti: `DESIGN_SYSTEM.md` (token, componenti, mappa del linguaggio), `desi
 
 | Sezione | Cosa c'è |
 |---|---|
-| **Oggi** (apertura) | data, banner del piano (venerdì), Rimaste indietro, «N di M fatte», «La giornata» (appuntamenti Google Calendar + cuscinetti, in ordine di ora), Routine, **Le tue 3**, **Rapide**, **Da controllare**, «Il resto di oggi» (chiuso), «In scadenza», fine giornata (dopo le 18) |
+| **Oggi** (apertura) | data, banner (incontro con il coach entro 48 ore · «È ora del Business Plan» · esercizio Q2 · appuntamenti che sembrano cicli), Rimaste indietro, «N di M fatte», «La giornata» (appuntamenti Google Calendar + cuscinetti, in ordine di ora), Routine, **Le tue 3**, **Rapide**, **Da controllare**, «Il resto di oggi» (chiuso), «In scadenza», fine giornata (dopo le 18) |
 | **Pianifica** | Settimana (in cima «In settimana, senza giorno»; chip dei giorni su telefono, colonne Lun–Ven su desktop con drag & drop; nel giorno appuntamenti + cuscinetti + cose con ora in ordine di ora, poi le cose senza ora) · Mese (puntini per tipo, tap → quel giorno). In fondo: Da piazzare, Riepilogo, Stampa la settimana, Invia il piano, Chiudi la settimana |
-| **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «Raggruppa per», Un giorno |
-| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Come la vedi: modalità semplice, dimensione testo, contrasto alto, quando preparo la settimana · Piano della settimana: cuscinetti automatici, email del coach, il tuo nome · Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
+| **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «N cose aperte» con la differenza su 7 giorni e **Svuota la testa**, «Raggruppa per», Un giorno |
+| **Altro** | Tema, Fatte, **Esercizio Q2 · prossimi 3 mesi**, Guida (con «Il metodo i-Time»), Importa da una registrazione, Impostazioni (Come la vedi: modalità semplice, dimensione testo, contrasto alto, quando preparo il piano + durata · Piano della settimana: cuscinetti automatici, email del coach, in copia, il tuo nome · Metodo i-Time: formato del foglio, proteggi le attività importanti · Promemoria su Google Calendar: Business Plan, calendario dove scrivo, calendari che leggo · Google Calendar, categorie, persone, Aree, chiave API), Versione precedente |
 
 Telefono: barra in basso Oggi · Pianifica · [+] · Tutto · Altro (modalità semplice: Oggi · [+] · Cose). Desktop (≥ 768px): barra laterale stretta + intestazione con Lavoro/Personale, ricerca, tema, Google Calendar, Aggiungi.
 
@@ -27,7 +27,7 @@ Subito / Importante / Delega / Lascia stare (Q1–Q4 nel suggerimento) · Cose a
 
 ### Azioni rapide su ogni riga
 
-Swipe a sinistra su telefono (Fatto · Domani · Quando · Delega · Scomponi · Blocca · Lascia), «···» su desktop (in più Ripeti); lo swipe a destra fa «Fatto». Ogni azione mostra un toast con «Annulla» per 5 secondi.
+Swipe a sinistra su telefono (Fatto · Domani · Quando · Delega — «Tornata» sulle Delega · Scomponi · Blocca · Lascia), «···» su desktop (in più Ripeti); lo swipe a destra fa «Fatto». Ogni azione mostra un toast con «Annulla» per 5 secondi.
 
 | Azione | Funzione | Cosa scrive |
 |---|---|---|
@@ -37,13 +37,16 @@ Swipe a sinistra su telefono (Fatto · Domani · Quando · Delega · Scomponi ·
 | Ripeti | `apriRipeti` / `salvaRipeti` | Giornaliera / Settimanale / Mensile / Trimestrale / Annuale |
 | Lascia stare | `azioneLascia` | `q = 4` + `parcheggiato = true`; da In attesa: «Elimina definitivamente» |
 | Scomponi | `azioneScomponi` | apre il dettaglio sui Passi con il campo a fuoco |
-| Blocca in agenda | `azioneBlocca` | evento sul calendario «Cicli Aperti — Battle Plan», id in `calendar_event_id`; di nuovo = toglie l'evento |
+| Blocca in agenda | `azioneBlocca` | evento sul calendario «Cicli Aperti — Battle Plan», id in `calendar_event_id`; di nuovo = toglie l'evento. Su un'Importante: `inderogabile = true` |
+| Mi è tornata indietro | `azioneTornata` | solo sulle Delega: `q = 2`, `ritorni_delega + 1`, persona e titolo in `battle_plan.motivi.deleghe` |
+
+Domani, Scegli quando, Lascia stare, trascinamento e chip dei giorni su una cosa `inderogabile` passano da `proteggi()` → foglio «La sposti davvero?» (`#proteggiOverlay`).
 
 **Annuale**: salvata come `ricorrenza = 'annuale'` e `pianificato_ripetizione = 'nessuna'` (il CHECK del database non ammette ancora `annuale`). Leggere sempre con `ripetizioneDi(c)`, mai dal campo diretto.
 
 ### Chiudi la settimana
 
-Due passi. Per ogni cosa non fatta: Domani / Prossima settimana (predefinita) / Tra 2 settimane / Scegli data / Rimetti in Cose aperte / Lascia stare. Poi «N su M», una nota, «Metti il piano su Google Calendar» (`mettiPianoSuCalendar`), e si apre la preparazione della settimana dopo con le cose spostate già scelte.
+Tre passi (v5): **0. Riporta il foglio** (`disegnaRiporta`, `applicaRiporta`: spunte del foglio stampato + cose nuove, salva `riportato_at`), 1. per ogni cosa non fatta: Domani / Prossima settimana (predefinita) / Tra 2 settimane / Scegli data / Rimetti in Cose aperte / Lascia stare. 2. «N su M», «Q2 spostate questa settimana» e «Deleghe tornate indietro» (`revStatQ2`), una nota, «Metti il piano su Google Calendar» (`mettiPianoSuCalendar`), e si apre la preparazione della settimana dopo con le cose spostate già scelte.
 
 ### Aiuto della schermata («?»)
 
@@ -98,6 +101,25 @@ Migration `supabase_migration_v4.sql` (applicata): `cicli.parent_id` (FK cicli, 
 - **Invia il piano**: `creaPdfSettimana()` → `{ doc, nome, riepilogo }` (usato anche da `bpStampaPdf`), foglio `#inviaOverlay` (`apriInvia`, `inviaPiano`): Web Share con il file su telefono, altrimenti `doc.save` + `apriEmail(mailto:)`. Email del coach (`coach_email`, predefinita timemanagement@osmanagement.it) e nome (`nome_utente`) in Impostazioni. `piano_inviato` = { 'YYYY-Www': data } → «Piano inviato al coach il …». Banner del venerdì a due stati (Prepara / Invia, `inviaPianoProssima`).
 - `f-durata` del dettaglio ora si chiama `f-durata-det` (l'id era doppio con «Scegli quando»).
 
+### v5 (2026-10-20) — metodo i-Time · vedi `DECISIONI.md`
+
+Migration divisa: **(a)** `supabase_migration_itime_a.sql` (applicata, solo aggiunte): `cicli.inderogabile`, `cicli.ritorni_delega`, `battle_plan.q2_spostate`, `battle_plan.riportato_at`, tabella `esercizi_q2` (id, fatto_at, attivita, note), `macro_aree.categorie text[]`. **(b)** `supabase_migration_itime_b.sql` (NON applicata, aspetta l'ok di Roberto sulla tabella in `STATO.md`): rinomina le aree, toglie «Da Delegare», scrive le categorie, aggiorna `cicli.macro_area`. Backup in `backup_2026-10-20.json` (fuori da git). `rilevaColonneV5()` → `state.inderoColOk`, `ritorniColOk`, `q2ColOk`, `riportoColOk`, `esQ2Ok`, `areeColOk`; senza, Impostazioni mostra l'avviso (`sezioneItime`).
+
+- **Aree i-Time** (`AREE_ITIME`, `aree()`, `areaDi(c)` = `macro_area` scelta a mano, altrimenti l'area della categoria; `normArea` legge i vecchi nomi; `areeDbMappate()` = la parte (b) c'è). Usare sempre `areaDi`, mai `c.macro_area`. Impostazioni → Aree: `sezioneAree`, `#areaOverlay`, `spostaCategoria`, `aggiungiArea` (attivi solo dopo la b). `nomiAree()` sostituisce `MACRO_AREE_LIST` (filtri, «Raggruppa per», campo Area, prompt di Claude).
+- **Google Calendar**: `caricaEventi` legge `CAL_LETTURA` (Lavoro + Privato) con `leggiEventi` → `eventoDa` (prefisso orario tolto con `prefissoOrario`, `orarioDiverso`, rifiutati esclusi, `routine` = ricorrente del Privato prima delle 8:30, `coach` = con l.beretta, `mio`, `invitati`) e `segnaSovrapposizioni`. `eventiDelGiorno` esclude la routine (`routineDelGiorno`, `arcoRoutine`). Una promessa per settimana in `ui.eventiCarico`. Scrittura: `ensureGcalCalendar` cerca per id (`calScelto()`, predefinito `GCAL_CAL_PREFERITO`), poi per nome, crea solo se non c'è.
+- **Cuscinetti negli spazi liberi**: `postiCuscinetto(d, extra)` (due spazi più lunghi tra 9 e 19, ≥ 45 min, uno prima delle 14 e uno dopo, `GIORNATA`), `bpwAggiungiCusc` li usa; `bpwRipiazzaAuto` quando arrivano gli appuntamenti; «Giornata piena» con `giornataPiena`.
+- **Promemoria su Calendar**: `sincronizzaPromemoria('bp' | 'q2')` — un evento ricorrente per tipo, ritrovato per id (`localStorage promemoria_cal`) o per `privateExtendedProperty cicli_aperti=<tipo>`, aggiornato con PATCH. «Quando preparo il piano»: `quandoPiano()` (predefinito venerdì 15:00) + `durataPiano()`.
+- **Banner** in Oggi: `bannerPiano` (prima `bannerCoach`, poi «È ora del Business Plan» finché il piano della settimana dopo non è inviato o stampato), `bannerQ2`, `bannerCicliCal`. Fine del wizard: `#prontoOverlay` (`apriPronto`, `disegnaPronto`). «Stampato il»: `segnaStampato` / `stampatoIl` (`localStorage piano_stampato`).
+- **Il foglio**: `creaPdfSettimana()` nel formato i-Time (riquadro giallo, quadratini, cerchi, cuscinetti con una riga vuota, routine in una riga, asterisco, «Nuove cose emerse», «Fatte __ / __»), A4 o A5 (`formatoFoglio()`); `costruisci(RIGA)` si ripete con righe più strette finché sta su un foglio (minimo 4 mm).
+- **Q2 inderogabili**: `eInderogabile`, `proteggi(fn)` avvolge `azioneDomani`, `azioneQuando`, `azioneLascia`, `impostaGiorno`, `moveCicloInAgenda`; `chiediSpostamento` / `rispondiProteggi` / `contaQ2Spostata` (→ `q2_spostate` e `motivi.q2` del piano della settimana corrente, `aggiornaPianoCorrente`). `protezione()` = conferma | avviso | spento (`localStorage proteggi_q2`). Lucchetto `ti-lock` sulla riga.
+- **Collegate a un evento di Lavoro**: `calendar_event_id = 'ext:<serie>'` (`bloccoEsterno`): `aggiornaBlocco`, `chiudiBlocco`, `mettiPianoSuCalendar` non le toccano, `togliBlocco` scollega soltanto.
+- **Esercizio Q2** (`#q2Overlay`, `ui.q2`, `apriEsercizioQ2`, `disegnaQ2`, `avantiQ2`, `salvaEsercizioQ2`): `Q2_LISTA` (23 voci della guida), `caricaQ2InAgenda` + `q2DaAgenda` (`PAROLE_Q2`), `eCategoria` / `Q2_AVVISO`, `q2Griglia` (14 settimane, `statoGiornoQ2`, `Q2.PIENO`). `state.ultimoQ2` da `esercizi_q2`.
+- **Appuntamenti che sembrano cicli**: `cercaCicliInCalendario` (`PAROLE_CICLO`, o ogni giorno da più di 30 giorni con `eventoMaster`), `#calCicliOverlay`, `portaInTutto`, `sceltaCalCiclo` (`localStorage cal_cicli_scelte`).
+- **Svuota la testa** (`#svuotaOverlay`, `apriSvuota`, `salvaSvuota`), `eGenerica` → «Spacchettala» (anche in `infoPassi`). **Dopo una Subito**: `chiediOrigineSubito` / `creaDaSubito` (`#subitoOverlay`, `localStorage subito_chiesto`). **Tutto**: `htmlAperte` / `statoAperte`.
+- **Wizard in tre passi** (`_bpwStep` 1 = Q2, 2 = cicli aperti, 3 = giorni; `bpw-step1` serve i passi 1 e 2).
+- **Invio**: destinatario `COACH_PREDEFINITO` = l.beretta@osmanagement.it, in copia `emailCC()` (predefinito timemanagement@osmanagement.it) nel `mailto:`.
+- **Guida**: `GUIDA_ITIME` (sette voci) prima di `GUIDA_SECTIONS`.
+
 ### Rimaste indietro (2026-10-15)
 
 `caricaRimaste()` legge gli item non completati dei piani `attivo`/`bozza` delle ultime 4 settimane (`CARRY.SETTIMANE`) con giorno prima di oggi (o senza giorno, se la settimana è finita). Parte all'avvio, all'apertura di Oggi, dopo il wizard e con il pull-to-refresh. `rimasteVisibili()` scarta le cose fatte, in attesa, routine o dell'altro contesto.
@@ -122,7 +144,7 @@ Migration `supabase_migration_v4.sql` (applicata): `cicli.parent_id` (FK cicli, 
 
 ### localStorage in più
 
-`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cuscinetti_auto`, `coach_email`, `nome_utente`, `bpw_cal`, `piano_inviato`, `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi), `focus_date`, `modo_semplice`, `testo_scala`, `contrasto`, `piano_giorno` (0 = lunedì), `piano_ora`, `banner_piano_chiuso`. `cicli_theme` vuoto = segue il tema del sistema.
+`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cuscinetti_auto`, `coach_email`, `nome_utente`, `bpw_cal`, `piano_inviato`, v5: `coach_cc`, `piano_durata`, `piano_stampato`, `foglio_formato`, `proteggi_q2`, `gcal_cal_scelto`, `promemoria_cal`, `subito_chiesto`, `cal_cicli_scelte`, `q2_agenda_scelte`, `banner_q2_chiuso`, `banner_cicli_chiuso`, `coach_v5`, `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi), `focus_date`, `modo_semplice`, `testo_scala`, `contrasto`, `piano_giorno` (0 = lunedì), `piano_ora`, `banner_piano_chiuso`. `cicli_theme` vuoto = segue il tema del sistema.
 
 ### Per modificare la v2
 
@@ -272,7 +294,7 @@ DRAWER → COMPACT CARD → MATRIX MOBILE → VISTA AGENDA →
 MINI-MODALE PIANIFICA → RITUALI QUOTIDIANI → BATTLE PLAN
 ```
 
-## Macro Aree (9 fisse SSI)
+## Macro Aree (9 fisse SSI) — sostituite in v5 dalle 8 aree i-Time (vedi sopra)
 
 `Management`, `Marketing`, `Vendite`, `Amministrazione`, `Produzione`, `HR`, `R&D`, `Personale`, `Da Delegare`
 

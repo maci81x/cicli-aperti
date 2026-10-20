@@ -1,0 +1,422 @@
+[
+  {
+    "nome": "colonne i-Time (parte a) rilevate",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "calendario di scrittura = il primo «Cicli Aperti — Battle Plan», nessuno creato",
+    "ok": true,
+    "info": "{\"id\":\"c_4f57b6288d651d161c272902e5b6e389607c32bbaad7508a7633d80c74899488@group.calendar.google.com\",\"creati\":0}"
+  },
+  {
+    "nome": "8 aree i-Time",
+    "ok": true,
+    "info": "Management, Marketing, Vendite, Amministrazione, Produzione, Ricerca e sviluppo, Famiglia / cose personali, Formazione"
+  },
+  {
+    "nome": "mappatura categorie → aree",
+    "ok": true,
+    "info": "{\"nomi\":[\"Management\",\"Marketing\",\"Vendite\",\"Amministrazione\",\"Produzione\",\"Ricerca e sviluppo\",\"Famiglia / cose personali\",\"Formazione\"],\"vend\":\"Vendite\",\"fam\":\"Famiglia / cose personali\",\"yoga\":\"Famiglia / cose personali\",\"man\":\"Management\",\"socio\":\"Management\",\"salute\":\"Famiglia / cose personali\",\"cresc\":\"Formazione\",\"vecchio\":\"Famiglia / cose personali\",\"rnd\":\"Ricerca e sviluppo\",\"esplicita\":\"Vendite\",\"db\":false,\"opzioni\":[\"Dalla categoria\",\"Management\",\"Marketing\",\"Vendite\",\"Amministrazione\",\"Produzione\",\"Ricerca e sviluppo\",\"Famiglia / cose personali\",\"Formazione\"]}"
+  },
+  {
+    "nome": "vecchi nomi d'area letti come nuovi (R&D, Personale)",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "area scelta a mano vince sulla categoria",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "parte (b) non applicata: database non toccato",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "ogni cosa aperta ha un'area",
+    "ok": true,
+    "info": "{\"Famiglia / cose personali\":35,\"Management\":36,\"Vendite\":27}"
+  },
+  {
+    "nome": "prefisso orario tolto dal titolo",
+    "ok": true,
+    "info": "Formazione tecnica commerciale [TEST]"
+  },
+  {
+    "nome": "«orario nel titolo diverso» (10 nel titolo, evento alle 11)",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "sovrapposizione segnata",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "evento rifiutato escluso",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "routine del mattino fuori dagli appuntamenti",
+    "ok": true,
+    "info": "routine 3"
+  },
+  {
+    "nome": "cuscinetti nei due spazi più lunghi (13:00 e 16:00)",
+    "ok": true,
+    "info": "[{\"ora\":\"13:00\",\"durata\":60},{\"ora\":\"16:00\",\"durata\":60}]"
+  },
+  {
+    "nome": "giornata piena: nessun cuscinetto",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«sembrano cicli»: chiamata e rimborso sì, routine e riunioni no",
+    "ok": true,
+    "info": "Chiedere il rimborso delle spese [TEST] | chiamata Luca per il contratto [TEST]"
+  },
+  {
+    "nome": "banner «sembrano un ciclo aperto» in Oggi",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«È un appuntamento» non viene riproposto",
+    "ok": true,
+    "info": "Chiedere il rimborso delle spese [TEST]"
+  },
+  {
+    "nome": "togliere dal calendario chiede conferma",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "serie tolta dal calendario Privato e cosa in Tutto",
+    "ok": true,
+    "info": "[\"/calendars/maci81x%40gmail.com/events/rimb\"]"
+  },
+  {
+    "nome": "promemoria creato: venerdì 15:00, 2 ore, avvisi 0 e 30 minuti, link",
+    "ok": true,
+    "info": "2026-10-23T15:00:00"
+  },
+  {
+    "nome": "evento ricorrente creato una sola volta e aggiornato al cambio orario",
+    "ok": true,
+    "info": "{\"post\":1,\"patch\":2}"
+  },
+  {
+    "nome": "senza id salvato lo ritrova e non ne crea un altro",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "dati di prova creati",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "wizard passo 1 «Le tue Q2 della settimana»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "passo 1: solo Importanti, inderogabile già scelta",
+    "ok": true,
+    "info": "Prima le attività importanti: quelle già in agenda sono inderogabili e sono già scelte. |  | In agenda o bloccate | 1 | [TEST] Formare il team sui follow-up | Management | "
+  },
+  {
+    "nome": "cuscinetti automatici: niente il mercoledì pieno",
+    "ok": true,
+    "info": "lunedi 13:00, lunedi 18:00, martedi 13:00, martedi 18:00, giovedi 13:00, giovedi 15:30, venerdi 13:00, venerdi 18:00"
+  },
+  {
+    "nome": "wizard passo 2 «Cicli aperti realistici in 7 giorni»: niente Importanti",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "wizard passo 3 «Distribuisci nei giorni» con «Giornata piena»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "piano salvato con cuscinetti negli spazi",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "fine del wizard: «Il piano è pronto» con Stampa e Invia",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF: titolo «Business Plan Settimanale — nome — Settimana N»",
+    "ok": true,
+    "info": "Business Plan Settimanale — Roberto Macinai — Settimana 50 (7/12–13/12)"
+  },
+  {
+    "nome": "PDF: riquadro giallo «Settimana (pensaci dopo)»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF: quadratini (cose) e cerchi (appuntamenti)",
+    "ok": true,
+    "info": "rect 20, cerchi 17"
+  },
+  {
+    "nome": "PDF: orario reale, prefisso tolto, asterisco sulle sovrapposizioni",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF: «Routine del mattino 05:00-08:15» in una riga",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF: nota sotto la cosa, cuscinetti, giornata piena",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF: «Nuove cose emerse» e «Fatte __ / __»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "PDF su un foglio A4",
+    "ok": true,
+    "info": "1 pagine"
+  },
+  {
+    "nome": "PDF salvato anche come immagine",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "formato A5 da Impostazioni",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Stampato il …» segnato",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Il piano è pronto» mostra «Stampato il»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Domani su un'inderogabile apre «La sposti davvero?»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Sposta comunque»: spostata e contata (q2_spostate = 1, motivo urgenza)",
+    "ok": true,
+    "info": "{\"data\":\"2026-12-09\",\"q2\":1,\"motivi\":{\"q2\":{\"urgenza\":1}}}"
+  },
+  {
+    "nome": "«Lasciala»: non si sposta e non conta",
+    "ok": true,
+    "info": "{\"pf\":false,\"q2\":1}"
+  },
+  {
+    "nome": "anche il trascinamento chiede conferma",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Spento»: Scegli quando si apre diretto",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "lucchetto sulla riga",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Mi è tornata indietro»: Importante, ritorni_delega = 1, nel piano",
+    "ok": true,
+    "info": "[{\"titolo\":\"[TEST] Aggiornare il DVR del cliente Bianchi\",\"persona\":null}]"
+  },
+  {
+    "nome": "Chiudi la settimana parte da «Riporta il foglio»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "riporto: la riga spuntata è fatta",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "riporto: due cose nuove in Tutto come Importanti",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "riporto: riportato_at salvato, si passa alla review",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "review: «Q2 spostate questa settimana: 1» e «Deleghe tornate indietro: 1»",
+    "ok": true,
+    "info": "1 su 3 | cose fatte questa settimana | Q2 spostate questa settimana | 1 | Deleghe tornate indietro | 1 | Una nota per te | Metti il piano su Google Calendar"
+  },
+  {
+    "nome": "chiusa una Subito: «Cosa l'ha generata?»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "crea l'attività importante",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "stessa area, stesso giorno: non lo chiede di nuovo",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Tutto: «N cose aperte» e la variazione su 7 giorni",
+    "ok": true,
+    "info": "73 cose aperte |  | 33 in più di 7 giorni fa | Svuota la testa"
+  },
+  {
+    "nome": "Svuota la testa: una colonna per area, conta le righe",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Svuota la testa: cose create con la loro area",
+    "ok": true,
+    "info": "[{\"t\":\"Gestione clienti [TEST]\",\"a\":\"Management\",\"ctx\":\"lavoro\"},{\"t\":\"Chiamare Rossi per il contratto [TEST]\",\"a\":\"Management\",\"ctx\":\"lavoro\"},{\"t\":\"Recupero crediti [TEST]\",\"a\":\"Amministrazione\",\"ctx\":\"lavoro\"},{\"t\":\"Prenotare il dentista per Emilio [TEST]\",\"a\":\"Famiglia / cose personali\",\"ctx\":\"personale\"}]"
+  },
+  {
+    "nome": "titoli generici → «Spacchettala»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "«Le Q2 che hai già in agenda»: eventi ricorrenti tuoi con parole Q2",
+    "ok": true,
+    "info": "Allineamento commerciale - Marco/Roby [TEST] | Revisione periodica degli obiettivi [TEST]"
+  },
+  {
+    "nome": "[È una Q2]: Importante inderogabile collegata all'evento, si ripete",
+    "ok": true,
+    "info": "Revisione periodica degli obiettivi [TEST]"
+  },
+  {
+    "nome": "nessun doppione: non viene riproposta",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "passo 2: avviso «Questa è una categoria…» e Avanti spento",
+    "ok": true,
+    "info": "{\"visibili\":2,\"testo\":\"Questa è una categoria: rendila un'attività a cui dare una data, es. 'Settimana bianca a Cortina con la famiglia'\",\"ok\":true}"
+  },
+  {
+    "nome": "attività specifiche: niente avviso",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "passo 3: giorni dei prossimi 3 mesi, i pieni segnati",
+    "ok": true,
+    "info": "{\"pieni\":13,\"celle\":92}"
+  },
+  {
+    "nome": "esercizio Q2 crea gli eventi su Google Calendar",
+    "ok": true,
+    "info": "[{\"s\":\"[TEST] Settimana bianca a Cortina con la famiglia\",\"start\":\"2026-11-19T09:00:00\",\"path\":\"/calendars/c_4f57b6288d651d161c272902e5b6e389607c32bbaad7508a7633d80c74899488%40group.calendar.google.com/events\"},{\"s\":\"[TEST] Sessione con il team commerciale sui follow-up\",\"start\":\"2026-12-04T09:00:00\",\"path\":\"/calendars/c_4f57b6288d651d161c272902e5b6e389607c32bbaad7508a7633d80c74899488%40group.calendar.google.com/events\"}]"
+  },
+  {
+    "nome": "esercizio Q2: cose Importanti inderogabili collegate",
+    "ok": true,
+    "info": "[{\"ind\":true,\"ev\":\"nuovo6\",\"a\":\"Formazione\",\"ctx\":\"lavoro\",\"data\":\"2026-12-04\"},{\"ind\":true,\"ev\":\"nuovo5\",\"a\":\"Famiglia / cose personali\",\"ctx\":\"personale\",\"data\":\"2026-11-19\"}]"
+  },
+  {
+    "nome": "promemoria «Esercizio Q2» ogni 3 mesi",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "esercizio salvato in esercizi_q2",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "banner «Hai l'incontro con il coach il … — invia il piano»",
+    "ok": true,
+    "info": "Hai l'incontro con il coach mer 21 ott alle 19:00 — invia il piano |  | Piano della settimana 43 |  | Invia al coach"
+  },
+  {
+    "nome": "banner «È ora del Business Plan» con Prepara, Stampa, Invia al coach",
+    "ok": true,
+    "info": "Prepara, Stampa, Invia al coach"
+  },
+  {
+    "nome": "Oggi: routine del mattino nella sezione Routine",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Oggi: «si sovrappone a …» e «orario nel titolo diverso»",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Invia il piano: a l.beretta, in copia timemanagement",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "mailto con il coach e la copia",
+    "ok": true,
+    "info": "mailto:l.beretta@osmanagement.it?subject=Piano%20settimana%2050%20%E2%80%94%20Roberto%20Ma"
+  },
+  {
+    "nome": "Impostazioni: quando preparo il piano, formato, proteggi, aree",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "Guida: il metodo i-Time (Parkinson, Covey, Q2, cicli aperti, Business Plan)",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "niente scroll orizzontale: oggi",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "niente scroll orizzontale: pianifica",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "niente scroll orizzontale: tutto",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "nome": "console senza errori",
+    "ok": true,
+    "info": ""
+  }
+]
