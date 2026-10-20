@@ -33,7 +33,12 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 | Focus del giorno | **Le tue 3** | Cosa porti a casa oggi? | — |
 | Regola dei 2 minuti | **Rapida** (≤ 15 min) · «Ci vogliono 2 minuti? Falle ora.» | — | — |
 | Delega con follow-up | **Da controllare** · «Chiedi a Marco: …» | Quando controlli? | Q3 delegato |
-| Sovraccarico | **Troppo per un giorno** | più di 3 Subito o più di 5 ore | — |
+| Piano al 130 % | **Pianificato: N cose / Xh** · «Pianificane circa il 30% in più di quante pensi di fare» | se ne chiude circa l'80 % | 130 → 80 |
+| Slot cuscinetto | **Cuscinetto** · «per gli imprevisti» | [Urgenza arrivata] [Riempi] | — |
+| Sotto-cicli | **Passi** · «2/5 passi» · azione **Scomponi** | «Grossa: scomponila in passi» da 4 ore | — |
+| Appuntamento con te stesso | **Blocca in agenda** / Togli dall'agenda | evento su Google Calendar | — |
+| Invio al coach | **Invia il piano** · «Piano inviato al coach il 17/10» | PDF + email o condivisione | — |
+| Motivi della review | **Perché?** · «Questa settimana ti hanno rallentato soprattutto: …» | suggerimenti Importanti | — |
 | Pianifica (azione) | **Pianifica** | Scegli un giorno | — |
 | Posticipa +1g | **Domani** | — | — |
 | Macro area | **Area** | — | Macro area |
@@ -42,6 +47,8 @@ Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione
 | Import Plaud | **Da una registrazione** | — | Plaud |
 
 Regole di scrittura: frasi brevi, verbo all'inizio nei bottoni («Aggiungi», «Prepara la settimana»), niente maiuscole gridate, niente sigle. I messaggi dicono cosa è successo e cosa si può fare («Non salvata: sei senza rete · Riprova»).
+
+«Blocca in agenda» è l'unica eccezione alla parola «Agenda»: l'ha chiesta il coach e indica un evento su Google Calendar.
 
 Nomi fissati: la voce di menu dell'armadio è «Tutto» e il titolo della pagina è «Cose aperte» (in modalità semplice entrambi diventano «Cose»). Pianifica ha solo **Settimana** e **Mese**: l'agenda a fasce sta dentro la Settimana, e le fasce compaiono solo quando almeno una cosa del giorno ha un momento o un'ora. La parola «Agenda» non si usa più nell'interfaccia; «Calendario» si usa solo per Google Calendar.
 
@@ -186,10 +193,19 @@ Cerchio da 64 `--primary-soft` con icona 30, titolo 20/700, una frase in 14px (m
 Il **+** apre un foglio con un solo campo grande («Cosa hai in testa?», corpo 20) e il microfono a destra se il browser ha la dettatura (Web Speech API, it-IT). Invio salva; Maiusc+Invio va a capo e ogni riga diventa una cosa. Sotto, tre chip spenti: Subito, Oggi, Con…. Predefinito: Importante, contesto attivo. Il toast «Aggiunta a Tutto · Importante» ha l'azione **Dettagli**.
 
 ### Oggi
-Dall'alto: avviso del piano (venerdì) · Rimaste indietro · avanzamento · appuntamenti · Routine · **Le tue 3** (stellina `--q1` per entrare/uscire) · **Rapide** · **Da controllare** · «Il resto di oggi» chiuso · In scadenza · dopo le 18 una riga sola «Oggi N su M · Bella giornata. · N giorni di fila».
+Dall'alto: avviso del piano (venerdì) · Rimaste indietro · avanzamento · «La giornata» (appuntamenti e cuscinetti in ordine di ora) · Routine · **Le tue 3** (stellina `--q1` per entrare/uscire) · **Rapide** · **Da controllare** · «Il resto di oggi» chiuso · In scadenza · dopo le 18 una riga sola «Oggi N su M · Bella giornata. · N giorni di fila».
 
 ### Avvisi
-Limite di carico e migration mancante: fondo `--warn-soft`, testo `--warn`, icona `ti-alert-triangle`, sempre con le parole («Troppo per un giorno»), mai solo il colore. Non bloccano niente. Il banner del piano usa `--primary-soft`.
+Migration mancante: fondo `--warn-soft`, testo `--warn`, icona `ti-alert-triangle`, sempre con le parole, mai solo il colore. Non bloccano niente. Il banner del piano usa `--primary-soft` e ha due stati: «È ora del piano» [Prepara] e «Il piano della prossima settimana è pronto» [Invia il piano] [Modifica]. Il limite di carico («Troppo per un giorno») non c'è più: accanto a ogni giorno solo il totale ore (cose + appuntamenti + cuscinetti), in mono.
+
+### Il giorno ora per ora (v4)
+Una sola sequenza in ordine di ora: **appuntamento** (`.evt-riga`: icona `ti-calendar-event` in `--text-3`, titolo e orario «09:00–10:00 · Google Calendar» in `--text-2`, niente spunta né azioni), **cuscinetto** (`.cusc-riga`: icona `ti-lifebuoy` in `--primary-ink`, «Cuscinetto · 13:00 · 1h» a peso normale, sotto «per gli imprevisti · fino alle 14:00»; in Oggi due chip [Urgenza arrivata] [Riempi]), **cosa con ora** (riga normale). Sotto, le cose senza ora: per fascia se almeno una ne ha una, altrimenti «Senza ora». Nel wizard il cuscinetto è un riquadro tratteggiato `--border-strong` con ora e durata modificabili su una seconda riga.
+
+### Passi (v4)
+Nel dettaglio, riquadro `det-box`: «Passi» + «2/5 fatti» in mono, barra da 6px, righe normali (con spunta e azioni proprie), poi «+ Passo» a tutta larghezza e sotto durata + [Aggiungi]. Nella riga della madre: `ti-list-tree` + «2/5 passi»; nella riga del passo: `ti-corner-down-right` + titolo della madre. Chiusura dell'ultimo passo → foglio di conferma (mai `confirm()`).
+
+### Fatte → Settimane (v4)
+«Trend: +2% rispetto alla settimana scorsa» con `ti-trending-up/down`; grafico a barre SVG alto 60px, barre da 24px con angoli arrotondati solo in alto, `--primary` (l'ultima piena, le altre al 55 %), linea tratteggiata `--border-strong` all'80 %, numero della settimana in mono sotto; `<title>` e tooltip su ogni barra; sotto la tabella Settimana · Pianificate · Fatte · % (vista accessibile degli stessi dati).
 
 ### Contrasto alto e movimento
 `html[data-contrast="alto"]`: `--border` e `--border-strong` più scuri, `--text-2`/`--text-3` più scuri, tipi e badge con bordo, chip e campi con bordo 2px. Con `prefers-reduced-motion: reduce` animazioni e transizioni durano 0.
@@ -211,8 +227,12 @@ Tabler Icons, contorno, via CDN (versione fissata):
 | Altro | `ti-dots` | Lascia stare | `ti-wind` |
 | Routine | `ti-repeat` | Un giorno | `ti-hourglass-empty` |
 | Le tue 3 | `ti-star` / `ti-star-filled` | Rapida | `ti-bolt` |
-| Da controllare | `ti-user-check` | Troppo per un giorno | `ti-alert-triangle` |
+| Da controllare | `ti-user-check` | Avviso (migration mancante) | `ti-alert-triangle` |
 | Dettatura | `ti-microphone` | Invio | `ti-corner-down-left` |
+| Cuscinetto | `ti-lifebuoy` | Urgenza arrivata | `ti-urgent` |
+| Riempi | `ti-arrow-bar-to-down` | Passi / Scomponi | `ti-list-tree` |
+| Blocca in agenda | `ti-calendar-plus` / `ti-calendar-x` | Bloccata | `ti-calendar-check` |
+| Invia il piano | `ti-send` | Trend | `ti-trending-up` / `ti-trending-down` |
 | Piano della settimana | `ti-map-2` | Persone | `ti-users` |
 | Aggiungi | `ti-plus` | Fatto | `ti-check` / `ti-circle-check` |
 | Quando | `ti-calendar-event` | Con chi | `ti-user` |

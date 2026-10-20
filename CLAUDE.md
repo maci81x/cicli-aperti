@@ -12,10 +12,10 @@ Riferimenti: `DESIGN_SYSTEM.md` (token, componenti, mappa del linguaggio), `desi
 
 | Sezione | Cosa c'è |
 |---|---|
-| **Oggi** (apertura) | data, banner del piano (venerdì), Rimaste indietro, «N di M fatte», Appuntamenti (Google Calendar, sola lettura), Routine, **Le tue 3**, **Rapide**, **Da controllare**, «Il resto di oggi» (chiuso), «In scadenza», fine giornata (dopo le 18) |
-| **Pianifica** | Settimana (chip dei giorni su telefono, colonne Lun–Ven su desktop con drag & drop; per fasce solo se serve) · Mese (puntini per tipo, tap → quel giorno). In fondo: Da piazzare, Riepilogo, Stampa la settimana, Chiudi la settimana |
+| **Oggi** (apertura) | data, banner del piano (venerdì), Rimaste indietro, «N di M fatte», «La giornata» (appuntamenti Google Calendar + cuscinetti, in ordine di ora), Routine, **Le tue 3**, **Rapide**, **Da controllare**, «Il resto di oggi» (chiuso), «In scadenza», fine giornata (dopo le 18) |
+| **Pianifica** | Settimana (in cima «In settimana, senza giorno»; chip dei giorni su telefono, colonne Lun–Ven su desktop con drag & drop; nel giorno appuntamenti + cuscinetti + cose con ora in ordine di ora, poi le cose senza ora) · Mese (puntini per tipo, tap → quel giorno). In fondo: Da piazzare, Riepilogo, Stampa la settimana, Invia il piano, Chiudi la settimana |
 | **Tutto** (titolo «Cose aperte») | ricerca, Filtri (tipo, categoria, area, + Nuova categoria), Lista / Matrice / Persone, «Raggruppa per», Un giorno |
-| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Come la vedi: modalità semplice, dimensione testo, contrasto alto, quando preparo la settimana · Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
+| **Altro** | Tema, Fatte, Guida, Importa da una registrazione, Impostazioni (Come la vedi: modalità semplice, dimensione testo, contrasto alto, quando preparo la settimana · Piano della settimana: cuscinetti automatici, email del coach, il tuo nome · Google Calendar, categorie, persone, Assegna Macro Aree, chiave API), Versione precedente |
 
 Telefono: barra in basso Oggi · Pianifica · [+] · Tutto · Altro (modalità semplice: Oggi · [+] · Cose). Desktop (≥ 768px): barra laterale stretta + intestazione con Lavoro/Personale, ricerca, tema, Google Calendar, Aggiungi.
 
@@ -27,7 +27,7 @@ Subito / Importante / Delega / Lascia stare (Q1–Q4 nel suggerimento) · Cose a
 
 ### Azioni rapide su ogni riga
 
-Swipe a sinistra su telefono, «···» su desktop; lo swipe a destra fa «Fatto». Ogni azione mostra un toast con «Annulla» per 5 secondi.
+Swipe a sinistra su telefono (Fatto · Domani · Quando · Delega · Scomponi · Blocca · Lascia), «···» su desktop (in più Ripeti); lo swipe a destra fa «Fatto». Ogni azione mostra un toast con «Annulla» per 5 secondi.
 
 | Azione | Funzione | Cosa scrive |
 |---|---|---|
@@ -36,6 +36,8 @@ Swipe a sinistra su telefono, «···» su desktop; lo swipe a destra fa «Fatt
 | Scegli quando | `azioneQuando` | apre il modale Pianifica (`confermaPianificazione`) |
 | Ripeti | `apriRipeti` / `salvaRipeti` | Giornaliera / Settimanale / Mensile / Trimestrale / Annuale |
 | Lascia stare | `azioneLascia` | `q = 4` + `parcheggiato = true`; da In attesa: «Elimina definitivamente» |
+| Scomponi | `azioneScomponi` | apre il dettaglio sui Passi con il campo a fuoco |
+| Blocca in agenda | `azioneBlocca` | evento sul calendario «Cicli Aperti — Battle Plan», id in `calendar_event_id`; di nuovo = toglie l'evento |
 
 **Annuale**: salvata come `ricorrenza = 'annuale'` e `pianificato_ripetizione = 'nessuna'` (il CHECK del database non ammette ancora `annuale`). Leggere sempre con `ripetizioneDi(c)`, mai dal campo diretto.
 
@@ -75,13 +77,26 @@ Migration `supabase_migration_v3.sql` (applicata): `battle_plan_items.in_focus`,
 - **Le tue 3** (`focusDiOggi`, `controllaMattino`, `#focusOverlay`, `azioneStella`): foglio del mattino alla prima apertura di Oggi del giorno (`localStorage focus_date`) se il piano di oggi ha più di 3 righe; Subito pre-spuntate. Con ≤ 3 righe sono tutte in focus senza scrivere niente. Stellina sulle righe del piano. `azioneFatto` è avvolta per il toast «Le tue 3 sono fatte».
 - **Rapide** (`eRapida`, `rapideDiOggi`): durata ≤ 15 (`RAPIDA_MIN`), chip `RAPIDA_CHIP`; se meno di 3 oggi, si aggiungono quelle Da piazzare.
 - **Settimana unica**: `htmlGiorno()` = per fasce solo se una riga ha `conFascia` (fascia o ora), altrimenti lista piatta. Desktop: `pianSettimanaColonne` con zone `.slot` (drag & drop → `moveCicloInAgenda`). `pianAgenda` non c'è più; `ui.pian` = settimana | mese.
-- **Limite di carico** (`caricoGiorno`, `CARICO`, `troppoHtml`, `TROPPO_TIP`): più di 3 Subito o più di 5 ore (cose + appuntamenti) → `--warn` «Troppo per un giorno». In Pianifica e nel wizard (`bpwChipGiorni`). Non blocca.
+- ~~Limite di carico~~: tolto in v4 (metodo 130 % → 80 %), resta il totale ore del giorno.
 - **Delega** (`apriDelega`, `salvaDelega`, `#delegaOverlay`, `daControllare`, `rigaControllo`, `azioneControllo`): si apre quando il tipo diventa Delega dal dettaglio o con l'azione «Delega» (swipe e «···»). Righe Delega: «a Marco · controlla il 20/10» (`delegaTesto`).
 - **Modalità semplice** (`modoSemplice()`, `localStorage modo_semplice`, `body.semplice`, classe `.solo-completa`): barra Oggi · + · Cose, `vai()` reindirizza Pianifica → Oggi e Altro → Impostazioni; in Oggi icona Impostazioni e «Pianifica la settimana». L'onboarding ha una quarta pagina (semplice / completa).
 - **Banner venerdì** (`bannerPiano`, `quandoPiano`, `inFinestraPiano`, `caricaPianoProssima`): da `piano_giorno`/`piano_ora` (predefiniti venerdì 14:00) a domenica, se la settimana dopo non ha un piano. X = `banner_piano_chiuso`.
 - **Fine giornata** (`fineGiornata`, `caricaSerie`): dopo le 18, «Oggi N su M · Bella giornata. · N giorni di fila».
 - **Testo e contrasto**: token tipografici in rem; `testo_scala` (100/112/125) sulla radice, `contrasto = alto` → `html[data-contrast="alto"]`; applicati nello script del tema (prima del primo disegno) e da `applicaAspetto()`. `prefers-reduced-motion` azzera animazioni e transizioni.
 - Nomi: «Senza data» → **Da piazzare**, «In attesa» → **Un giorno** (nel codice resta `parcheggiato`), «Agenda» non compare più.
+
+### v4 (2026-10-20) — coaching del 19/10 · vedi `DECISIONI.md` e `CALL_19-10_SCHERMATE.md`
+
+Migration `supabase_migration_v4.sql` (applicata): `cicli.parent_id` (FK cicli, cascade), `battle_plan_items.tipo_slot` ('cosa' | 'cuscinetto'), `battle_plan.pianificate/completate/percentuale/motivi`. `rilevaColonneV4()` → `state.passiColOk`, `state.cuscColOk`, `state.statsColOk`; senza, le funzioni si spengono e Impostazioni mostra l'avviso (`sezionePiano`).
+
+- **Il giorno ora per ora** (`sequenzaGiorno(righe, d)` → `{ conOra, senzaOra }`, `htmlGiorno(righe, opz, d)`, `rigaEvento`, `rigaCuscinetto`): appuntamenti (sola lettura) + cuscinetti vuoti + cose con ora, in ordine; sotto le cose senza ora (per fascia solo se una ha `haFascia`). La usano Pianifica, colonne desktop, wizard passo 2 (`bpwBloccoGiorno`), PDF (`righePdfGiorno`) e «La giornata» in Oggi. `caricaEventi` salva anche `fine`. Totale del giorno: `minutiGiorno` (cose + appuntamenti + cuscinetti). «Troppo per un giorno» non c'è più.
+- **Cuscinetti**: riga di `battle_plan_items` con `tipo_slot = 'cuscinetto'` e `ciclo_id` NULL (`cuscinettiDelGiorno`). Wizard: `_bpwCusc` (Map), `bpwAggiungiCusc`, `bpwSalvaCuscinetti` dentro `bpAttiva`; automatici (`CUSC`: 13:00 e 17:30, 1h, lun–ven) solo su piano nuovo o in bozza senza cuscinetti, se `localStorage cuscinetti_auto` ≠ '0'. Oggi: [Urgenza arrivata] = `apriUrgenza` («+» con `ui.rapido.cusc`), [Riempi] = `apriRiempi` / `candidatiRiempi` (3: Subito, Importanti senza data, rapide, che stanno nel tempo) / `riempiCuscinetto` (scrive `ciclo_id` sulla riga del cuscinetto, toglie l'eventuale vecchia riga della cosa). I cuscinetti vuoti non contano nelle statistiche.
+- **130 % → 80 %**: `bpwRenderSummary` («Pianificato: N cose / Xh», riferimento da `bpwCaricaRiferimento` → `_bpwRif`, «Puoi aggiungerne ancora» se N < P × `PIANO.ANCORA`). `bpChiudiSettimana` salva pianificate/completate/percentuale/motivi. Fatte → Settimane: trend, `graficoSettimane` (SVG, 60px, ultime 8), tabella.
+- **Review con il perché**: `REV_MOTIVI`, `ui.rev.motivi` / `ui.rev.altro` / `ui.rev.aggiunte`, `revMotiviConteggio`, `revRallentato`, `revSuggerimenti`, `aggiungiSuggerimento` (cosa Importante senza data).
+- **Passi**: `passiDi`, `haPassiAperti`, `infoPassi` (meta della riga), `disegnaPassi` (`#det-passi`), `aggiungiPasso`, `controllaMadre` → foglio `#confermaOverlay` (`apriConferma` / `rispondiConferma`). I passi non compaiono da soli in Tutto; wizard, Da piazzare, Rapide e Riempi propongono i passi, non la madre. Grossa = `durata_minuti` ≥ `PASSI.GROSSA` (240).
+- **Blocca in agenda**: `slotBlocco` (riga del piano → agenda → ora/durata della cosa), `creaBlocco`, `scriviEvento` (PATCH, toglie l'id se l'evento non esiste più), `togliBlocco`, `aggiornaBlocco` (chiamato da Domani, cambio giorno, salvataggio dettaglio, Riempi, `allineaBlocchi` dopo il wizard), `chiudiBlocco` (futuro → cancella, passato → «✓» nel titolo), foglio `#bloccaOverlay` se manca giorno/ora. `mettiPianoSuCalendar` crea o aggiorna; nel wizard è la casella `#bpw-cal` (`localStorage bpw_cal`). Icona `ti-calendar-check` sulla riga.
+- **Invia il piano**: `creaPdfSettimana()` → `{ doc, nome, riepilogo }` (usato anche da `bpStampaPdf`), foglio `#inviaOverlay` (`apriInvia`, `inviaPiano`): Web Share con il file su telefono, altrimenti `doc.save` + `apriEmail(mailto:)`. Email del coach (`coach_email`, predefinita timemanagement@osmanagement.it) e nome (`nome_utente`) in Impostazioni. `piano_inviato` = { 'YYYY-Www': data } → «Piano inviato al coach il …». Banner del venerdì a due stati (Prepara / Invia, `inviaPianoProssima`).
+- `f-durata` del dettaglio ora si chiama `f-durata-det` (l'id era doppio con «Scegli quando»).
 
 ### Rimaste indietro (2026-10-15)
 
@@ -107,7 +122,7 @@ Migration `supabase_migration_v3.sql` (applicata): `battle_plan_items.in_focus`,
 
 ### localStorage in più
 
-`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi), `focus_date`, `modo_semplice`, `testo_scala`, `contrasto`, `piano_giorno` (0 = lunedì), `piano_ora`, `banner_piano_chiuso`. `cicli_theme` vuoto = segue il tema del sistema.
+`cicli_tab`, `cicli_onboarded` (introduzione già vista), `cuscinetti_auto`, `coach_email`, `nome_utente`, `bpw_cal`, `piano_inviato`, `cicli_raggruppa`, `carry_dismissed` (Rimaste indietro chiuso per oggi), `focus_date`, `modo_semplice`, `testo_scala`, `contrasto`, `piano_giorno` (0 = lunedì), `piano_ora`, `banner_piano_chiuso`. `cicli_theme` vuoto = segue il tema del sistema.
 
 ### Per modificare la v2
 
