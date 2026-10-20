@@ -805,6 +805,10 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .accesso-campo[hidden] { display: none; }
 .accesso-stato { min-height: 1.5em; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
 .accesso-stato.errore { color: var(--danger); }
+.accesso-pass { position: relative; }
+.accesso-pass .input { padding-right: 56px; }
+.accesso-occhio { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.accesso-nota { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-3); }
 
 /* --- Aiuto della schermata --- */
 .aiuto-btn { display: inline-grid; place-items: center; width: var(--tap); height: var(--tap); margin: -6px 0 -6px 2px; border: 0; border-radius: var(--r-full); background: none; color: var(--text-3); vertical-align: middle; -webkit-tap-highlight-color: transparent; }
@@ -1585,24 +1589,24 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
   </div>
 </div>
 
-<!-- ══════════ ACCESSO (Supabase Auth: link via email) ══════════ -->
+<!-- ══════════ ACCESSO (Supabase Auth: codice personale) ══════════ -->
 <div class="accesso" id="accesso" hidden role="dialog" aria-modal="true" aria-labelledby="accesso-titolo">
   <form class="accesso-box" id="accesso-form" novalidate>
     <div class="logo">CICLI <span>APERTI</span></div>
     <span class="onb-ico" aria-hidden="true"><i class="ti ti-lock"></i></span>
     <h2 id="accesso-titolo">Entra nelle tue cose</h2>
-    <p id="accesso-sub">Ti mando un link per email: aprilo su questo dispositivo e sei dentro. Resti collegato finché non tocchi «Esci».</p>
+    <p>Scrivi il tuo codice personale. Resti dentro finché non tocchi «Esci».</p>
+    <input type="text" name="username" autocomplete="username" hidden aria-hidden="true" tabindex="-1" id="accesso-utente">
     <div class="accesso-campo">
-      <label class="t-label" for="accesso-email">La tua email</label>
-      <input class="input" id="accesso-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required>
+      <label class="t-label" for="accesso-codice">Il tuo codice</label>
+      <div class="accesso-pass">
+        <input class="input" id="accesso-codice" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button type="button" class="btn btn-icon accesso-occhio" data-act="accesso-occhio" aria-label="Mostra il codice" aria-pressed="false"><i class="ti ti-eye"></i></button>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-block btn-grande" id="accesso-invia"><i class="ti ti-mail"></i>Mandami il link</button>
-    <div class="accesso-campo" id="accesso-codice" hidden>
-      <label class="t-label" for="accesso-otp">Hai l'app installata sul telefono? Se l'email ha un codice, scrivilo qui</label>
-      <input class="input mono" id="accesso-otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10">
-      <button type="button" class="btn btn-secondary btn-block" data-act="accesso-codice">Entra con il codice</button>
-    </div>
+    <button type="submit" class="btn btn-primary btn-block btn-grande" id="accesso-entra"><i class="ti ti-login-2"></i>Entra</button>
     <p class="accesso-stato" id="accesso-stato" role="status" aria-live="polite"></p>
+    <p class="accesso-nota">Hai dimenticato il codice? Lo cambi da Supabase → Authentication → Users.</p>
   </form>
 </div>
 
@@ -3330,7 +3334,7 @@ checkImplicitCallback();
 
 async function loadGcalTokenFromDB() {
   try {
-    const { data } = await db.from('user_tokens').select('*').eq('user_email', GCAL_USER_EMAIL).single();
+    const { data } = await db.from('user_tokens').select('*').eq('user_email', GCAL_USER_EMAIL).maybeSingle();
     if (!data) return;
     if (!gcal.token && data.google_access_token) {
       gcal.token      = data.google_access_token;
@@ -7098,7 +7102,7 @@ const AZIONI = {
   'rev-gcal': async el => { el.disabled = true; await mettiPianoSuCalendar(); el.disabled = false; },
   'onb-salta': () => onbChiudi(false),
   'esci': () => chiediEsci(),
-  'accesso-codice': () => entraConCodice(),
+  'accesso-occhio': () => mostraCodice(),
   'onb-avanti': () => onbAvanti(),
   'onb-apri': () => onbApri(),
   aiuto: el => apriAiuto(el),
@@ -9978,74 +9982,93 @@ function avvioV5() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ACCESSO · Supabase Auth con link via email, un solo utente ammesso.
-// La protezione vera sono le policy RLS (auth.jwt() ->> 'email'):
-// questo controllo serve solo a non far partire l'app senza sessione.
+// ACCESSO · Supabase Auth con codice personale (password), un solo utente.
+// L'email è fissa e non si vede. La protezione vera sono le policy RLS
+// (auth.jwt() ->> 'email'): questo serve solo a non far partire l'app senza sessione.
 // ══════════════════════════════════════════════════════════════
 const EMAIL_AMMESSA = 'maci81x@gmail.com';
+const ACCESSO = { MAX_ERRORI: 5, BLOCCO_MS: 60 * 1000, LS_ERRORI: 'accesso_errori', LS_BLOCCO: 'accesso_blocco_fino' };
 let _appAvviata = false;
+let _accessoTimer = null;
 const urlRitorno = () => location.origin + location.pathname;
 const emailDi = s => ((s && s.user && s.user.email) || '').trim().toLowerCase();
 const sessioneAmmessa = s => !!(s && s.access_token) && emailDi(s) === EMAIL_AMMESSA;
+const erroriDiFila = () => parseInt(lsLeggi(ACCESSO.LS_ERRORI) || '0', 10) || 0;
+const bloccatoFino = () => parseInt(lsLeggi(ACCESSO.LS_BLOCCO) || '0', 10) || 0;
 
 function statoAccesso(testo, errore) {
   const el = $('accesso-stato');
   el.textContent = testo || '';
   el.classList.toggle('errore', !!errore);
 }
-function erroreDalLink() {
-  // il link scaduto o già usato torna con #error=…&error_description=…
-  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
-  if (!h.get('error')) return '';
-  history.replaceState(null, '', urlRitorno());
-  return h.get('error_code') === 'otp_expired' ? 'Il link è scaduto o è già stato usato: chiedine un altro.' : 'Il link non ha funzionato: chiedine un altro.';
+function abilitaAccesso(si) {
+  $('accesso-codice').disabled = !si;
+  $('accesso-entra').disabled = !si;
+}
+// Dopo 5 codici sbagliati di fila il campo resta spento per un minuto (anche se ricarichi la pagina).
+function controllaBlocco() {
+  clearInterval(_accessoTimer);
+  const resto = bloccatoFino() - Date.now();
+  if (resto <= 0) {
+    if (bloccatoFino()) { lsScrivi(ACCESSO.LS_BLOCCO, null); lsScrivi(ACCESSO.LS_ERRORI, null); statoAccesso(''); }
+    abilitaAccesso(true);
+    return false;
+  }
+  abilitaAccesso(false);
+  const scrivi = () => {
+    const sec = Math.ceil((bloccatoFino() - Date.now()) / 1000);
+    if (sec <= 0) { controllaBlocco(); $('accesso-codice').focus(); return; }
+    statoAccesso(`Troppi codici sbagliati di fila: riprova tra ${sec} ${sec === 1 ? 'secondo' : 'secondi'}.`, true);
+  };
+  scrivi();
+  _accessoTimer = setInterval(scrivi, 1000);
+  return true;
 }
 function mostraAccesso(msg, errore) {
   $('accesso').hidden = false;
-  const campo = $('accesso-email');
-  if (!campo.value) campo.value = lsLeggi('accesso_email') || '';
+  $('accesso-utente').value = EMAIL_AMMESSA;   // per il gestore delle password, non si vede
   statoAccesso(msg, errore);
-  setTimeout(() => campo.focus(), 50);
+  if (!controllaBlocco()) setTimeout(() => $('accesso-codice').focus(), 50);
 }
-function testoErroreAuth(e) {
-  const m = String((e && e.message) || '');
-  if (/rate|too many|seconds/i.test(m)) return 'Hai chiesto troppi link di seguito: aspetta qualche minuto e riprova.';
-  if (/signups not allowed|not allowed/i.test(m)) return 'Questo indirizzo non può entrare.';
-  if (/expired|invalid/i.test(m)) return 'Il codice non è valido o è scaduto: chiedi un altro link.';
-  return 'Non sono riuscito a mandare il link. Controlla la connessione e riprova.';
+function mostraCodice() {
+  const campo = $('accesso-codice'), btn = document.querySelector('[data-act="accesso-occhio"]');
+  const visibile = campo.type === 'password';
+  campo.type = visibile ? 'text' : 'password';
+  btn.setAttribute('aria-pressed', String(visibile));
+  btn.setAttribute('aria-label', visibile ? 'Nascondi il codice' : 'Mostra il codice');
+  btn.innerHTML = `<i class="ti ${visibile ? 'ti-eye-off' : 'ti-eye'}"></i>`;
+  campo.focus();
 }
-async function inviaLinkAccesso(ev) {
+const codiceSbagliato = e => !!e && (e.code === 'invalid_credentials' || /invalid login credentials/i.test(e.message || ''));
+async function entra(ev) {
   ev.preventDefault();
-  const email = $('accesso-email').value.trim().toLowerCase();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return statoAccesso('Scrivi un indirizzo email completo, per esempio nome@gmail.com.', true);
-  if (email !== EMAIL_AMMESSA) return statoAccesso('Con questo indirizzo non si entra.', true);
-  const btn = $('accesso-invia');
-  btn.disabled = true;
-  statoAccesso('Ti sto mandando il link…');
+  if (controllaBlocco()) return;
+  const codice = $('accesso-codice').value;
+  if (!codice) { statoAccesso('Scrivi il tuo codice.', true); $('accesso-codice').focus(); return; }
+  abilitaAccesso(false);
+  statoAccesso('Controllo il codice…');
   try {
-    const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: urlRitorno() } });
+    const { error } = await db.auth.signInWithPassword({ email: EMAIL_AMMESSA, password: codice });
     if (error) throw error;
-    lsScrivi('accesso_email', email);
-    $('accesso-email').value = email;
-    statoAccesso(`Fatto: ti ho mandato il link a ${email}. Aprilo da questo dispositivo.`);
-    $('accesso-codice').hidden = false;
+    lsScrivi(ACCESSO.LS_ERRORI, null);
+    statoAccesso('');
+    // l'app parte da onAuthStateChange (SIGNED_IN)
   } catch (e) {
-    console.warn('[Accesso] invio link:', e.message);
-    statoAccesso(testoErroreAuth(e), true);
-  } finally {
-    btn.disabled = false;
+    console.warn('[Accesso]', e.code || e.status || '', e.message);
+    abilitaAccesso(true);
+    $('accesso-codice').select();
+    if (!codiceSbagliato(e)) {
+      const tanti = e.status === 429 || /rate|too many/i.test(e.message || '');
+      return statoAccesso(tanti ? 'Troppi tentativi: aspetta qualche minuto e riprova.' : 'Non riesco a collegarmi. Controlla la connessione e riprova.', true);
+    }
+    const n = erroriDiFila() + 1;
+    lsScrivi(ACCESSO.LS_ERRORI, String(n));
+    if (n >= ACCESSO.MAX_ERRORI) { lsScrivi(ACCESSO.LS_BLOCCO, String(Date.now() + ACCESSO.BLOCCO_MS)); controllaBlocco(); return; }
+    statoAccesso('Codice sbagliato', true);
   }
 }
-async function entraConCodice() {
-  const email = $('accesso-email').value.trim().toLowerCase();
-  const token = $('accesso-otp').value.replace(/\s/g, '');
-  if (!/^\d{6,10}$/.test(token)) return statoAccesso('Il codice è fatto solo di cifre: copialo dall\'email.', true);
-  statoAccesso('Controllo il codice…');
-  const { error } = await db.auth.verifyOtp({ email, token, type: 'email' });
-  if (error) { console.warn('[Accesso] codice:', error.message); statoAccesso(testoErroreAuth(error), true); }
-}
 function chiediEsci() {
-  apriConferma({ titolo: 'Esci da Cicli Aperti?', testo: 'Per rientrare ti mando un nuovo link per email.', ok: 'Esci', no: 'Resta', onOk: esci });
+  apriConferma({ titolo: 'Esci da Cicli Aperti?', testo: 'Per rientrare ti servirà il tuo codice.', ok: 'Esci', no: 'Resta', onOk: esci });
 }
 async function esci() {
   try { await db.auth.signOut(); } catch (e) { console.warn('[Accesso] uscita:', e.message); }
@@ -10054,8 +10077,7 @@ async function esci() {
 
 (async function accesso() {
   applyTheme();
-  $('accesso-form').addEventListener('submit', inviaLinkAccesso);
-  const errLink = erroreDalLink();
+  $('accesso-form').addEventListener('submit', entra);
   db.auth.onAuthStateChange((evento, sessione) => {
     // niente chiamate a Supabase dentro questa funzione: si rimanda con setTimeout
     if (sessione && sessione.access_token) db.realtime.setAuth(sessione.access_token);
@@ -10066,13 +10088,14 @@ async function esci() {
   if (error) console.warn('[Accesso] sessione:', error.message);
   const s = data && data.session;
   if (sessioneAmmessa(s)) return avviaApp(s);
-  if (s) { await db.auth.signOut(); return mostraAccesso('Con questo indirizzo non si entra.', true); }
-  mostraAccesso(errLink, !!errLink);
+  if (s) { await db.auth.signOut(); return mostraAccesso('Questo utente non può entrare.', true); }
+  mostraAccesso();
 })();
 
 function avviaApp(sessione) {
   if (_appAvviata) return;
   _appAvviata = true;
+  clearInterval(_accessoTimer);
   $('accesso').hidden = true;
   state.utente = emailDi(sessione);
   const corrente = bpSettimanaCorrente();
