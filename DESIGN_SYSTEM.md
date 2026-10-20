@@ -1,6 +1,6 @@
 # Cicli Aperti — Design system
 
-Riferimento per il redesign. La pagina `design-preview.html` mostra tutto quello che è scritto qui, nei due temi; se i due documenti non coincidono, vale l'anteprima e questo file va corretto.
+Riferimento per il redesign. La pagina `design-preview.html` (in `privata/`, solo in locale: ha dati veri) mostra tutto quello che è scritto qui, nei due temi; se i due documenti non coincidono, vale l'anteprima e questo file va corretto.
 
 Punto di partenza: `ui-ux-pro-max` (stile piatto, verde acqua + arancio d'azione, Plus Jakarta Sans). Affinato con `mobile-app-ui-design` (regola 60/30/10, griglia a 4, due pesi, azione principale nella zona del pollice) e passato quattro volte da `design-critique`.
 

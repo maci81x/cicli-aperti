@@ -1,1 +1,6 @@
+# dati personali: restano solo su questo Mac
+privata/
 backup_*.json
+# istruzioni per Claude Code (contengono indirizzi email): solo in locale
+CLAUDE.md
+.DS_Store

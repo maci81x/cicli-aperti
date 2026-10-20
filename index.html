@@ -796,6 +796,15 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .onb-dots { display: flex; justify-content: center; gap: 6px; }
 .onb-dots i { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--border); transition: width var(--t-base), background-color var(--t-base); }
 .onb-dots i.on { width: 24px; background: var(--primary); }
+/* accesso: una sola schermata, prima di tutto il resto */
+.accesso { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; overflow-y: auto; background: var(--bg); padding: calc(var(--sp-5) + env(safe-area-inset-top)) var(--sp-4) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
+.accesso[hidden] { display: none; }
+.accesso-box { display: grid; justify-items: center; gap: var(--sp-4); width: 100%; max-width: 400px; text-align: center; }
+.accesso-box p { max-width: 32ch; color: var(--text-2); }
+.accesso-campo { display: grid; gap: var(--sp-2); width: 100%; text-align: left; }
+.accesso-campo[hidden] { display: none; }
+.accesso-stato { min-height: 1.5em; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.accesso-stato.errore { color: var(--danger); }
 
 /* --- Aiuto della schermata --- */
 .aiuto-btn { display: inline-grid; place-items: center; width: var(--tap); height: var(--tap); margin: -6px 0 -6px 2px; border: 0; border-radius: var(--r-full); background: none; color: var(--text-3); vertical-align: middle; -webkit-tap-highlight-color: transparent; }
@@ -1574,6 +1583,27 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
       <button type="button" class="btn btn-primary" id="bprev-ok" data-act="rev-avanti">Avanti</button>
     </div>
   </div>
+</div>
+
+<!-- ══════════ ACCESSO (Supabase Auth: link via email) ══════════ -->
+<div class="accesso" id="accesso" hidden role="dialog" aria-modal="true" aria-labelledby="accesso-titolo">
+  <form class="accesso-box" id="accesso-form" novalidate>
+    <div class="logo">CICLI <span>APERTI</span></div>
+    <span class="onb-ico" aria-hidden="true"><i class="ti ti-lock"></i></span>
+    <h2 id="accesso-titolo">Entra nelle tue cose</h2>
+    <p id="accesso-sub">Ti mando un link per email: aprilo su questo dispositivo e sei dentro. Resti collegato finché non tocchi «Esci».</p>
+    <div class="accesso-campo">
+      <label class="t-label" for="accesso-email">La tua email</label>
+      <input class="input" id="accesso-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block btn-grande" id="accesso-invia"><i class="ti ti-mail"></i>Mandami il link</button>
+    <div class="accesso-campo" id="accesso-codice" hidden>
+      <label class="t-label" for="accesso-otp">Hai l'app installata sul telefono? Se l'email ha un codice, scrivilo qui</label>
+      <input class="input mono" id="accesso-otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10">
+      <button type="button" class="btn btn-secondary btn-block" data-act="accesso-codice">Entra con il codice</button>
+    </div>
+    <p class="accesso-stato" id="accesso-stato" role="status" aria-live="polite"></p>
+  </form>
 </div>
 
 <!-- ══════════ PRIMA APERTURA ══════════ -->
@@ -6273,6 +6303,9 @@ function vistaAltro() {
       <button type="button" class="riga-link" data-act="plaud" data-tip="Import Plaud (Cmd+P)"><i class="ti ti-microphone"></i><span>Importa da una registrazione</span><span></span><i class="ti ti-chevron-right"></i></button>
       <button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="impostazioni"><i class="ti ti-settings"></i><span>Impostazioni</span><span></span><i class="ti ti-chevron-right"></i></button>
       <a class="riga-link" href="index.legacy.html"><i class="ti ti-history"></i><span>Versione precedente</span><span></span><i class="ti ti-chevron-right"></i></a>
+    </div>
+    <div class="group" style="margin-top:var(--sp-5)">
+      <button type="button" class="riga-link" data-act="esci"><i class="ti ti-logout"></i><span>Esci${state.utente ? `<small>${escHtml(state.utente)}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>
     </div>`;
 }
 
@@ -7064,6 +7097,8 @@ const AZIONI = {
   'rev-avanti': () => { if (ui.rev.passo === 1 && revAperti().length) { ui.rev.passo = 2; disegnaReview(); } else bpChiudiSettimana(); },
   'rev-gcal': async el => { el.disabled = true; await mettiPianoSuCalendar(); el.disabled = false; },
   'onb-salta': () => onbChiudi(false),
+  'esci': () => chiediEsci(),
+  'accesso-codice': () => entraConCodice(),
   'onb-avanti': () => onbAvanti(),
   'onb-apri': () => onbApri(),
   aiuto: el => apriAiuto(el),
@@ -8564,7 +8599,7 @@ const _handleGcalTokenBase = _handleGcalToken;
 _handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); caricaEventi(state.week, state.year); render(); riconciliaCalendar(); };
 
 // ══════════════════════════════════════════════════════════════
-// v5 · METODO i-TIME — costanti e impostazioni (vedi DECISIONI.md)
+// v5 · METODO i-TIME — costanti e impostazioni (vedi privata/DECISIONI.md, solo in locale)
 // ══════════════════════════════════════════════════════════════
 const LS5 = { PIANO_DURATA: 'piano_durata', FORMATO: 'foglio_formato', PROTEGGI: 'proteggi_q2', CC: 'coach_cc', STAMPATO: 'piano_stampato',
   CAL_SCRITTURA: 'gcal_cal_scelto', PROM: 'promemoria_cal', SUBITO: 'subito_chiesto', CICLI_CAL: 'cal_cicli_scelte', Q2_AGENDA: 'q2_agenda_scelte',
@@ -8619,12 +8654,12 @@ async function rilevaColonneV5() {
 // ══════════════════════════════════════════════════════════════
 // v5 · AREE i-TIME: le categorie diventano un sotto-livello di un'area
 // Finché la parte (b) della migration non è applicata, la mappatura è quella scritta qui
-// (la stessa di STATO.md) e il database non si tocca.
+// (la stessa di privata/STATO.md) e il database non si tocca.
 // ══════════════════════════════════════════════════════════════
 const AREE_ITIME = [
-  { nome: 'Management', icona: 'ti-crown', cats: ['management', 'hr', 'da-delegare', 'custom_4'], cat: 'management' },
+  { nome: 'Management', icona: 'ti-crown', cats: ['management', 'hr', 'da-delegare', 'custom_2', 'custom_4'], cat: 'management' },
   { nome: 'Marketing', icona: 'ti-speakerphone', cats: ['marketing'], cat: 'marketing' },
-  { nome: 'Vendite', icona: 'ti-trending-up', cats: ['vendite', 'custom_2', 'custom_3'], cat: 'vendite' },
+  { nome: 'Vendite', icona: 'ti-trending-up', cats: ['vendite', 'custom_3'], cat: 'vendite' },
   { nome: 'Amministrazione', icona: 'ti-file-text', cats: ['amministrazione'], cat: 'amministrazione' },
   { nome: 'Produzione', icona: 'ti-building-factory-2', cats: ['produzione'], cat: 'produzione' },
   { nome: 'Ricerca e sviluppo', icona: 'ti-flask', cats: ['rnd', 'idee'], cat: 'rnd' },
@@ -8683,7 +8718,7 @@ function sezioneAree() {
   const chip = k => `<button type="button" class="chip" data-act="area-cat" data-k="${esc(k)}"${mappate ? '' : ' disabled'}><i class="ti ${catIconaTi(k)}"></i>${escHtml(catNome(k))}</button>`;
   const avviso = state.areeColOk === false
     ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>Manca la colonna <span class="mono">macro_aree.categorie</span>: esegui <span class="mono">supabase_migration_itime_a.sql</span>.</span></div>`
-    : !mappate ? `<div class="avviso"><i class="ti ti-info-circle"></i><span>È la mappatura proposta (STATO.md). Per spostare categorie e aggiungere aree serve la parte (b) della migration: <span class="mono">supabase_migration_itime_b.sql</span>.</span></div>` : '';
+    : !mappate ? `<div class="avviso"><i class="ti ti-info-circle"></i><span>È la mappatura scritta nell'app. Per spostare categorie e aggiungere aree serve la parte (b) della migration: <span class="mono">supabase_migration_itime_b.sql</span>.</span></div>` : '';
   return `<p class="list-head"><span>Aree</span><span class="mono">${aree().length}</span></p>${avviso}
     <div class="group aree-lista">${aree().map(a => `<div class="area-riga"><div class="area-h"><i class="ti ${a.icona}"></i><b>${escHtml(a.nome)}</b><span class="mono t-caption faint">${n(a.nome)}</span></div>
       <div class="chips chips-wrap">${a.cats.filter(categoriaEsiste).map(chip).join('') || '<span class="t-caption faint">Nessuna categoria</span>'}</div></div>`).join('')}
@@ -9941,8 +9976,104 @@ function avvioV5() {
   setTimeout(avvioCalendarV5, 2800);   // dopo che initGcal ha ripreso il token
 }
 
-(function avvio() {
+// ══════════════════════════════════════════════════════════════
+// ACCESSO · Supabase Auth con link via email, un solo utente ammesso.
+// La protezione vera sono le policy RLS (auth.jwt() ->> 'email'):
+// questo controllo serve solo a non far partire l'app senza sessione.
+// ══════════════════════════════════════════════════════════════
+const EMAIL_AMMESSA = 'maci81x@gmail.com';
+let _appAvviata = false;
+const urlRitorno = () => location.origin + location.pathname;
+const emailDi = s => ((s && s.user && s.user.email) || '').trim().toLowerCase();
+const sessioneAmmessa = s => !!(s && s.access_token) && emailDi(s) === EMAIL_AMMESSA;
+
+function statoAccesso(testo, errore) {
+  const el = $('accesso-stato');
+  el.textContent = testo || '';
+  el.classList.toggle('errore', !!errore);
+}
+function erroreDalLink() {
+  // il link scaduto o già usato torna con #error=…&error_description=…
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (!h.get('error')) return '';
+  history.replaceState(null, '', urlRitorno());
+  return h.get('error_code') === 'otp_expired' ? 'Il link è scaduto o è già stato usato: chiedine un altro.' : 'Il link non ha funzionato: chiedine un altro.';
+}
+function mostraAccesso(msg, errore) {
+  $('accesso').hidden = false;
+  const campo = $('accesso-email');
+  if (!campo.value) campo.value = lsLeggi('accesso_email') || '';
+  statoAccesso(msg, errore);
+  setTimeout(() => campo.focus(), 50);
+}
+function testoErroreAuth(e) {
+  const m = String((e && e.message) || '');
+  if (/rate|too many|seconds/i.test(m)) return 'Hai chiesto troppi link di seguito: aspetta qualche minuto e riprova.';
+  if (/signups not allowed|not allowed/i.test(m)) return 'Questo indirizzo non può entrare.';
+  if (/expired|invalid/i.test(m)) return 'Il codice non è valido o è scaduto: chiedi un altro link.';
+  return 'Non sono riuscito a mandare il link. Controlla la connessione e riprova.';
+}
+async function inviaLinkAccesso(ev) {
+  ev.preventDefault();
+  const email = $('accesso-email').value.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return statoAccesso('Scrivi un indirizzo email completo, per esempio nome@gmail.com.', true);
+  if (email !== EMAIL_AMMESSA) return statoAccesso('Con questo indirizzo non si entra.', true);
+  const btn = $('accesso-invia');
+  btn.disabled = true;
+  statoAccesso('Ti sto mandando il link…');
+  try {
+    const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: urlRitorno() } });
+    if (error) throw error;
+    lsScrivi('accesso_email', email);
+    $('accesso-email').value = email;
+    statoAccesso(`Fatto: ti ho mandato il link a ${email}. Aprilo da questo dispositivo.`);
+    $('accesso-codice').hidden = false;
+  } catch (e) {
+    console.warn('[Accesso] invio link:', e.message);
+    statoAccesso(testoErroreAuth(e), true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+async function entraConCodice() {
+  const email = $('accesso-email').value.trim().toLowerCase();
+  const token = $('accesso-otp').value.replace(/\s/g, '');
+  if (!/^\d{6,10}$/.test(token)) return statoAccesso('Il codice è fatto solo di cifre: copialo dall\'email.', true);
+  statoAccesso('Controllo il codice…');
+  const { error } = await db.auth.verifyOtp({ email, token, type: 'email' });
+  if (error) { console.warn('[Accesso] codice:', error.message); statoAccesso(testoErroreAuth(error), true); }
+}
+function chiediEsci() {
+  apriConferma({ titolo: 'Esci da Cicli Aperti?', testo: 'Per rientrare ti mando un nuovo link per email.', ok: 'Esci', no: 'Resta', onOk: esci });
+}
+async function esci() {
+  try { await db.auth.signOut(); } catch (e) { console.warn('[Accesso] uscita:', e.message); }
+  location.replace(urlRitorno());
+}
+
+(async function accesso() {
   applyTheme();
+  $('accesso-form').addEventListener('submit', inviaLinkAccesso);
+  const errLink = erroreDalLink();
+  db.auth.onAuthStateChange((evento, sessione) => {
+    // niente chiamate a Supabase dentro questa funzione: si rimanda con setTimeout
+    if (sessione && sessione.access_token) db.realtime.setAuth(sessione.access_token);
+    if (evento === 'SIGNED_OUT' && _appAvviata) { setTimeout(() => location.replace(urlRitorno()), 0); return; }
+    if (sessioneAmmessa(sessione) && !_appAvviata) setTimeout(() => avviaApp(sessione), 0);
+  });
+  const { data, error } = await db.auth.getSession();
+  if (error) console.warn('[Accesso] sessione:', error.message);
+  const s = data && data.session;
+  if (sessioneAmmessa(s)) return avviaApp(s);
+  if (s) { await db.auth.signOut(); return mostraAccesso('Con questo indirizzo non si entra.', true); }
+  mostraAccesso(errLink, !!errLink);
+})();
+
+function avviaApp(sessione) {
+  if (_appAvviata) return;
+  _appAvviata = true;
+  $('accesso').hidden = true;
+  state.utente = emailDi(sessione);
   const corrente = bpSettimanaCorrente();
   state.week = corrente.week; state.year = corrente.year;      // si apre sempre sulla settimana di oggi
   ui.giorno = giornoIdxDi(oggiData());
@@ -9964,7 +10095,7 @@ function avvioV5() {
     if (salite.length) setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
   });
   window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
-})();
+}
 
 </script>
 </body>

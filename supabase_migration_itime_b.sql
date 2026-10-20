@@ -20,9 +20,9 @@ DELETE FROM macro_aree WHERE nome = 'Da Delegare'
   AND NOT EXISTS (SELECT 1 FROM cicli WHERE macro_area = 'Da Delegare');
 
 -- 4. Ordine e categorie di ogni area (vedi la tabella in STATO.md)
-UPDATE macro_aree SET ordine = 1, categorie = ARRAY['management','hr','da-delegare','custom_4']  WHERE nome = 'Management';
+UPDATE macro_aree SET ordine = 1, categorie = ARRAY['management','hr','da-delegare','custom_2','custom_4'] WHERE nome = 'Management';
 UPDATE macro_aree SET ordine = 2, categorie = ARRAY['marketing']                                  WHERE nome = 'Marketing';
-UPDATE macro_aree SET ordine = 3, categorie = ARRAY['vendite','custom_2','custom_3']              WHERE nome = 'Vendite';
+UPDATE macro_aree SET ordine = 3, categorie = ARRAY['vendite','custom_3']                         WHERE nome = 'Vendite';
 UPDATE macro_aree SET ordine = 4, categorie = ARRAY['amministrazione']                            WHERE nome = 'Amministrazione';
 UPDATE macro_aree SET ordine = 5, categorie = ARRAY['produzione']                                 WHERE nome = 'Produzione';
 UPDATE macro_aree SET ordine = 6, categorie = ARRAY['rnd','idee']                                 WHERE nome = 'Ricerca e sviluppo';
