@@ -8652,22 +8652,24 @@ async function rilevaColonneV5() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// v5 · AREE i-TIME: le categorie diventano un sotto-livello di un'area
-// Finché la parte (b) della migration non è applicata, la mappatura è quella scritta qui
-// (la stessa di privata/STATO.md) e il database non si tocca.
+// v5 · AREE i-TIME: le categorie sono un sotto-livello di un'area.
+// Aree, ordine e categorie stanno in macro_aree (migration itime_b, applicata il 20/10).
+// Qui resta solo come si presenta un'area: icona, categoria per le cose nuove, se è personale.
 // ══════════════════════════════════════════════════════════════
-const AREE_ITIME = [
-  { nome: 'Management', icona: 'ti-crown', cats: ['management', 'hr', 'da-delegare', 'custom_2', 'custom_4'], cat: 'management' },
-  { nome: 'Marketing', icona: 'ti-speakerphone', cats: ['marketing'], cat: 'marketing' },
-  { nome: 'Vendite', icona: 'ti-trending-up', cats: ['vendite', 'custom_3'], cat: 'vendite' },
-  { nome: 'Amministrazione', icona: 'ti-file-text', cats: ['amministrazione'], cat: 'amministrazione' },
-  { nome: 'Produzione', icona: 'ti-building-factory-2', cats: ['produzione'], cat: 'produzione' },
-  { nome: 'Ricerca e sviluppo', icona: 'ti-flask', cats: ['rnd', 'idee'], cat: 'rnd' },
-  { nome: 'Famiglia / cose personali', icona: 'ti-home', cats: ['salute', 'relazioni', 'finanze', 'hobbies', 'spiritualita', 'casa', 'custom_1', 'custom_5'], cat: 'custom_1', personale: true },
-  { nome: 'Formazione', icona: 'ti-school', cats: ['crescita'], cat: 'management' }
-];
+const AREE_STILE = {
+  'Management':                { icona: 'ti-crown', cat: 'management' },
+  'Marketing':                 { icona: 'ti-speakerphone', cat: 'marketing' },
+  'Vendite':                   { icona: 'ti-trending-up', cat: 'vendite' },
+  'Amministrazione':           { icona: 'ti-file-text', cat: 'amministrazione' },
+  'Produzione':                { icona: 'ti-building-factory-2', cat: 'produzione' },
+  'Ricerca e sviluppo':        { icona: 'ti-flask', cat: 'rnd' },
+  'Famiglia / cose personali': { icona: 'ti-home', cat: 'custom_1', personale: true },
+  'Formazione':                { icona: 'ti-school', cat: 'management' }
+};
+const STILE_AREA_NUOVA = { icona: 'ti-tag', cat: 'management' };
+// I nomi di prima: li scrive ancora la versione precedente (index.legacy.html), qui si leggono come i nuovi.
 const AREE_NOMI_VECCHI = { 'R&D': 'Ricerca e sviluppo', 'Personale': 'Famiglia / cose personali', 'HR': 'Formazione', 'Da Delegare': null };
-state.areeDb = null;
+state.areeDb = null;   // null = non ancora lette (o lettura fallita)
 
 async function caricaAree() {
   try {
@@ -8676,13 +8678,12 @@ async function caricaAree() {
     state.areeDb = data || [];
   } catch (e) { console.warn('[Aree] lettura:', e.message); state.areeDb = null; }
 }
-// La parte (b) è applicata quando almeno un'area ha le sue categorie nel database.
-const areeDbMappate = () => !!state.areeColOk && !!state.areeDb && state.areeDb.some(a => (a.categorie || []).length);
+const areeLette = () => Array.isArray(state.areeDb);
 function aree() {
-  if (!areeDbMappate()) return AREE_ITIME;
+  if (!areeLette()) return [];
   return state.areeDb.slice().sort((a, b) => (a.ordine ?? 99) - (b.ordine ?? 99)).map(r => {
-    const base = AREE_ITIME.find(x => x.nome === r.nome);
-    return { id: r.id, nome: r.nome, icona: base ? base.icona : 'ti-tag', cats: r.categorie || [], cat: base ? base.cat : 'management', personale: !!(base && base.personale) };
+    const st = AREE_STILE[r.nome] || STILE_AREA_NUOVA;
+    return { id: r.id, nome: r.nome, icona: st.icona, cats: r.categorie || [], cat: st.cat, personale: !!st.personale };
   });
 }
 function nomiAree() { return aree().map(a => a.nome); }
@@ -8710,7 +8711,7 @@ function riempiSelectAree(valore) {
 
 // Impostazioni → Aree: ogni area con le sue categorie; si sposta una categoria o se ne aggiunge una.
 function sezioneAree() {
-  const mappate = areeDbMappate();
+  const mappate = areeLette();
   const usate = new Set(aree().flatMap(a => a.cats));
   const tutte = [...Object.keys(CAT_LABELS), ...(state.categorie || []).map(c => 'custom_' + c.id)];
   const libere = tutte.filter(k => !usate.has(k));
@@ -8718,7 +8719,7 @@ function sezioneAree() {
   const chip = k => `<button type="button" class="chip" data-act="area-cat" data-k="${esc(k)}"${mappate ? '' : ' disabled'}><i class="ti ${catIconaTi(k)}"></i>${escHtml(catNome(k))}</button>`;
   const avviso = state.areeColOk === false
     ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>Manca la colonna <span class="mono">macro_aree.categorie</span>: esegui <span class="mono">supabase_migration_itime_a.sql</span>.</span></div>`
-    : !mappate ? `<div class="avviso"><i class="ti ti-info-circle"></i><span>È la mappatura scritta nell'app. Per spostare categorie e aggiungere aree serve la parte (b) della migration: <span class="mono">supabase_migration_itime_b.sql</span>.</span></div>` : '';
+    : !mappate ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>Non riesco a leggere le aree. Controlla la connessione e riapri Impostazioni.</span></div>` : '';
   return `<p class="list-head"><span>Aree</span><span class="mono">${aree().length}</span></p>${avviso}
     <div class="group aree-lista">${aree().map(a => `<div class="area-riga"><div class="area-h"><i class="ti ${a.icona}"></i><b>${escHtml(a.nome)}</b><span class="mono t-caption faint">${n(a.nome)}</span></div>
       <div class="chips chips-wrap">${a.cats.filter(categoriaEsiste).map(chip).join('') || '<span class="t-caption faint">Nessuna categoria</span>'}</div></div>`).join('')}
@@ -8737,7 +8738,7 @@ function apriSpostaCategoria(k) {
 }
 // Sposta la categoria `k` nell'area `dest`: la toglie dalla vecchia, la aggiunge alla nuova, e le sue cose cambiano area.
 async function spostaCategoria(k, dest) {
-  if (!areeDbMappate()) return;
+  if (!areeLette()) return;
   const da = state.areeDb.find(r => (r.categorie || []).includes(k)) || null, a = state.areeDb.find(r => r.nome === dest);
   if (!a || da === a) { closeModal('areaOverlay'); return; }
   try {
