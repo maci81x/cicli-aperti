@@ -709,6 +709,35 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .fil-sez { margin-bottom: var(--sp-4); }
 .fil-nuova { margin-top: var(--sp-2); }
 
+/* v8 · riepilogo della frase sotto il campo */
+.rap-anteprima { display: grid; gap: var(--sp-1); margin-top: var(--sp-2); }
+.rap-voce { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.rap-sintesi { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-1) 0 var(--sp-3); font-size: var(--fs-label); color: var(--text); }
+.rap-sintesi > span { flex: 1; min-width: 0; }
+.rap-voce.p-q1 .rap-sintesi > .ti { color: var(--q1); } .rap-voce.p-q2 .rap-sintesi > .ti { color: var(--q2); }
+.rap-voce.p-q3 .rap-sintesi > .ti { color: var(--q3); } .rap-voce.p-q4 .rap-sintesi > .ti { color: var(--text-3); }
+.rap-edit { display: grid; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); }
+.rap-edit .input { min-height: var(--tap); }
+.rap-edit-riga { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--sp-2); }
+.pl-tipo[data-q="1"] { color: var(--q1); border-color: var(--q1-mark); } .pl-tipo[data-q="2"] { color: var(--q2); border-color: var(--q2-mark); }
+.pl-tipo[data-q="3"] { color: var(--q3); border-color: var(--q3-mark); }
+.cattura { flex-wrap: wrap; }
+.cattura-anteprima { flex: 1 0 100%; display: flex; align-items: center; gap: var(--sp-2); padding: 0 0 var(--sp-1); font-size: var(--fs-caption); color: var(--text-2); }
+.ca-voci { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.ca-voci > span { display: flex; align-items: flex-start; gap: var(--sp-1); line-height: var(--lh-caption); }
+.ca-voci > span .ti { flex: none; margin-top: 1px; }
+.ca-voci .p-q1 .ti { color: var(--q1); } .ca-voci .p-q2 .ti { color: var(--q2); } .ca-voci .p-q3 .ti { color: var(--q3); }
+/* v8 · import della riunione */
+.pl-file { margin-top: var(--sp-2); }
+.pl-madre { display: grid; gap: var(--sp-1); background: var(--q2-soft); }
+.pl-madre .input { min-height: var(--tap); font-weight: var(--fw-strong); }
+.pl-madre .plaud-item-note { margin-left: 0; }
+.plaud-item.p-q1 { border-color: var(--q1-mark); } .plaud-item.p-q3 { border-color: var(--q3-mark); }
+.plaud-item-meta .pl-tipo { min-height: 36px; width: auto; padding: 0 calc(var(--sp-4) * 2) 0 var(--sp-2); }
+.pl-data { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.pl-chi { display: inline-flex; align-items: center; gap: 4px; color: var(--q3); font-weight: var(--fw-strong); }
+.pl-chiedi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: var(--sp-2) 0 0 34px; font-size: var(--fs-label); color: var(--text-2); }
+
 /* registrazione (Plaud) */
 .step-indicator { display: inline-flex; gap: 4px; margin-right: var(--sp-2); vertical-align: middle; }
 .step-dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--border); }
@@ -1289,6 +1318,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
   <!-- CAMPO FISSO (telefono): una riga = una cosa, Importante senza data -->
   <form class="cattura" id="cattura" autocomplete="off" aria-label="Aggiungi al volo">
+    <div class="cattura-anteprima" id="cattura-anteprima" aria-live="polite" hidden></div>
     <label class="sr-only" for="cattura-testo">Cosa hai in testa?</label>
     <textarea id="cattura-testo" rows="1" placeholder="Cosa hai in testa?" enterkeyhint="done" autocomplete="off" spellcheck="true"></textarea>
     <button type="button" class="btn btn-icon cattura-mic" id="cattura-mic" data-act="cattura-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
@@ -1599,6 +1629,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
     </div>
     <div id="plaud-step-1">
       <textarea class="input textarea" id="plaud-transcript" placeholder="Incolla qui il testo della registrazione" style="min-height:180px" aria-label="Trascrizione"></textarea>
+      <div class="pl-file"><label class="btn btn-secondary btn-sm" for="plaud-file"><i class="ti ti-file-text"></i>Apri un file .txt o .md</label><input type="file" id="plaud-file" class="sr-only" accept=".txt,.md,.markdown,text/plain,text/markdown"></div>
+      <p class="t-caption muted">Con il formato «RIUNIONE: … DA FARE IO: …» la leggo da sola, senza AI. Altrimenti la legge Claude.</p>
       <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block btn-analyze" onclick="analyzePlaud()"><i class="ti ti-sparkles"></i>Trova le cose da fare</button></div>
     </div>
     <div id="plaud-step-2" style="display:none">
@@ -1845,7 +1877,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
       <textarea class="input" id="rapido-testo" rows="2" placeholder="Cosa hai in testa?" autocomplete="off" aria-label="Cosa hai in testa?" enterkeyhint="send"></textarea>
       <button type="button" class="btn btn-icon rapido-mic" id="rapido-mic" data-act="rapido-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
     </div>
-    <p class="t-caption muted rapido-nota">Una riga, una cosa. Più righe, più cose.</p>
+    <div class="rap-anteprima" id="rapido-anteprima" aria-live="polite" hidden></div>
+    <p class="t-caption muted rapido-nota">Una riga, una cosa. Prova: «ricordami venerdì alle 10 di chiamare Rossi».</p>
     <div class="chips" role="group" aria-label="Opzioni" id="rapido-chips"></div>
     <div class="chips chips-wrap" id="rapido-persone" hidden></div>
     <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="rapido-salva"><i class="ti ti-corner-down-left"></i>Invio</button></div>
@@ -8181,6 +8214,7 @@ async function aggiungiRighe(righe, r) {
 }
 
 // Dettatura (Web Speech API, it-IT): il testo finisce nel campo, dopo quello già scritto.
+const DETTATURA = { SILENZIO_MS: 3000 };
 function dettatura(campoId, micId) {
   if (!Riconoscimento) return;
   if (_ascolto) { fermaDettatura(); return; }
@@ -8189,11 +8223,13 @@ function dettatura(campoId, micId) {
   const rec = new Riconoscimento();
   rec.lang = 'it-IT';
   rec.interimResults = true;
-  rec.continuous = false;
-  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; campo.dispatchEvent(new Event('input', { bubbles: true })); };
+  rec.continuous = true;                                         // si ferma con il tasto o dopo DETTATURA.SILENZIO_MS senza parlare
+  let silenzio = null;
+  const attendi = () => { clearTimeout(silenzio); silenzio = setTimeout(() => { try { rec.stop(); } catch (_) {} }, DETTATURA.SILENZIO_MS); };
+  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; campo.dispatchEvent(new Event('input', { bubbles: true })); attendi(); };
   rec.onerror = e => { if (e.error !== 'aborted' && e.error !== 'no-speech') showToast('Dettatura non riuscita: ' + e.error, 'error'); };
-  rec.onend = () => { _ascolto = null; mic.setAttribute('aria-pressed', 'false'); mic.classList.remove('ascolta'); };
-  try { rec.start(); } catch (e) { showToast('Dettatura non disponibile', 'error'); return; }
+  rec.onend = () => { clearTimeout(silenzio); _ascolto = null; mic.setAttribute('aria-pressed', 'false'); mic.classList.remove('ascolta'); };
+  try { rec.start(); attendi(); } catch (e) { showToast('Dettatura non disponibile', 'error'); return; }
   _ascolto = rec;
   mic.setAttribute('aria-pressed', 'true');
   mic.classList.add('ascolta');
@@ -11245,6 +11281,544 @@ caricaEventi = function (week, year) {
 // scollegando, la copia locale va via
 const _disconnectGcalV6 = disconnectGcal;
 disconnectGcal = function () { lsScrivi(GCAL_CACHE.LS, null); ui.eventi = {}; ui.eventiDaCache = new Set(); _disconnectGcalV6(); render(); };
+
+// ══════════════════════════════════════════════════════════════
+// v8 · «RICORDAMI» A VOCE: la frase diventa titolo, giorno, ora, tipo e delega (in locale, senza AI)
+// ══════════════════════════════════════════════════════════════
+const FRASE = {
+  GIORNI: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'],
+  MESI: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+  NUMERI: { un: 1, uno: 1, una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, quindici: 15, venti: 20, trenta: 30 },
+  MINUTI: { mezza: 30, mezzo: 30, 'un quarto': 15, quarto: 15, 'tre quarti': 45 },
+  POMERIGGIO_FINO: 7,        // «alle 3» = 15:00: dall'1 alle 7 senza «di mattina» si intende il pomeriggio
+  CONTROLLO_GIORNI: 2,       // una delega senza data si controlla tra 2 giorni (come il foglio Delega)
+  PAROLE_NON_NOMI: ['mia', 'mio', 'lui', 'lei', 'tutti', 'qualcuno', 'loro', 'chi', 'me', 'te']
+};
+const senzaAccenti = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const FINE_PAROLA = '(?![A-Za-z0-9À-ÿ])';   // \b non vede «ì» come lettera
+const RE_GIORNO = '(luned[iìí]|marted[iìí]|mercoled[iìí]|gioved[iìí]|venerd[iìí]|sabato|domenica)';
+const RE_PRIMA = '(?:\\b(?:entro|per|da|di)\\s+)?(?:\\b(?:il|lo|la|l\')\\s*)?';
+const RE_NUM = '(\\d{1,2}|' + Object.keys(FRASE.NUMERI).join('|') + ')';
+const numeroDa = t => /^\d+$/.test(t) ? parseInt(t, 10) : FRASE.NUMERI[senzaAccenti(t)] || null;
+const piuGiorni = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; };
+const lunediDopo = d => piuGiorni(d, 7 - giornoIdxDi(d));
+function dataValida(g, m, a, oggi) {
+  const anno = a ? (a < 100 ? 2000 + a : a) : oggi.getFullYear();
+  const d = new Date(anno, m - 1, g);
+  if (d.getMonth() !== m - 1 || d.getDate() !== g) return null;
+  if (!a && toISODate(d) < toISODate(oggi)) d.setFullYear(anno + 1);   // «il 5 gennaio» detto a ottobre = l'anno prossimo
+  return d;
+}
+function oraDa(h, m, dopo) {
+  let ore = parseInt(h, 10);
+  const minuti = m == null ? 0 : /^\d+$/.test(m) ? parseInt(m, 10) : FRASE.MINUTI[m.toLowerCase()] || 0;
+  const q = senzaAccenti(dopo);
+  if (/pomeriggio|sera/.test(q) && ore < 12) ore += 12;
+  else if (!q && ore >= 1 && ore <= FRASE.POMERIGGIO_FINO) ore += 12;
+  if (ore > 23 || minuti > 59) return null;
+  return `${String(ore).padStart(2, '0')}:${String(minuti).padStart(2, '0')}`;
+}
+function trovaPersona(nome) {
+  const n = senzaAccenti(nome);
+  if (!n) return null;
+  const ps = state.persone || [];
+  return ps.find(p => senzaAccenti(p.nome) === n)
+    || ps.find(p => senzaAccenti(p.nome).split(/\s+/).includes(n))
+    || null;
+}
+
+// Restituisce { title, data: 'YYYY-MM-DD' | null, ora: 'HH:MM' | null, q: 1 | 2 | 3, delega: { id, nome } | null }.
+// `oggi` serve alle prove e alle riunioni: le date relative partono da lì.
+function interpretaFrase(testo, oggi = new Date()) {
+  const base = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  let resto = ` ${String(testo || '').replace(/\s+/g, ' ').trim()} `;
+  let data = null, ora = null, q = 2, delega = null;
+  // toglie dal testo la prima corrispondenza accettata da `fn`
+  const togli = (re, fn) => {
+    const m = new RegExp(re, 'i').exec(resto);
+    if (!m || fn(m) === false) return false;
+    resto = resto.slice(0, m.index) + ' ' + resto.slice(m.index + m[0].length);
+    return true;
+  };
+  togli('\\b(?:ricordami|ricordarmi|ricorda(?:ti)?|promemoria)\\b\\s*:?', () => {});
+  togli('\\b(?:subito|urgente(?:mente)?|con urgenza)\\b', () => { q = 1; });
+  // l'ora prima delle date: «alle 15.30» non è il 15 marzo
+  togli("\\b(?:alle|ore|per le|verso le|dalle)\\s+(?:ore\\s+)?(\\d{1,2})(?:[:.](\\d{2}))?(?:\\s+e\\s+(mezza|mezzo|un quarto|tre quarti|\\d{1,2}))?(?:\\s+(di mattina|del mattino|di pomeriggio|del pomeriggio|di sera|della sera))?\\b",
+    m => { const o = oraDa(m[1], m[2] != null ? m[2] : m[3], m[4]); if (!o) return false; ora = o; })
+    || togli("\\ball'una(?:\\s+e\\s+(mezza|un quarto|tre quarti))?\\b", m => { ora = oraDa('13', m[1], 'pomeriggio'); })
+    || togli('\\b(\\d{1,2}):(\\d{2})\\b', m => { const o = oraDa(m[1], m[2], 'mattina'); if (!o) return false; ora = o; });
+  const metti = d => { if (!data && d) data = toISODate(d); return !!d; };
+  togli(RE_PRIMA + '(\\d{1,2})(?:°)?\\s+(' + FRASE.MESI.join('|') + ')(?:\\s+(\\d{4}))?\\b', m => metti(dataValida(+m[1], FRASE.MESI.indexOf(m[2].toLowerCase()) + 1, m[3] ? +m[3] : null, base)));
+  togli(RE_PRIMA + '\\b(\\d{1,2})[/\\-](\\d{1,2})(?:[/\\-](\\d{2,4}))?\\b', m => metti(dataValida(+m[1], +m[2], m[3] ? +m[3] : null, base)));
+  togli(RE_PRIMA + '\\b(?:settimana\\s+prossima|prossima\\s+settimana)\\b', () => metti(lunediDopo(base)));
+  togli(RE_PRIMA + '\\bdopodomani\\b', () => metti(piuGiorni(base, 2)));
+  togli(RE_PRIMA + '\\bdomani(?:\\s+(?:mattina|pomeriggio|sera))?\\b', () => metti(piuGiorni(base, 1)));
+  togli(RE_PRIMA + '\\b(?:oggi(?:\\s+pomeriggio)?|stasera|stamattina|stamani)\\b', () => metti(base));
+  togli('\\b(?:tra|fra)\\s+' + RE_NUM + '\\s+(giorni|giorno|settimane|settimana|mesi|mese)\\b', m => {
+    const n = numeroDa(m[1]);
+    if (!n) return false;
+    const u = senzaAccenti(m[2]);
+    if (u.startsWith('mes')) { const d = new Date(base); d.setMonth(d.getMonth() + n); return metti(d); }
+    return metti(piuGiorni(base, u.startsWith('settiman') ? n * 7 : n));
+  });
+  // «lunedì» e «il prossimo lunedì» = il primo lunedì dopo oggi; «lunedì prossimo» = il lunedì della settimana dopo
+  togli(RE_PRIMA + '(?:prossim[oa]\\s+)?' + RE_GIORNO + '(?:\\s+(prossim[oa]))?' + FINE_PAROLA, m => {
+    const idx = FRASE.GIORNI.indexOf(senzaAccenti(m[1]));
+    if (m[2]) return metti(piuGiorni(lunediDopo(base), idx)) || true;
+    const avanti = (idx - giornoIdxDi(base) + 7) % 7 || 7;
+    return metti(piuGiorni(base, avanti)) || true;
+  });
+  // delega: «chiedi a Raia …», «delega a Simone …» (persona nota, o un nome con la maiuscola: diventa una persona nuova)
+  const md = new RegExp("\\b(?:chiedi|chiedere|chiedo|delega|delegare|deleghi|fai fare|far fare)\\s+(?:a|ad)\\s+([A-Za-zÀ-ÿ']+)(?:\\s+([A-Za-zÀ-ÿ']+))?", 'i').exec(resto);
+  if (md) {
+    const due = md[2] ? trovaPersona(`${md[1]} ${md[2]}`) : null;
+    const p = due || trovaPersona(md[1]);
+    const nuova = !p && /^[A-ZÀ-Ý]/.test(md[1]) && !FRASE.PAROLE_NON_NOMI.includes(senzaAccenti(md[1]));
+    if (p || nuova) {
+      delega = p ? { id: p.id, nome: p.nome } : { id: null, nome: md[1] };
+      const lungo = due || !md[2] ? md[0].length : md[0].length - md[2].length;   // la seconda parola resta nel titolo
+      resto = resto.slice(0, md.index) + ' ' + resto.slice(md.index + lungo);
+    }
+  }
+  // il resto è il titolo
+  let t = resto.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
+  const testa = /^(?:di|che|devo|dovrei|bisogna|da|e|,|:|-)\s+/i;
+  for (let i = 0; i < 4 && testa.test(t + ' '); i++) t = (t + ' ').replace(testa, '').trim();
+  if (delega) t = t.replace(/^(?:il|lo|la|i|gli|le|l')\s*(?=\S)/i, '');
+  t = t.replace(/^[\s,;:.\-–—]+|[\s,;:\-–—]+$/g, '').replace(/\s+(?:entro|per|alle|e|di)$/i, '').trim();
+  if (!t) t = String(testo || '').trim();
+  const title = t.charAt(0).toUpperCase() + t.slice(1);
+  return { title, data, ora, q: delega ? 3 : q, delega };
+}
+
+// «ven 23/10»
+const fmtGiornoCorto = iso => { const d = parseISODate(iso); return d ? `${['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'][d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}` : ''; };
+const escAttr = s => escHtml(s).replace(/"/g, '&quot;');
+function sintesiVoce(v) {
+  const quando = v.data ? `${fmtGiornoCorto(v.data)}${v.ora ? ' ' + v.ora : ''}` : v.ora ? `oggi ${v.ora}` : 'Tutto, senza data';
+  if (v.q === 3 && v.delega) return [v.title, `Delega a ${v.delega.nome}${v.delega.id ? '' : ' (nuova persona)'}`, `controlli ${v.data ? fmtGiornoCorto(v.data) : 'tra ' + FRASE.CONTROLLO_GIORNI + ' giorni'}`].join(' · ');
+  return [v.title, quando, TIPI[v.q].label].join(' · ');
+}
+// Le righe del campo con le scelte del foglio (Subito, Oggi, il giorno della colonna) e le correzioni a mano
+function vociDaRighe(righe, r) {
+  const mod = (r && r.mod) || {};
+  return righe.map((testo, i) => {
+    let v = { ...interpretaFrase(testo), testo };
+    if (r && r.subito && v.q !== 3) v = { ...v, q: 1 };
+    if (!v.data && r && r.data) v = { ...v, data: r.data };
+    if (!v.data && r && r.oggi && v.q !== 3) v = { ...v, data: oggiLocale() };
+    if (!v.data && v.ora && v.q !== 3) v = { ...v, data: oggiLocale() };   // solo l'ora detta: oggi a quell'ora
+    const m = mod[i];
+    return m && m.testo === testo ? { ...v, ...m.valori } : v;
+  });
+}
+
+// ─── Il riepilogo sotto il campo, modificabile ───
+function editorVoce(v, i) {
+  const persone = state.persone || [];
+  return `<div class="rap-edit" data-i="${i}">
+    <input type="text" class="input" data-campo="title" value="${escAttr(v.title)}" aria-label="Cosa">
+    <div class="rap-edit-riga">
+      <input type="date" class="input" data-campo="data" value="${v.data || ''}" aria-label="Giorno">
+      <input type="time" class="input" data-campo="ora" value="${v.ora || ''}" aria-label="Ora">
+      <select class="input pl-tipo" data-campo="q" data-q="${v.q}" aria-label="Tipo">${[1, 2, 3, 4].map(q => `<option value="${q}"${q === v.q ? ' selected' : ''}>${TIPI[q].label}</option>`).join('')}</select>
+    </div>
+    ${v.q === 3 ? `<select class="input" data-campo="delega" aria-label="A chi"><option value="">A chi?</option>${v.delega && !v.delega.id ? `<option value="nuova:${escAttr(v.delega.nome)}" selected>${escHtml(v.delega.nome)} (nuova)</option>` : ''}${persone.map(p => `<option value="${p.id}"${v.delega && String(v.delega.id) === String(p.id) ? ' selected' : ''}>${escHtml(p.nome)}</option>`).join('')}</select>` : ''}
+  </div>`;
+}
+function disegnaAnteprima() {
+  const box = $('rapido-anteprima');
+  if (!box) return;
+  const voci = vociDaRighe(righeDi($('rapido-testo').value), ui.rapido);
+  box.hidden = !voci.length;
+  box.innerHTML = voci.map((v, i) => `<div class="rap-voce p-q${v.q}" data-i="${i}">
+    <div class="rap-sintesi"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i><span>${escHtml(sintesiVoce(v))}</span>
+      <button type="button" class="btn btn-icon btn-sm" data-act="rap-modifica" data-i="${i}" aria-label="Modifica" aria-expanded="${ui.rapido.aperta === i}"><i class="ti ti-pencil"></i></button></div>
+    ${ui.rapido.aperta === i ? editorVoce(v, i) : ''}</div>`).join('');
+}
+// una correzione nel riepilogo: vale finché la riga del campo resta uguale
+function correggiVoce(i, campo, valore) {
+  const righe = righeDi($('rapido-testo').value);
+  const v = vociDaRighe(righe, ui.rapido)[i];
+  if (!v) return;
+  const valori = { title: v.title, data: v.data, ora: v.ora, q: v.q, delega: v.delega };
+  if (campo === 'q') { valori.q = parseInt(valore, 10) || 2; if (valori.q !== 3) valori.delega = null; }
+  else if (campo === 'delega') valori.delega = !valore ? null : valore.startsWith('nuova:') ? { id: null, nome: valore.slice(6) } : (p => p && { id: p.id, nome: p.nome })(personaDi(valore));
+  else valori[campo] = String(valore || '').trim() || (campo === 'title' ? v.title : null);
+  ui.rapido = { ...ui.rapido, mod: { ...(ui.rapido.mod || {}), [i]: { testo: righe[i], valori } } };
+  if (campo === 'q' || campo === 'data') { disegnaAnteprima(); return; }
+  const riga = document.querySelector(`#rapido-anteprima .rap-voce[data-i="${i}"] .rap-sintesi span`);
+  if (riga) riga.textContent = sintesiVoce(vociDaRighe(righe, ui.rapido)[i]);
+}
+document.addEventListener('change', e => {
+  const t = e.target, ed = t.closest && t.closest('#rapido-anteprima .rap-edit');
+  if (ed && t.dataset.campo) correggiVoce(+ed.dataset.i, t.dataset.campo, t.value);
+});
+document.addEventListener('input', e => {
+  const t = e.target, ed = t.closest && t.closest('#rapido-anteprima .rap-edit');
+  if (ed && t.dataset.campo === 'title') correggiVoce(+ed.dataset.i, 'title', t.value);
+});
+AZIONI['rap-modifica'] = el => { const i = +el.dataset.i; ui.rapido = { ...ui.rapido, aperta: ui.rapido.aperta === i ? null : i }; disegnaAnteprima(); };
+$('rapido-testo').addEventListener('input', disegnaAnteprima);
+const _disegnaRapidoV8 = disegnaRapido;
+disegnaRapido = function () { _disegnaRapidoV8(); disegnaAnteprima(); };
+const _apriRapidoV8 = apriRapido;
+apriRapido = function () { _apriRapidoV8(); ui.rapido = { ...ui.rapido, mod: {}, aperta: null }; disegnaAnteprima(); };
+function apriRapidoCon(testo) { apriRapido(); $('rapido-testo').value = testo; disegnaAnteprima(); }
+
+// ─── Salvataggio: senza data va in Tutto (non più oggi); con data e ora va in quel giorno ───
+async function creaPersona(nome) {
+  const pulito = String(nome || '').trim().slice(0, 80);
+  if (!pulito) return null;
+  const gia = trovaPersona(pulito);
+  if (gia) return gia;
+  const { data, error } = await db.from('persone').insert({ nome: pulito, colore: personColor({ nome: pulito }), created_at: new Date().toISOString() }).select();
+  if (error) throw error;
+  const p = data && data[0];
+  if (p) state.persone = [...state.persone, p].sort((a, b) => a.nome.localeCompare(b.nome));
+  return p || null;
+}
+const fasciaDaOra = ora => !ora ? null : ora < '13:00' ? 'mattina' : ora < '18:00' ? 'pomeriggio' : 'sera';
+const unici = lista => [...new Set(lista.filter(Boolean))];
+// Una riga del database per una voce: delega con persona e controllo, oppure giorno e ora
+async function rigaDaVoce(v, r, ctx) {
+  const base = rigaNuova(v.title, { subito: v.q === 1, persona: r && r.persona }, ctx);
+  const riga = { ...base, q: v.q };
+  if (v.q === 3) {
+    const p = v.delega ? (v.delega.id ? personaDi(v.delega.id) : await creaPersona(v.delega.nome)) : null;
+    if (p && state.delegaColsOk) return { ...riga, delega_persona_id: p.id, delega_controllo: v.data || toISODate(dataPiu(FRASE.CONTROLLO_GIORNI)), persone_menzionate: unici([...base.persone_menzionate, p.nome]) };
+    return p ? { ...riga, persone_menzionate: unici([...base.persone_menzionate, p.nome]) } : riga;
+  }
+  return v.data ? { ...riga, scheduled_date: v.data, scheduled_time: v.ora || null } : riga;
+}
+async function aggiungiFrasi(voci, r) {
+  const ctx = state.ctx;
+  try {
+    const coppie = [];
+    for (const v of voci) { const c = await upsertCiclo(await rigaDaVoce(v, r, ctx)); if (c) coppie.push({ v, c }); }
+    const nuove = coppie.map(x => x.c);
+    state.cicli = [...nuove, ...state.cicli.filter(c => !nuove.some(n => n.id === c.id))];
+    for (const { v, c } of coppie) if (v.data && v.q !== 3) await pianificaInData(ciclo(c.id) || c, parseISODate(v.data), fasciaDaOra(v.ora));
+    render();
+    if (r && r.cusc && nuove[0]) { await riempiCuscinetto(r.cusc, nuove[0].id); return nuove; }   // urgenza arrivata: va nel cuscinetto
+    coppie.forEach(({ v, c }) => {
+      if (v.data && v.q !== 3) syncCicloToGcal(ciclo(c.id) || c).catch(() => {});
+      if (ctx === 'lavoro') autoCategoria(c.title, '').then(area => area && patchCiclo(c.id, { macro_area: area })).catch(() => {});
+    });
+    if (coppie.length === 1) showToast(`Aggiunta: ${sintesiVoce(coppie[0].v)}`, 'success', { annulla: () => apriDettaglio(nuove[0].id), etichetta: 'Dettagli' });
+    else showToast(`${coppie.length} cose aggiunte`, 'success');
+    return nuove;
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
+}
+salvaRapido = async function () {
+  const righe = righeDi($('rapido-testo').value);
+  if (!righe.length) { $('rapido-testo').focus(); return; }
+  fermaDettatura();
+  if (await aggiungiFrasi(vociDaRighe(righe, ui.rapido), { ...ui.rapido })) closeModal('rapidoOverlay');
+};
+// campo fisso del telefono: stesso riepilogo, in breve; «Modifica» apre il foglio con il testo
+function disegnaAnteprimaCattura() {
+  const box = $('cattura-anteprima');
+  if (!box) return;
+  const voci = vociDaRighe(righeCattura(), {});
+  box.hidden = !voci.length;
+  if (!voci.length) { box.innerHTML = ''; return; }
+  const prime = voci.slice(0, 2).map(v => `<span class="p-q${v.q}"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i>${escHtml(sintesiVoce(v))}</span>`).join('');
+  box.innerHTML = `<div class="ca-voci">${prime}${voci.length > 2 ? `<span class="muted">+ altre ${voci.length - 2}</span>` : ''}</div>
+    <button type="button" class="btn btn-ghost btn-sm" data-act="cattura-modifica"><i class="ti ti-pencil"></i>Modifica</button>`;
+}
+AZIONI['cattura-modifica'] = () => { const t = $('cattura-testo').value; fermaDettatura(); $('cattura-testo').value = ''; allungaCattura(); disegnaAnteprimaCattura(); apriRapidoCon(t); };
+$('cattura-testo').addEventListener('input', disegnaAnteprimaCattura);
+salvaCattura = async function () {
+  const righe = righeCattura();
+  if (!righe.length) { apriRapido(); return; }
+  fermaDettatura();
+  const campo = $('cattura-testo');
+  campo.disabled = true;
+  const nuove = await aggiungiFrasi(vociDaRighe(righe, {}), {});
+  campo.disabled = false;
+  if (nuove) { campo.value = ''; allungaCattura(); disegnaAnteprimaCattura(); }
+  campo.focus();
+};
+
+// ─── ?nuova=<testo>: dopo l'accesso apre il «+» con il testo già interpretato (Comando Rapido «Cicli») ───
+const NUOVA_URL = { PARAM: 'nuova', MAX: 2000, ATTESA_MS: 15000, PASSO_MS: 200 };
+function testoNuovaDaUrl() {
+  try { return (new URLSearchParams(location.search).get(NUOVA_URL.PARAM) || '').trim().slice(0, NUOVA_URL.MAX); } catch (_) { return ''; }
+}
+function togliNuovaDaUrl() {
+  try { const u = new URL(location.href); u.searchParams.delete(NUOVA_URL.PARAM); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (_) {}
+}
+// le persone servono per riconoscere le deleghe: si aspetta la fine del primo caricamento
+function dopoIlCaricamento() {
+  const inizio = Date.now();
+  return new Promise(ok => { const t = setInterval(() => { if (!state.loading || Date.now() - inizio > NUOVA_URL.ATTESA_MS) { clearInterval(t); ok(); } }, NUOVA_URL.PASSO_MS); });
+}
+const _avviaAppV8 = avviaApp;
+avviaApp = function (sessione) {
+  const prima = _appAvviata;
+  _avviaAppV8(sessione);
+  if (prima) return;
+  const testo = testoNuovaDaUrl();
+  if (!testo) return;
+  togliNuovaDaUrl();
+  dopoIlCaricamento().then(() => { if ($('onb') && !$('onb').hidden) return; apriRapidoCon(testo); });   // prima volta: c'è l'introduzione
+};
+
+// ══════════════════════════════════════════════════════════════
+// v8 · IMPORT PLAUD: un'attività madre per la riunione, le cose da fare come passi
+// ══════════════════════════════════════════════════════════════
+const PLAUD = {
+  MAX_FILE: 500 * 1024, ESTENSIONI: /\.(txt|md|markdown)$/i,
+  TIPO: { subito: 1, importante: 2, delega: 3, 'lascia stare': 4 },
+  SEZIONI: { 'riunione': 'riunione', 'con': 'con', 'da fare io': 'io', 'delegate': 'delegate', 'decisioni': 'decisioni' }
+};
+ui.plaud = null;
+const ePlaudFormato = t => /RIUNIONE\s*:/i.test(t) && /DA FARE IO\s*:/i.test(t);
+const vuotoODash = s => { const x = String(s || '').trim(); return !x || /^[-–—]$/.test(x) ? null : x; };
+function dataDaTesto(s, rif) {
+  const x = vuotoODash(s);
+  if (!x) return null;
+  const m = /^(\d{1,2})[/.\-](\d{1,2})(?:[/.\-](\d{2,4}))?$/.exec(x);
+  if (m) { const d = dataValida(+m[1], +m[2], m[3] ? +m[3] : null, rif); return d ? toISODate(d) : null; }
+  return interpretaFrase(x, rif).data;
+}
+// Il formato del foglio Plaud: RIUNIONE / CON / DA FARE IO / DELEGATE / DECISIONI
+function parsePlaudFormato(testo, oggi = new Date()) {
+  const out = { titolo: '', data: null, con: [], decisioni: [], cose: [] };
+  let sez = null;
+  String(testo || '').split(/\r?\n/).forEach(rigaGrezza => {
+    const riga = rigaGrezza.replace(/\*\*/g, '').replace(/^\s*[#>]+\s*/, '').trim();
+    if (!riga) return;
+    const h = /^(RIUNIONE|CON|DA FARE IO|DELEGATE|DECISIONI)\s*:\s*(.*)$/i.exec(riga);
+    if (h) {
+      sez = PLAUD.SEZIONI[h[1].toLowerCase()];
+      const v = h[2].trim();
+      if (sez === 'riunione') {
+        const m = /^(.*?)\s*[—–-]\s*(\d{1,2}[/.\-]\d{1,2}[/.\-]\d{2,4})\s*$/.exec(v);
+        out.titolo = (m ? m[1] : v).trim();
+        out.data = m ? dataDaTesto(m[2], oggi) : null;
+      } else if (sez === 'con' && v) out.con = v.split(/,|\s+e\s+/).map(s => s.trim()).filter(Boolean);
+      return;
+    }
+    const b = /^[-*•]\s*(.+)$/.exec(riga);
+    const voce = b ? b[1].trim() : riga;
+    const rif = out.data ? parseISODate(out.data) : oggi;
+    if (sez === 'io') {
+      const [primo, ...altri] = voce.split('|').map(s => s.trim());
+      const t = /^\[([^\]]+)\]\s*(.*)$/.exec(primo);
+      const campi = Object.fromEntries(altri.map(a => { const i = a.indexOf(':'); return i < 0 ? [a.toLowerCase(), ''] : [a.slice(0, i).trim().toLowerCase(), a.slice(i + 1).trim()]; }));
+      const title = (t ? t[2] : primo).trim();
+      if (title) out.cose.push({ title, q: PLAUD.TIPO[senzaAccenti(t ? t[1] : '')] || 2, data: dataDaTesto(campi.entro, rif), note: vuotoODash(campi.note), persona: null });
+    } else if (sez === 'delegate') {
+      const m = /^([^:|]+):\s*(.+)$/.exec(voce);
+      if (!m) return;
+      const [cosa, ...altri] = m[2].split('|').map(s => s.trim());
+      const ctrl = altri.map(a => /^controllo\s*:\s*(.*)$/i.exec(a)).find(Boolean);
+      if (cosa) out.cose.push({ title: cosa, q: 3, data: ctrl ? dataDaTesto(ctrl[1], rif) : null, note: null, persona: m[1].trim() });
+    } else if (sez === 'decisioni') out.decisioni.push(voce);
+    else if (sez === 'con') out.con.push(...voce.split(/,|\s+e\s+/).map(s => s.trim()).filter(Boolean));
+  });
+  return out;
+}
+
+// Senza formato: Claude, con la data di oggi e i tipi dell'app
+function promptRiunione(testo) {
+  const oggi = new Date();
+  return `Oggi è ${fmtGiornoLungo(oggi)} ${oggi.getFullYear()} (${toISODate(oggi)}). Leggi questa trascrizione italiana di una riunione e trova le cose da fare.
+
+Restituisci SOLO un oggetto JSON valido, nessun altro testo:
+{
+  "riunione": { "titolo": "titolo breve della riunione (max 50 caratteri)", "data": "YYYY-MM-DD o null" },
+  "presenti": ["nomi delle persone presenti"],
+  "decisioni": ["decisioni prese, una frase ciascuna"],
+  "cose": [{
+    "title": "cosa da fare, con un verbo all'infinito (max 60 caratteri)",
+    "note": "un dettaglio utile o null",
+    "tipo": "Subito | Importante | Delega",
+    "persona": "chi la fa, solo se tipo è Delega, altrimenti null",
+    "data": "YYYY-MM-DD o null",
+    "cat": "management"
+  }]
+}
+
+Tipi: "Subito" = urgente, da fare entro 1-2 giorni; "Importante" = la faccio io, senza urgenza; "Delega" = la fa un'altra persona (scrivi chi).
+data: per Subito e Importante quando va fatta; per Delega quando controllare. Risolvi le date relative ("venerdì", "la settimana prossima") a partire da oggi. Se la riunione non ha una data, usa null.
+cat valide: management, hr, marketing, vendite, amministrazione, produzione, rnd, salute, relazioni, finanze, crescita, hobbies, spiritualita, casa, idee
+
+TRASCRIZIONE:
+${testo}`;
+}
+async function chiamaClaudeRiunione(testo, apiKey) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages: [{ role: 'user', content: promptRiunione(testo) }] })
+  });
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error((err.error && err.error.message) || 'HTTP ' + res.status); }
+  const data = await res.json();
+  const t = ((data.content && data.content[0] && data.content[0].text) || '').trim();
+  const m = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const grezzo = (m ? m[1] : t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)).trim();
+  return JSON.parse(grezzo);
+}
+// la risposta di Claude è un dato esterno: si tiene solo quello che ha la forma giusta
+function daRispostaAI(r) {
+  const testo = (x, max) => typeof x === 'string' && x.trim() ? x.trim().slice(0, max) : null;
+  const iso = x => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) && parseISODate(x) ? x : null;
+  const lista = x => Array.isArray(x) ? x : [];
+  const ri = (r && r.riunione) || {};
+  return {
+    titolo: testo(ri.titolo, 80) || 'Riunione', data: iso(ri.data),
+    con: lista(r && r.presenti).map(x => testo(x, 60)).filter(Boolean),
+    decisioni: lista(r && r.decisioni).map(x => testo(x, 300)).filter(Boolean),
+    cose: lista(r && r.cose).map(c => ({
+      title: testo(c && c.title, 120), note: testo(c && c.note, 500), q: PLAUD.TIPO[senzaAccenti(c && c.tipo)] || 2,
+      data: iso(c && c.data), persona: testo(c && c.persona, 60), cat: typeof (c && c.cat) === 'string' && categoriaEsiste(c.cat) ? c.cat : null
+    })).filter(c => c.title)
+  };
+}
+// Il modello dell'anteprima: la madre e i passi, ognuno con la sua spunta
+function preparaPlaud(r, fonte) {
+  const data = r.data || oggiLocale();
+  const titolo = r.titolo || 'Riunione';
+  return {
+    fonte, data, con: r.con, decisioni: r.decisioni,
+    madre: /\d{1,2}\/\d{1,2}\s*$/.test(titolo) ? titolo : `${titolo} – ${fmtGgMm(data)}`,
+    cose: r.cose.map((c, i) => {
+      const p = c.persona ? trovaPersona(c.persona) : null;
+      return { i, scelta: true, title: c.title, note: c.note, q: c.q, data: c.data, cat: c.cat || null, persona: p ? p.nome : c.persona, personaId: p ? p.id : null, crea: true };
+    })
+  };
+}
+const notaMadre = p => [p.con.length ? `CON: ${p.con.join(', ')}` : '', p.decisioni.length ? `DECISIONI:\n${p.decisioni.map(d => `- ${d}`).join('\n')}` : ''].filter(Boolean).join('\n\n') || null;
+
+function voceAnteprimaPlaud(c) {
+  const chiedi = c.q === 3 && c.persona && !c.personaId;
+  return `<div class="plaud-item p-q${c.q}" data-i="${c.i}">
+    <div class="plaud-item-header"><label class="plaud-check-label"><input type="checkbox" class="plaud-item-check" data-pl="scelta" ${c.scelta ? 'checked' : ''}><span class="plaud-item-title">${escHtml(c.title)}</span></label></div>
+    ${c.note ? `<div class="plaud-item-note">${escHtml(c.note)}</div>` : ''}
+    <div class="plaud-item-meta">
+      <select class="input pl-tipo" data-pl="q" data-q="${c.q}" aria-label="Tipo">${[1, 2, 3, 4].map(q => `<option value="${q}"${q === c.q ? ' selected' : ''}>${TIPI[q].label}</option>`).join('')}</select>
+      <label class="pl-data"><span>${c.q === 3 ? 'controllo' : 'quando'}</span><input type="date" class="plaud-date-input" data-pl="data" value="${c.data || ''}"></label>
+      ${c.q === 3 && c.persona ? `<span class="pl-chi"><i class="ti ti-user"></i>${escHtml(c.persona)}</span>` : ''}
+    </div>
+    ${chiedi ? `<div class="pl-chiedi"><span>${escHtml(c.persona)} non è tra le tue persone. La aggiungo?</span>
+      <span class="chips"><button type="button" class="chip" data-act="pl-crea" data-v="si" aria-pressed="${c.crea}">Sì</button><button type="button" class="chip" data-act="pl-crea" data-v="no" aria-pressed="${!c.crea}">No</button></span></div>` : ''}
+  </div>`;
+}
+function disegnaAnteprimaPlaud() {
+  const p = ui.plaud, box = $('plaud-items');
+  if (!p || !box) return;
+  const scelte = p.cose.filter(c => c.scelta).length, scorri = box.scrollTop;   // ridisegnando, l'elenco resta dov'era
+  const sommario = document.querySelector('#plaud-step-3 .plaud-summary');
+  if (sommario) sommario.innerHTML = `${p.fonte === 'formato' ? 'Letta dal formato, senza AI.' : 'Letta da Claude.'} Un'attività madre e <b class="mono" id="plaud-count">${scelte}</b> ${scelte === 1 ? 'passo' : 'passi'}: togli la spunta a quelli che non vuoi.`;
+  box.innerHTML = `<div class="plaud-item pl-madre p-q2">
+      <label class="t-caption muted" for="pl-madre">Attività madre · Importante</label>
+      <input type="text" class="input" id="pl-madre" value="${escAttr(p.madre)}" maxlength="200">
+      ${p.con.length ? `<div class="plaud-item-note">Con ${escHtml(p.con.join(', '))}</div>` : ''}
+      ${p.decisioni.length ? `<div class="plaud-item-note">${plurale(p.decisioni.length, 'decisione', 'decisioni')} nella nota</div>` : ''}
+    </div>
+    ${p.cose.length ? p.cose.map(voceAnteprimaPlaud).join('') : '<p class="t-label muted">Nessuna cosa da fare: importo solo la riunione.</p>'}`;
+  box.scrollTop = scorri;
+  const btn = $('btn-import-plaud');
+  if (btn) { btn.disabled = false; btn.textContent = scelte ? `Importa · ${plurale(scelte, 'passo', 'passi')}` : 'Importa la riunione'; }
+}
+function cambiaVocePlaud(i, chiave, valore) {
+  const p = ui.plaud;
+  if (!p) return;
+  ui.plaud = { ...p, cose: p.cose.map(c => c.i !== i ? c : { ...c, [chiave]: valore }) };
+  disegnaAnteprimaPlaud();
+}
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'pl-madre' && ui.plaud) { ui.plaud = { ...ui.plaud, madre: t.value.trim() || ui.plaud.madre }; return; }
+  if (t.id === 'plaud-file') { leggiFilePlaud(t.files && t.files[0]); t.value = ''; return; }
+  const box = t.closest && t.closest('#plaud-items .plaud-item[data-i]');
+  if (!box || !t.dataset.pl) return;
+  const i = +box.dataset.i;
+  if (t.dataset.pl === 'scelta') cambiaVocePlaud(i, 'scelta', t.checked);
+  else if (t.dataset.pl === 'q') cambiaVocePlaud(i, 'q', parseInt(t.value, 10) || 2);
+  else if (t.dataset.pl === 'data') cambiaVocePlaud(i, 'data', t.value || null);
+});
+AZIONI['pl-crea'] = el => { const box = el.closest('.plaud-item[data-i]'); if (box) cambiaVocePlaud(+box.dataset.i, 'crea', el.dataset.v === 'si'); };
+
+function leggiFilePlaud(file) {
+  if (!file) return;
+  if (!PLAUD.ESTENSIONI.test(file.name || '')) { showToast('Scegli un file .txt o .md', 'warn'); return; }
+  if (file.size > PLAUD.MAX_FILE) { showToast('Il file è troppo grande (massimo 500 KB)', 'warn'); return; }
+  const r = new FileReader();
+  r.onload = () => { $('plaud-transcript').value = String(r.result || ''); showToast(`Letto «${file.name}»`, 'success'); };
+  r.onerror = () => showToast('Non riesco a leggere il file', 'error');
+  r.readAsText(file);
+}
+const _openPlaudModalV8 = openPlaudModal;
+openPlaudModal = function () { ui.plaud = null; _openPlaudModalV8(); };
+analyzePlaud = async function () {
+  const testo = ($('plaud-transcript').value || '').trim();
+  if (!testo) { showToast('Incolla il testo della registrazione o apri un file', 'warn'); return; }
+  if (ePlaudFormato(testo)) {
+    const r = parsePlaudFormato(testo);
+    if (!r.titolo) { showToast('Manca il titolo dopo «RIUNIONE:»', 'warn'); return; }
+    ui.plaud = preparaPlaud(r, 'formato');
+    disegnaAnteprimaPlaud();
+    setPlaudStep(3);
+    return;
+  }
+  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
+  if (!apiKey) { closePlaudModal(); openApiKeyModal(); return; }
+  setPlaudStep(2);
+  try {
+    ui.plaud = preparaPlaud(daRispostaAI(await chiamaClaudeRiunione(testo, apiKey)), 'ai');
+    disegnaAnteprimaPlaud();
+    setPlaudStep(3);
+  } catch (e) {
+    console.warn('[Plaud] lettura con Claude:', e.message);
+    showToast('Non sono riuscito a leggere la trascrizione: ' + e.message, 'error');
+    setPlaudStep(1);
+  }
+};
+// la madre (Importante, nota = CON + DECISIONI) e i passi spuntati, con parent_id; poi state e render, senza ricaricare
+async function importaRiunione() {
+  const p = ui.plaud;
+  if (!p) return;
+  const btn = $('btn-import-plaud');
+  btn.disabled = true; btn.textContent = 'Importo…';
+  const ctx = state.ctx;
+  const salvate = [];
+  try {
+    const base = rigaNuova(p.madre, { subito: false }, ctx);
+    const madre = await upsertCiclo({ ...base, q: 2, note: notaMadre(p), da_plaud: true, persone_menzionate: unici(p.con), macro_area: areaDaCategoria(base.cat) });
+    if (!madre) throw new Error('attività madre non salvata');
+    salvate.push(madre);
+    state.cicli = [madre, ...state.cicli];
+    for (const c of p.cose.filter(x => x.scelta)) {
+      const persona = c.q === 3 && c.persona ? (c.personaId ? personaDi(c.personaId) : c.crea ? await creaPersona(c.persona) : null) : null;
+      const cat = c.cat || madre.cat;
+      const riga = { ...rigaNuova(c.title, { subito: c.q === 1 }, ctx), q: c.q, note: c.note || null, cat, macro_area: areaDaCategoria(cat), da_plaud: true,
+        persone_menzionate: unici([persona ? persona.nome : c.q === 3 ? c.persona : null]), ...(state.passiColOk ? { parent_id: madre.id } : {}) };
+      const conDelega = c.q === 3 && state.delegaColsOk
+        ? { ...riga, delega_persona_id: persona ? persona.id : null, delega_controllo: c.data || toISODate(dataPiu(FRASE.CONTROLLO_GIORNI)) }
+        : c.data && c.q !== 3 ? { ...riga, scheduled_date: c.data } : riga;
+      const salvata = await upsertCiclo(conDelega);
+      if (!salvata) continue;
+      salvate.push(salvata);
+      state.cicli = [salvata, ...state.cicli];
+      if (c.data && c.q !== 3) await pianificaInData(salvata, parseISODate(c.data), null);
+    }
+    closePlaudModal();
+    ui.plaud = null;
+    render();
+    const passi = salvate.length - 1;
+    showToast(`Importata «${madre.title}»${passi ? ` con ${plurale(passi, 'passo', 'passi')}` : ''}`, 'success', { annulla: () => apriDettaglio(madre.id), etichetta: 'Apri' });
+  } catch (e) {
+    console.warn('[Plaud] import:', e.message);
+    showToast(`Import interrotto: ${e.message}${salvate.length ? ` (${plurale(salvate.length, 'cosa salvata', 'cose salvate')})` : ''}`, 'error');
+    btn.disabled = false; disegnaAnteprimaPlaud();
+    render();
+  }
+}
+importPlaudSelected = () => importaRiunione();
 
 // ══════════════════════════════════════════════════════════════
 // ACCESSO · Supabase Auth con codice personale (password), un solo utente.
