@@ -1229,6 +1229,9 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .cc-testa > .ti { font-size: 22px; color: var(--evt); }
 .cc-testa h2 { font-size: var(--fs-body); line-height: var(--lh-body); }
 .cc-testa p { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.cc-nota { white-space: normal; }
+.oggi-coach { margin-top: var(--sp-5); }
+.ctx-etichetta { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); font-weight: 500; }
 .cc-n { font-size: var(--fs-label); color: var(--text-2); }
 .cc-lista { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0 0; padding: 0; list-style: none; }
 .cc-lista li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: center; min-height: var(--tap); }
@@ -3436,34 +3439,94 @@ function _tryInitGis() {
     gcal.client = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: GCAL_SCOPE,
-      callback: _handleGcalToken
+      login_hint: GCAL_USER_EMAIL,
+      callback: r => _handleGcalToken(r),           // sempre l'ultima versione (le parti dopo la avvolgono)
+      error_callback: r => _erroreGcalPopup(r)
     });
+    avviaRinnovoGcal();
   } else {
     setTimeout(_tryInitGis, 800);
   }
 }
 
 async function _handleGcalToken(resp) {
+  const silenzioso = gcal.rinnovo === 'silenzioso';
+  gcal.rinnovo = null;
+  if (resp.error && silenzioso) { rinnovoGcalFallito(resp.error); return; }
   if (resp.error) { showToast(resp.error === 'access_denied' ? 'Google non ha dato il permesso: riprova e accetta l\'accesso al calendario.' : 'Errore Google: ' + resp.error, 'error'); return; }
   gcal.scope = resp.scope || GCAL_SCOPE;
   localStorage.setItem('gcal_scope', gcal.scope);
-  if (!haScopeEventi()) showToast('Google non ha dato il permesso di modificare gli eventi: ricollega e lascia spuntato «Vedere, modificare… i calendari».', 'warn');
+  if (!haScopeEventi() && !silenzioso) showToast('Google non ha dato il permesso di modificare gli eventi: ricollega e lascia spuntato «Vedere, modificare… i calendari».', 'warn');
   gcal.token     = resp.access_token;
   gcal.expiresAt = Date.now() + (resp.expires_in * 1000);
   gcal.email     = GCAL_USER_EMAIL;
+  gcal.rinnovoFallito = false;
   localStorage.setItem('gcal_token',   gcal.token);
   localStorage.setItem('gcal_expires', gcal.expiresAt);
   localStorage.setItem('gcal_email',   gcal.email);
   await saveGcalTokenToDB();
   updateGcalButton();
   await ensureGcalCalendar();
+  if (silenzioso) { if ($('gcalOverlay').classList.contains('open')) openGcalModal(); return; }
   showToast('Google Calendar connesso ✓', 'success');
   closeModal('gcalOverlay');
 }
 
+// ── Rinnovo silenzioso del token (dura un'ora) ──
+// Ogni 50 minuti, quando la scheda torna in primo piano e all'avvio: richiesta con prompt vuoto, senza finestre da compilare.
+// Se il browser blocca la finestra perché non c'è stato un tocco, si riprova (sempre in silenzio) al primo tocco.
+// «Ricollega» compare solo se anche quello fallisce.
+const GCAL_RINNOVO = { OGNI_MS: 50 * 60 * 1000, ANTICIPO_MS: 10 * 60 * 1000 };
+let _gcalRinnovoTimer = null, _gcalRinnovoAvviato = false, _gcalAttesaTocco = false;
+const gcalInScadenza = () => !gcal.token || gcal.expiresAt - Date.now() < GCAL_RINNOVO.ANTICIPO_MS;
+function rinnovaGcalSilenzioso(perche) {
+  if (!gcal.client || !gcalEraCollegato() || gcal.rinnovo) return false;
+  gcal.rinnovo = 'silenzioso';
+  setTimeout(() => { if (gcal.rinnovo === 'silenzioso') gcal.rinnovo = null; }, 60000);   // Google non ha risposto: si riprova al prossimo giro
+  try { gcal.client.requestAccessToken({ prompt: '', login_hint: GCAL_USER_EMAIL }); }
+  catch (e) { gcal.rinnovo = null; rinnovoGcalFallito(e.message || 'errore'); return false; }
+  console.info('[GCal] rinnovo silenzioso:', perche);
+  return true;
+}
+function rinnovoGcalFallito(motivo) {
+  gcal.rinnovo = null;
+  if (isGcalTokenValid()) return;   // il token di prima vale ancora: si riprova al prossimo giro
+  gcal.rinnovoFallito = true;
+  console.info('[GCal] rinnovo silenzioso non riuscito:', motivo);
+  updateGcalButton();
+  if (typeof render === 'function' && _appAvviata) render();
+  if ($('gcalOverlay').classList.contains('open')) openGcalModal();
+}
+function _erroreGcalPopup(err) {
+  const silenzioso = gcal.rinnovo === 'silenzioso';
+  gcal.rinnovo = null;
+  const tipo = (err && err.type) || 'unknown';
+  if (!silenzioso) { if (tipo === 'popup_failed_to_open') showToast('Il browser ha bloccato la finestra di Google: consenti i popup per questo sito e riprova.', 'warn'); return; }
+  // senza un tocco il browser blocca la finestra: si riprova al primo tocco, una volta
+  if (tipo === 'popup_failed_to_open' && !_gcalAttesaTocco) { _gcalAttesaTocco = true; return; }
+  rinnovoGcalFallito(tipo);
+}
+document.addEventListener('click', () => {
+  if (!_gcalAttesaTocco) return;
+  _gcalAttesaTocco = false;
+  if (gcalInScadenza()) rinnovaGcalSilenzioso('al tocco');
+}, true);
+function avviaRinnovoGcal() {
+  if (_gcalRinnovoAvviato) return;
+  _gcalRinnovoAvviato = true;
+  _gcalRinnovoTimer = setInterval(() => rinnovaGcalSilenzioso('ogni 50 minuti'), GCAL_RINNOVO.OGNI_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && gcalInScadenza() && !gcal.rinnovoFallito) rinnovaGcalSilenzioso('scheda in primo piano');
+  });
+  if (gcalEraCollegato() && gcalInScadenza()) rinnovaGcalSilenzioso('avvio');
+}
+// scaduto davvero (rinnovo silenzioso fallito): solo allora si chiede di ricollegare
+const gcalDaRicollegare = () => !isGcalTokenValid() && gcalEraCollegato() && !!gcal.rinnovoFallito;
+
 function connectGoogleCalendar() {
   if (gcal.client) {
-    gcal.client.requestAccessToken();
+    gcal.rinnovo = null;
+    gcal.client.requestAccessToken(gcalEraCollegato() ? { prompt: '' } : {});
   } else {
     // Fallback: redirect implicit flow
     const params = new URLSearchParams({
@@ -3556,10 +3619,7 @@ async function ensureGcalCalendar() {
 }
 
 async function gcalFetch(path, method, body) {
-  if (!isGcalTokenValid()) {
-    if (gcal.client) { gcal.client.requestAccessToken(); return null; }
-    return null;
-  }
+  if (!isGcalTokenValid()) { rinnovaGcalSilenzioso('richiesta a token scaduto'); return null; }
   const base = 'https://www.googleapis.com/calendar/v3';
   const res = await fetch(base + path, {
     method,
@@ -3926,6 +3986,22 @@ function agendaBaseCicli() {
 // settimanale, altrimenti comparirebbero 7 volte.
 function agendaPianificati()   { return agendaBaseCicli().filter(c => !isGiornaliero(c) && agendaSlotFor(c).giorno); }
 function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianificazione(c)); }
+
+// «Da sistemare»: una sola definizione per la colonna Da pianificare, Da piazzare, Riordina e la card del coach.
+// Aperta (non fatta, non parcheggiata), senza giorno, senza data (né scadenza né data pianificata), fuori dal piano della settimana.
+// Non conta le routine di ogni giorno né le cose divise in passi (contano i passi).
+const ETICHETTA_CTX = { lavoro: 'Lavoro', personale: 'Personale', tutti: 'Tutti' };
+const etichettaCtx = ctx => ETICHETTA_CTX[ctx || state.ctx] || ETICHETTA_CTX.tutti;
+function senzaGiornoNePiano(ctx) {
+  const k = ctx || state.ctx;
+  const nelPiano = new Set((state.bpItems || []).map(i => i.ciclo_id).filter(Boolean));
+  return state.cicli.filter(c => (k === 'tutti' || c.ctx === k) && isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c)
+    && !c.giorno_settimana && !c.pianificato_data && !agendaOverrideFor(c.id) && !nelPiano.has(c.id));
+}
+const daSistemare = ctx => senzaGiornoNePiano(ctx).filter(c => !c.due_date);
+// quelle con una scadenza ma senza giorno: non sono da sistemare, restano a portata in Pianifica
+const conScadenzaSenzaGiorno = ctx => senzaGiornoNePiano(ctx).filter(c => c.due_date).sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
+const perTipoEData = (a, b) => computeEffectiveQ(a) - computeEffectiveQ(b) || String(a.created_at || '').localeCompare(String(b.created_at || ''));
 
 
 // ── SOTTO-VISTA: PIANIFICATI (griglia 7 giorni × fasce) ──
@@ -5431,7 +5507,7 @@ function updateGcalButton() {
   if (!btn) return;
   const ok = !!isGcalTokenValid();
   btn.classList.toggle('connected', ok);
-  btn.dataset.tip = ok ? 'Google Calendar collegato' : gcalEraCollegato() ? 'Ricollega Google Calendar' : 'Collega Google Calendar';
+  btn.dataset.tip = ok ? 'Google Calendar collegato' : gcalDaRicollegare() ? 'Ricollega Google Calendar' : gcalEraCollegato() ? 'Google Calendar: rinnovo il collegamento' : 'Collega Google Calendar';
   btn.setAttribute('aria-label', btn.dataset.tip);
 }
 
@@ -6155,6 +6231,7 @@ function vistaOggi() {
   }
   // modalità semplice: niente Pianifica, il piano si prepara da qui
   if (semplice) h += `<div style="margin-top:var(--sp-5)"><button type="button" class="btn btn-secondary btn-block" data-act="wizard"><i class="ti ti-calendar-week"></i>Pianifica la settimana</button></div>`;
+  h += `<div class="oggi-coach">${cardCoach()}</div>`;   // sempre, anche senza Google Calendar
   h += fineGiornata(fatte, tot);
   return h;
 }
@@ -6332,7 +6409,7 @@ function pianMese() {
 
 // --- In fondo a Pianifica: Da piazzare · Riepilogo · Stampa · Chiudi la settimana ---
 function pianFondo() {
-  const senza = agendaDaPianificare().filter(c => !haPassiAperti(c));
+  const senza = daSistemare().sort(perTipoEData), scad = conScadenzaSenzaGiorno();
   const tutte = [...GIORNI.map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k));
   const fatte = tutte.filter(r => r.fatto).length;
   const minuti = tutte.reduce((s, r) => s + (r.durata || BP_DURATA_DEFAULT), 0);
@@ -6340,11 +6417,13 @@ function pianFondo() {
   const perTipo = [1, 2, 3, 4].map(q => `<div><b>${tutte.filter(r => computeEffectiveQ(r.c) === q).length}</b><span>${TIPI[q].label}</span></div>`).join('');
   const sola = bpSolaLettura();
   return `<div class="group" style="margin-top:var(--sp-6)">
-    ${accordion('senza', 'Da piazzare', `<span class="mono">${senza.length}</span>`,
-      senza.length ? senza.map(c => riga({ c, fatto: false }, { suggerisci: true, data: oggiLocale() })).join('') : '<div class="col-vuota">Ogni cosa aperta ha già un giorno</div>')}
+    ${accordion('senza', `Da piazzare <span class="ctx-etichetta">· ${etichettaCtx()}</span>`, `<span class="mono">${senza.length}</span>`,
+      senza.length ? senza.map(c => riga({ c, fatto: false }, { suggerisci: true, data: oggiLocale() })).join('') : '<div class="col-vuota">Ogni cosa aperta ha già un giorno, una data o un posto nel piano</div>')}
+    ${scad.length ? accordion('scad-senza', 'Con una scadenza, senza giorno', `<span class="mono">${scad.length}</span>`,
+      scad.map(c => riga({ c, fatto: false }, { suggerisci: true, data: oggiLocale() })).join('')) : ''}
     ${accordion('riepilogo', 'Riepilogo', `<span class="mono">${fatte}/${tutte.length}</span>`,
       `<div class="stat"><div><b>${fatte}/${tutte.length}</b><span>fatte</span></div><div><b>${bpFormatMin(minuti)}</b><span>tempo previsto</span></div>${perTipo}${occ ? `<div><b>${bpFormatMin(occ)}</b><span>già occupato da appuntamenti</span></div>` : ''}</div>`)}
-    <button type="button" class="riga-link" data-act="pdf"${tutte.length ? '' : ' disabled'}><i class="ti ti-printer"></i><span>Stampa la settimana</span><small>PDF A4</small><i class="ti ti-chevron-right"></i></button>
+    <button type="button" class="riga-link" data-act="pdf"${tutte.length ? '' : ' disabled'}><i class="ti ti-printer"></i><span>Stampa il foglio</span><small>PDF ${formatoFoglio().toUpperCase()}</small><i class="ti ti-chevron-right"></i></button>
     <button type="button" class="riga-link" data-act="invia"${tutte.length ? '' : ' disabled'}><i class="ti ti-send"></i><span>Invia il piano</span><small>${inviatoIl(state.week, state.year) ? 'inviato il ' + inviatoIl(state.week, state.year) : 'al coach'}</small><i class="ti ti-chevron-right"></i></button>
     <button type="button" class="riga-link" data-act="review"${state.bp && !sola ? '' : ' disabled'} ${state.bp ? '' : 'data-tip="Prima prepara la settimana"'}><i class="ti ti-flag"></i><span>Chiudi la settimana</span><small>${!state.bp ? 'serve un piano' : state.bp.stato === 'chiuso' ? 'già chiusa' : ''}</small><i class="ti ti-chevron-right"></i></button>
   </div>`;
@@ -6551,8 +6630,16 @@ function openGcalModal() {
     az.innerHTML = `<button type="button" class="btn btn-secondary btn-block" onclick="batchSyncAll()"><i class="ti ti-refresh"></i>Sincronizza tutto di nuovo</button>
       <button type="button" class="btn btn-ghost btn-danger btn-sm btn-block" onclick="disconnectGcal()">Scollega</button>`;
   } else {
+    if (gcalEraCollegato() && !gcalDaRicollegare()) {
+      // il token è scaduto ma il rinnovo silenzioso non ha ancora detto di no: si riprova ora (c'è stato un tocco)
+      rinnovaGcalSilenzioso('apertura di Google Calendar');
+      body.innerHTML = `<div class="gcal-stato"><b>Rinnovo il collegamento…</b><span>Google chiude l'accesso dopo un'ora: lo riapro da solo, non devi fare niente.</span></div>`;
+      az.innerHTML = '';
+      $('gcalOverlay').classList.add('open');
+      return;
+    }
     if (gcalEraCollegato()) {
-      body.innerHTML = `<div class="gcal-stato"><b>Il collegamento è scaduto</b><span>Google lo chiude dopo un'ora: ricollega con un tocco, non perdi niente.</span></div>`;
+      body.innerHTML = `<div class="gcal-stato"><b>Il collegamento è scaduto</b><span>Non sono riuscito a rinnovarlo da solo: ricollega con un tocco, non perdi niente.</span></div>`;
       az.innerHTML = `<button type="button" class="btn btn-primary btn-block" id="gcal-connetti" onclick="connectGoogleCalendar()"><i class="ti ti-refresh"></i>Ricollega</button>`;
       $('gcalOverlay').classList.add('open');
       return;
@@ -8245,7 +8332,7 @@ function cuscinettiDelGiorno(d) {
 // { conOra: in ordine di ora (gli appuntamenti di tutto il giorno in cima), senzaOra: le cose senza ora }
 function sequenzaGiorno(righe, d) {
   const peso = { evento: 0, cuscinetto: 1, cosa: 2 };
-  const eventi = d && isGcalTokenValid() ? eventiDelGiorno(d) : [];
+  const eventi = d && gcalEraCollegato() ? eventiDelGiorno(d) : [];   // anche a token scaduto: restano quelli già letti finché si rinnova
   const conOra = [
     ...eventi.map(e => ({ tipo: 'evento', ora: e.ora || '00:00', e })),
     ...cuscinettiDelGiorno(d).map(item => ({ tipo: 'cuscinetto', ora: bpOra(item) || CUSC.META, item })),
@@ -9010,7 +9097,7 @@ function eventoDa(e, cal) {
     giorno: toISODate(inizio), ora, fine: fine ? hhmm(fine) : null, minuti: fine ? Math.max(0, Math.round((fine - inizio) / 60000)) : 0,
     inizioMs: inizio.getTime(), fineMs: fine ? fine.getTime() : inizio.getTime(), tuttoIlGiorno: !e.start.dateTime,
     invitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).length,
-    mio: mia(e.creator) || mia(e.organizer), coach: persone.includes(COACH_PERSONA) || conCoach.test(e.summary || ''),
+    mio: mia(e.creator) || mia(e.organizer), coach: persone.includes(COACH_PERSONA) || /coach\s*:/i.test(e.summary || ''),   // «Coach:» in qualsiasi punto del titolo
     // per spostarlo dall'app: chi lo organizza, chi riceve l'aggiornamento, orari originali
     orgIo: !e.organizer || !!e.organizer.self || mia(e.organizer), org: e.organizer ? (e.organizer.displayName || e.organizer.email || '') : '',
     nomiInvitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).map(x => x.displayName || x.email),
@@ -9273,7 +9360,7 @@ bannerPiano = function () {
   return `<section class="banner-piano" aria-label="Business Plan"><i class="ti ti-calendar-plus"></i>
     <div><b>È ora del Business Plan</b><p class="t-caption muted">${esiste ? `Il piano della settimana ${n.week} c'è: stampalo e portalo con te, mandane una copia al coach.` : `Prepara il piano della settimana ${n.week}: poi lo stampi o lo mandi al coach.`}</p>
       <div class="banner-azioni"><button type="button" class="btn ${esiste ? 'btn-secondary' : 'btn-primary'} btn-sm" data-act="banner-piano">Prepara</button>
-        <button type="button" class="btn ${esiste ? 'btn-primary' : 'btn-secondary'} btn-sm" data-act="banner-stampa"${esiste ? '' : ' disabled'}><i class="ti ti-printer"></i>Stampa</button>
+        <button type="button" class="btn ${esiste ? 'btn-primary' : 'btn-secondary'} btn-sm" data-act="banner-stampa"${esiste ? '' : ' disabled'}><i class="ti ti-printer"></i>Stampa il foglio</button>
         <button type="button" class="btn btn-secondary btn-sm" data-act="banner-invia"${esiste ? '' : ' disabled'}><i class="ti ti-send"></i>Invia al coach</button></div></div>${chiudiBanner}</section>`;
 };
 // Porta Pianifica sulla settimana (w) e poi stampa o invia
@@ -10027,7 +10114,7 @@ function sezioneItime() {
   return `${mancano.length ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>Spente: ${mancano.join(', ')}. Manca la migration i-Time: esegui <span class="mono">supabase_migration_itime_a.sql</span> nel SQL Editor di Supabase.</span></div>` : ''}
     <p class="list-head"><span>Metodo i-Time</span></p>
     <div class="group">
-      <div class="riga-link riga-scelta"><i class="ti ti-file-text"></i><span id="lbl-formato">Formato del foglio<small>«Stampa la settimana» e «Invia il piano»</small></span>${seg('formato', FORMATI, formatoFoglio(), 'lbl-formato')}</div>
+      <div class="riga-link riga-scelta"><i class="ti ti-file-text"></i><span id="lbl-formato">Formato del foglio<small>«Stampa il foglio» e «Invia il piano»</small></span>${seg('formato', FORMATI, formatoFoglio(), 'lbl-formato')}</div>
       <div class="riga-link riga-scelta"><i class="ti ti-lock"></i><span id="lbl-proteggi">Proteggi le attività importanti<small>Spostare un'Importante bloccata in agenda chiede conferma</small></span>${seg('proteggi', PROTEZIONI, protezione(), 'lbl-proteggi')}</div>
       <button type="button" class="riga-link" data-act="q2-apri"${state.esQ2Ok ? '' : ' disabled'}><i class="ti ti-target"></i><span>Esercizio Q2 · prossimi 3 mesi<small>${state.ultimoQ2 ? 'Ultimo il ' + fmtGgMm(state.ultimoQ2) : 'Mai fatto'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>
     </div>
@@ -10363,6 +10450,7 @@ function ricaricaEventi(...date) {
 const isoLocale = (iso, hm) => `${iso}T${hm}:00`;
 const fusoEvento = e => (e.startRaw && e.startRaw.timeZone) || 'Europe/Rome';
 function serveScopeEventi() {
+  if (!isGcalTokenValid() && !gcalDaRicollegare() && gcalEraCollegato()) { rinnovaGcalSilenzioso('sposta appuntamento'); return 'Sto rinnovando il collegamento a Google Calendar: riprova tra un momento.'; }
   if (!isGcalTokenValid()) return 'Il collegamento a Google Calendar è scaduto: ricollegalo per spostare gli appuntamenti.';
   if (!haScopeEventi()) return 'Google non ha dato all\'app il permesso di modificare gli eventi. Ricollega Google e lascia spuntato il permesso sul calendario.';
   return '';
@@ -10632,26 +10720,28 @@ function testaBoard() {
 }
 function daPianificareFiltrate() {
   const q = ui.dp.q.trim().toLowerCase();
-  return agendaDaPianificare().filter(c => !haPassiAperti(c))
+  return daSistemare()
     .filter(c => !q || String(c.title || '').toLowerCase().includes(q))
     .filter(c => !ui.dp.tipo || computeEffectiveQ(c) === ui.dp.tipo)
-    .sort((a, b) => computeEffectiveQ(a) - computeEffectiveQ(b) || String(a.created_at).localeCompare(String(b.created_at)));
+    .sort(perTipoEData);
 }
 function htmlDaPianificareLista() {
   const lista = daPianificareFiltrate();
   return lista.length ? lista.map(c => riga({ c, fatto: false }, { trascina: true, data: oggiLocale() })).join('') : '<div class="col-vuota">Niente da pianificare</div>';
 }
 function colonnaDaPianificare() {
-  const tutte = agendaDaPianificare().filter(c => !haPassiAperti(c));
+  const tutte = daSistemare(), scad = conScadenzaSenzaGiorno();
   const n = q => tutte.filter(c => computeEffectiveQ(c) === q).length;
   const chip = (q, l) => `<button type="button" class="chip chip-q${q}" data-act="dp-tipo" data-v="${q}" aria-pressed="${ui.dp.tipo === q}">${l} <span class="mono">${n(q)}</span></button>`;
-  const senza = tutte.filter(c => !c.due_date).length;
+  const senza = tutte.length;
+  const conScad = scad.length ? `<div class="group" style="margin-top:var(--sp-3)">${accordion('dp-scad', 'Con una scadenza', `<span class="mono">${scad.length}</span>`,
+    scad.map(c => riga({ c, fatto: false }, { trascina: true, data: oggiLocale() })).join(''))}</div>` : '';
   return `<section class="bcol bcol-dp" aria-label="Da pianificare">
-    <div class="bcol-h"><span>Da pianificare</span><span class="mono">${tutte.length}</span></div>
+    <div class="bcol-h"><span>Da pianificare</span><span class="mono">${tutte.length}</span></div><p class="bcol-sotto">${etichettaCtx()} · senza giorno, data né piano</p>
     <label class="cerca"><i class="ti ti-search" aria-hidden="true"></i><input type="search" id="dp-cerca" placeholder="Cerca" autocomplete="off" aria-label="Cerca tra le cose da pianificare" value="${esc(ui.dp.q)}"></label>
     <div class="chips chips-wrap dp-chips" role="group" aria-label="Filtra per tipo">${chip(1, 'Subito')}${chip(2, 'Importante')}${chip(3, 'Delega')}</div>
-    ${senza ? `<button type="button" class="dp-avviso" data-act="riordina"><i class="ti ti-arrows-sort"></i><span><b class="mono">${senza}</b> senza giorno né data · Riordina in 10 minuti</span></button>` : ''}
-    <div class="group bzona" data-zona="dapiano" id="dp-lista">${htmlDaPianificareLista()}</div>
+    ${senza ? `<button type="button" class="dp-avviso" data-act="riordina"><i class="ti ti-arrows-sort"></i><span><b class="mono">${senza}</b> da sistemare · ${etichettaCtx()} · Riordina in 10 minuti</span></button>` : ''}
+    <div class="group bzona" data-zona="dapiano" id="dp-lista">${htmlDaPianificareLista()}</div>${conScad}
   </section>`;
 }
 // Spazi liberi del giorno senza cuscinetto nel piano: tratteggiati, «pensaci tu»
@@ -10792,16 +10882,19 @@ disegna = function () {
 // ─── 4. RIORDINA: una cosa alla volta, le più vecchie prima ──
 ui.rio = null;
 function rioCoda() {
-  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c) && !c.parent_id)
-    .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || ''))).map(c => c.id);
+  return daSistemare()
+    .sort((a, b) => (computeEffectiveQ(a) === 1 ? 0 : 1) - (computeEffectiveQ(b) === 1 ? 0 : 1) || String(a.created_at || '').localeCompare(String(b.created_at || '')))
+    .map(c => c.id);
 }
 function rioSalva() { if (ui.rio) lsScrivi(V6.RIO_LS, JSON.stringify({ ids: ui.rio.ids, i: ui.rio.i, conta: ui.rio.conta, ctx: state.ctx })); }
 function apriRiordina(daCapo) {
   let salvato = null;
   try { salvato = JSON.parse(lsLeggi(V6.RIO_LS) || 'null'); } catch (_) { salvato = null; }
   const valido = salvato && !daCapo && salvato.ctx === state.ctx && salvato.i < (salvato.ids || []).length;
-  ui.rio = valido ? { ids: salvato.ids.filter(id => ciclo(id)), i: 0, conta: salvato.conta || {}, ripreso: true } : { ids: rioCoda(), i: 0, conta: {}, ripreso: false };
-  if (valido) ui.rio.i = Math.min(salvato.ids.slice(0, salvato.i).filter(id => ciclo(id)).length, ui.rio.ids.length);
+  // ripresa: le cose già passate restano contate, le altre solo se sono ancora da sistemare
+  const ancora = new Set(rioCoda());
+  const fatte = valido ? salvato.ids.slice(0, salvato.i).filter(id => ciclo(id)) : [];
+  ui.rio = valido ? { ids: [...fatte, ...salvato.ids.slice(salvato.i).filter(id => ancora.has(id))], i: fatte.length, conta: salvato.conta || {}, ripreso: true } : { ids: [...ancora], i: 0, conta: {}, ripreso: false };
   ui.rio.scelta = null;
   $('riordinaOverlay').classList.add('open');
   rioSalta(0);
@@ -10830,12 +10923,12 @@ function rioRiepilogo() {
 function disegnaRiordina() {
   const r = ui.rio, tot = r.ids.length, corpo = $('rio-corpo');
   const testa = `<div class="rio-testa"><button type="button" class="btn btn-ghost btn-sm" data-act="rio-chiudi"><i class="ti ti-x"></i>Interrompi</button>
-    <h2 id="rio-titolo">Riordina</h2><span class="mono rio-conto" aria-live="polite">${Math.min(r.i + 1, tot)} / ${tot}</span></div>
+    <h2 id="rio-titolo">Riordina <span class="ctx-etichetta">· ${etichettaCtx()}</span></h2><span class="mono rio-conto" aria-live="polite">${Math.min(r.i + 1, tot)} / ${tot}</span></div>
     <div class="bar" role="progressbar" aria-label="Riordinate" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${r.i}"><i style="width:${tot ? Math.round(r.i / tot * 100) : 100}%"></i></div>`;
   const piede = `<div class="rio-piede" aria-label="Riepilogo">${rioRiepilogo()}</div>`;
   if (r.i >= tot) {
     lsScrivi(V6.RIO_LS, null);
-    corpo.innerHTML = testa + `<div class="rio-fine">${vuoto('ti-circle-check', 'Riordinate tutte', 'Ogni cosa aperta ha un tipo e, se serve, una data. Le trovi in Tutto e in Pianifica.',
+    corpo.innerHTML = testa + `<div class="rio-fine">${vuoto('ti-circle-check', tot ? 'Riordinate tutte' : 'Niente da sistemare', `${tot ? 'Ogni cosa' : `In ${etichettaCtx()} ogni cosa`} aperta ha un tipo e, se serve, una data. Le trovi in Tutto e in Pianifica.`,
       '<button type="button" class="btn btn-primary btn-sm" data-act="rio-chiudi">Chiudi</button>')}</div>` + piede;
     return;
   }
@@ -10951,6 +11044,7 @@ async function caricaCoach(forza) {
       }
     }
     trovati.sort((x, y) => x.inizioMs - y.inizioMs);
+    if (trovati[0]) salvaRiservaCoach(trovati[0]);
     ui.coach = { ...ui.coach, evento: trovati[0] || null, letto: true };
     await caricaPianiCoach();
     render();
@@ -10959,7 +11053,7 @@ async function caricaCoach(forza) {
 }
 // la settimana da chiudere (quella prima dell'incontro) e il piano della settimana dell'incontro
 function settimaneCoach() {
-  const e = ui.coach.evento;
+  const e = coachEvento();
   const dIncontro = e ? new Date(e.inizioMs) : null;
   const wInc = dIncontro ? isoWeekParts(dIncontro) : bpSettimanaSuccessiva(bpSettimanaCorrente().week, bpSettimanaCorrente().year);
   const prima = new Date(getWeekStart(wInc.week, wInc.year)); prima.setDate(prima.getDate() - 7);
@@ -10978,12 +11072,10 @@ async function caricaPianiCoach() {
   try { ui.coach = { ...ui.coach, chiusa: await leggi(wChiudi), prossimo: await leggi(wInc) }; }
   catch (e) { console.warn('[Coach] piani:', e.message); }
 }
-function importantiSenzaData() {
-  return state.cicli.filter(c => isAttivo(c) && !isGiornaliero(c) && computeEffectiveQ(c) === 2 && !c.due_date && !haPianificazione(c) && !haPassiAperti(c)).length;
-}
+
 function vociCoach() {
   const { wInc, wChiudi } = settimaneCoach();
-  const mancano = importantiSenzaData();
+  const mancano = daSistemare().length, dove = etichettaCtx();
   const ultimoQ2 = state.ultimoQ2 ? new Date(state.ultimoQ2) : null;
   const q2ok = !!ultimoQ2 && Date.now() - ultimoQ2.getTime() <= V6.Q2_GIORNI * 864e5;
   const ch = ui.coach.chiusa, motivi = ch && ch.motivi && Object.keys(ch.motivi).length;
@@ -10991,7 +11083,7 @@ function vociCoach() {
   const st = stampatoIl(wInc.week, wInc.year), inv = inviatoIl(wInc.week, wInc.year);
   ui.coachSett = wInc;   // «Invia» della checklist manda il piano della settimana dell'incontro
   return [
-    { k: 'foglio', ok: mancano === 0, l: 'Foglio cicli aperti sistemato', d: mancano ? `${plurale(mancano, 'Importante', 'Importanti')} senza giorno né data` : 'nessuna Importante senza giorno né data', az: mancano ? '<button type="button" class="btn btn-secondary btn-sm" data-act="riordina"><i class="ti ti-arrows-sort"></i>Riordina</button>' : '' },
+    { k: 'foglio', ok: mancano === 0, l: 'Foglio cicli aperti sistemato', d: mancano ? `${mancano} da sistemare · ${dove}` : `niente da sistemare · ${dove}`, az: mancano ? '<button type="button" class="btn btn-secondary btn-sm" data-act="riordina"><i class="ti ti-arrows-sort"></i>Riordina</button>' : '' },
     { k: 'q2', ok: q2ok, l: 'Esercizio Q2 fatto negli ultimi 3 mesi', d: ultimoQ2 ? `l'ultimo il ${fmtGgMm(toISODate(ultimoQ2))}` : 'mai fatto', az: q2ok ? '' : '<button type="button" class="btn btn-secondary btn-sm" data-act="q2-apri">Fallo ora</button>' },
     { k: 'chiusa', ok: !!(ch && ch.stato === 'chiuso' && motivi), l: `Settimana ${wChiudi.week} chiusa con i perché`, d: !ch ? 'nessun piano' : ch.stato !== 'chiuso' ? 'non ancora chiusa' : motivi ? 'chiusa, con i perché' : 'chiusa, ma senza i perché', az: ch && ch.stato !== 'chiuso' ? `<button type="button" class="btn btn-secondary btn-sm" data-act="coach-chiudi" data-w="${wChiudi.week}" data-y="${wChiudi.year}">Chiudi</button>` : '' },
     { k: 'bp', ok: pronto && !!st && !!inv, l: `Business Plan della settimana ${wInc.week}`, d: [pronto ? 'pronto' : pr ? 'in bozza' : 'da preparare', st ? `stampato il ${st}` : 'da stampare', inv ? `inviato il ${inv}` : 'da inviare'].join(' · '),
@@ -11002,12 +11094,29 @@ function contoAllaRovescia(ms) {
   const g = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
   return g ? `tra ${g} ${g === 1 ? 'giorno' : 'giorni'}${h ? ` e ${h} ${h === 1 ? 'ora' : 'ore'}` : ''}` : h ? `tra ${h} ${h === 1 ? 'ora' : 'ore'}${m ? ` e ${m} min` : ''}` : `tra ${m} min`;
 }
+// Riserva: l'ultimo incontro trovato sul calendario (localStorage), altrimenti quello già fissato.
+// Così la card c'è anche senza Google Calendar o col collegamento scaduto.
+const COACH_RISERVA = { LS: 'coach_prossimo', PREDEFINITO: { inizio: '2026-11-02T18:50:00+01:00', ora: '18:50' } };
+function salvaRiservaCoach(e) { lsScrivi(COACH_RISERVA.LS, JSON.stringify({ inizioMs: e.inizioMs, ora: e.ora })); }
+function riservaCoach() {
+  const salvata = leggiJson(COACH_RISERVA.LS, null);
+  const pred = { inizioMs: new Date(COACH_RISERVA.PREDEFINITO.inizio).getTime(), ora: COACH_RISERVA.PREDEFINITO.ora };
+  const r = salvata && Number.isFinite(salvata.inizioMs) && /^\d{2}:\d{2}$/.test(salvata.ora || '') ? salvata : pred;
+  return r.inizioMs > Date.now() ? { ...r, riserva: true } : null;
+}
+const coachEvento = () => ui.coach.evento || riservaCoach();
+const fmtGiornoNum = d => `${d.toLocaleDateString('it-IT', { weekday: 'long' })} ${d.getDate()}/${d.getMonth() + 1}`;
+function testoQuandoCoach() {
+  const e = coachEvento(), collegato = isGcalTokenValid();
+  if (ui.coach.evento) return `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> · ${contoAllaRovescia(e.inizioMs)}`;
+  const nota = !collegato ? 'dal calendario quando è collegato' : ui.coach.letto ? 'l\'ultima data trovata: ora sul calendario non c\'è' : 'sto guardando il calendario';
+  return e ? `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> <span class="cc-nota">(${nota})</span>`
+    : `Prossimo incontro: da fissare <span class="cc-nota">(${nota})</span>`;
+}
 function cardCoach() {
   caricaCoach();
-  if (!isGcalTokenValid() && !ui.coach.evento) return '';
-  const e = ui.coach.evento;
   const voci = vociCoach(), fatte = voci.filter(v => v.ok).length;
-  const quando = e ? `${fmtGiornoLungo(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> · ${contoAllaRovescia(e.inizioMs)}` : 'nessun incontro in calendario nei prossimi 60 giorni';
+  const quando = testoQuandoCoach();
   return `<section class="coach-card" aria-label="Per il coach">
     <div class="cc-testa"><i class="ti ti-user-check" aria-hidden="true"></i><div><h2>Per il coach</h2><p>${quando}</p></div><span class="mono cc-n">${fatte}/${voci.length}</span></div>
     <ul class="cc-lista">${voci.map(v => `<li class="${v.ok ? 'ok' : ''}"><span class="cc-check" aria-hidden="true">${v.ok ? SVG_SPUNTA : ''}</span>
@@ -11017,7 +11126,7 @@ function cardCoach() {
 // Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
 const _bannerCoachV5 = bannerCoach;
 bannerCoach = function () {
-  const e = ui.coach.evento;
+  const e = coachEvento();
   if (!e || e.inizioMs - Date.now() > COACH_ORE * 3600e3 || e.inizioMs < Date.now()) return _bannerCoachV5();
   const aperte = vociCoach().filter(v => !v.ok);
   if (!aperte.length) return '';
@@ -11063,6 +11172,51 @@ Object.assign(AZIONI, {
   'coach-chiudi': el => vaiSettimanaE({ week: +el.dataset.w, year: +el.dataset.y }, () => openBpReview()),
   'coach-prepara': el => apriWizard(+el.dataset.w, +el.dataset.y)
 });
+
+// ══════════════════════════════════════════════════════════════
+// v7 · GLI APPUNTAMENTI RESTANO VISIBILI mentre il collegamento a Google si rinnova
+// Gli appuntamenti di questa settimana e della prossima si tengono anche in localStorage:
+// si mostrano subito all'apertura e si rileggono da Google appena il token è valido.
+// ══════════════════════════════════════════════════════════════
+const GCAL_CACHE = { LS: 'gcal_eventi_cache', SETTIMANE: 2 };
+ui.eventiDaCache = new Set();
+function settimaneDaTenere() {
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
+  return [settKey(cur.week, cur.year), settKey(n.week, n.year)].slice(0, GCAL_CACHE.SETTIMANE);
+}
+function salvaCacheEventi() {
+  const tieni = settimaneDaTenere(), out = {};
+  tieni.forEach(k => { if (Array.isArray(ui.eventi[k]) && !ui.eventiDaCache.has(k)) out[k] = ui.eventi[k]; });
+  const prima = leggiJson(GCAL_CACHE.LS, {});
+  tieni.forEach(k => { if (!out[k] && Array.isArray(prima[k])) out[k] = prima[k]; });
+  try { localStorage.setItem(GCAL_CACHE.LS, JSON.stringify(out)); } catch (e) { console.warn('[GCal] copia locale degli appuntamenti:', e.message); }
+}
+(function ripristinaCacheEventi() {
+  if (!gcalEraCollegato()) return;
+  const salvati = leggiJson(GCAL_CACHE.LS, {});
+  settimaneDaTenere().forEach(k => {
+    if (!Array.isArray(salvati[k]) || ui.eventi[k]) return;
+    ui.eventi[k] = salvati[k];
+    ui.eventiDaCache.add(k);
+  });
+})();
+const _caricaEventiV6 = caricaEventi;
+caricaEventi = function (week, year) {
+  const k = settKey(week, year);
+  if (isGcalTokenValid() && ui.eventiDaCache.has(k) && !ui.eventiCarico[k]) {
+    // si rilegge da Google senza svuotare: fino alla risposta restano quelli della copia
+    const copia = ui.eventi[k];
+    delete ui.eventi[k];
+    const p = _caricaEventiV6(week, year);
+    if (!ui.eventi[k]) ui.eventi[k] = copia;
+    return p.then(lista => { if (ui.eventi[k] !== copia) { ui.eventiDaCache.delete(k); salvaCacheEventi(); } return lista; });
+  }
+  const p = _caricaEventiV6(week, year);
+  return Promise.resolve(p).then(lista => { if (settimaneDaTenere().includes(k) && isGcalTokenValid()) salvaCacheEventi(); return lista; });
+};
+// scollegando, la copia locale va via
+const _disconnectGcalV6 = disconnectGcal;
+disconnectGcal = function () { lsScrivi(GCAL_CACHE.LS, null); ui.eventi = {}; ui.eventiDaCache = new Set(); _disconnectGcalV6(); render(); };
 
 // ══════════════════════════════════════════════════════════════
 // ACCESSO · Supabase Auth con codice personale (password), un solo utente.
