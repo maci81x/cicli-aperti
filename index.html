@@ -1292,6 +1292,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .sheet-cta-row > * { min-width: 0; }
 .sheet-cta-row .btn { white-space: normal; }
 
+/* v9 · Oggi sul telefono: con tante Subito, titoli su una riga finché non le apri tutte */
+.subito-corte .item-title { -webkit-line-clamp: 1; }
 /* v9 · appuntamenti toccabili: il cerchio si spunta, la riga apre il foglio */
 .evt-spunta { padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--r-full); }
 .evt-spunta:focus-visible { outline: 2px solid var(--ring); outline-offset: -4px; }
@@ -6097,9 +6099,10 @@ function vistaOggi() {
 
   const impostazioni = semplice ? `<button type="button" class="btn btn-icon" data-act="sub" data-tab="altro" data-sub="impostazioni" aria-label="Impostazioni"><i class="ti ti-settings"></i></button>` : '';
   let h = `<div class="vh"><div><p>${fmtGiornoLungo(oggi)}</p><h1>Oggi${btnAiuto('oggi')}</h1></div>${impostazioni}</div>`;
-  h += bannerPiano();
-  h += bannerQ2();
-  h += bannerCicliCal();
+  // v9 · sul telefono il primo schermo è: data e progresso, Subito, le prime righe della giornata, il campo
+  const stretto = window.innerWidth < 768;
+  const banner = bannerPiano() + bannerQ2() + bannerCicliCal();
+  if (!stretto) h += banner;
   h += bloccoRimaste();
   if (tot) h += `<div class="progress"><div class="bar" role="progressbar" aria-label="Fatte oggi" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${fatte}"><i style="width:${Math.round(fatte / tot * 100)}%"></i></div><span><b class="mono">${fatte}</b> / <b class="mono">${tot}</b> fatte</span></div>`;
 
@@ -6107,7 +6110,10 @@ function vistaOggi() {
   const subito = righe.filter(r => computeEffectiveQ(r.c) === 1 && !r.ora);
   if (subito.length) {
     const nf = subito.filter(r => r.fatto).length;
-    h += `<p class="list-head lh-subito"><span><i class="ti ti-flame lh-ico"></i>Subito</span><span class="mono">${nf}/${subito.length}</span></p><div class="group">${subito.map(r => riga(r, opz)).join('')}</div>`;
+    const corte = stretto && !ui.subitoTutte && subito.length > OGGI_TEL.SUBITO;   // sul telefono le prime 2, poi «Altre N»
+    const viste = corte ? subito.slice(0, OGGI_TEL.SUBITO) : subito;
+    const altreSubito = corte ? `<button type="button" class="riga-link subito-altre" data-act="subito-tutte"><i class="ti ti-chevron-down"></i><span>Altre ${subito.length - viste.length} Subito</span><span></span><span></span></button>` : '';
+    h += `<p class="list-head lh-subito"><span><i class="ti ti-flame lh-ico"></i>Subito</span><span class="mono">${nf}/${subito.length}</span></p><div class="group${corte ? ' subito-corte' : ''}">${viste.map(r => riga(r, opz)).join('')}${altreSubito}</div>`;
   }
   // 2. La giornata ora per ora: appuntamenti (viola), cuscinetti, cose con ora; sotto quelle senza ora (le tue 3 per prime)
   const altre = righe.filter(r => !subito.includes(r));
@@ -6118,6 +6124,7 @@ function vistaOggi() {
     if (conOra.length) h += `<div class="group giornata">${conOra.map(x => x.tipo === 'evento' ? rigaEvento(x.e) : x.tipo === 'cuscinetto' ? rigaCuscinetto(x.item, { azioni: !semplice }) : riga(x.r, opz)).join('')}</div>`;
     if (senza.length) h += `${conOra.length ? '<p class="list-head"><span>Senza ora</span></p>' : ''}<div class="group">${senza.map(r => riga(r, opz)).join('')}</div>`;
   }
+  if (stretto) h += banner;
   const inGiorno = new Set(righe.map(r => r.c.id));
   const rapideFuori = rapide.filter(r => !inGiorno.has(r.c.id));
   if (rapideFuori.length) {
@@ -12289,6 +12296,92 @@ aggiungiFrasi = async function (voci, r) {
   }
   return nuove;
 };
+
+// ══════════════════════════════════════════════════════════════
+// v9 · OGGI SUL TELEFONO: «Rimaste indietro» diventa una riga «N indietro · Sistema»
+// che apre il riordino delle rimaste, una alla volta (le scelte sono quelle del blocco di prima).
+// ══════════════════════════════════════════════════════════════
+const schermoStretto = () => window.innerWidth < 768;
+const OGGI_TEL = { SUBITO: 2 };
+ui.subitoTutte = false;
+AZIONI['subito-tutte'] = () => { ui.subitoTutte = true; render(); };
+const _bloccoRimasteV9 = bloccoRimaste;
+bloccoRimaste = function () {
+  if (ui.tab !== 'oggi' || !schermoStretto()) return _bloccoRimasteV9();
+  const n = rimasteVisibili().length;
+  if (!n || carryNascosto()) return '';
+  return `<div class="group rimaste-riga"><button type="button" class="riga-link" data-act="rimaste-sistema"><i class="ti ti-clock-exclamation"></i><span><b class="mono">${n}</b> indietro · <b>Sistema</b></span><span></span><i class="ti ti-chevron-right"></i></button></div>`;
+};
+function apriRiordinaRimaste() {
+  ui.rio = { rimaste: true, ids: rimasteVisibili().map(r => r.item.id), i: 0, conta: {}, saltate: [], scelta: null, giorni: false };
+  $('riordinaOverlay').classList.add('open');
+  rimasteAvanti(0);
+}
+const recRimasta = itemId => rimasteVisibili().find(r => r.item.id === itemId) || null;
+function rimasteAvanti(passo) {
+  const r = ui.rio;
+  r.i += passo;
+  while (r.i < r.ids.length && !recRimasta(r.ids[r.i])) r.i++;
+  r.giorni = false;
+  disegnaRiordina();
+}
+const _rioSalvaV9 = rioSalva;
+rioSalva = function () { if (ui.rio && ui.rio.rimaste) return; _rioSalvaV9(); };   // il giro delle rimaste non si riprende
+const _disegnaRiordinaV9 = disegnaRiordina;
+disegnaRiordina = function () {
+  const r = ui.rio;
+  if (!r || !r.rimaste) return _disegnaRiordinaV9();
+  const tot = r.ids.length, corpo = $('rio-corpo');
+  const testa = `<div class="rio-testa"><button type="button" class="btn btn-ghost btn-sm" data-act="rio-chiudi"><i class="ti ti-x"></i>Chiudi</button>
+    <h2 id="rio-titolo">Rimaste indietro</h2><span class="mono rio-conto" aria-live="polite">${Math.min(r.i + 1, tot)} / ${tot}</span></div>
+    <div class="bar" role="progressbar" aria-label="Sistemate" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${r.i}"><i style="width:${tot ? Math.round(r.i / tot * 100) : 100}%"></i></div>`;
+  const rec = r.i < tot ? recRimasta(r.ids[r.i]) : null;
+  if (!rec) {
+    const fatte = Object.values(r.conta).reduce((t, n) => t + n, 0);
+    corpo.innerHTML = testa + `<div class="rio-fine">${vuoto('ti-circle-check', fatte ? `Sistemate ${fatte}` : 'Niente di rimasto indietro', 'Le trovi al loro posto, in Oggi e in Pianifica.', '<div class="rio-fine-tasti"><button type="button" class="btn btn-primary btn-sm" data-act="rio-chiudi">Chiudi</button></div>')}</div>`;
+    return;
+  }
+  const { item, plan } = rec, c = ciclo(item.ciclo_id), d = carryData(item, plan), q = computeEffectiveQ(c);
+  const era = d ? `era ${d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric' })}` : `era nella settimana del ${fmtCorta(getWeekStart(plan.settimana, plan.anno))}`;
+  const cur = bpSettimanaCorrente();
+  const tasto = (v, ico, l, s, extra) => `<button type="button" class="rio-tasto t-q${q}" data-act="rim-sposta" data-v="${v}"${extra || ''}><i class="ti ${ico}"></i><b>${l}</b>${s ? `<small>${s}</small>` : ''}</button>`;
+  const giorni = r.giorni ? `<div class="gchips rim-giorni" role="group" aria-label="Giorno di questa settimana">${GIORNI.map((g, idx) => {
+      const dd = bpDataGiorno(cur.week, cur.year, idx);
+      return `<button type="button" class="gchip" data-act="rim-sposta" data-v="giorno" data-g="${idx}" aria-label="${g.label} ${dd.getDate()}"${giornoPassato(dd) ? ' disabled' : ''}>${g.label.slice(0, 1)}</button>`;
+    }).join('')}</div>` : '';
+  corpo.innerHTML = testa + `<article class="rio-carta p-q${q}">
+      <p class="rio-meta"><span class="ritardo">${era}</span><span>${TIPI[q].label}</span></p>
+      <h3 class="rio-cosa">${escHtml(c.title)}</h3>
+      ${c.note ? `<p class="rio-nota">${escHtml(c.note)}</p>` : ''}
+    </article>
+    <div class="rio-tasti">${tasto('oggi', 'ti-sun', 'Oggi')}${tasto('domani', 'ti-arrow-right', 'Domani')}${tasto('scegli', 'ti-calendar', 'Scegli giorno', 'questa settimana', ` aria-expanded="${r.giorni}"`)}${tasto('prossima', 'ti-calendar-week', 'Prossima settimana')}</div>
+    ${giorni}
+    <div class="rio-altro"><button type="button" class="btn btn-secondary btn-sm" data-act="rim-fatta"><i class="ti ti-check"></i>È fatta</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="rim-sposta" data-v="lascia"><i class="ti ti-wind"></i>Lascia stare</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="rim-salta">Salta<i class="ti ti-arrow-right"></i></button></div>
+    ${tot - r.i > 1 ? `<div class="rio-altro"><button type="button" class="btn btn-ghost btn-sm" data-act="rim-tutte"><i class="ti ti-sun"></i>Porta tutte le ${tot - r.i} a oggi</button></div>` : ''}`;
+};
+async function rimastaSposta(v, idx) {
+  const r = ui.rio, id = r.ids[r.i];
+  if (v === 'scegli') { r.giorni = !r.giorni; disegnaRiordina(); return; }
+  await azioneCarry(id, v === 'prossima' ? 'prossima' : v, idx);
+  if (!ui.rio) return;
+  if (!recRimasta(id)) { ui.rio.conta = { ...ui.rio.conta, [v]: (ui.rio.conta[v] || 0) + 1 }; rimasteAvanti(1); }
+  else disegnaRiordina();   // non spostata (errore): resta qui
+}
+async function rimastaFatta() {
+  const r = ui.rio, rec = recRimasta(r.ids[r.i]);
+  if (!rec) return;
+  await azioneFatto(rec.item.ciclo_id);
+  if (!ui.rio) return;
+  ui.rio.conta = { ...ui.rio.conta, fatta: (ui.rio.conta.fatta || 0) + 1 };
+  rimasteAvanti(1);
+}
+AZIONI['rimaste-sistema'] = () => apriRiordinaRimaste();
+AZIONI['rim-sposta'] = el => rimastaSposta(el.dataset.v, parseInt(el.dataset.g, 10));
+AZIONI['rim-fatta'] = () => rimastaFatta();
+AZIONI['rim-salta'] = () => rimasteAvanti(1);
+AZIONI['rim-tutte'] = async () => { await carryTutteAOggi(); if (ui.rio) { ui.rio.i = ui.rio.ids.length; disegnaRiordina(); } };
 
 const _avviaAppV9 = avviaApp;
 avviaApp = function (sessione) {
