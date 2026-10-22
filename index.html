@@ -6543,7 +6543,7 @@ function vistaImpostazioni() {
 function openGcalModal() {
   const body = $('gcal-modal-body'), az = $('gcal-modal-actions');
   if (isGcalTokenValid()) {
-    body.innerHTML = `<div class="gcal-stato"><b>Collegato come ${escHtml(gcal.email || GCAL_USER_EMAIL)}</b><span>Calendario: ${escHtml(GCAL_CAL_NAME)}</span></div>
+    body.innerHTML = `<div class="gcal-stato"><b>Collegato come ${escHtml(gcal.email || GCAL_USER_EMAIL)}</b><span>Scrivo nel calendario: ${escHtml(nomeCalScrittura())}</span></div>
       <p class="t-label muted">Gli appuntamenti del giorno compaiono in Oggi. Su Google Calendar l'app scrive solo quando lo chiedi tu: «Blocca in agenda» su una cosa e «Metti il piano su Calendar».</p>`;
     az.innerHTML = `<button type="button" class="btn btn-ghost btn-danger btn-sm btn-block" onclick="disconnectGcal()">Scollega</button>`;
   } else {
@@ -6561,7 +6561,7 @@ function openGcalModal() {
       $('gcalOverlay').classList.add('open');
       return;
     }
-    body.innerHTML = `<p class="t-label muted">Collega Google Calendar per vedere gli appuntamenti in Oggi e mettere in calendario le cose pianificate. Nel tuo account viene creato il calendario «${escHtml(GCAL_CAL_NAME)}».</p>`;
+    body.innerHTML = `<p class="t-label muted">Collega Google Calendar per vedere gli appuntamenti in Oggi e mettere in calendario le cose pianificate. Gli eventi dell'app (avvisi, blocchi, promemoria) vanno nel calendario Lavoro: non ne creo altri.</p>`;
     az.innerHTML = `<button type="button" class="btn btn-primary btn-block" id="gcal-connetti" onclick="connectGoogleCalendar()"><i class="ti ti-link"></i>Connetti</button>`;
   }
   $('gcalOverlay').classList.add('open');
@@ -8518,7 +8518,7 @@ async function calendarPronto() {
   if (!isGcalTokenValid()) { showToast('Prima collega Google Calendar da Altro, Impostazioni', 'warn'); return false; }
   if (ui.calEventColOk === false) { showToast('Manca la colonna calendar_event_id: vedi Impostazioni', 'warn'); return false; }
   await ensureGcalCalendar();
-  if (!gcal.calendarId) { showToast('Non trovo il calendario «' + GCAL_CAL_NAME + '»', 'error'); return false; }
+  if (!gcal.calendarId) { showToast('Non trovo il calendario dove scrivo: controlla in Impostazioni', 'error'); return false; }
   return true;
 }
 // Giorno, ora e durata di una riga del piano della settimana in vista (null se manca il giorno o l'ora).
@@ -8853,8 +8853,8 @@ _handleGcalToken = async function (resp) { await _handleGcalTokenBase(resp); car
 const LS5 = { PIANO_DURATA: 'piano_durata', FORMATO: 'foglio_formato', PROTEGGI: 'proteggi_q2', CC: 'coach_cc', STAMPATO: 'piano_stampato',
   CAL_SCRITTURA: 'gcal_cal_scelto', PROM: 'promemoria_cal', SUBITO: 'subito_chiesto', CICLI_CAL: 'cal_cicli_scelte', Q2_AGENDA: 'q2_agenda_scelte',
   BANNER_Q2: 'banner_q2_chiuso', BANNER_CICLI: 'banner_cicli_chiuso', COACH_V5: 'coach_v5' };
-// Calendario di scrittura: il primo dei due «Cicli Aperti — Battle Plan» che esistono (il secondo lo cancella Roberto)
-const GCAL_CAL_PREFERITO = 'c_4f57b6288d651d161c272902e5b6e389607c32bbaad7508a7633d80c74899488@group.calendar.google.com';
+// Calendario di scrittura (dal 22/10): Lavoro. I «Cicli Aperti — Battle Plan» non ci sono più e l'app non crea calendari.
+const GCAL_CAL_PREFERITO = 'r.macinai@sisoluzioniimpresa.it';
 // Calendari da leggere: niente colleghi, sale o festività
 const CAL_LETTURA = [
   { id: 'r.macinai@sisoluzioniimpresa.it', tipo: 'lavoro', nome: 'Lavoro' },
@@ -8873,7 +8873,7 @@ const Q2 = { OGNI_GIORNI: 90, ORIZZONTE: 92, SETTIMANE: 14,
   PIENO: { giornata: 300, mattina: 120, pomeriggio: 120 } };     // minuti di appuntamenti oltre i quali il giorno è «pieno»
 const PROTEZIONI = [{ v: 'conferma', l: 'Conferma' }, { v: 'avviso', l: 'Solo avviso' }, { v: 'spento', l: 'Spento' }];
 const FORMATI = [{ v: 'a4', l: 'A4' }, { v: 'a5', l: 'A5' }];
-const DURATE_PIANO = [60, 90, 120, 180];
+const DURATE_PIANO = [60, 90, 105, 120, 180];   // 105 = 16:45–18:30
 
 const leggiJson = (k, base) => { try { return JSON.parse(lsLeggi(k) || 'null') || base; } catch (_) { return base; } };
 const scriviJson = (k, v) => lsScrivi(k, JSON.stringify(v));
@@ -8882,7 +8882,7 @@ const hmDi = min => `${String(Math.floor(min / 60) % 24).padStart(2, '0')}:${Str
 const protezione = () => PROTEZIONI.some(p => p.v === lsLeggi(LS5.PROTEGGI)) ? lsLeggi(LS5.PROTEGGI) : 'conferma';
 const formatoFoglio = () => lsLeggi(LS5.FORMATO) === 'a5' ? 'a5' : 'a4';
 const emailCC = () => { const v = lsLeggi(LS5.CC); return v === null ? CC_PREDEFINITO : v.trim(); };
-const durataPiano = () => DURATE_PIANO.includes(parseInt(lsLeggi(LS5.PIANO_DURATA), 10)) ? parseInt(lsLeggi(LS5.PIANO_DURATA), 10) : 120;
+const durataPiano = () => DURATE_PIANO.includes(parseInt(lsLeggi(LS5.PIANO_DURATA), 10)) ? parseInt(lsLeggi(LS5.PIANO_DURATA), 10) : 105;
 function stampati() { return leggiJson(LS5.STAMPATO, {}); }
 function stampatoIl(week, year) { const iso = stampati()[settKey(week, year)]; return iso ? fmtGgMm(iso) : ''; }
 function segnaStampato(week, year) { scriviJson(LS5.STAMPATO, { ...stampati(), [settKey(week, year)]: oggiLocale() }); }
@@ -9050,6 +9050,9 @@ function eventoDa(e, cal) {
     orgIo: !e.organizer || !!e.organizer.self || mia(e.organizer), org: e.organizer ? (e.organizer.displayName || e.organizer.email || '') : '',
     nomiInvitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).map(x => x.displayName || x.email),
     startRaw: e.start, endRaw: e.end, ricorrente: !!e.recurringEventId, link: e.htmlLink || null,
+    // evento creato dall'app (avviso, blocco, promemoria, appuntamento) e la cosa a cui è collegato
+    app: (e.extendedProperties && e.extendedProperties.private && e.extendedProperties.private.cicli_aperti) || null,
+    cicloId: (e.extendedProperties && e.extendedProperties.private && e.extendedProperties.private.ciclo_id) || null,
     routine: cal.tipo === 'privato' && !!e.recurringEventId && !!ora && ora < ROUTINE_ENTRO
   };
 }
@@ -9278,7 +9281,7 @@ async function sincronizzaPromemoria(tipo, forza) {
 // ══════════════════════════════════════════════════════════════
 quandoPiano = function () {
   const g = parseInt(lsLeggi(LS3.PIANO_GIORNO), 10), o = lsLeggi(LS3.PIANO_ORA) || '';
-  return { giorno: g >= 0 && g <= 6 ? g : 4, ora: /^\d{2}:\d{2}$/.test(o) ? o : '15:00' };
+  return { giorno: g >= 0 && g <= 6 ? g : 4, ora: /^\d{2}:\d{2}$/.test(o) ? o : '16:45' };   // predefinito venerdì 16:45
 };
 // Il prossimo incontro con il coach entro 48 ore (dagli appuntamenti già letti)
 function prossimoCoach() {
@@ -9762,7 +9765,7 @@ async function cercaCicliInCalendario() {
   const scelte = leggiJson(LS5.CICLI_CAL, {});
   const perSerie = new Map();
   ev.forEach(e => {
-    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach) return;
+    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach || e.app) return;   // gli eventi dell'app non sono «cicli nel calendario»
     const k = e.serie || e.id;
     if (scelte[k]) return;
     perSerie.set(k, [...(perSerie.get(k) || []), e]);
@@ -9802,7 +9805,7 @@ async function portaInTutto(k, togli) {
     const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: `Dal calendario ${e.cal === 'privato' ? 'Privato' : 'Lavoro'}: «${e.titoloOrig}»` });
     if (c) state.cicli = [c, ...state.cicli];
     if (togli) {
-      try { await gcalFetch(`/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(e.serie || e.id)}`, 'DELETE'); }
+      try { await gcalFetchUtente(`/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(e.serie || e.id)}`, 'DELETE'); }
       catch (err) { if (!nonEsiste(err)) throw err; }
       ui.eventi = {};
       caricaEventi(state.week, state.year);
@@ -10069,9 +10072,9 @@ function sezioneItime() {
     </div>
     <p class="list-head"><span>Promemoria su Google Calendar</span></p>
     <div class="group">
-      <button type="button" class="riga-link" data-act="prom-bp"${collegato ? '' : ' disabled'}><i class="ti ti-bell"></i><span>Prepara il Business Plan<small>${collegato ? (prom.bp ? 'Ogni settimana nel calendario «Cicli Aperti — Battle Plan», avvisi a 30 e 0 minuti' : 'Tocca per crearlo') : 'Collega Google Calendar'}</small></span><span></span><i class="ti ti-refresh"></i></button>
-      <div class="riga-link riga-scelta"><i class="ti ti-calendar-cog"></i><label for="set-cal">Calendario dove scrivo<small>Id del «Cicli Aperti — Battle Plan». Non ne creo altri.</small></label>
-        <div class="tools-row"><input type="text" class="input mono" id="set-cal" data-act="set-cal" value="${esc(calScelto())}" autocomplete="off" spellcheck="false"></div></div>
+      <button type="button" class="riga-link" data-act="prom-bp"${collegato ? '' : ' disabled'}><i class="ti ti-bell"></i><span>Prepara il Business Plan<small>${collegato ? (prom.bp ? `Ogni ${GIORNI[quandoPiano().giorno].label.toLowerCase()} alle ${quandoPiano().ora} nel calendario ${escHtml(nomeCalScrittura())}, avvisi all'ora e 10 minuti prima` : 'Tocca per crearlo') : 'Collega Google Calendar'}</small></span><span></span><i class="ti ti-refresh"></i></button>
+      <div class="riga-link riga-scelta"><i class="ti ti-calendar-cog"></i><label for="set-cal">Calendario dove scrivo<small>Uno dei tuoi calendari. Non ne creo altri.</small></label>
+        <div class="tools-row">${sceltaCalScrittura()}</div></div>
       <div class="riga-link"><i class="ti ti-eye"></i><span>Calendari che leggo<small>${CAL_LETTURA.map(c => `${c.nome} (${c.id})`).join(' · ')}</small></span><span></span><span></span></div>
     </div>`;
 }
@@ -10181,7 +10184,7 @@ document.addEventListener('change', e => {
     const v = t.value.trim();
     lsScrivi(LS5.CAL_SCRITTURA, v && v !== GCAL_CAL_PREFERITO ? v : null);
     ui.calVerificato = false;
-    ensureGcalCalendar().then(() => { render(); showToast(gcal.calendarId === calScelto() ? 'Calendario di scrittura salvato' : 'Non trovo quel calendario: uso ' + GCAL_CAL_NAME, gcal.calendarId === calScelto() ? 'success' : 'warn'); });
+    ensureGcalCalendar().then(() => { render(); showToast(gcal.calendarId === calScelto() ? 'Calendario di scrittura salvato' : 'Non trovo quel calendario: uso Lavoro', gcal.calendarId === calScelto() ? 'success' : 'warn'); });
   }
 });
 document.addEventListener('input', e => {
@@ -10501,14 +10504,14 @@ const utcCompatto = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/,
 // «Anche le prossime» su un evento che si ripete: la serie vecchia finisce prima di questa volta, ne parte una nuova da qui.
 async function spostaSerieEvento(e, inizio, fine, invia) {
   const calPath = `/calendars/${encodeURIComponent(e.calId)}/events`;
-  const master = await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}`, 'GET');
+  const master = await gcalFetchUtente(`${calPath}/${encodeURIComponent(e.serie)}`, 'GET');
   const rr = master && rruleDi(master);
   if (!rr) throw new Error('non trovo la regola della serie');
   let nuovaRegola = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '');
   const count = /COUNT=(\d+)/i.exec(rr), until = /UNTIL=([^;]+)/i.exec(rr);
   if (count) {   // quante volte restano da qui
     const qs = new URLSearchParams({ timeMin: new Date(e.inizioMs).toISOString(), maxResults: '2500', showDeleted: 'false' });
-    const ist = await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}/instances?${qs}`, 'GET');
+    const ist = await gcalFetchUtente(`${calPath}/${encodeURIComponent(e.serie)}/instances?${qs}`, 'GET');
     nuovaRegola += `;COUNT=${Math.max(1, ((ist && ist.items) || []).length)}`;
   } else if (until) nuovaRegola += `;UNTIL=${until[1]}`;
   const vecchioGiorno = BYDAY[(new Date(e.inizioMs).getDay() + 6) % 7], nuovoGiorno = BYDAY[(inizio.getDay() + 6) % 7];
@@ -10521,19 +10524,19 @@ async function spostaSerieEvento(e, inizio, fine, invia) {
     end: e.tuttoIlGiorno ? { date: toISODate(fine) } : { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz },
     recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), nuovaRegola]
   };
-  const creato = await gcalFetch(`${calPath}?sendUpdates=${invia}`, 'POST', nuovo);
+  const creato = await gcalFetchUtente(`${calPath}?sendUpdates=${invia}`, 'POST', nuovo);
   if (!creato || !creato.id) throw new Error('la serie nuova non è stata creata');
   const primaDi = new Date(e.inizioMs); primaDi.setDate(primaDi.getDate() - 1);   // tutto il giorno: UNTIL è una data
   const fineVecchia = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '') + `;UNTIL=${e.tuttoIlGiorno ? toISODate(primaDi).replace(/-/g, '') : utcCompatto(new Date(e.inizioMs - 1000))}`;
   try {
-    await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), fineVecchia] });
+    await gcalFetchUtente(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), fineVecchia] });
   } catch (err) {   // non sono riuscito a chiudere la vecchia: tolgo la nuova, così non resta doppia
-    await gcalFetch(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=none`, 'DELETE').catch(() => {});
+    await gcalFetchUtente(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=none`, 'DELETE').catch(() => {});
     throw err;
   }
   return async () => {   // annulla
-    await gcalFetch(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=${invia}`, 'DELETE');
-    await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: master.recurrence });
+    await gcalFetchUtente(`${calPath}/${encodeURIComponent(creato.id)}?sendUpdates=${invia}`, 'DELETE');
+    await gcalFetchUtente(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: master.recurrence });
   };
 }
 async function confermaSpostaEvento() {
@@ -10554,8 +10557,8 @@ async function confermaSpostaEvento() {
     let annulla;
     if (e.ricorrente && s.tutte) annulla = await spostaSerieEvento(e, inizio, fine, invia);
     else {
-      await gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { dateTime: isoLocale(s.giorno, s.ora), timeZone: tz }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz } });
-      annulla = () => gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
+      await gcalFetchUtente(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { dateTime: isoLocale(s.giorno, s.ora), timeZone: tz }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz } });
+      annulla = () => gcalFetchUtente(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
     }
     closeModal('spostaEvtOverlay');
     ui.sevt = null;
@@ -10613,7 +10616,8 @@ async function creaNuovoEvento() {
   $('nevt-crea').disabled = true;
   try {
     const creato = await gcalFetch(`/calendars/${encodeURIComponent(n.cal)}/events`, 'POST', {
-      summary: titolo, start: { dateTime: isoLocale(n.iso, ora), timeZone: 'Europe/Rome' }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: 'Europe/Rome' } });
+      summary: titolo, start: { dateTime: isoLocale(n.iso, ora), timeZone: 'Europe/Rome' }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: 'Europe/Rome' },
+      extendedProperties: { private: { cicli_aperti: 'appuntamento' } } });
     if (!creato || !creato.id) throw new Error('Google non ha risposto');
     closeModal('nuovoEvtOverlay');
     ricaricaEventi(inizio);
@@ -12111,8 +12115,8 @@ confermaSpostaEvento = async function () {
     let annulla;
     if (e.ricorrente && s.tutte) annulla = await spostaSerieEvento(e, inizio, fine, invia);
     else {
-      await gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { date: toISODate(inizio) }, end: { date: toISODate(fine) } });
-      annulla = () => gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
+      await gcalFetchUtente(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { date: toISODate(inizio) }, end: { date: toISODate(fine) } });
+      annulla = () => gcalFetchUtente(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
     }
     closeModal('spostaEvtOverlay');
     ui.sevt = null;
@@ -12406,6 +12410,198 @@ AZIONI['rim-sposta'] = el => rimastaSposta(el.dataset.v, parseInt(el.dataset.g, 
 AZIONI['rim-fatta'] = () => rimastaFatta();
 AZIONI['rim-salta'] = () => rimasteAvanti(1);
 AZIONI['rim-tutte'] = async () => { await carryTutteAOggi(); if (ui.rio) { ui.rio.i = ui.rio.ids.length; disegnaRiordina(); } };
+
+// ══════════════════════════════════════════════════════════════
+// v10 (22/10) · CALENDARIO DI SCRITTURA = LAVORO
+// I due «Cicli Aperti — Battle Plan» non ci sono più. L'app scrive su Lavoro (o su un altro calendario
+// esistente scelto in Impostazioni), non crea calendari, e modifica/sposta/cancella SOLO i suoi eventi
+// (proprietà privata cicli_aperti). Unica eccezione: i comandi che dai tu sul foglio di un appuntamento
+// («Sposta», «Mettila tra le cose da fare e toglila dal calendario»), che passano da gcalFetchUtente.
+// ══════════════════════════════════════════════════════════════
+const CAL_SCRITTURA = { LAVORO: GCAL_CAL_PREFERITO, RUOLI: ['owner', 'writer'] };
+const NON_APP = 'NON_APP';
+const evDellApp = ev => !!(ev && ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.cicli_aperti);
+const _gcalFetchV10 = gcalFetch;
+let _gcalUtente = false;
+// ogni PATCH / PUT / DELETE su un evento esistente: prima si legge, e si va avanti solo se è dell'app
+gcalFetch = function (path, method, body) {
+  const m = String(method || 'GET').toUpperCase(), base = String(path || '').split('?')[0];
+  if (m === 'POST' && /^\/calendars\/?$/.test(base)) return Promise.reject(new Error('L\'app non crea calendari'));
+  const suEvento = /^\/calendars\/[^/]+\/events\/[^/]+$/.test(base);
+  if (suEvento && ['PATCH', 'PUT', 'DELETE'].includes(m) && !_gcalUtente) return scriviSoloSeDellApp(path, m, body);
+  return _gcalFetchV10(path, method, body);
+};
+async function scriviSoloSeDellApp(path, metodo, body) {
+  const ev = await _gcalFetchV10(path.split('?')[0], 'GET');   // se non esiste più l'errore arriva a chi chiama, come prima
+  if (!ev || !evDellApp(ev)) {
+    console.warn('[GCal] evento non creato dall\'app: non lo tocco', path.split('?')[0]);
+    const err = new Error('questo evento non l\'ha creato l\'app: non lo tocco');
+    err.code = NON_APP;
+    throw err;
+  }
+  return _gcalFetchV10(path, metodo, body);
+}
+// comando dato da te su un tuo appuntamento: passa senza il controllo
+function gcalFetchUtente(path, method, body) {
+  _gcalUtente = true;
+  try { return gcalFetch(path, method, body); } finally { _gcalUtente = false; }
+}
+
+// Calendario di scrittura: quello scelto se esiste ancora, altrimenti Lavoro. Mai creato.
+ui.calendari = null;   // i tuoi calendari scrivibili (per la scelta in Impostazioni)
+const nomeCalScrittura = () => {
+  const id = gcal.calendarId || calScelto();
+  const c = (ui.calendari || []).find(x => x.id === id) || CAL_LETTURA.find(x => x.id === id);
+  return c ? (c.nome || c.summary || id) : id;
+};
+async function calendariScrivibili() {
+  const lista = await gcalFetch('/users/me/calendarList', 'GET');
+  return ((lista && lista.items) || []).filter(c => CAL_SCRITTURA.RUOLI.includes(c.accessRole))
+    .map(c => ({ id: c.id, nome: (CAL_LETTURA.find(x => x.id === c.id) || {}).nome || c.summaryOverride || c.summary || c.id }));
+}
+ensureGcalCalendar = async function () {
+  if (!isGcalTokenValid()) return;
+  const scelto = calScelto();
+  if (gcal.calendarId === scelto && ui.calVerificato) return;
+  let id = CAL_SCRITTURA.LAVORO;
+  if (scelto !== CAL_SCRITTURA.LAVORO) {
+    try { ui.calendari = await calendariScrivibili(); } catch (e) { console.warn('[GCal] calendari:', e.message); }
+    if ((ui.calendari || []).some(c => c.id === scelto)) id = scelto;
+    else lsScrivi(LS5.CAL_SCRITTURA, null);   // quello scelto non c'è più: si torna a Lavoro
+  }
+  const cambiato = gcal.calendarId !== id;
+  gcal.calendarId = id;
+  ui.calVerificato = true;
+  localStorage.setItem('gcal_cal_id', id);
+  if (cambiato) await saveGcalTokenToDB();
+};
+// un id vecchio (localStorage gcal_cal_id o user_tokens.google_calendar_id) che non è quello di scrittura → Lavoro, subito
+function normalizzaCalendario() {
+  const giusto = calScelto();
+  if (gcal.calendarId && gcal.calendarId !== giusto && giusto === CAL_SCRITTURA.LAVORO) {
+    gcal.calendarId = giusto;
+    try { localStorage.setItem('gcal_cal_id', giusto); } catch (_) { /* niente */ }
+    if (isGcalTokenValid()) saveGcalTokenToDB();
+  }
+}
+normalizzaCalendario();
+const _loadGcalTokenFromDBV10 = loadGcalTokenFromDB;
+loadGcalTokenFromDB = async function () { const r = await _loadGcalTokenFromDBV10.apply(this, arguments); normalizzaCalendario(); return r; };
+// Impostazioni: si sceglie tra i calendari che hai (lista letta da Google), predefinito Lavoro
+function sceltaCalScrittura() {
+  const attuale = calScelto(), lista = ui.calendari || [{ id: CAL_SCRITTURA.LAVORO, nome: 'Lavoro' }];
+  if (ui.calendari === null && isGcalTokenValid() && !ui.calendariCarico) {
+    ui.calendariCarico = true;
+    calendariScrivibili().then(l => { ui.calendari = l; render(); }).catch(e => console.warn('[GCal] calendari:', e.message)).finally(() => { ui.calendariCarico = false; });
+  }
+  const voci = lista.some(c => c.id === attuale) ? lista : [...lista, { id: attuale, nome: attuale }];
+  return `<select class="input sel-inline" id="set-cal" data-act="set-cal" aria-label="Calendario dove scrivo">${voci.map(c => `<option value="${esc(c.id)}"${c.id === attuale ? ' selected' : ''}>${escHtml(c.nome)}</option>`).join('')}</select>`;
+}
+
+// Gli eventi dell'app: titolo «16.45 - titolo», popup all'ora e 10 minuti prima, link all'app, proprietà cicli_aperti
+const PROMEMORIA_EVENTO = { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }, { method: 'popup', minutes: 10 }] };
+corpoEvento = function (c, slot) {
+  const durata = slot.durata || AVVISO.DURATA;
+  const inizio = new Date(`${slot.data}T${slot.ora}:00`), fine = new Date(inizio.getTime() + durata * 60000);
+  return { summary: titoloAvviso(slot.ora, c.title), description: `Cicli Aperti · appuntamento con te stesso\n${APP_URL}#ciclo=${c.id}`,
+    start: { dateTime: `${slot.data}T${slot.ora}:00`, timeZone: 'Europe/Rome' },
+    end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
+    reminders: PROMEMORIA_EVENTO,
+    extendedProperties: { private: { cicli_aperti: 'blocco', ciclo_id: c.id } } };
+};
+// togli: un evento che non è dell'app non si cancella, si scollega soltanto
+const _togliBloccoV10 = togliBlocco;
+togliBlocco = async function (c, silenzioso) {
+  try { return await _togliBloccoV10(c, silenzioso); }
+  catch (e) {
+    if (e.code !== NON_APP) throw e;
+    await patchCiclo(c.id, { calendar_event_id: null });
+    if (!silenzioso) { render(); showToast('Scollegata: l\'evento sul calendario non è dell\'app e resta com\'è', 'info'); }
+  }
+};
+// chiusa: avviso → cancellato; blocco futuro → cancellato; blocco passato → «✓» davanti al titolo. Solo eventi dell'app.
+chiudiBlocco = async function (c) {
+  if (!c || !c.calendar_event_id || bloccoEsterno(c) || !isGcalTokenValid()) return;
+  try {
+    await ensureGcalCalendar();
+    if (!gcal.calendarId) return;
+    const ev = await eventoDellApp(c);
+    if (!evDellApp(ev)) return;   // non è dell'app (o non c'è più): niente
+    const inizio = ev.start && (ev.start.dateTime || ev.start.date);
+    const futuro = inizio && new Date(inizio) > new Date();
+    if (eAvviso(ev) || futuro) { await togliBlocco(ciclo(c.id) || c, true); return; }
+    if (!/^✓ /.test(ev.summary || '')) await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + (ev.summary || c.title) });
+  } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi:', e.message); }
+};
+
+// In Oggi e nelle colonne: un evento dell'app collegato a una cosa non compare (si vede la cosa, con la sua ora)
+const collegatoACosa = e => !!(e && e.app && e.cicloId);
+const _leggiEventiV10 = leggiEventi;
+leggiEventi = async function () { return (await _leggiEventiV10.apply(this, arguments)).filter(e => !collegatoACosa(e)); };
+const _eventiDelGiornoV10 = eventiDelGiorno;
+eventiDelGiorno = function (d) { return _eventiDelGiornoV10(d).filter(e => !collegatoACosa(e)); };
+
+// Promemoria del Business Plan: «16.45 - Prepara il Business Plan» ogni venerdì 16:45–18:30 su Lavoro,
+// saltando i giorni in cui a quell'ora c'è già un incontro col coach (o la sua preparazione).
+const PROM = { SETTIMANE_SALTI: 26 };
+async function saltiPerCoach(giorno, ora, durata) {
+  const da = new Date(), a = new Date(Date.now() + PROM.SETTIMANE_SALTI * 7 * 864e5);
+  const eventi = await _leggiEventiV10(da, a);
+  const [h, m] = ora.split(':').map(Number);
+  return eventi.filter(e => (e.coach || e.prepCoach) && giornoIdxDi(parseISODate(e.giorno)) === giorno && e.ora).filter(e => {
+    const s = new Date(parseISODate(e.giorno)); s.setHours(h, m, 0, 0);
+    const f = new Date(s.getTime() + durata * 60000);
+    return e.inizioMs < f.getTime() && s.getTime() < (e.fineMs || e.inizioMs);
+  }).map(e => `${e.giorno.replace(/-/g, '')}T${ora.replace(':', '')}00`);
+}
+async function corpoPromemoriaV10(tipo) {
+  const desc = tipo === 'bp'
+    ? `Il piano della prossima settimana: scegli le Q2, i cicli aperti realistici, distribuiscili nei giorni. Poi stampalo e mandalo al coach.\n${APP_URL}`
+    : `Scegli le attività importanti dei prossimi 3 mesi e fissale in agenda.\n${APP_URL}`;
+  const { ora } = quandoPiano();
+  if (tipo === 'bp') {
+    const { giorno } = quandoPiano(), durata = durataPiano(), d = prossimoGiorno(giorno, ora);
+    const fine = new Date(`${toISODate(d)}T${ora}:00`); fine.setMinutes(fine.getMinutes() + durata);
+    const salti = await saltiPerCoach(giorno, ora, durata);
+    return { firma: `${giorno}|${ora}|${durata}|${calScelto()}|${salti.join(',')}`, corpo: {
+      summary: titoloAvviso(ora, 'Prepara il Business Plan'), description: desc,
+      start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
+      recurrence: [`RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[giorno]}`, ...(salti.length ? [`EXDATE;TZID=Europe/Rome:${salti.join(',')}`] : [])],
+      reminders: PROMEMORIA_EVENTO, extendedProperties: { private: { cicli_aperti: 'promemoria', promemoria: 'bp' } } } };
+  }
+  const base = state.ultimoQ2 ? new Date(state.ultimoQ2) : new Date();
+  const d = new Date(base); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + Q2.OGNI_GIORNI);
+  const fine = new Date(`${toISODate(d)}T${ora}:00`); fine.setMinutes(fine.getMinutes() + 120);
+  return { firma: `${toISODate(d)}|${ora}|${calScelto()}`, corpo: {
+    summary: titoloAvviso(ora, 'Esercizio Q2'), description: desc,
+    start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
+    recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: PROMEMORIA_EVENTO, extendedProperties: { private: { cicli_aperti: 'promemoria', promemoria: 'q2' } } } };
+}
+sincronizzaPromemoria = async function (tipo, forza) {
+  if (!isGcalTokenValid()) return null;
+  await ensureGcalCalendar();
+  if (!gcal.calendarId) return null;
+  const tutti = leggiJson(LS5.PROM, {}), salvato = tutti[tipo] || {};
+  try {
+    const { firma, corpo } = await corpoPromemoriaV10(tipo);
+    if (!forza && salvato.id && salvato.firma === firma && salvato.cal === gcal.calendarId) return salvato.id;
+    let id = salvato.cal === gcal.calendarId ? salvato.id || null : null;   // id di un altro calendario (quello cancellato): non vale
+    if (!id) {
+      const qs = new URLSearchParams({ privateExtendedProperty: `promemoria=${tipo}`, maxResults: '5', showDeleted: 'false' });
+      const res = await gcalFetch(`${percorsoEventi()}?${qs}`, 'GET');
+      const trovato = ((res && res.items) || []).find(e => e.status !== 'cancelled' && evDellApp(e));
+      id = trovato ? trovato.id : null;
+    }
+    if (id) {
+      try { await gcalFetch(`${percorsoEventi()}/${id}`, 'PATCH', corpo); }
+      catch (e) { if (!nonEsiste(e) && e.code !== NON_APP) throw e; id = null; }
+    }
+    if (!id) { const ev = await gcalFetch(percorsoEventi(), 'POST', corpo); id = ev && ev.id; }
+    if (!id) return null;
+    scriviJson(LS5.PROM, { ...leggiJson(LS5.PROM, {}), [tipo]: { id, firma, cal: gcal.calendarId } });
+    return id;
+  } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
+};
 
 const _avviaAppV9 = avviaApp;
 avviaApp = function (sessione) {
