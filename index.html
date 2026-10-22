@@ -1026,6 +1026,15 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
 /* ══ v5 · metodo i-Time ══ */
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
+.tag-dopp { display: inline-flex; align-items: center; flex: none; margin-left: var(--sp-2); padding: 0 6px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: var(--fs-caption); font-weight: var(--fw-strong); line-height: 18px; white-space: nowrap; }
+.dopp-parente { display: flex; gap: 6px; align-items: center; margin: 2px 0 0; padding-left: 28px; color: var(--text-2); font-size: var(--fs-caption); }
+.dopp-domanda { margin: var(--sp-2) 0 0; font-weight: var(--fw-strong); }
+.dopp-domanda small { display: block; font-weight: normal; color: var(--text-2); }
+.dopp-intro { margin: 0 0 var(--sp-4); }
+.dopp-riga { cursor: pointer; }
+.dopp-riga input { width: 20px; height: 20px; accent-color: var(--primary); }
+.dopp-azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--border); }
+.dopp-azioni .btn { min-height: 44px; }
 .tag-cal { display: inline-flex; align-items: center; gap: 3px; color: var(--evt); font-weight: var(--fw-strong); white-space: nowrap; }
 .tag-cal .ti { font-size: 13px; }
 @keyframes lampo { 30% { background-color: var(--evt-soft); box-shadow: inset 0 0 0 2px var(--evt-mark); } }
@@ -12623,7 +12632,8 @@ const TAG_DAL_CAL = '<span class="tag-cal" data-tip="Collegata a un appuntamento
 ui.evtNuova = null;   // { evtId, cicloId } finché il foglio aspetta la risposta
 const idCollegato = c => bloccoEsterno(c) ? c.calendar_event_id.slice(4) : null;
 const eventoCollegato = e => !!e && state.cicli.some(c => idCollegato(c) === e.id);
-const cosaDiEvento = e => state.cicli.find(c => idCollegato(c) === e.id) || state.cicli.find(c => !c.done && normTitolo(c.title) === normTitolo(e.titolo));
+// già tra le cose da fare: collegata a questo evento, oppure una cosa aperta uguale o molto simile (vedi DOPPIONI)
+const cosaDiEvento = e => state.cicli.find(c => idCollegato(c) === e.id) || (m => m && m.tipo === 'aperta' ? m.c : null)(trovaDoppione(e.titolo, { senzaEventi: true }));
 const eventoDiSerie = e => !!(e && e.serie && e.serie !== e.id);
 
 const _eventiDelGiornoDalCal = eventiDelGiorno;
@@ -12711,6 +12721,427 @@ document.addEventListener('keydown', ev => {
 }, true);
 const _apriFoglioEventoDalCal = apriFoglioEvento;
 apriFoglioEvento = function (id) { ui.evtNuova = null; return _apriFoglioEventoDalCal(id); };
+
+// ══════════════════════════════════════════════════════════════
+// 22/10 · DOPPIONI · il confronto tra due titoli, in locale (senza AI)
+// simile(a, b) → { livello: 'uguale' | 'molto' | 'forse' | 'parente' | null, punteggio }
+// uguale = stesse parole (ordine libero, piccoli errori ammessi) · molto = quasi le stesse, stessi nomi ·
+// forse = da guardare (solo nella pulizia) · parente = stesso nome proprio o cliente
+// ══════════════════════════════════════════════════════════════
+const DOPP = { MOLTO: 0.75, FORSE: 0.5, FATTE_GIORNI: 30, AGENDA_GIORNI: 14, LS_NO: 'doppioni_no' };
+const DOPP_VUOTE = new Set(('il lo la i gli le l un una uno di a ad da in con su per tra fra del dello della dei degli delle dell al allo alla ai agli alle all ' +
+  'dal dallo dalla dai dagli dalle nel nello nella nei negli nelle sul sullo sulla sui sugli sulle e ed o od anche che come cosa cose fare fatto fatta fatte ' +
+  'devo deve devi dovrei bisogna mi ti si ci vi ne non piu poi questo questa questi queste quello quella quelli quelle mio mia miei mie tuo tua suo sua ' +
+  'loro nostro nostra io tu lui lei noi voi c d s ma se entro dopo prima oppure')
+  .split(' '));
+// parole che non sono mai un nome proprio, anche con la maiuscola
+const DOPP_COMUNI = new Set(('preventivo preventivi mail email cliente clienti controllo controllare gestione gestire app strategia definizione partner program ' +
+  'corso corsi date fatture fattura agenti agente formazione tempo lettera riunione piani piano incentivi scheda organizzazione q1 q2 q3 q4 report call ' +
+  'appuntamento calendario sopralluogo progetto ufficio area chiamare chiamata incontro visita').split(' '));
+// parole troppo generiche per dire «è la stessa cosa» insieme a un nome
+const DOPP_GENERICHE = new Set('attivita gestione gestire punto situazione elenco info tempo mail email lavoro'.split(' '));
+
+const togliAccenti = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+const parolaPulita = w => togliAccenti(w).toLowerCase().replace(/[^a-z0-9]/g, '');
+function distanza(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prima = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const riga = [i];
+    let minimo = i;
+    for (let j = 1; j <= b.length; j++) {
+      const v = Math.min(prima[j] + 1, riga[j - 1] + 1, prima[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      riga.push(v);
+      if (v < minimo) minimo = v;
+    }
+    if (minimo > max) return max + 1;
+    prima = riga;
+  }
+  return prima[b.length];
+}
+// stessa parola: uguale, un piccolo errore («preventvo»), o la stessa radice («preventivo» / «preventivi»)
+function stessaParola(x, y, nomi) {
+  if (x === y) return true;
+  if (/\d/.test(x + y)) return false;   // i numeri: solo uguali
+  const corta = Math.min(x.length, y.length);
+  if (nomi && (corta < 6 || x[0] !== y[0] || x[x.length - 1] !== y[y.length - 1])) return false;   // Rosseti/Rossetti sì, Marco/Mario e Francesco/Francesca no
+  if (corta >= 5 && distanza(x, y, corta >= 8 ? 2 : 1) <= (corta >= 8 ? 2 : 1)) return true;
+  return !nomi && corta >= 6 && x.slice(0, 6) === y.slice(0, 6) && Math.abs(x.length - y.length) <= 3;
+}
+const _paroleCache = new Map();
+// le parole di un titolo, senza quelle vuote; nome = nome proprio o cliente (dalla maiuscola o da `nomi`)
+function paroleDopp(titolo) {
+  const t = String(titolo || '').replace(/\[[^\]]*\]/g, ' ').replace(/^\s*\d{1,2}(?:[.:]\d{2})?\s*[-–—]\s*/, '');   // etichette [TEST] e «10 - …» degli appuntamenti
+  if (_paroleCache.has(t)) return _paroleCache.get(t);
+  const tuttoMaiuscolo = !/[a-zà-ÿ]/.test(t);
+  const segmenti = t.split(/\s[-–—]\s|\s[-–—]|[-–—]\s|[+:/(),.;!?"«»]/).map(s => s.trim()).filter(Boolean);
+  const out = [];
+  segmenti.forEach((seg, si) => {
+    const grezze = seg.replace(/['’`]/g, ' ').split(/\s+/).filter(Boolean);
+    grezze.forEach((raw, j) => {
+      const p = parolaPulita(raw);
+      if (!p || DOPP_VUOTE.has(p)) return;
+      const lettere = togliAccenti(raw).replace(/[^A-Za-z]/g, '');
+      const maiusc = /^[A-ZÀ-Ý]/.test(raw);
+      const nome = !tuttoMaiuscolo && !DOPP_COMUNI.has(p) && !!lettere && (
+        (lettere.length >= 2 && lettere === lettere.toUpperCase()) ||          // sigla: DV, BE PROF, LUNA
+        /[a-z][A-Z]/.test(raw) ||                                              // BeProf, iProfile
+        (maiusc && j > 0 && p.length >= 3) ||                                  // maiuscola in mezzo alla frase
+        (maiusc && si === 0 && segmenti.length > 1 && grezze.length <= 2 && p.length >= 3));   // «Arillo - Preventivo»
+      out.push({ p, nome, primo: si === 0 && j === 0 });
+    });
+  });
+  _paroleCache.set(t, out);
+  return out;
+}
+// «be prof» / «beprof»: due parole vicine che insieme sono una parola dell'altro titolo
+function unisciVicine(X, Y) {
+  const out = [];
+  for (let i = 0; i < X.length; i++) {
+    const a = X[i], b = X[i + 1];
+    if (b) {
+      const insieme = a.p + b.p;
+      const y = Y.find(w => w.p.length >= 5 && stessaParola(w.p, insieme));
+      if (y && !Y.some(w => w.p === a.p || w.p === b.p)) { out.push({ p: insieme, nome: a.nome || b.nome || y.nome }); i++; continue; }
+    }
+    out.push(a);
+  }
+  return out;
+}
+// scritto di corsa (niente maiuscole dopo la prima lettera) o prima parola: i nomi si riconoscono da quelli già noti
+const scrittoMinuscolo = t => !/[A-ZÀ-Ý]/.test(String(t || '').trim().slice(1));
+function simile(a, b, nomi) {
+  const conNomi = t => w => ({ ...w, nome: w.nome || (!!nomi && (w.primo || scrittoMinuscolo(t)) && nomi.has(w.p)) });   // la maiuscola non dice niente: prima parola o tutto minuscolo
+  let A = paroleDopp(a).map(conNomi(a)), B = paroleDopp(b).map(conNomi(b));
+  A = unisciVicine(A, B); B = unisciVicine(B, A);
+  if (!A.length || !B.length) return { livello: null, punteggio: 0 };
+  const usate = new Set(), coppie = [];
+  A.forEach((x, i) => {
+    let j = B.findIndex((y, k) => !usate.has(k) && y.p === x.p);
+    if (j < 0) j = B.findIndex((y, k) => !usate.has(k) && stessaParola(x.p, y.p, x.nome || y.nome));
+    if (j >= 0) { usate.add(j); coppie.push([i, j]); }
+  });
+  const n = coppie.length, punteggio = 2 * n / (A.length + B.length);
+  if (n === A.length && n === B.length) return { livello: 'uguale', punteggio: 1 };
+  const presiA = new Set(coppie.map(c => c[0])), presiB = new Set(coppie.map(c => c[1]));
+  const nomiFuori = (X, presi) => X.some((w, i) => w.nome && !presi.has(i));
+  const nomiDiversi = nomiFuori(A, presiA) && nomiFuori(B, presiB);
+  const conNome = coppie.filter(([i, j]) => A[i].nome && B[j].nome).length;   // lo stesso nome, per tutti e due
+  const altre = coppie.filter(([i, j]) => !A[i].nome && !B[j].nome);
+  const altreVere = altre.filter(([i]) => !DOPP_GENERICHE.has(A[i].p)).length;
+  if (!nomiDiversi && altre.length && (punteggio >= DOPP.MOLTO || (conNome && altreVere))) return { livello: 'molto', punteggio };
+  if (conNome) return { livello: 'parente', punteggio };
+  const ultime = presiA.has(A.length - 1) && presiB.has(B.length - 1);   // finiscono con la stessa parola («… della settimana»)
+  if (!nomiDiversi && altre.length >= 2 && punteggio >= DOPP.FORSE && ultime) return { livello: 'forse', punteggio };
+  return { livello: null, punteggio };
+}
+const LIV_DOPP = { uguale: 4, molto: 3, forse: 2, parente: 1 };
+// gruppi di doppioni in una lista di cose { id, title, created_at }: uguale / molto (e forse, «da guardare»)
+function gruppiDoppioni(lista, nomi) {
+  const padre = new Map(lista.map(c => [c.id, c.id]));
+  const radice = id => { while (padre.get(id) !== id) id = padre.get(id); return id; };
+  const coppie = [];
+  for (let i = 0; i < lista.length; i++) for (let j = i + 1; j < lista.length; j++) {
+    const s = simile(lista[i].title, lista[j].title, nomi);
+    if (s.livello && s.livello !== 'parente') { coppie.push({ a: lista[i].id, b: lista[j].id, livello: s.livello }); padre.set(radice(lista[i].id), radice(lista[j].id)); }
+  }
+  const gruppi = new Map();
+  lista.forEach(c => { const r = radice(c.id); if (r !== c.id || coppie.some(p => p.a === c.id || p.b === c.id)) gruppi.set(r, [...(gruppi.get(r) || []), c]); });
+  return [...gruppi.values()].filter(g => g.length > 1).map(cose => {
+    const ids = new Set(cose.map(c => c.id)), livelli = coppie.filter(p => ids.has(p.a)).map(p => p.livello);
+    const tipo = livelli.every(l => l === 'uguale') ? 'uguali' : livelli.some(l => l !== 'forse') ? 'simili' : 'da guardare';
+    const ordinate = cose.slice().sort((x, y) => String(x.created_at).localeCompare(String(y.created_at)));
+    return { chiave: ordinate.map(c => c.id).sort().join('|'), tipo, cose: ordinate };
+  }).sort((x, y) => ['uguali', 'simili', 'da guardare'].indexOf(x.tipo) - ['uguali', 'simili', 'da guardare'].indexOf(y.tipo));
+}
+
+// ─── Dove cercare: cose aperte, fatte negli ultimi 30 giorni, appuntamenti delle prossime 2 settimane ───
+let _nomiNoti = { chiave: '', nomi: new Set() };
+function nomiNoti() {
+  const chiave = `${state.cicli.length}:${(state.persone || []).length}`;
+  if (_nomiNoti.chiave === chiave) return _nomiNoti.nomi;
+  const nomi = new Set([...state.cicli.flatMap(c => paroleDopp(c.title).filter(w => w.nome).map(w => w.p)),
+    ...(state.persone || []).flatMap(p => String(p.nome || '').split(/\s+/).map(parolaPulita).filter(x => x.length >= 3))]);
+  _nomiNoti = { chiave, nomi };
+  return nomi;
+}
+const forte = l => l === 'uguale' || l === 'molto';
+const giornoIso = s => String(s || '').slice(0, 10);
+// la corrispondenza migliore in una lista (solo i livelli accettati)
+function migliore(titolo, lista, livelli, testo) {
+  const nomi = nomiNoti();
+  let meglio = null;
+  for (const x of lista) {
+    const s = simile(titolo, testo(x), nomi);
+    if (!s.livello || !livelli.includes(s.livello)) continue;
+    if (!meglio || LIV_DOPP[s.livello] > LIV_DOPP[meglio.livello] || (s.livello === meglio.livello && s.punteggio > meglio.punteggio)) meglio = { x, livello: s.livello };
+  }
+  return meglio;
+}
+const coseAperteDopp = salta => state.cicli.filter(c => !c.done && !c.parent_id && !(salta && salta.has(c.id)));
+function fatteDiRecente() {
+  const limite = toISODate(piuGiorni(new Date(), -DOPP.FATTE_GIORNI));
+  return state.cicli.filter(c => c.done && !c.parent_id && giornoIso(c.chiuso_at || c.updated_at) >= limite);
+}
+function eventiProssimiDopp() {
+  const da = oggiLocale(), a = toISODate(piuGiorni(new Date(), DOPP.AGENDA_GIORNI)), visti = new Set();
+  return Object.values(ui.eventi || {}).flat().filter(e => e && e.giorno >= da && e.giorno <= a && !e.app && !e.routine && !eventoCollegato(e) && !visti.has(e.id) && visti.add(e.id));
+}
+// gli appuntamenti delle prossime 2 settimane (dalla copia se Google non è collegato)
+async function caricaEventiDopp() {
+  if (!isGcalTokenValid()) return;
+  const settimane = new Map();
+  for (let n = 0; n <= DOPP.AGENDA_GIORNI; n += 7) { const w = isoWeekParts(piuGiorni(new Date(), n)); settimane.set(`${w.year}-${w.week}`, w); }
+  const w = isoWeekParts(piuGiorni(new Date(), DOPP.AGENDA_GIORNI)); settimane.set(`${w.year}-${w.week}`, w);
+  for (const s of settimane.values()) { try { await caricaEventi(s.week, s.year); } catch (err) { console.warn('[Doppioni] appuntamenti:', err.message); } }
+}
+// { tipo: 'aperta' | 'fatta' | 'evento' | 'parente', livello, c | e }
+function trovaDoppione(titolo, opz = {}) {
+  if (!String(titolo || '').trim()) return null;
+  const aperta = migliore(titolo, coseAperteDopp(opz.salta), ['uguale', 'molto'], c => c.title);
+  if (aperta) return { tipo: 'aperta', livello: aperta.livello, c: aperta.x };
+  const fatta = migliore(titolo, fatteDiRecente(), ['uguale', 'molto'], c => c.title);
+  if (fatta) return { tipo: 'fatta', livello: fatta.livello, c: fatta.x };
+  if (!opz.senzaEventi) {
+    const ev = migliore(titolo, eventiProssimiDopp(), ['uguale', 'molto'], e => e.titolo);
+    if (ev) return { tipo: 'evento', livello: ev.livello, e: ev.x };
+  }
+  const parente = migliore(titolo, coseAperteDopp(opz.salta), ['parente'], c => c.title);
+  return parente ? { tipo: 'parente', livello: 'parente', c: parente.x } : null;
+}
+const GG_SETT = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+const giornoEvento = e => `${GG_SETT[parseISODate(e.giorno).getDay()]} ${fmtGgMm(e.giorno)}`;
+const etichettaDopp = m => !m || !forte(m.livello) ? '' : `<span class="tag-dopp" data-tip="${esc(testoDopp(m))}">${m.livello === 'uguale' ? 'c\'è già' : 'simile'}</span>`;
+function testoDopp(m) {
+  if (m.tipo === 'aperta') return `C'è già: ${m.c.title} (${TIPI[m.c.q] ? TIPI[m.c.q].label : 'Importante'}, dal ${fmtGgMm(giornoIso(m.c.created_at))})`;
+  if (m.tipo === 'fatta') return `L'hai già fatta il ${fmtGgMm(giornoIso(m.c.chiuso_at || m.c.updated_at))}: la riapro o ne faccio una nuova?`;
+  if (m.tipo === 'evento') return `In agenda c'è già: ${m.e.titoloOrig || m.e.titolo}, ${giornoEvento(m.e)}`;
+  return `Vedi anche: ${m.c.title}`;
+}
+const suggerimentoParente = m => m && m.tipo === 'parente' ? `<p class="dopp-parente"><i class="ti ti-link" aria-hidden="true"></i>Vedi anche: ${escHtml(m.c.title)}</p>` : '';
+
+// ─── Il foglio «C'è già» (una voce alla volta) ───
+document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="doppOverlay" onclick="if(event.target===this)rispondiDopp('annulla')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="dopp-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><h3 class="t-title" id="dopp-titolo">C'è già?</h3><button type="button" class="btn btn-icon" onclick="rispondiDopp('annulla')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="dopp-corpo"></div>
+  </div>
+</div>`);
+let _doppRisposta = null;
+function chiediDoppione(titolo, m, opz = {}) {
+  const b = (v, cls, testo) => `<button type="button" class="btn ${cls} btn-block" data-act="dopp-scelta" data-v="${v}">${testo}</button>`;
+  const tasti = m.tipo === 'aperta'
+    ? b('salta', 'btn-primary', 'È quella, non aggiungere') + (opz.senzaPasso ? '' : b('passo', 'btn-secondary', 'Aggiungi come passo di quella')) + b('aggiungi', 'btn-ghost', 'Aggiungi comunque')
+    : m.tipo === 'fatta' ? b('riapri', 'btn-primary', 'Riaprila') + b('aggiungi', 'btn-secondary', 'Fanne una nuova')
+    : b('collega', 'btn-primary', 'Collegala all\'appuntamento') + b('aggiungi', 'btn-ghost', 'Aggiungi comunque');
+  $('dopp-titolo').textContent = m.tipo === 'evento' ? 'È già in agenda?' : m.tipo === 'fatta' ? 'L\'hai già fatta?' : 'C\'è già?';
+  $('dopp-corpo').innerHTML = `${opz.conto ? `<p class="t-caption muted">${opz.conto}</p>` : ''}
+    <p class="t-label muted">Stai aggiungendo «${escHtml(titolo)}»</p>
+    <p class="t-body dopp-domanda">${escHtml(testoDopp(m))}${m.tipo === 'fatta' ? `<small>${escHtml(m.c.title)}</small>` : ''}</p>
+    <div class="evt-domanda">${tasti}</div>`;
+  $('doppOverlay').classList.add('open');
+  return new Promise(ok => { _doppRisposta = ok; });
+}
+function rispondiDopp(v) {
+  const ok = _doppRisposta;
+  _doppRisposta = null;
+  $('doppOverlay').classList.remove('open');
+  if (ok) ok(v);
+}
+AZIONI['dopp-scelta'] = el => rispondiDopp(el.dataset.v);
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && _doppRisposta && $('doppOverlay').classList.contains('open')) { ev.preventDefault(); ev.stopImmediatePropagation(); rispondiDopp('annulla'); }
+}, true);
+
+// una cosa con giorno e ora dell'appuntamento, collegata (in Oggi si vede solo lei, «dal calendario»)
+async function creaCosaDaEvento(e, titolo, ctx) {
+  const ora = e.ora || null;
+  const c = await upsertCiclo({ ...rigaNuova(titolo, { subito: false }, ctx), note: `Dal calendario ${nomeCalendario(e)}: «${e.titoloOrig || e.titolo}» del ${fmtGgMm(e.giorno)}`,
+    scheduled_date: e.giorno, scheduled_time: ora, ...(state.ritualiColsOk && ora && e.minuti ? { durata_minuti: e.minuti } : {}),
+    ...(ui.calEventColOk !== false ? { calendar_event_id: 'ext:' + e.id } : {}) });
+  if (!c) throw new Error('la cosa non è stata salvata');
+  state.cicli = [c, ...state.cicli.filter(x => x.id !== c.id)];
+  await pianificaInData(ciclo(c.id) || c, parseISODate(e.giorno), fasciaDaOra(ora));
+  return ciclo(c.id) || c;
+}
+async function creaPassoDi(madre, v, ctx) {
+  const p = await upsertCiclo({ ...rigaNuova(v.title, { subito: v.q === 1 }, ctx), q: madre.q === 1 ? 1 : 2, cat: madre.cat, macro_area: madre.macro_area, ...(state.passiColOk ? { parent_id: madre.id } : {}) });
+  if (p) state.cicli = [p, ...state.cicli];
+  return p;
+}
+
+// ─── Quando aggiungi («+», campo del telefono, Ricordami): prima di salvare, una domanda per ogni doppione ───
+async function decidiDoppioni(voci) {
+  await caricaEventiDopp();
+  const trovate = voci.map(v => ({ v, m: trovaDoppione(v.title) })).map(x => ({ ...x, m: x.m && forte(x.m.livello) ? x.m : null }));
+  const da = trovate.filter(x => x.m);
+  const scelte = [];
+  for (const x of trovate) {
+    if (!x.m) { scelte.push({ ...x, scelta: 'aggiungi' }); continue; }
+    const conto = da.length > 1 ? `${da.indexOf(x) + 1} di ${da.length}` : '';
+    const scelta = await chiediDoppione(x.v.title, x.m, { conto, senzaPasso: !!(x.v.passi || []).length || !state.passiColOk });
+    if (scelta === 'annulla') return null;
+    scelte.push({ ...x, scelta });
+  }
+  return scelte;
+}
+const _aggiungiFrasiDopp = aggiungiFrasi;
+aggiungiFrasi = async function (voci, r) {
+  if (r && r.cusc) return _aggiungiFrasiDopp(voci, r);   // urgenza arrivata: va nel cuscinetto com'è
+  const scelte = await decidiDoppioni(voci);
+  if (!scelte) return null;
+  const nuove = scelte.some(s => s.scelta === 'aggiungi') ? await _aggiungiFrasiDopp(scelte.filter(s => s.scelta === 'aggiungi').map(s => s.v), r) : [];
+  if (!nuove) return null;
+  const ctx = state.ctx, fatti = [];
+  try {
+    for (const s of scelte) {
+      if (s.scelta === 'salta') fatti.push(`Non aggiunta: c'è già «${s.m.c.title}»`);
+      else if (s.scelta === 'passo') { const p = await creaPassoDi(s.m.c, s.v, ctx); if (p) { nuove.push(p); fatti.push(`Passo di «${s.m.c.title}»`); } }
+      else if (s.scelta === 'riapri') { await flipDone(s.m.c.id, true); fatti.push(`Riaperta «${s.m.c.title}»`); }
+      else if (s.scelta === 'collega') { const c = await creaCosaDaEvento(s.m.e, s.v.title, ctx); nuove.push(c); fatti.push('Collegata all\'appuntamento'); }
+    }
+  } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
+  if (fatti.length) { render(); showToast(fatti.length === 1 ? fatti[0] : `${fatti.length} cose sistemate`, 'success'); }
+  return nuove;
+};
+
+// ─── Il riepilogo prima di salvare: «c'è già» / «simile», e «Vedi anche» per i parenti ───
+const _disegnaAnteprimaDopp = disegnaAnteprima;
+disegnaAnteprima = function () {
+  _disegnaAnteprimaDopp();
+  const box = $('rapido-anteprima');
+  if (!box || box.hidden) return;
+  vociDaRighe(righeDi($('rapido-testo').value), ui.rapido).forEach((v, i) => {
+    const m = trovaDoppione(v.title), voce = box.querySelector(`.rap-voce[data-i="${i}"]`);
+    if (!m || !voce) return;
+    if (forte(m.livello)) voce.querySelector('.rap-sintesi > span').insertAdjacentHTML('afterend', etichettaDopp(m));
+    else voce.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', suggerimentoParente(m));
+  });
+};
+const _disegnaAnteprimaCatturaDopp = disegnaAnteprimaCattura;
+disegnaAnteprimaCattura = function () {
+  _disegnaAnteprimaCatturaDopp();
+  const box = $('cattura-anteprima');
+  if (!box || box.hidden) return;
+  const voci = vociDaRighe(righeCattura(), {});
+  box.querySelectorAll('.ca-voci > span[class^="p-q"]').forEach((el, i) => { const m = voci[i] && trovaDoppione(voci[i].title); if (m && forte(m.livello)) el.insertAdjacentHTML('beforeend', ' ' + etichettaDopp(m)); });
+};
+
+// ─── Plaud: le cose che ci sono già partono senza spunta, con «c'è già» (si possono riattivare) ───
+const _preparaPlaudDopp = preparaPlaud;
+preparaPlaud = function (r, fonte) {
+  const p = _preparaPlaudDopp(r, fonte);
+  return { ...p, cose: p.cose.map(c => { const m = trovaDoppione(c.title, { senzaEventi: true }); return m && forte(m.livello) ? { ...c, scelta: false, gia: m } : c; }) };
+};
+const _voceAnteprimaPlaudDopp = voceAnteprimaPlaud;
+voceAnteprimaPlaud = function (c) {
+  const h = _voceAnteprimaPlaudDopp(c);
+  return c.gia ? h.replace('</span></label>', `</span>${etichettaDopp(c.gia)}</label>`).replace('<div class="plaud-item-meta">', `<div class="plaud-item-note dopp-nota">${escHtml(testoDopp(c.gia))}</div><div class="plaud-item-meta">`) : h;
+};
+
+// ─── «È una cosa da fare»: già aperta → il dettaglio (come prima, ora anche se è scritta un po' diversa); fatta da poco → riapro o nuova ───
+const _eventoInElencoDopp = eventoInElenco;
+eventoInElenco = async function (id) {
+  const e = eventoPerId(id);
+  if (e && !cosaDiEvento(e)) {
+    const m = trovaDoppione(e.titolo, { senzaEventi: true });
+    if (m && m.tipo === 'fatta') {
+      const scelta = await chiediDoppione(e.titolo, m);
+      if (scelta === 'annulla') return;
+      if (scelta === 'riapri') { await flipDone(m.c.id, true); closeModal('evtOverlay'); render(); apriDettaglio(m.c.id); return; }
+    }
+  }
+  return _eventoInElencoDopp(id);
+};
+
+// ─── Altro → Doppioni: i gruppi tra le cose aperte, «Unisci» e «Non sono doppioni» ───
+ui.doppTieni = {};
+const doppioniNo = () => leggiJson(DOPP.LS_NO, []);
+function gruppiAperti() {
+  const no = new Set(doppioniNo());
+  return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
+}
+const TIPO_GRUPPO = { uguali: 'Uguali', simili: 'Simili', 'da guardare': 'Da guardare' };
+function rigaDopp(c, k, tieni) {
+  const passi = state.cicli.filter(p => p.parent_id === c.id && !p.done).length;
+  const info = [TIPI[c.q] ? TIPI[c.q].label : '', `dal ${fmtGgMm(giornoIso(c.created_at))}`, passi ? plurale(passi, 'passo', 'passi') : '', isParcheggiato(c) ? 'Un giorno' : '', c.note ? 'con una nota' : ''].filter(Boolean).join(' · ');
+  return `<label class="riga-link dopp-riga"><input type="radio" name="dopp-${esc(k)}" data-dopp-k="${esc(k)}" value="${c.id}"${c.id === tieni ? ' checked' : ''}>
+    <span>${escHtml(c.title)}<small>${escHtml(info)}</small></span><span class="t-caption muted">${c.id === tieni ? 'tengo questa' : ''}</span><span></span></label>`;
+}
+function vistaDoppioni() {
+  const gruppi = gruppiAperti();
+  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Doppioni</h1></div></div>
+    <p class="t-label muted dopp-intro">Cose aperte che sembrano la stessa. «Unisci» tiene quella scelta (di solito la più vecchia), ci copia note e date delle altre, sposta passi e deleghe e chiude le altre come «unita a…». Niente si cancella.</p>`;
+  if (!gruppi.length) return h + vuoto('ti-copy-check', 'Nessun doppione', 'Quando due cose aperte si somigliano compaiono qui.');
+  gruppi.forEach(g => {
+    const tieni = g.cose.some(c => c.id === ui.doppTieni[g.chiave]) ? ui.doppTieni[g.chiave] : g.cose[0].id;
+    h += `<p class="list-head"><span>${TIPO_GRUPPO[g.tipo]}</span><span class="mono">${g.cose.length}</span></p>
+      <div class="group dopp-gruppo" data-k="${esc(g.chiave)}">${g.cose.map(c => rigaDopp(c, g.chiave, tieni)).join('')}
+        <div class="dopp-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="dopp-unisci" data-k="${esc(g.chiave)}"><i class="ti ti-arrows-join"></i>Unisci</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-act="dopp-no" data-k="${esc(g.chiave)}">Non sono doppioni</button></div></div>`;
+  });
+  return h;
+}
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (!t.dataset || !t.dataset.doppK) return;
+  ui.doppTieni = { ...ui.doppTieni, [t.dataset.doppK]: t.value };
+  render();
+});
+const campiUnione = () => ['note', 'done', 'chiuso_at', 'execution_status', 'persone_menzionate', ...(state.passiColOk ? ['parent_id'] : []), ...(state.delegaColsOk ? ['delega_persona_id', 'delega_controllo'] : [])];
+function notaUnione(c) {
+  const date = [`creata il ${fmtGgMm(giornoIso(c.created_at))}`, c.pianificato_data ? `giorno ${fmtGgMm(c.pianificato_data)}` : '', c.due_date ? `scadenza ${fmtGgMm(c.due_date)}` : '', c.delega_controllo ? `controllo ${fmtGgMm(c.delega_controllo)}` : ''].filter(Boolean).join(', ');
+  return `— Unita: «${c.title}» (${date})${c.note ? '\n' + c.note : ''}`;
+}
+async function unisciGruppo(k) {
+  const g = gruppiAperti().find(x => x.chiave === k);
+  if (!g) return;
+  const tieniId = g.cose.some(c => c.id === ui.doppTieni[k]) ? ui.doppTieni[k] : g.cose[0].id;
+  const tieni = ciclo(tieniId), altre = g.cose.map(c => ciclo(c.id)).filter(c => c && c.id !== tieniId && !c.done);
+  if (!tieni || !altre.length) return;
+  const ids = altre.map(c => c.id);
+  const passi = state.cicli.filter(p => ids.includes(p.parent_id));
+  const prima = [tieni, ...altre, ...passi].map(c => ({ id: c.id, campi: campi(c, campiUnione()) }));
+  let assegnazioni = [];
+  try {
+    const conDelega = altre.find(c => c.delega_persona_id);
+    await patchCiclo(tieni.id, { note: [tieni.note, ...altre.map(notaUnione)].filter(Boolean).join('\n\n'),
+      persone_menzionate: unici([...(tieni.persone_menzionate || []), ...altre.flatMap(c => c.persone_menzionate || [])]),
+      ...(state.delegaColsOk && !tieni.delega_persona_id && conDelega ? { delega_persona_id: conDelega.delega_persona_id, delega_controllo: conDelega.delega_controllo } : {}) });
+    for (const p of passi) await patchCiclo(p.id, { parent_id: tieni.id });
+    const { data: ass } = await db.from('assegnazioni').select('id,ciclo_id').in('ciclo_id', ids);
+    assegnazioni = ass || [];
+    if (assegnazioni.length) await db.from('assegnazioni').update({ ciclo_id: tieni.id }).in('id', assegnazioni.map(a => a.id));
+    const ora = new Date().toISOString();
+    for (const c of altre) await patchCiclo(c.id, { done: true, chiuso_at: ora, execution_status: 'done', note: `Unita a «${tieni.title}»${c.note ? '\n\n' + c.note : ''}` });
+  } catch (err) { showToast('Unione interrotta: ' + err.message, 'error'); render(); return; }
+  render();
+  showToast(`Unite in «${tieni.title}»`, 'success', { annulla: () => annullaUnione(prima, assegnazioni) });
+}
+async function annullaUnione(prima, assegnazioni) {
+  try {
+    for (const x of prima) await patchCiclo(x.id, x.campi);
+    for (const a of assegnazioni) await db.from('assegnazioni').update({ ciclo_id: a.ciclo_id }).eq('id', a.id);
+    render();
+    showToast('Unione annullata', 'info');
+  } catch (err) { showToast('Non riesco ad annullare: ' + err.message, 'error'); }
+}
+AZIONI['dopp-unisci'] = el => unisciGruppo(el.dataset.k);
+AZIONI['dopp-no'] = el => {
+  const k = el.dataset.k;
+  scriviJson(DOPP.LS_NO, unici([...doppioniNo(), k]));
+  render();
+  showToast('Non te li propongo più', 'info', { annulla: () => { scriviJson(DOPP.LS_NO, doppioniNo().filter(x => x !== k)); render(); } });
+};
+const _vistaAltroDopp = vistaAltro;
+vistaAltro = function () {
+  if (ui.sub === 'doppioni') return vistaDoppioni();
+  const n = gruppiAperti().length;
+  const riga = `<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="doppioni"><i class="ti ti-copy"></i><span>Doppioni<small>${n ? plurale(n, 'gruppo da guardare', 'gruppi da guardare') : 'nessuno'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>`;
+  return _vistaAltroDopp().replace('<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">', riga + '<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">');
+};
 
 const _avviaAppV9 = avviaApp;
 avviaApp = function (sessione) {
