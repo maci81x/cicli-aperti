@@ -1034,6 +1034,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .evt-fatta .ti { color: var(--success, var(--primary)); font-size: 20px; }
 .evt-domanda { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
 .evt-domanda .btn { min-height: 48px; }
+.evt-invito { margin: var(--sp-2) 0 0; }
 .tag-coach.tag-prep { border-style: dashed; color: var(--text-2); border-color: var(--border-strong); }
 .tag-coach { display: inline-flex; align-items: center; margin-right: 6px; padding: 0 6px; border-radius: var(--r-sm); background: var(--surface); color: var(--evt); border: 1px solid var(--evt-mark); font-size: var(--fs-caption); line-height: 18px; font-weight: var(--fw-strong); vertical-align: 1px; }
 .evt-diverso { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); }
@@ -12650,10 +12651,18 @@ eventoInElenco = async function (id) {
 function disegnaDomandaEvento(e) {
   const b = (v, cls, testo) => `<button type="button" class="btn ${cls} btn-block" data-act="evt-togli" data-v="${v}">${testo}</button>`;
   const quando = `${fmtGiornoLungo(parseISODate(e.giorno))}${e.ora ? ` alle <span class="mono">${e.ora}</span>` : ''}`;
+  const fatta = `<p class="t-body evt-fatta"><i class="ti ti-circle-check" aria-hidden="true"></i><span>Messa tra le cose da fare: ${quando}.</span></p>`;
+  // invito di un'altra persona: toglierlo sarebbe rifiutarlo (e l'organizzatore riceve l'avviso) → solo nell'app
+  if (!e.orgIo) {
+    $('evt-corpo').innerHTML = `${fatta}
+      <div class="evt-domanda">${b('no', 'btn-secondary', 'Ok, nascondilo nell\'app')}</div>
+      <p class="t-label muted evt-invito">È un invito di ${escHtml(e.org || 'un\'altra persona')}: per rifiutarlo usa Google Calendar.</p>`;
+    return;
+  }
   const si = eventoDiSerie(e)
     ? b('una', 'btn-secondary', 'Sì, solo questa volta') + b('serie', 'btn-secondary', 'Sì, tutta la serie')
     : b('una', 'btn-secondary', 'Sì, toglilo');
-  $('evt-corpo').innerHTML = `<p class="t-body evt-fatta"><i class="ti ti-circle-check" aria-hidden="true"></i><span>Messa tra le cose da fare: ${quando}.</span></p>
+  $('evt-corpo').innerHTML = `${fatta}
     <h4 class="t-title" id="evt-domanda">Lo tolgo anche dal calendario?</h4>
     <div class="evt-domanda" role="group" aria-labelledby="evt-domanda">${si}${b('no', 'btn-ghost', 'No, lascialo')}</div>`;
 }
@@ -12661,7 +12670,7 @@ async function rispondiTogliEvento(v) {
   const n = ui.evtNuova;
   if (!n) return;
   const e = eventoPerId(n.evtId);
-  if (v !== 'no' && e) {
+  if (v !== 'no' && e && e.orgIo) {   // mai su un invito: sarebbe rifiutarlo
     const bersaglio = v === 'serie' && eventoDiSerie(e) ? e.serie : e.id;
     try { await gcalFetchUtente(`/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(bersaglio)}`, 'DELETE'); }   // comando di Roby
     catch (err) { if (!nonEsiste(err)) { showToast('Non riesco a toglierlo dal calendario: ' + err.message, 'error'); return; } }
