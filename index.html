@@ -11699,6 +11699,9 @@ function daRispostaAI(r) {
     })).filter(c => c.title)
   };
 }
+const maiuscola = t => { const x = String(t || '').trim(); return x.charAt(0).toUpperCase() + x.slice(1); };
+// una delega senza data di controllo si controlla 2 giorni dopo la riunione (come a voce)
+const controlloDopoRiunione = dataRiunione => toISODate(piuGiorni(parseISODate(dataRiunione) || new Date(), FRASE.CONTROLLO_GIORNI));
 // Il modello dell'anteprima: la madre e i passi, ognuno con la sua spunta
 function preparaPlaud(r, fonte) {
   const data = r.data || oggiLocale();
@@ -11708,7 +11711,7 @@ function preparaPlaud(r, fonte) {
     madre: /\d{1,2}\/\d{1,2}\s*$/.test(titolo) ? titolo : `${titolo} – ${fmtGgMm(data)}`,
     cose: r.cose.map((c, i) => {
       const p = c.persona ? trovaPersona(c.persona) : null;
-      return { i, scelta: true, title: c.title, note: c.note, q: c.q, data: c.data, cat: c.cat || null, persona: p ? p.nome : c.persona, personaId: p ? p.id : null, crea: true };
+      return { i, scelta: true, title: maiuscola(c.title), note: c.note, q: c.q, data: c.data, cat: c.cat || null, persona: p ? p.nome : c.persona ? maiuscola(c.persona) : null, personaId: p ? p.id : null, crea: true };
     })
   };
 }
@@ -11721,7 +11724,7 @@ function voceAnteprimaPlaud(c) {
     ${c.note ? `<div class="plaud-item-note">${escHtml(c.note)}</div>` : ''}
     <div class="plaud-item-meta">
       <select class="input pl-tipo" data-pl="q" data-q="${c.q}" aria-label="Tipo">${[1, 2, 3, 4].map(q => `<option value="${q}"${q === c.q ? ' selected' : ''}>${TIPI[q].label}</option>`).join('')}</select>
-      <label class="pl-data"><span>${c.q === 3 ? 'controllo' : 'quando'}</span><input type="date" class="plaud-date-input" data-pl="data" value="${c.data || ''}"></label>
+      <label class="pl-data"><span>${c.q === 3 ? 'controllo' : 'quando'}</span><input type="date" class="plaud-date-input" data-pl="data" value="${c.data || (c.q === 3 ? controlloDopoRiunione(ui.plaud.data) : '')}"></label>
       ${c.q === 3 && c.persona ? `<span class="pl-chi"><i class="ti ti-user"></i>${escHtml(c.persona)}</span>` : ''}
     </div>
     ${chiedi ? `<div class="pl-chiedi"><span>${escHtml(c.persona)} non è tra le tue persone. La aggiungo?</span>
@@ -11819,7 +11822,7 @@ async function importaRiunione() {
       const riga = { ...rigaNuova(c.title, { subito: c.q === 1 }, ctx), q: c.q, note: c.note || null, cat, macro_area: areaDaCategoria(cat), da_plaud: true,
         persone_menzionate: unici([persona ? persona.nome : c.q === 3 ? c.persona : null]), ...(state.passiColOk ? { parent_id: madre.id } : {}) };
       const conDelega = c.q === 3 && state.delegaColsOk
-        ? { ...riga, delega_persona_id: persona ? persona.id : null, delega_controllo: c.data || toISODate(dataPiu(FRASE.CONTROLLO_GIORNI)) }
+        ? { ...riga, delega_persona_id: persona ? persona.id : null, delega_controllo: c.data || controlloDopoRiunione(p.data) }
         : c.data && c.q !== 3 ? { ...riga, scheduled_date: c.data } : riga;
       const salvata = await upsertCiclo(conDelega);
       if (!salvata) continue;
