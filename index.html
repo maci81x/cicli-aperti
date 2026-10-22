@@ -5579,12 +5579,13 @@ function eventiDelGiorno(d) {
   const w = isoWeekParts(d);
   return (ui.eventi[settKey(w.week, w.year)] || []).filter(e => e.giorno === toISODate(d));
 }
-// 22/10 · un evento «di giornata» (tutto il giorno, di 12 ore o più, o che finisce un altro giorno) non occupa ore
+// 22/10 · un evento «di giornata» (tutto il giorno o di 12 ore o più) non occupa ore
 // e non dà avvisi di sovrapposizione
 const GIORNATA_EVENTO_MIN = 12 * 60;
 function eGiornata(e) {
   if (!e || e.tuttoIlGiorno || !e.ora) return true;
-  return e.minuti >= GIORNATA_EVENTO_MIN || (e.fineMs && toISODate(new Date(e.fineMs - 1)) !== e.giorno);
+  // 22/10 sera · uno che passa la mezzanotte (23:00–00:30) resta un appuntamento con orario: conta solo la durata
+  return e.minuti >= GIORNATA_EVENTO_MIN;
 }
 function minutiOccupati(d) { return eventiDelGiorno(d).filter(e => !eGiornata(e)).reduce((s, e) => s + e.minuti, 0); }
 
@@ -11214,8 +11215,24 @@ const FRASE = {
   MINUTI: { mezza: 30, mezzo: 30, 'un quarto': 15, quarto: 15, 'tre quarti': 45 },
   POMERIGGIO_FINO: 6,        // senza «mattina/pomeriggio/sera»: dall'1 alle 6 = pomeriggio, dalle 7 alle 12 = mattina
   CONTROLLO_GIORNI: 2,       // una delega senza data si controlla tra 2 giorni (come il foglio Delega)
-  PAROLE_NON_NOMI: ['mia', 'mio', 'lui', 'lei', 'tutti', 'qualcuno', 'loro', 'chi', 'me', 'te']
+  PAROLE_NON_NOMI: ['mia', 'mio', 'lui', 'lei', 'tutti', 'qualcuno', 'loro', 'chi', 'me', 'te'],
+  // dopo «il 26» queste parole lasciano il numero una data; un'altra parola (un nome di cosa: «il 2 pacchi») no
+  DOPO_DATA: ['a', 'ad', 'al', 'alle', 'all', 'ore', 'e', 'ed', 'o', 'entro', 'per', 'di', 'del', 'della', 'da', 'dalle', 'con', 'che', 'ma', 'poi', 'devo', 'dobbiamo', 'bisogna', 'ricordami',
+    'mattina', 'mattino', 'pomeriggio', 'sera', 'prossimo', 'prossima', 'mese', 'sì', 'si', 'no']
 };
+// Dopo il numero c'è «un nome di cosa» contato? («il 2 pacchi», «il 3 bottiglie»: è una quantità, non un giorno).
+// Si guarda il plurale: finisce in -i, o in -e ma non come i singolari «riunione», «cliente», «fattore».
+// Non sono cose: i nomi di persona (maiuscola), i verbi all'infinito, le parole di FRASE.DOPO_DATA, un'ora o una data tolta (¦).
+const VERBO_INFINITO = /(?:are|ere|ire|arsi|ersi|irsi|urre|orre|arre)$/i;
+const SINGOLARE_IN_E = /(?:ione|ore|ente|ante|ale|ile|ice|ese|ere|one)$/i;
+const TOLTO = '¦';
+function seguitoDaCosa(dopo) {
+  const m = /^\s*([A-Za-zÀ-ÿ']+)/.exec(dopo || '');
+  if (!m || /^[A-ZÀ-Ý]/.test(m[1])) return false;
+  const w = senzaAccenti(m[1].replace(/'$/, ''));
+  if (FRASE.DOPO_DATA.includes(w) || VERBO_INFINITO.test(w) || FRASE.GIORNI.includes(w)) return false;
+  return /i$/.test(w) || (/e$/.test(w) && !SINGOLARE_IN_E.test(w));
+}
 const senzaAccenti = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 const FINE_PAROLA = '(?![A-Za-z0-9À-ÿ])';   // \b non vede «ì» come lettera
 const RE_GIORNO = '(luned[iìí]|marted[iìí]|mercoled[iìí]|gioved[iìí]|venerd[iìí]|sabato|domenica)';
@@ -11264,12 +11281,15 @@ function interpretaFrase(testo, oggi = new Date()) {
   let data = null, ora = null, q = 2, delega = null, giornoDetto = null;
   // «pomeriggio», «sera», «stasera» detti altrove nella frase valgono per l'ora («domani pomeriggio alle 4» = 16:00)
   const momento = /\b(?:pomeriggio|sera|stasera|stanotte)\b/i.test(testo || '') ? 'pomeriggio' : /\b(?:mattina|mattino|stamattina|stamani|domattina)\b/i.test(testo || '') ? 'mattina' : '';
-  // toglie dal testo la prima corrispondenza accettata da `fn`
+  // toglie dal testo la prima corrispondenza accettata da `fn` (se `fn` scarta la prima, prova le successive:
+  // in «comprare il 2 pacchi il 27» la data è «il 27»)
   const togli = (re, fn) => {
-    const m = new RegExp(re, 'i').exec(resto);
-    if (!m || fn(m) === false) return false;
-    resto = resto.slice(0, m.index) + ' ' + resto.slice(m.index + m[0].length);
-    return true;
+    const g = new RegExp(re, 'gi');
+    for (let m = g.exec(resto); m; m = g.exec(resto)) {
+      if (fn(m) !== false) { resto = resto.slice(0, m.index) + ` ${TOLTO} ` + resto.slice(m.index + m[0].length); return true; }
+      if (!m[0].length) g.lastIndex++;
+    }
+    return false;
   };
   togli('\\b(?:ricordami|ricordarmi|ricorda(?:ti)?|promemoria)\\b\\s*:?', () => {});
   togli('\\b(?:subito|urgente(?:mente)?|con urgenza)\\b', () => { q = 1; });
@@ -11283,6 +11303,7 @@ function interpretaFrase(testo, oggi = new Date()) {
   // se il giorno non torna («lunedì 27» quando il 27 è martedì) il riepilogo dice «controlla il giorno»
   togli(RE_PRIMA + RE_GIORNO + '\\s+(\\d{1,2})(?:°)?(?:(?:[/\\-](\\d{1,2})(?:[/\\-](\\d{2,4}))?)|(?:\\s+(' + FRASE.MESI.join('|') + ')(?:\\s+(\\d{4}))?))?(?![\\d:.])', m => {
     const n = +m[2], mese = m[3] ? +m[3] : m[5] ? FRASE.MESI.indexOf(m[5].toLowerCase()) + 1 : null, anno = m[4] ? +m[4] : m[6] ? +m[6] : null;
+    if (!mese && seguitoDaCosa(resto.slice(m.index + m[0].length))) return false;   // «venerdì 2 pacchi»: il 2 non è il giorno
     const d = mese ? dataValida(n, mese, anno, base) : giornoDelMese(n, base);
     if (!d) return false;
     giornoDetto = FRASE.GIORNI.indexOf(senzaAccenti(m[1]));
@@ -11301,8 +11322,11 @@ function interpretaFrase(testo, oggi = new Date()) {
     if (u.startsWith('mes')) { const d = new Date(base); d.setMonth(d.getMonth() + n); return metti(d); }
     return metti(piuGiorni(base, u.startsWith('settiman') ? n * 7 : n));
   });
-  // «il 26», «entro il 3»: il giorno del mese
-  togli('(?:\\b(?:entro|per|da)\\s+)?\\b(?:il|l\')\\s*(\\d{1,2})(?:°)?(?![\\d/:.\\-])', m => metti(giornoDelMese(+m[1], base)));
+  // «il 26», «entro il 3», «per il 5», «dal 3»: il giorno del mese, ma non «il 2 pacchi»
+  togli('(?:\\b(?:entro|per|da)\\s+)?\\b(?:il|l\'|dal|dall\')\\s*(\\d{1,2})(?:°)?(?![\\d/:.\\-])', m => {
+    if (seguitoDaCosa(resto.slice(m.index + m[0].length))) return false;
+    return metti(giornoDelMese(+m[1], base));
+  });
   // «lunedì» e «il prossimo lunedì» = il primo lunedì dopo oggi; «lunedì prossimo» = il lunedì della settimana dopo
   togli(RE_PRIMA + '(?:prossim[oa]\\s+)?' + RE_GIORNO + '(?:\\s+(prossim[oa]))?' + FINE_PAROLA, m => {
     const idx = FRASE.GIORNI.indexOf(senzaAccenti(m[1]));
@@ -11323,7 +11347,7 @@ function interpretaFrase(testo, oggi = new Date()) {
     }
   }
   // il resto è il titolo
-  let t = resto.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
+  let t = resto.split(TOLTO).join(' ').replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
   const testa = /^(?:di|che|devo|dovrei|bisogna|da|e|,|:|-)\s+/i;
   for (let i = 0; i < 4 && testa.test(t + ' '); i++) t = (t + ' ').replace(testa, '').trim();
   if (delega) t = t.replace(/^(?:il|lo|la|i|gli|le|l')\s*(?=\S)/i, '');
