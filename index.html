@@ -1026,6 +1026,14 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
 /* ══ v5 · metodo i-Time ══ */
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
+.tag-cal { display: inline-flex; align-items: center; gap: 3px; color: var(--evt); font-weight: var(--fw-strong); white-space: nowrap; }
+.tag-cal .ti { font-size: 13px; }
+@keyframes lampo { 30% { background-color: var(--evt-soft); box-shadow: inset 0 0 0 2px var(--evt-mark); } }
+.item.lampo { animation: lampo 1.2s ease-out 1; }
+.evt-fatta { display: flex; gap: var(--sp-2); align-items: flex-start; margin: 0 0 var(--sp-3); color: var(--text); }
+.evt-fatta .ti { color: var(--success, var(--primary)); font-size: 20px; }
+.evt-domanda { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
+.evt-domanda .btn { min-height: 48px; }
 .tag-coach.tag-prep { border-style: dashed; color: var(--text-2); border-color: var(--border-strong); }
 .tag-coach { display: inline-flex; align-items: center; margin-right: 6px; padding: 0 6px; border-radius: var(--r-sm); background: var(--surface); color: var(--evt); border: 1px solid var(--evt-mark); font-size: var(--fs-caption); line-height: 18px; font-weight: var(--fw-strong); vertical-align: 1px; }
 .evt-diverso { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); }
@@ -5439,6 +5447,7 @@ function riga(r, opz) {
   else if (o.extra) meta.push(`<span>${escHtml(o.extra)}</span>`);
   else if (ripetizioneDi(c) !== 'nessuna') meta.push(`<span><i class="ti ti-repeat" style="font-size:12px"></i> ${RIP_LABELS[ripetizioneDi(c)].toLowerCase()}</span>`);
   else if ((c.persone_menzionate || []).length) meta.push(`<span>${escHtml(c.persone_menzionate[0])}</span>`);
+  if (bloccoEsterno(c) && !o.routine) meta.push(TAG_DAL_CAL);   // collegata a un appuntamento rimasto sul calendario
   const sep = '<span class="sep">·</span>';
   const titolo = (o.evidenzia ? evidenzia(c.title, o.evidenzia) : escHtml(c.title)) + (!fatto && !o.routine && eRapida(c, r.item) ? RAPIDA_CHIP : '');
   const stella = o.stellaDi ? o.stellaDi(r) : null;   // 'on' | 'off' | null (righe fuori dal piano)
@@ -5457,7 +5466,7 @@ function riga(r, opz) {
   const ripete = !o.routine && ripetizioneDi(c) !== 'nessuna' && !isGiornaliero(c)
     ? `<i class="ti ti-repeat blocco-ico" role="img" aria-label="Si ripete: ${RIP_LABELS[ripetizioneDi(c)].toLowerCase()}" data-tip="Si ripete: ${RIP_LABELS[ripetizioneDi(c)].toLowerCase()}"></i>` : '';
   const blocco = fatto ? '' : c.inderogabile && state.inderoColOk ? '<i class="ti ti-lock blocco-ico" role="img" aria-label="Importante bloccata in agenda: inderogabile" data-tip="Importante bloccata in agenda: non si sposta"></i>'
-    : c.calendar_event_id ? '<i class="ti ti-calendar-check blocco-ico" role="img" aria-label="Bloccata in agenda" data-tip="Bloccata in agenda su Google Calendar"></i>' : '';
+    : c.calendar_event_id && !bloccoEsterno(c) ? '<i class="ti ti-calendar-check blocco-ico" role="img" aria-label="Bloccata in agenda" data-tip="Bloccata in agenda su Google Calendar"></i>' : '';
   return `<div class="item p-q${q}${fatto ? ' is-done' : ''}${inRitardo ? ' is-late' : ''}" data-id="${c.id}"${data}${o.trascina ? ' draggable="true"' : ''}>
     ${azioni}
     <div class="item-row">
@@ -9765,7 +9774,7 @@ async function cercaCicliInCalendario() {
   const scelte = leggiJson(LS5.CICLI_CAL, {});
   const perSerie = new Map();
   ev.forEach(e => {
-    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach || e.app) return;   // gli eventi dell'app non sono «cicli nel calendario»
+    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach || e.app || eventoCollegato(e)) return;   // gli eventi dell'app non sono «cicli nel calendario»
     const k = e.serie || e.id;
     if (scelte[k]) return;
     perSerie.set(k, [...(perSerie.get(k) || []), e]);
@@ -12602,6 +12611,97 @@ sincronizzaPromemoria = async function (tipo, forza) {
     return id;
   } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
 };
+
+// ══════════════════════════════════════════════════════════════
+// 22/10 sera · «È una cosa da fare» dal foglio di un appuntamento
+// La cosa prende giorno e ora dell'appuntamento; il foglio chiede «Lo tolgo anche dal calendario?».
+// Se resta sul calendario la cosa è collegata (calendar_event_id = 'ext:<id dell'evento>'): in Oggi si vede solo lei, con «dal calendario».
+// ══════════════════════════════════════════════════════════════
+const DAL_CAL = { LAMPO_MS: 1300 };
+const TAG_DAL_CAL = '<span class="tag-cal" data-tip="Collegata a un appuntamento di Google Calendar"><i class="ti ti-calendar-event"></i>dal calendario</span>';
+ui.evtNuova = null;   // { evtId, cicloId } finché il foglio aspetta la risposta
+const idCollegato = c => bloccoEsterno(c) ? c.calendar_event_id.slice(4) : null;
+const eventoCollegato = e => !!e && state.cicli.some(c => idCollegato(c) === e.id);
+const cosaDiEvento = e => state.cicli.find(c => idCollegato(c) === e.id) || state.cicli.find(c => !c.done && normTitolo(c.title) === normTitolo(e.titolo));
+const eventoDiSerie = e => !!(e && e.serie && e.serie !== e.id);
+
+const _eventiDelGiornoDalCal = eventiDelGiorno;
+eventiDelGiorno = function (d) { return _eventiDelGiornoDalCal(d).filter(e => !eventoCollegato(e)); };
+
+eventoInElenco = async function (id) {
+  const e = eventoPerId(id);
+  if (!e) return;
+  const gia = cosaDiEvento(e);
+  if (gia) { closeModal('evtOverlay'); apriDettaglio(gia.id); return; }
+  const ctx = e.cal === 'privato' ? 'personale' : 'lavoro', ora = e.ora || null;
+  try {
+    const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx),
+      note: `Dal calendario ${nomeCalendario(e)}: «${e.titoloOrig || e.titolo}» del ${fmtGgMm(e.giorno)}`,
+      scheduled_date: e.giorno, scheduled_time: ora,
+      ...(state.ritualiColsOk && ora && e.minuti ? { durata_minuti: e.minuti } : {}),
+      ...(ui.calEventColOk !== false ? { calendar_event_id: 'ext:' + e.id } : {}) });
+    if (!c) throw new Error('la cosa non è stata salvata');
+    state.cicli = [c, ...state.cicli.filter(x => x.id !== c.id)];
+    await pianificaInData(ciclo(c.id) || c, parseISODate(e.giorno), fasciaDaOra(ora));
+    ui.evtNuova = { evtId: e.id, cicloId: c.id };
+    disegnaDomandaEvento(e);
+  } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
+};
+function disegnaDomandaEvento(e) {
+  const b = (v, cls, testo) => `<button type="button" class="btn ${cls} btn-block" data-act="evt-togli" data-v="${v}">${testo}</button>`;
+  const quando = `${fmtGiornoLungo(parseISODate(e.giorno))}${e.ora ? ` alle <span class="mono">${e.ora}</span>` : ''}`;
+  const si = eventoDiSerie(e)
+    ? b('una', 'btn-secondary', 'Sì, solo questa volta') + b('serie', 'btn-secondary', 'Sì, tutta la serie')
+    : b('una', 'btn-secondary', 'Sì, toglilo');
+  $('evt-corpo').innerHTML = `<p class="t-body evt-fatta"><i class="ti ti-circle-check" aria-hidden="true"></i><span>Messa tra le cose da fare: ${quando}.</span></p>
+    <h4 class="t-title" id="evt-domanda">Lo tolgo anche dal calendario?</h4>
+    <div class="evt-domanda" role="group" aria-labelledby="evt-domanda">${si}${b('no', 'btn-ghost', 'No, lascialo')}</div>`;
+}
+async function rispondiTogliEvento(v) {
+  const n = ui.evtNuova;
+  if (!n) return;
+  const e = eventoPerId(n.evtId);
+  if (v !== 'no' && e) {
+    const bersaglio = v === 'serie' && eventoDiSerie(e) ? e.serie : e.id;
+    try { await gcalFetchUtente(`/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(bersaglio)}`, 'DELETE'); }   // comando di Roby
+    catch (err) { if (!nonEsiste(err)) { showToast('Non riesco a toglierlo dal calendario: ' + err.message, 'error'); return; } }
+    if (ui.calEventColOk !== false) await patchCiclo(n.cicloId, { calendar_event_id: null });
+    const via = x => bersaglio === e.serie ? (x.serie || x.id) !== e.serie : x.id !== e.id;
+    ui.eventi = Object.fromEntries(Object.entries(ui.eventi).map(([k, lista]) => [k, Array.isArray(lista) ? lista.filter(via) : lista]));
+  }
+  ui.evtNuova = null;
+  _closeModalDalCal('evtOverlay');
+  render();
+  lampeggia(n.cicloId);
+}
+// la riga nuova lampeggia una volta
+function lampeggia(id) {
+  requestAnimationFrame(() => {
+    const el = document.querySelector(`#view .item[data-id="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'nearest' });
+    el.classList.add('lampo');
+    setTimeout(() => el.classList.remove('lampo'), DAL_CAL.LAMPO_MS);
+  });
+}
+// mentre il foglio aspetta la risposta: la X vale «No, lascialo», il tocco fuori non chiude
+const _closeModalDalCal = closeModal;
+closeModal = function (id) {
+  if (id === 'evtOverlay' && ui.evtNuova) { rispondiTogliEvento('no'); return; }
+  return _closeModalDalCal.apply(this, arguments);
+};
+const _closeModalOnBgDalCal = closeModalOnBg;
+closeModalOnBg = function (ev, id) {
+  if (id === 'evtOverlay' && ui.evtNuova) return;
+  return _closeModalOnBgDalCal.apply(this, arguments);
+};
+AZIONI['evt-in-elenco'] = el => eventoInElenco(el.dataset.evt);
+AZIONI['evt-togli'] = el => rispondiTogliEvento(el.dataset.v);
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && ui.evtNuova && $('evtOverlay').classList.contains('open')) { ev.preventDefault(); ev.stopImmediatePropagation(); rispondiTogliEvento('no'); }
+}, true);
+const _apriFoglioEventoDalCal = apriFoglioEvento;
+apriFoglioEvento = function (id) { ui.evtNuova = null; return _apriFoglioEventoDalCal(id); };
 
 const _avviaAppV9 = avviaApp;
 avviaApp = function (sessione) {
