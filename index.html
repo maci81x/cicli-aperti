@@ -96,7 +96,7 @@
   --q1: #B42318;  --q1-mark: #D92D20;  --q1-soft: #FFF4F3;   /* Subito */
   --q2: #0B5F58;  --q2-mark: #0F766E;  --q2-soft: #DDF2EE;   /* Importante */
   --q3: #1D4ED8;  --q3-mark: #2563EB;  --q3-soft: #E8EFFE;   /* Delega */
-  --q4: #5F6C67;  --q4-mark: #8A9692;  --q4-soft: #ECF0EE;   /* Lascia stare */
+  --q4: #5F6C67;  --q4-mark: #7A8682;  --q4-soft: #ECF0EE;   /* Lascia stare · segno ≥ 3:1 anche su #FFF4F3 e #F3EEFE (22/10) */
   --evt: #6D28D9; --evt-mark: #7C3AED; --evt-soft: #F3EEFE;  /* Appuntamento (Google Calendar) */
   --pensa: #FDF6D8; --pensa-bordo: #E3C65A; --pensa-ink: #6B5300;   /* «In settimana · pensaci dopo» */
 
@@ -417,7 +417,7 @@ a { color: var(--primary-ink); }
 .tools-row { display: flex; align-items: center; gap: var(--sp-2); }
 .tools-row > .grow { flex: 1; min-width: 0; }
 .cerca { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-3); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); color: var(--text-3); }
-.cerca input { flex: 1; min-width: 0; border: 0; background: none; outline: none; color: var(--text); font-size: var(--fs-body); }
+.cerca input { flex: 1; min-width: 0; align-self: stretch; min-height: var(--tap); border: 0; background: none; outline: none; color: var(--text); font-size: var(--fs-body); }
 .cerca:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 @media (min-width: 768px) { .solo-tel { display: none !important; } }
 @media (max-width: 767px) { .solo-desk { display: none !important; } }
@@ -719,6 +719,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .rap-edit { display: grid; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); }
 .rap-edit .input { min-height: var(--tap); }
 .rap-edit-riga { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--sp-2); }
+.rap-edit-riga .input { width: 100%; }
+@media (max-width: 479px) { .rap-edit-riga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .rap-edit-riga select { grid-column: 1 / -1; } }
 .pl-tipo[data-q="1"] { color: var(--q1); border-color: var(--q1-mark); } .pl-tipo[data-q="2"] { color: var(--q2); border-color: var(--q2-mark); }
 .pl-tipo[data-q="3"] { color: var(--q3); border-color: var(--q3-mark); }
 .cattura { flex-wrap: wrap; }
@@ -733,8 +735,9 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .pl-madre .input { min-height: var(--tap); font-weight: var(--fw-strong); }
 .pl-madre .plaud-item-note { margin-left: 0; }
 .plaud-item.p-q1 { border-color: var(--q1-mark); } .plaud-item.p-q3 { border-color: var(--q3-mark); }
-.plaud-item-meta .pl-tipo { min-height: 36px; width: auto; padding: 0 calc(var(--sp-4) * 2) 0 var(--sp-2); }
+.plaud-item-meta .pl-tipo { min-height: var(--tap); width: auto; padding: 0 calc(var(--sp-4) * 2) 0 var(--sp-2); }
 .pl-data { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.pl-data .plaud-date-input { min-height: var(--tap); }
 .pl-chi { display: inline-flex; align-items: center; gap: 4px; color: var(--q3); font-weight: var(--fw-strong); }
 .pl-chiedi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: var(--sp-2) 0 0 34px; font-size: var(--fs-label); color: var(--text-2); }
 
@@ -1214,7 +1217,8 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 @media (hover: hover) { .evt-riga[data-act="evt-sposta"]:hover { filter: brightness(.98); } }
 /* Sposta a */
 .sevt-campi { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--sp-2); }
-.sevt-campi .input { min-height: var(--tap); padding: 0 var(--sp-2); }
+.sevt-campi .input { width: 100%; min-height: var(--tap); padding: 0 var(--sp-2); }
+@media (max-width: 479px) { .sevt-campi { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .sevt-campi > label:first-child { grid-column: 1 / -1; } }
 .sevt-avviso { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--sp-1) var(--sp-2); align-items: start; margin-top: var(--sp-3); padding: var(--sp-3); border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-label); line-height: var(--lh-label); }
 .sevt-avviso.warn { background: var(--warn-soft); color: var(--warn); }
 .sevt-avviso .btn { grid-column: 2; justify-self: start; }
@@ -7250,7 +7254,7 @@ function creaPdfSettimana() {
   const RIGA_MIN = 4.6;                                                       // con il corpo a 9 pt sotto non si legge
   const stima = Math.max(RIGA_MIN, Math.min(7.2 * s, (LIMITE - M - fissi) / totRighe));
   // v6 · colori del foglio = colori dell'app (tema chiaro); il fondo delle Subito è un po' più carico, sulla carta #FFF4F3 non si vede
-  const PDF_COL = { 1: [217, 45, 32], 2: [15, 118, 110], 3: [37, 99, 235], 4: [138, 150, 146], evt: [124, 58, 237], evtInk: [109, 40, 217], subitoFondo: [253, 226, 223], giallo: [255, 244, 179] };
+  const PDF_COL = { 1: [217, 45, 32], 2: [15, 118, 110], 3: [37, 99, 235], 4: [122, 134, 130], evt: [124, 58, 237], evtInk: [109, 40, 217], subitoFondo: [253, 226, 223], giallo: [255, 244, 179] };
   const nPiano = cose.length;
   // tutto su un foglio quando si può: se esce su due pagine si rifà con le righe più strette, fino al minimo leggibile
   const costruisci = RIGA => {

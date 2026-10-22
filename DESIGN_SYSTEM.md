@@ -82,7 +82,7 @@ Token semantici. Nell'app stanno su `:root` (chiaro) e `:root[data-theme="dark"]
 | `--q1-mark` / `--q1` / `--q1-soft` | `#D92D20` / `#B42318` / `#FFF4F3` | `#F97066` / = / `#3A1D1A` | **Subito**: casella, puntini / testo / fondo della riga. Nel PDF anche «!» davanti al titolo |
 | `--q2-mark` / `--q2` / `--q2-soft` | `#0F766E` / `#0B5F58` / `#DDF2EE` | `#2DD4BF` / = / `#12332F` | **Importante** (= primario) |
 | `--q3-mark` / `--q3` / `--q3-soft` | `#2563EB` / `#1D4ED8` / `#E8EFFE` | `#93B4FF` / = / `#1B2A4A` | **Delega** |
-| `--q4-mark` / `--q4` / `--q4-soft` | `#8A9692` / `#5F6C67` / `#ECF0EE` | `#8A9692` / = / `#202A28` | **Lascia stare** (grigio) |
+| `--q4-mark` / `--q4` / `--q4-soft` | `#7A8682` / `#5F6C67` / `#ECF0EE` | `#8A9692` / = / `#202A28` | **Lascia stare** (grigio) |
 | `--evt-mark` / `--evt` / `--evt-soft` | `#7C3AED` / `#6D28D9` / `#F3EEFE` | `#B9A2F7` / = / `#261E3D` | **Appuntamento** (Google Calendar): cerchio, ora, fondo |
 | `--pensa` / `--pensa-bordo` / `--pensa-ink` | `#FDF6D8` / `#E3C65A` / `#6B5300` | `#2E2810` / `#7A6420` / `#F2D675` | colonna gialla «In settimana · pensaci dopo» |
 | `--danger` / `--danger-soft` | `#B42318` / `#FCE8E6` | `#F98B82` / `#3B1A17` | eliminare, errori |
@@ -99,7 +99,7 @@ Ogni cosa porta il colore del suo tipo, uguale nell'app (chiaro e scuro) e nel f
 
 - **La casella da spuntare** è un quadratino (raggio 7) con il bordo 2px del colore del tipo (`--qN-mark`); spuntata si riempie dello stesso colore. Gli **appuntamenti** hanno un **cerchio** viola al posto del quadratino, su fondo `--evt-soft`.
 - **Subito** ha anche il fondo della riga `--q1-soft`. Nessuna barra colorata laterale, da nessuna parte.
-- Due livelli per colore: `-mark` è il colore esatto per i segni (casella, puntino, cerchio, ≥ 3:1); il token senza suffisso è per il **testo** (≥ 4,5:1 su tutte le superfici). In chiaro sono diversi perché alcuni colori dei segni non arrivano a 4,5:1 come testo (Subito `#D92D20` sul suo fondo: 4,48; Lascia stare `#8A9692`: 3,06). In scuro coincidono.
+- Due livelli per colore: `-mark` è il colore esatto per i segni (casella, puntino, cerchio, ≥ 3:1); il token senza suffisso è per il **testo** (≥ 4,5:1 su tutte le superfici). In chiaro sono diversi perché alcuni colori dei segni non arrivano a 4,5:1 come testo (Subito `#D92D20` sul suo fondo: 4,48; Lascia stare: il segno è `#7A8682` dal 22/10, ≥ 3:1 anche sui fondi rosato `#FFF4F3` e viola `#F3EEFE`). In scuro coincidono.
 - Verificato con a11y-audit (`contrast_checker.py`): tutte le coppie di testo passano 4,5:1 nei due temi; i segni passano 3:1. Le uniche coppie sotto sono la casella di Lascia stare su fondo Subito o appuntamento, combinazioni che non esistono.
 - Legenda (testata di Pianifica a colonne e foglio PDF): quadratino rosso col fondo rosato «Subito», verde «Importante», blu «Delega», grigio «Lascia stare», cerchio viola «Appuntamento».
 
