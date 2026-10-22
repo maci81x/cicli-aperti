@@ -11290,7 +11290,7 @@ const FRASE = {
   MESI: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
   NUMERI: { un: 1, uno: 1, una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, quindici: 15, venti: 20, trenta: 30 },
   MINUTI: { mezza: 30, mezzo: 30, 'un quarto': 15, quarto: 15, 'tre quarti': 45 },
-  POMERIGGIO_FINO: 7,        // «alle 3» = 15:00: dall'1 alle 7 senza «di mattina» si intende il pomeriggio
+  POMERIGGIO_FINO: 6,        // senza «mattina/pomeriggio/sera»: dall'1 alle 6 = pomeriggio, dalle 7 alle 12 = mattina
   CONTROLLO_GIORNI: 2,       // una delega senza data si controlla tra 2 giorni (come il foglio Delega)
   PAROLE_NON_NOMI: ['mia', 'mio', 'lui', 'lei', 'tutti', 'qualcuno', 'loro', 'chi', 'me', 'te']
 };
@@ -11309,11 +11309,18 @@ function dataValida(g, m, a, oggi) {
   if (!a && toISODate(d) < toISODate(oggi)) d.setFullYear(anno + 1);   // «il 5 gennaio» detto a ottobre = l'anno prossimo
   return d;
 }
+// «il 26» senza mese: questo mese se non è ancora passato, altrimenti il prossimo
+function giornoDelMese(n, oggi) {
+  if (n < 1 || n > 31) return null;
+  const mese = n >= oggi.getDate() ? oggi.getMonth() : oggi.getMonth() + 1;
+  const d = new Date(oggi.getFullYear(), mese, n);
+  return d.getDate() === n ? d : null;
+}
 function oraDa(h, m, dopo) {
   let ore = parseInt(h, 10);
   const minuti = m == null ? 0 : /^\d+$/.test(m) ? parseInt(m, 10) : FRASE.MINUTI[m.toLowerCase()] || 0;
   const q = senzaAccenti(dopo);
-  if (/pomeriggio|sera/.test(q) && ore < 12) ore += 12;
+  if (/pomeriggio|sera|notte/.test(q) && ore < 12) ore += 12;
   else if (!q && ore >= 1 && ore <= FRASE.POMERIGGIO_FINO) ore += 12;
   if (ore > 23 || minuti > 59) return null;
   return `${String(ore).padStart(2, '0')}:${String(minuti).padStart(2, '0')}`;
@@ -11332,7 +11339,9 @@ function trovaPersona(nome) {
 function interpretaFrase(testo, oggi = new Date()) {
   const base = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
   let resto = ` ${String(testo || '').replace(/\s+/g, ' ').trim()} `;
-  let data = null, ora = null, q = 2, delega = null;
+  let data = null, ora = null, q = 2, delega = null, giornoDetto = null;
+  // «pomeriggio», «sera», «stasera» detti altrove nella frase valgono per l'ora («domani pomeriggio alle 4» = 16:00)
+  const momento = /\b(?:pomeriggio|sera|stasera|stanotte)\b/i.test(testo || '') ? 'pomeriggio' : /\b(?:mattina|mattino|stamattina|stamani|domattina)\b/i.test(testo || '') ? 'mattina' : '';
   // toglie dal testo la prima corrispondenza accettata da `fn`
   const togli = (re, fn) => {
     const m = new RegExp(re, 'i').exec(resto);
@@ -11344,15 +11353,24 @@ function interpretaFrase(testo, oggi = new Date()) {
   togli('\\b(?:subito|urgente(?:mente)?|con urgenza)\\b', () => { q = 1; });
   // l'ora prima delle date: «alle 15.30» non è il 15 marzo
   togli("\\b(?:alle|ore|per le|verso le|dalle)\\s+(?:ore\\s+)?(\\d{1,2})(?:[:.](\\d{2}))?(?:\\s+e\\s+(mezza|mezzo|un quarto|tre quarti|\\d{1,2}))?(?:\\s+(di mattina|del mattino|di pomeriggio|del pomeriggio|di sera|della sera))?\\b",
-    m => { const o = oraDa(m[1], m[2] != null ? m[2] : m[3], m[4]); if (!o) return false; ora = o; })
+    m => { const o = oraDa(m[1], m[2] != null ? m[2] : m[3], m[4] || momento); if (!o) return false; ora = o; })
     || togli("\\ball'una(?:\\s+e\\s+(mezza|un quarto|tre quarti))?\\b", m => { ora = oraDa('13', m[1], 'pomeriggio'); })
     || togli('\\b(\\d{1,2}):(\\d{2})\\b', m => { const o = oraDa(m[1], m[2], 'mattina'); if (!o) return false; ora = o; });
   const metti = d => { if (!data && d) data = toISODate(d); return !!d; };
+  // giorno della settimana con la data: «lunedì 26», «venerdì 30 ottobre», «giovedì 29/10». Vale la data;
+  // se il giorno non torna («lunedì 27» quando il 27 è martedì) il riepilogo dice «controlla il giorno»
+  togli(RE_PRIMA + RE_GIORNO + '\\s+(\\d{1,2})(?:°)?(?:(?:[/\\-](\\d{1,2})(?:[/\\-](\\d{2,4}))?)|(?:\\s+(' + FRASE.MESI.join('|') + ')(?:\\s+(\\d{4}))?))?(?![\\d:.])', m => {
+    const n = +m[2], mese = m[3] ? +m[3] : m[5] ? FRASE.MESI.indexOf(m[5].toLowerCase()) + 1 : null, anno = m[4] ? +m[4] : m[6] ? +m[6] : null;
+    const d = mese ? dataValida(n, mese, anno, base) : giornoDelMese(n, base);
+    if (!d) return false;
+    giornoDetto = FRASE.GIORNI.indexOf(senzaAccenti(m[1]));
+    return metti(d);
+  });
   togli(RE_PRIMA + '(\\d{1,2})(?:°)?\\s+(' + FRASE.MESI.join('|') + ')(?:\\s+(\\d{4}))?\\b', m => metti(dataValida(+m[1], FRASE.MESI.indexOf(m[2].toLowerCase()) + 1, m[3] ? +m[3] : null, base)));
   togli(RE_PRIMA + '\\b(\\d{1,2})[/\\-](\\d{1,2})(?:[/\\-](\\d{2,4}))?\\b', m => metti(dataValida(+m[1], +m[2], m[3] ? +m[3] : null, base)));
   togli(RE_PRIMA + '\\b(?:settimana\\s+prossima|prossima\\s+settimana)\\b', () => metti(lunediDopo(base)));
   togli(RE_PRIMA + '\\bdopodomani\\b', () => metti(piuGiorni(base, 2)));
-  togli(RE_PRIMA + '\\bdomani(?:\\s+(?:mattina|pomeriggio|sera))?\\b', () => metti(piuGiorni(base, 1)));
+  togli(RE_PRIMA + '\\b(?:domani(?:\\s+(?:mattina|pomeriggio|sera))?|domattina)\\b', () => metti(piuGiorni(base, 1)));
   togli(RE_PRIMA + '\\b(?:oggi(?:\\s+pomeriggio)?|stasera|stamattina|stamani)\\b', () => metti(base));
   togli('\\b(?:tra|fra)\\s+' + RE_NUM + '\\s+(giorni|giorno|settimane|settimana|mesi|mese)\\b', m => {
     const n = numeroDa(m[1]);
@@ -11361,6 +11379,8 @@ function interpretaFrase(testo, oggi = new Date()) {
     if (u.startsWith('mes')) { const d = new Date(base); d.setMonth(d.getMonth() + n); return metti(d); }
     return metti(piuGiorni(base, u.startsWith('settiman') ? n * 7 : n));
   });
+  // «il 26», «entro il 3»: il giorno del mese
+  togli('(?:\\b(?:entro|per|da)\\s+)?\\b(?:il|l\')\\s*(\\d{1,2})(?:°)?(?![\\d/:.\\-])', m => metti(giornoDelMese(+m[1], base)));
   // «lunedì» e «il prossimo lunedì» = il primo lunedì dopo oggi; «lunedì prossimo» = il lunedì della settimana dopo
   togli(RE_PRIMA + '(?:prossim[oa]\\s+)?' + RE_GIORNO + '(?:\\s+(prossim[oa]))?' + FINE_PAROLA, m => {
     const idx = FRASE.GIORNI.indexOf(senzaAccenti(m[1]));
@@ -11388,7 +11408,8 @@ function interpretaFrase(testo, oggi = new Date()) {
   t = t.replace(/^[\s,;:.\-–—]+|[\s,;:\-–—]+$/g, '').replace(/\s+(?:entro|per|alle|e|di)$/i, '').trim();
   if (!t) t = String(testo || '').trim();
   const title = t.charAt(0).toUpperCase() + t.slice(1);
-  return { title, data, ora, q: delega ? 3 : q, delega };
+  const controllaGiorno = giornoDetto != null && giornoDetto >= 0 && !!data && giornoIdxDi(parseISODate(data)) !== giornoDetto;
+  return { title, data, ora, q: delega ? 3 : q, delega, controllaGiorno };
 }
 
 // «ven 23/10»
@@ -11396,8 +11417,8 @@ const fmtGiornoCorto = iso => { const d = parseISODate(iso); return d ? `${['dom
 const escAttr = s => escHtml(s).replace(/"/g, '&quot;');
 function sintesiVoce(v) {
   const quando = v.data ? `${fmtGiornoCorto(v.data)}${v.ora ? ' ' + v.ora : ''}` : v.ora ? `oggi ${v.ora}` : 'Tutto, senza data';
-  if (v.q === 3 && v.delega) return [v.title, `Delega a ${v.delega.nome}${v.delega.id ? '' : ' (nuova persona)'}`, `controlli ${v.data ? fmtGiornoCorto(v.data) : 'tra ' + FRASE.CONTROLLO_GIORNI + ' giorni'}`].join(' · ');
-  return [v.title, quando, TIPI[v.q].label].join(' · ');
+  if (v.q === 3 && v.delega) return [v.title, `Delega a ${v.delega.nome}${v.delega.id ? '' : ' (nuova persona)'}`, `controlli ${v.data ? fmtGiornoCorto(v.data) + (v.controllaGiorno ? ' (controlla il giorno)' : '') : 'tra ' + FRASE.CONTROLLO_GIORNI + ' giorni'}`].join(' · ');
+  return [v.title, quando + (v.controllaGiorno ? ' (controlla il giorno)' : ''), TIPI[v.q].label].join(' · ');
 }
 // Le righe del campo con le scelte del foglio (Subito, Oggi, il giorno della colonna) e le correzioni a mano
 function vociDaRighe(righe, r) {
@@ -11441,7 +11462,7 @@ function correggiVoce(i, campo, valore) {
   const righe = righeDi($('rapido-testo').value);
   const v = vociDaRighe(righe, ui.rapido)[i];
   if (!v) return;
-  const valori = { title: v.title, data: v.data, ora: v.ora, q: v.q, delega: v.delega };
+  const valori = { title: v.title, data: v.data, ora: v.ora, q: v.q, delega: v.delega, controllaGiorno: campo === 'data' ? false : !!v.controllaGiorno };   // data scelta a mano: niente avviso
   if (campo === 'q') { valori.q = parseInt(valore, 10) || 2; if (valori.q !== 3) valori.delega = null; }
   else if (campo === 'delega') valori.delega = !valore ? null : valore.startsWith('nuova:') ? { id: null, nome: valore.slice(6) } : (p => p && { id: p.id, nome: p.nome })(personaDi(valore));
   else valori[campo] = String(valore || '').trim() || (campo === 'title' ? v.title : null);
