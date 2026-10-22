@@ -1655,7 +1655,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
       <div id="plaud-items" class="plaud-items"></div>
       <div class="sheet-cta sheet-cta-row">
         <button type="button" class="btn btn-ghost" onclick="setPlaudStep(1)">Indietro</button>
-        <button type="button" class="btn btn-primary btn-import" id="btn-import-plaud" onclick="importPlaudSelected()">Importa selezionati</button>
+        <button type="button" class="btn btn-primary btn-import" id="btn-import-plaud" onclick="importaRiunione()">Importa selezionati</button>
       </div>
     </div>
   </div>
@@ -2929,11 +2929,9 @@ async function deleteCurrent() {
 // PLAUD IMPORT (3 step)
 // ══════════════════════════════════════════════════════════════
 let plaudStep      = 1;
-let plaudExtracted = [];
 
 function openPlaudModal() {
   plaudStep = 1;
-  plaudExtracted = [];
   setPlaudStep(1);
   const ta = document.getElementById('plaud-transcript');
   if (ta) ta.value = '';
@@ -2954,162 +2952,6 @@ function setPlaudStep(n) {
     if (step) step.style.display = i === n ? 'block' : 'none';
     const dot  = document.getElementById('plaud-dot-' + i);
     if (dot) dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
-  }
-}
-
-async function analyzePlaud() {
-  const transcript = (document.getElementById('plaud-transcript')?.value || '').trim();
-  if (!transcript) { showToast('Incolla il testo della registrazione Plaud', 'warn'); return; }
-
-  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
-  if (!apiKey) {
-    closePlaudModal();
-    openApiKeyModal();
-    return;
-  }
-
-  setPlaudStep(2);
-
-  try {
-    plaudExtracted = await callClaude(transcript, apiKey);
-    if (!Array.isArray(plaudExtracted) || !plaudExtracted.length) {
-      showToast('Nessun ciclo trovato nella trascrizione', 'warn');
-      setPlaudStep(1);
-      return;
-    }
-    renderPlaudItems(plaudExtracted);
-    setPlaudStep(3);
-  } catch (e) {
-    showToast('Errore Claude API: ' + e.message, 'error');
-    setPlaudStep(1);
-  }
-}
-
-async function callClaude(transcript, apiKey) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-allow-browser': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: buildPrompt(transcript) }]
-    })
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || 'HTTP ' + res.status);
-  }
-
-  const data = await res.json();
-  const text = (data.content?.[0]?.text || '').trim();
-  const match = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, text];
-  return JSON.parse((match[1] || text).trim());
-}
-
-function buildPrompt(transcript) {
-  return `Analizza questa trascrizione vocale italiana e identifica TUTTI i "cicli aperti": impegni, task, promesse, cose da fare, follow-up, decisioni pendenti.
-
-Restituisci SOLO un array JSON valido (nessun altro testo):
-[{
-  "title": "titolo breve e chiaro (max 60 caratteri)",
-  "note": "dettagli opzionali o null",
-  "q": 2,
-  "cat": "management",
-  "ctx": "lavoro",
-  "due_date": null,
-  "persone_menzionate": []
-}]
-
-Legenda quadranti q: 1=urgente+prioritario, 2=prioritario non urgente, 3=urgente non prioritario, 4=bassa priorità
-Categorie valide cat: management, hr, marketing, vendite, amministrazione, produzione, rnd, da-delegare, salute, relazioni, finanze, crescita, hobbies, spiritualita, casa, idee
-ctx: "lavoro" o "personale"
-due_date: "YYYY-MM-DD" se menzionata, altrimenti null
-persone_menzionate: array di nomi propri di persone menzionate, [] se nessuna
-
-TRASCRIZIONE:
-${transcript}`;
-}
-
-function renderPlaudItems(items) {
-  const container = document.getElementById('plaud-items');
-  const countEl   = document.getElementById('plaud-count');
-  if (!container) return;
-  if (countEl) countEl.textContent = items.length;
-  container.innerHTML = '';
-
-  items.forEach((item, idx) => {
-    const card = document.createElement('div');
-    card.className = 'plaud-item';
-    const dateVal = item.due_date || '';
-    const noteHtml = item.note ? `<div class="plaud-item-note">${escHtml(item.note)}</div>` : '';
-    const personeHtml = item.persone_menzionate?.length
-      ? `<span style="font-size:10px;color:var(--text-muted)"> ${escHtml(item.persone_menzionate.join(', '))}</span>`
-      : '';
-
-    card.innerHTML = `
-      <div class="plaud-item-header">
-        <label class="plaud-check-label">
-          <input type="checkbox" class="plaud-item-check" data-idx="${idx}" checked>
-          <span class="plaud-item-title">${escHtml(item.title)}</span>
-        </label>
-        <span class="q-badge q${item.q||2}">Q${item.q||2}</span>
-      </div>
-      ${noteHtml}
-      <div class="plaud-item-meta">
-        <span class="meta-tag ${CAT_COLORS[item.cat]||''}">${escHtml(catNome(item.cat)) || '—'}</span>
-        ${personeHtml}
-        <input type="date" id="plaud-date-${idx}" value="${dateVal}" class="plaud-date-input" title="Scadenza">
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-async function importPlaudSelected() {
-  const checks = document.querySelectorAll('.plaud-item-check:checked');
-  if (!checks.length) { showToast('Scegli almeno una cosa', 'warn'); return; }
-
-  const toImport = [];
-  checks.forEach(cb => {
-    const idx  = parseInt(cb.dataset.idx);
-    const item = plaudExtracted[idx];
-    const dateEl = document.getElementById('plaud-date-' + idx);
-    toImport.push({
-      title:              item.title,
-      note:               item.note || null,
-      q:                  item.q    || 2,
-      cat:                item.cat  || 'management',
-      ctx:                item.ctx  || state.ctx,
-      due_date:           dateEl?.value || item.due_date || null,
-      persone_menzionate: item.persone_menzionate || [],
-      week:               state.week,
-      year:               state.year,
-      done:               false,
-      da_plaud:           true,
-      created_at:         new Date().toISOString(),
-      updated_at:         new Date().toISOString()
-    });
-  });
-
-  const btn = document.getElementById('btn-import-plaud');
-  btn.textContent = 'Importazione...';
-  btn.disabled = true;
-
-  try {
-    const { error } = await db.from('cicli').insert(toImport);
-    if (error) throw error;
-    closePlaudModal();
-    showToast(`${toImport.length} cose importate dalla registrazione`, 'success');
-  } catch (e) {
-    showToast('Errore importazione: ' + e.message, 'error');
-    btn.textContent = 'Importa selezionati';
-    btn.disabled = false;
   }
 }
 
@@ -3415,29 +3257,9 @@ function getMaEmoji(area) { return MACRO_AREA_EMOJIS[area] || ''; }
 // AUTO-CATEGORIZZAZIONE CLAUDE
 // ══════════════════════════════════════════════════════════════
 async function autoCategoria(title, note) {
-  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
-  if (!apiKey || !title) return null;
-
+  if (!title || !claudeDisponibile()) return null;
   const prompt = `Classifica questa attività SSI (consulenza sicurezza sul lavoro) in UNA delle aree: ${nomiAree().join(', ')}. Rispondi SOLO con il nome esatto, nient'altro. Titolo: ${title}. Note: ${note || ''}`;
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-allow-browser': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 30,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-
-  if (!res.ok) return null;
-  const data = await res.json();
-  const area = (data.content?.[0]?.text || '').trim();
+  const area = (await chiediClaude('area', prompt)).trim();
   return nomiAree().includes(area) ? area : null;
 }
 
@@ -3860,8 +3682,7 @@ async function _applyPostpone(ciclo, newDate) {
 // BATCH MIGRAZIONE MACRO AREE SU CICLI ESISTENTI
 // ══════════════════════════════════════════════════════════════
 async function batchMigrateAree() {
-  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
-  if (!apiKey) { showToast('Serve la chiave API di Claude: Altro, Impostazioni', 'warn'); return; }
+  if (!claudeDisponibile()) { showToast('Serve la chiave di Claude: Altro, Impostazioni', 'warn'); return; }
 
   const toMigrate = state.cicli.filter(c => !areaDi(c) && c.ctx === 'lavoro').slice(0, 50);   // v5: chi ha l'area dalla categoria resta così
   if (!toMigrate.length) { showToast('Tutte le cose hanno già un\'area', 'info'); return; }
@@ -6632,7 +6453,6 @@ function vistaAltro() {
       <button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida"><i class="ti ti-book"></i><span>Guida</span><span></span><i class="ti ti-chevron-right"></i></button>
       <button type="button" class="riga-link" data-act="plaud" data-tip="Import Plaud (Cmd+P)"><i class="ti ti-microphone"></i><span>Importa da una registrazione</span><span></span><i class="ti ti-chevron-right"></i></button>
       <button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="impostazioni"><i class="ti ti-settings"></i><span>Impostazioni</span><span></span><i class="ti ti-chevron-right"></i></button>
-      <a class="riga-link" href="index.legacy.html"><i class="ti ti-history"></i><span>Versione precedente</span><span></span><i class="ti ti-chevron-right"></i></a>
     </div>
     <div class="group" style="margin-top:var(--sp-5)">
       <button type="button" class="riga-link" data-act="esci"><i class="ti ti-logout"></i><span>Esci${state.utente ? `<small>${escHtml(state.utente)}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>
@@ -6692,8 +6512,7 @@ function vistaImpostazioni() {
 
     ${sezioneAree()}
 
-    <p class="list-head"><span>Claude</span></p>
-    <div class="group"><button type="button" class="riga-link" data-act="apikey"><i class="ti ti-key"></i><span>Chiave API</span><small>${localStorage.getItem(LS.CLAUDE_KEY) ? 'salvata' : 'non impostata'}</small><i class="ti ti-chevron-right"></i></button></div>`;
+    ${sezioneClaude()}`;
 }
 
 function openGcalModal() {
@@ -9072,7 +8891,7 @@ const AREE_STILE = {
   'Formazione':                { icona: 'ti-school', cat: 'management' }
 };
 const STILE_AREA_NUOVA = { icona: 'ti-tag', cat: 'management' };
-// I nomi di prima: li scrive ancora la versione precedente (index.legacy.html), qui si leggono come i nuovi.
+// I nomi di prima (li scriveva la versione precedente, tolta il 22/10): qui si leggono come i nuovi.
 const AREE_NOMI_VECCHI = { 'R&D': 'Ricerca e sviluppo', 'Personale': 'Famiglia / cose personali', 'HR': 'Formazione', 'Da Delegare': null };
 state.areeDb = null;   // null = non ancora lette (o lettura fallita)
 
@@ -11746,15 +11565,8 @@ cat valide: management, hr, marketing, vendite, amministrazione, produzione, rnd
 TRASCRIZIONE:
 ${testo}`;
 }
-async function chiamaClaudeRiunione(testo, apiKey) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4000, messages: [{ role: 'user', content: promptRiunione(testo) }] })
-  });
-  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error((err.error && err.error.message) || 'HTTP ' + res.status); }
-  const data = await res.json();
-  const t = ((data.content && data.content[0] && data.content[0].text) || '').trim();
+async function chiamaClaudeRiunione(testo) {
+  const t = await chiediClaude('riunione', promptRiunione(testo));
   const m = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   const grezzo = (m ? m[1] : t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)).trim();
   return JSON.parse(grezzo);
@@ -11854,7 +11666,7 @@ function leggiFilePlaud(file) {
 }
 const _openPlaudModalV8 = openPlaudModal;
 openPlaudModal = function () { ui.plaud = null; _openPlaudModalV8(); };
-analyzePlaud = async function () {
+async function analyzePlaud() {
   const testo = ($('plaud-transcript').value || '').trim();
   if (!testo) { showToast('Incolla il testo della registrazione o apri un file', 'warn'); return; }
   if (ePlaudFormato(testo)) {
@@ -11865,11 +11677,10 @@ analyzePlaud = async function () {
     setPlaudStep(3);
     return;
   }
-  const apiKey = localStorage.getItem(LS.CLAUDE_KEY);
-  if (!apiKey) { closePlaudModal(); openApiKeyModal(); return; }
+  if (!claudeDisponibile()) { closePlaudModal(); openApiKeyModal(); return; }
   setPlaudStep(2);
   try {
-    ui.plaud = preparaPlaud(daRispostaAI(await chiamaClaudeRiunione(testo, apiKey)), 'ai');
+    ui.plaud = preparaPlaud(daRispostaAI(await chiamaClaudeRiunione(testo)), 'ai');
     disegnaAnteprimaPlaud();
     setPlaudStep(3);
   } catch (e) {
@@ -11918,7 +11729,106 @@ async function importaRiunione() {
     render();
   }
 }
-importPlaudSelected = () => importaRiunione();
+
+// ══════════════════════════════════════════════════════════════
+// v9 (22/10) · CLAUDE DAL SERVER
+// Edge Function «claude» (segreto ANTHROPIC_API_KEY su Supabase). Finché il segreto
+// non c'è si usa la chiave salvata in questo browser, e Impostazioni lo dice.
+// ══════════════════════════════════════════════════════════════
+const CLAUDE = {
+  MODELLO: 'claude-haiku-5-5',
+  FUNZIONE: SUPABASE_URL + '/functions/v1/claude',
+  // uguali a quelli della funzione: servono solo per la chiave nel browser
+  PARAMS: {
+    riunione: { max_tokens: 16000, output_config: { effort: 'low' } },
+    area: { max_tokens: 256, thinking: { type: 'disabled' }, output_config: { effort: 'low' } }
+  },
+  ERRORI: {
+    utente: 'questo utente non può usare Claude',
+    testo: 'il testo è vuoto o troppo lungo',
+    rifiuto: 'Claude non ha risposto a questa richiesta',
+    anthropic: 'Claude non risponde, riprova tra poco'
+  }
+};
+state.claudeServer = null;   // null = non lo so ancora · true = il segreto c'è · false = manca
+
+const chiaveBrowser = () => localStorage.getItem(LS.CLAUDE_KEY) || '';
+// si può chiedere a Claude? (server pronto o da verificare, oppure una chiave nel browser)
+const claudeDisponibile = () => state.claudeServer !== false || !!chiaveBrowser();
+
+async function chiamaFunzioneClaude(corpo) {
+  const { data } = await db.auth.getSession();
+  const token = data && data.session && data.session.access_token;
+  if (!token) throw new Error('non sei collegato');
+  const res = await fetch(CLAUDE.FUNZIONE, {
+    method: 'POST',
+    headers: { authorization: 'Bearer ' + token, apikey: SUPABASE_ANON, 'content-type': 'application/json' },
+    body: JSON.stringify(corpo)
+  });
+  const dati = await res.json().catch(() => ({}));
+  return { ok: res.ok, stato: res.status, dati };
+}
+
+async function controllaClaudeServer() {
+  try {
+    const r = await chiamaFunzioneClaude({ compito: 'stato' });
+    state.claudeServer = r.ok ? !!r.dati.pronto : null;
+  } catch (e) {
+    console.warn('[Claude] stato del server:', e.message);
+    state.claudeServer = null;
+  }
+  return state.claudeServer;
+}
+
+async function chiamaClaudeBrowser(compito, testo, apiKey) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: CLAUDE.MODELLO, messages: [{ role: 'user', content: testo }], ...CLAUDE.PARAMS[compito] })
+  });
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error((err.error && err.error.message) || 'HTTP ' + res.status); }
+  const data = await res.json();
+  if (data.stop_reason === 'refusal') throw new Error(CLAUDE.ERRORI.rifiuto);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+}
+
+// compito = 'riunione' | 'area'; restituisce il testo della risposta
+async function chiediClaude(compito, testo) {
+  if (state.claudeServer !== false) {
+    let r = null;
+    try { r = await chiamaFunzioneClaude({ compito, testo }); }
+    catch (e) { if (!chiaveBrowser()) throw e; console.warn('[Claude] server non raggiungibile, uso la chiave del browser:', e.message); }
+    if (r && r.ok) { state.claudeServer = true; return r.dati.testo || ''; }
+    if (r && !(r.stato === 503 && r.dati.errore === 'manca_segreto')) throw new Error(CLAUDE.ERRORI[r.dati.errore] || 'HTTP ' + r.stato);
+    if (r) state.claudeServer = false;
+  }
+  const chiave = chiaveBrowser();
+  if (!chiave) throw new Error('manca la chiave di Claude');
+  return chiamaClaudeBrowser(compito, testo, chiave);
+}
+
+function sezioneClaude() {
+  const browser = !!chiaveBrowser(), server = state.claudeServer;
+  const stato = server === true ? 'sul server' : browser ? 'in questo browser' : 'non impostata';
+  const avviso = server === false
+    ? `<div class="avviso"><i class="ti ti-alert-triangle"></i><span>${browser ? 'La chiave di Claude è ancora salvata in questo browser.' : 'Claude è spento: manca la chiave.'} Mettila sul server: Supabase → Edge Functions → Secrets, nome <span class="mono">ANTHROPIC_API_KEY</span>. Poi riapri Impostazioni.</span></div>`
+    : '';
+  const togli = server === true && browser
+    ? `<button type="button" class="riga-link" data-act="apikey-togli"><i class="ti ti-trash"></i><span>Togli la chiave da questo browser<small>non serve più: Claude usa quella del server</small></span><span></span><i class="ti ti-chevron-right"></i></button>`
+    : '';
+  return `<p class="list-head"><span>Claude</span></p>${avviso}
+    <div class="group">${server === true ? `<div class="riga-link" style="grid-template-columns:24px 1fr auto"><i class="ti ti-server"></i><span>Chiave</span><small>sul server</small></div>`
+      : `<button type="button" class="riga-link" data-act="apikey"><i class="ti ti-key"></i><span>Chiave API</span><small>${stato}</small><i class="ti ti-chevron-right"></i></button>`}${togli}</div>`;
+}
+AZIONI['apikey-togli'] = () => { localStorage.removeItem(LS.CLAUDE_KEY); showToast('Chiave tolta da questo browser', 'success'); render(); };
+
+const _avviaAppV9 = avviaApp;
+avviaApp = function (sessione) {
+  const prima = _appAvviata;
+  _avviaAppV9(sessione);
+  if (prima) return;
+  controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
+};
 
 // ══════════════════════════════════════════════════════════════
 // ACCESSO · Supabase Auth con codice personale (password), un solo utente.

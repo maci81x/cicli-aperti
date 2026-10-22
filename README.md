@@ -17,20 +17,18 @@ Oppure doppio clic sul file `index.html`. Funziona direttamente nel browser, sen
 - Tabelle: `cicli`, `persone`
 - Realtime attivo: aggiornamenti live tra finestre/dispositivi
 
-## Import da Plaud (richiede Claude API Key)
+## Import da Plaud
 
-1. Premi **🎙 Plaud** in alto a destra (o `Cmd+P`)
-2. Incolla la trascrizione dalla app Plaud
-3. Claude (modello Haiku) estrae automaticamente tutti i cicli aperti
-4. Rivedi i cicli estratti, modifica le scadenze, deseleziona quelli da non importare
-5. Premi **Importa selezionati** → salvati su Supabase con tag `🎙 Plaud`
+1. Altro → **Importa da una registrazione** (o `Cmd+P`)
+2. Incolla la trascrizione o apri il file della app Plaud
+3. Nel formato «RIUNIONE: … / DA FARE IO: …» la legge l'app da sola; altrimenti la legge Claude (Haiku 5.5)
+4. Rivedi l'anteprima (un'attività madre e i suoi passi), togli quelli che non vuoi
+5. **Importa** → salvati su Supabase
 
-### Aggiungere la Claude API Key
+### Chiave di Claude
 
-1. Premi il pulsante **⚙️** in alto a destra
-2. Incolla la tua chiave (inizia con `sk-ant-`)
-3. Ottienila su [console.anthropic.com](https://console.anthropic.com) → API Keys
-4. La chiave è salvata solo nel browser (localStorage), mai inviata a server propri
+La chiave sta sul server: Edge Function `claude` (`supabase/functions/claude/index.ts`), segreto `ANTHROPIC_API_KEY` in Supabase → Edge Functions → Secrets. La funzione accetta solo l'utente dell'app.
+Finché il segreto non c'è, l'app usa la chiave salvata nel browser (Altro → Impostazioni → Chiave API) e lo segnala in Impostazioni.
 
 ## Shortcut da tastiera
 
