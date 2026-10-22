@@ -714,6 +714,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .rap-voce { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
 .rap-sintesi { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-1) 0 var(--sp-3); font-size: var(--fs-label); color: var(--text); }
 .rap-sintesi > span { flex: 1; min-width: 0; }
+.rap-passi { margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
 .rap-voce.p-q1 .rap-sintesi > .ti { color: var(--q1); } .rap-voce.p-q2 .rap-sintesi > .ti { color: var(--q2); }
 .rap-voce.p-q3 .rap-sintesi > .ti { color: var(--q3); } .rap-voce.p-q4 .rap-sintesi > .ti { color: var(--text-3); }
 .rap-edit { display: grid; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); }
@@ -1288,6 +1289,18 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .sheet-cta-row > * { min-width: 0; }
 .sheet-cta-row .btn { white-space: normal; }
 
+/* v9 · appuntamenti toccabili: il cerchio si spunta, la riga apre il foglio */
+.evt-spunta { padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--r-full); }
+.evt-spunta:focus-visible { outline: 2px solid var(--ring); outline-offset: -4px; }
+.evt-cerchio { display: grid; place-items: center; }
+.evt-cerchio.on { background: var(--evt-mark); border-color: var(--evt-mark); color: var(--surface); }
+.evt-cerchio.on .ti { font-size: 14px; }
+.evt-riga.is-fatto .item-title { color: var(--done-title); text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--border-strong); }
+.evt-riga.is-fatto .item-meta, .evt-riga.is-fatto .evt-nota { color: var(--done-meta); opacity: var(--done-opacity); }
+.evt-riga[data-act="evt-apri"] { cursor: pointer; }
+.evt-riga[data-act="evt-apri"]:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+@media (hover: hover) { .evt-riga[data-act="evt-apri"]:hover { filter: brightness(.98); } }
+.evt-quando { margin: 0 0 var(--sp-3); }
 </style>
 </head>
 <body>
@@ -6065,8 +6078,9 @@ function vistaOggi() {
   const semplice = modoSemplice();
   const righe = eSettimanaCorrente() ? righeGiorno(gk) : [];
   const routine = semplice ? [] : ritualiQuotidiani().map(c => ({ c, fatto: rituraleFattoOggi(c.id), ora: formatOra(c.ora_inizio), durata: c.durata_minuti }));
-  const tot = righe.length + routine.length;
-  const fatte = righe.filter(r => r.fatto).length + routine.filter(r => r.fatto).length;
+  const evSpunta = appuntamentiSpuntabili(oggi);   // v9: anche gli appuntamenti con orario si spuntano
+  const tot = righe.length + routine.length + evSpunta.length;
+  const fatte = righe.filter(r => r.fatto).length + routine.filter(r => r.fatto).length + evSpunta.filter(eventoFatto).length;
 
   // le tue 3, poi le rapide, poi il resto (chiuso) — le righe non si ripetono tra le sezioni
   const focusIds = focusDiOggi(righe);
@@ -6578,7 +6592,7 @@ function openBpReview() {
 }
 
 function disegnaReview() {
-  const aperti = revAperti(), st = bpStats(revItems());
+  const aperti = revAperti(), st = statRevConEventi();
   const body = $('bprev-body');
   if (ui.rev.passo === 1 && aperti.length) {
     $('bprev-title').textContent = 'Cosa fai di quello che è rimasto?';
@@ -6653,7 +6667,7 @@ async function bpChiudiSettimana() {
       // 'aperte': nessuna scrittura, resta tra le cose aperte
     }
     const chiuso_at = new Date().toISOString();
-    const st = bpStats(revItems());
+    const st = statRevConEventi();
     const numeri = state.statsColOk ? { pianificate: st.tot, completate: st.done, percentuale: st.pct, motivi: revMotiviConteggio() } : {};
     const { error } = await db.from('battle_plan').update({ stato: 'chiuso', chiuso_at, note, ...numeri }).eq('id', state.bp.id);
     if (error) throw error;
@@ -7464,7 +7478,7 @@ const AIUTI = {
   pianifica: { titolo: 'Pianifica', testo: ['Una volta a settimana prepari il piano: scegli cosa portare a casa e in che giorno. Con le frecce puoi preparare anche le settimane che vengono, e rivedere quelle passate. Da piazzare = cose che non hanno ancora un giorno. Chiudi la settimana = decidi cosa fare di ciò che non hai fatto.'] },
   settimana: { titolo: 'Settimana', base: 'pianifica', testo: ['Qui vedi un giorno alla volta: tocca un giorno per aprire quello che c\'è in programma. Se le cose hanno un momento o un\'ora, il giorno è diviso in mattina, pomeriggio e sera. Gli appuntamenti di Google Calendar e i cuscinetti stanno in mezzo alle cose, in ordine di ora. Su computer puoi trascinare una cosa in un altro giorno: vale solo per quella settimana. Accanto a ogni giorno vedi le ore in tutto: il piano si fa al 130 %, se ne chiude circa l\'80 %.'] },
   mese:      { titolo: 'Mese',      base: 'pianifica', testo: ['Un puntino per ogni cosa in programma, colorato per tipo. Tocca un giorno per aprirlo.'] },
-  tutto:     { titolo: 'Tutto',     testo: ['Il tuo armadio: ogni cosa aperta, di lavoro e personale, finisce qui. Cercala, filtrala, vedila per persona o nella matrice. In cima vedi quante sono e com\'erano 7 giorni fa: meno è meglio. «Svuota la testa» = una colonna per area, scrivi tutto e al resto pensi dopo.'] },
+  tutto:     { titolo: 'Tutto',     testo: ['Tutto è l\'elenco di tutte le cose da fare: ogni cosa aperta, di lavoro e personale, finisce qui. Cercala, filtrala, vedila per persona o nella matrice. In cima vedi quante sono e com\'erano 7 giorni fa: meno è meglio. «Svuota la testa» = una colonna per area, scrivi tutto e al resto pensi dopo.'] },
   matrice:   { titolo: 'Matrice',   testo: ['Le cose aperte divise per tipo: Subito (urgente e importante), Importante (a cui dare un giorno), Delega, Lascia stare.'] },
   persone:   { titolo: 'Persone',   testo: ['Prima di una riunione, apri la persona: vedi tutto quello che hai in sospeso con lei.'] },
   attesa:    { titolo: 'Un giorno', testo: ['Cose messe da parte di proposito: un giorno, forse. Non sparisce niente, ma non ti disturbano.'] },
@@ -9024,7 +9038,7 @@ function eventoDa(e, cal) {
     // per spostarlo dall'app: chi lo organizza, chi riceve l'aggiornamento, orari originali
     orgIo: !e.organizer || !!e.organizer.self || mia(e.organizer), org: e.organizer ? (e.organizer.displayName || e.organizer.email || '') : '',
     nomiInvitati: (e.attendees || []).filter(x => !x.self && !x.resource && !MIE_EMAIL.has(String(x.email || '').toLowerCase())).map(x => x.displayName || x.email),
-    startRaw: e.start, endRaw: e.end, ricorrente: !!e.recurringEventId,
+    startRaw: e.start, endRaw: e.end, ricorrente: !!e.recurringEventId, link: e.htmlLink || null,
     routine: cal.tipo === 'privato' && !!e.recurringEventId && !!ora && ora < ROUTINE_ENTRO
   };
 }
@@ -9756,8 +9770,8 @@ function disegnaCalCicli() {
   const lista = ui.calCicli || [];
   $('calc-lista').innerHTML = lista.length ? lista.map(({ k, e, perche }) => `<div class="recon-riga"><b>${escHtml(e.titolo)}</b>
     <p>${escHtml(fmtGiorno(parseISODate(e.giorno)))}${e.ora ? ` · <span class="mono">${e.ora}</span>` : ''} · ${(CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || ''}${e.serie ? ' · si ripete' : ''}${perche === 'ogni giorno' ? ' ogni giorno da più di un mese' : ''}</p>
-    <div class="chips chips-wrap"><button type="button" class="chip" data-act="calc-tutto" data-k="${esc(k)}"><i class="ti ti-stack-2"></i>Porta in Tutto</button>
-      <button type="button" class="chip" data-act="calc-togli" data-k="${esc(k)}"><i class="ti ti-calendar-minus"></i>Porta in Tutto e toglilo dal calendario</button>
+    <div class="chips chips-wrap"><button type="button" class="chip" data-act="calc-tutto" data-k="${esc(k)}"><i class="ti ti-stack-2"></i>Mettila tra le cose da fare</button>
+      <button type="button" class="chip" data-act="calc-togli" data-k="${esc(k)}"><i class="ti ti-calendar-minus"></i>Mettila tra le cose da fare e toglila dal calendario</button>
       <button type="button" class="chip" data-act="calc-app" data-k="${esc(k)}">È un appuntamento</button></div></div>`).join('')
     : '<div class="col-vuota">Nient\'altro da guardare.</div>';
 }
@@ -9783,7 +9797,7 @@ async function portaInTutto(k, togli) {
       caricaEventi(state.week, state.year);
     }
     sceltaCalCiclo(k, 'tutto');
-    showToast(togli ? 'In Tutto, e tolto dal calendario' : 'In Tutto come Importante', 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Dettagli' } : undefined);
+    showToast(togli ? 'Tra le cose da fare, e tolta dal calendario' : 'Messa tra le cose da fare, come Importante', 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Dettagli' } : undefined);
   } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
 }
 
@@ -10117,7 +10131,7 @@ Object.assign(AZIONI, {
   'calc-apri': () => apriCalCicli(),
   'calc-tutto': el => portaInTutto(el.dataset.k, false),
   'calc-togli': el => { const v = (ui.calCicli || []).find(x => x.k === el.dataset.k); if (!v) return;
-    apriConferma({ titolo: 'Lo tolgo dal calendario?', testo: `«${v.e.titoloOrig}»${v.e.serie ? ', con tutte le sue ripetizioni,' : ''} sparisce da Google Calendar e diventa una cosa in Tutto.`, ok: 'Sì, toglilo', no: 'Annulla', onOk: () => portaInTutto(el.dataset.k, true) }); },
+    apriConferma({ titolo: 'Lo tolgo dal calendario?', testo: `«${v.e.titoloOrig}»${v.e.serie ? ', con tutte le sue ripetizioni,' : ''} sparisce da Google Calendar e diventa una cosa da fare.`, ok: 'Sì, toglilo', no: 'Annulla', onOk: () => portaInTutto(el.dataset.k, true) }); },
   'calc-app': el => sceltaCalCiclo(el.dataset.k, 'app'),
   'q2-apri': () => apriEsercizioQ2(),
   'q2-scelta': el => { const s = new Set(ui.q2.scelte), i = parseInt(el.dataset.i, 10); s.has(i) ? s.delete(i) : s.add(i); ui.q2 = { ...ui.q2, scelte: s }; disegnaQ2(); },
@@ -10492,12 +10506,14 @@ async function spostaSerieEvento(e, inizio, fine, invia) {
   const nuovo = {
     summary: master.summary, description: master.description, location: master.location, colorId: master.colorId,
     attendees: master.attendees, reminders: master.reminders, transparency: master.transparency, visibility: master.visibility,
-    start: { dateTime: isoLocale(toISODate(inizio), hhmm(inizio)), timeZone: tz }, end: { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz },
+    start: e.tuttoIlGiorno ? { date: toISODate(inizio) } : { dateTime: isoLocale(toISODate(inizio), hhmm(inizio)), timeZone: tz },
+    end: e.tuttoIlGiorno ? { date: toISODate(fine) } : { dateTime: isoLocale(toISODate(fine), hhmm(fine)), timeZone: tz },
     recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), nuovaRegola]
   };
   const creato = await gcalFetch(`${calPath}?sendUpdates=${invia}`, 'POST', nuovo);
   if (!creato || !creato.id) throw new Error('la serie nuova non è stata creata');
-  const fineVecchia = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '') + `;UNTIL=${utcCompatto(new Date(e.inizioMs - 1000))}`;
+  const primaDi = new Date(e.inizioMs); primaDi.setDate(primaDi.getDate() - 1);   // tutto il giorno: UNTIL è una data
+  const fineVecchia = rr.replace(/;?UNTIL=[^;]+/i, '').replace(/;?COUNT=\d+/i, '') + `;UNTIL=${e.tuttoIlGiorno ? toISODate(primaDi).replace(/-/g, '') : utcCompatto(new Date(e.inizioMs - 1000))}`;
   try {
     await gcalFetch(`${calPath}/${encodeURIComponent(e.serie)}?sendUpdates=${invia}`, 'PATCH', { recurrence: [...(master.recurrence || []).filter(r => !/^RRULE:/i.test(r)), fineVecchia] });
   } catch (err) {   // non sono riuscito a chiudere la vecchia: tolgo la nuova, così non resta doppia
@@ -11316,11 +11332,26 @@ function sintesiVoce(v) {
   if (v.q === 3 && v.delega) return [v.title, `Delega a ${v.delega.nome}${v.delega.id ? '' : ' (nuova persona)'}`, `controlli ${v.data ? fmtGiornoCorto(v.data) + (v.controllaGiorno ? ' (controlla il giorno)' : '') : 'tra ' + FRASE.CONTROLLO_GIORNI + ' giorni'}`].join(' · ');
   return [v.title, quando + (v.controllaGiorno ? ' (controlla il giorno)' : ''), TIPI[v.q].label].join(' · ');
 }
+// v9 · «Spesa:» con sotto righe che iniziano con «-», «•» o «*» = UNA cosa (senza i due punti) con quei passi
+const PUNTO_ELENCO = /^[-•*]\s*/;
+function gruppiDaRighe(righe) {
+  const gruppi = righe.reduce((acc, riga) => {
+    const ultimo = acc[acc.length - 1];
+    if (PUNTO_ELENCO.test(riga) && ultimo && ultimo.apre) {
+      const passo = riga.replace(PUNTO_ELENCO, '').trim();
+      return passo ? [...acc.slice(0, -1), { ...ultimo, passi: [...ultimo.passi, passo] }] : acc;
+    }
+    return [...acc, { testo: riga, apre: /:\s*$/.test(riga), passi: [] }];
+  }, []);
+  return gruppi.map(g => ({ testo: g.testo, titolo: g.passi.length ? g.testo.replace(/\s*:\s*$/, '') : g.testo, passi: g.passi }));
+}
+const frasePassi = n => `1 cosa con ${n} ${n === 1 ? 'passo' : 'passi'}`;
 // Le righe del campo con le scelte del foglio (Subito, Oggi, il giorno della colonna) e le correzioni a mano
 function vociDaRighe(righe, r) {
   const mod = (r && r.mod) || {};
-  return righe.map((testo, i) => {
-    let v = { ...interpretaFrase(testo), testo };
+  return gruppiDaRighe(righe).map((g, i) => {
+    const testo = g.testo;
+    let v = { ...interpretaFrase(g.titolo), testo, passi: g.passi.map(maiuscola) };
     if (r && r.subito && v.q !== 3) v = { ...v, q: 1 };
     if (!v.data && r && r.data) v = { ...v, data: r.data };
     if (!v.data && r && r.oggi && v.q !== 3) v = { ...v, data: oggiLocale() };
@@ -11351,6 +11382,7 @@ function disegnaAnteprima() {
   box.innerHTML = voci.map((v, i) => `<div class="rap-voce p-q${v.q}" data-i="${i}">
     <div class="rap-sintesi"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i><span>${escHtml(sintesiVoce(v))}</span>
       <button type="button" class="btn btn-icon btn-sm" data-act="rap-modifica" data-i="${i}" aria-label="Modifica" aria-expanded="${ui.rapido.aperta === i}"><i class="ti ti-pencil"></i></button></div>
+    ${v.passi.length ? `<p class="rap-passi"><b>${frasePassi(v.passi.length)}</b>: ${v.passi.map(escHtml).join(' · ')}</p>` : ''}
     ${ui.rapido.aperta === i ? editorVoce(v, i) : ''}</div>`).join('');
 }
 // una correzione nel riepilogo: vale finché la riga del campo resta uguale
@@ -11362,7 +11394,7 @@ function correggiVoce(i, campo, valore) {
   if (campo === 'q') { valori.q = parseInt(valore, 10) || 2; if (valori.q !== 3) valori.delega = null; }
   else if (campo === 'delega') valori.delega = !valore ? null : valore.startsWith('nuova:') ? { id: null, nome: valore.slice(6) } : (p => p && { id: p.id, nome: p.nome })(personaDi(valore));
   else valori[campo] = String(valore || '').trim() || (campo === 'title' ? v.title : null);
-  ui.rapido = { ...ui.rapido, mod: { ...(ui.rapido.mod || {}), [i]: { testo: righe[i], valori } } };
+  ui.rapido = { ...ui.rapido, mod: { ...(ui.rapido.mod || {}), [i]: { testo: v.testo, valori } } };
   if (campo === 'q' || campo === 'data') { disegnaAnteprima(); return; }
   const riga = document.querySelector(`#rapido-anteprima .rap-voce[data-i="${i}"] .rap-sintesi span`);
   if (riga) riga.textContent = sintesiVoce(vociDaRighe(righe, ui.rapido)[i]);
@@ -11412,16 +11444,31 @@ async function aggiungiFrasi(voci, r) {
   const ctx = state.ctx;
   try {
     const coppie = [];
-    for (const v of voci) { const c = await upsertCiclo(await rigaDaVoce(v, r, ctx)); if (c) coppie.push({ v, c }); }
-    const nuove = coppie.map(x => x.c);
-    state.cicli = [...nuove, ...state.cicli.filter(c => !nuove.some(n => n.id === c.id))];
+    const passiNuovi = [];
+    for (const v of voci) {
+      const riga = await rigaDaVoce(v, r, ctx);
+      const passi = v.passi || [];
+      // senza la colonna dei passi restano nella nota, uno per riga
+      const c = await upsertCiclo(passi.length && !state.passiColOk ? { ...riga, note: passi.map(p => '- ' + p).join('\n') } : riga);
+      if (!c) continue;
+      coppie.push({ v, c });
+      if (passi.length && state.passiColOk) {
+        for (const t of passi) {
+          const p = await upsertCiclo({ ...rigaNuova(t, { subito: false }, ctx), q: c.q === 1 ? 1 : 2, cat: c.cat, macro_area: c.macro_area, persone_menzionate: c.persone_menzionate || [], parent_id: c.id });
+          if (p) passiNuovi.push(p);
+        }
+      }
+    }
+    const nuove = coppie.map(x => x.c), tutte = [...nuove, ...passiNuovi];
+    state.cicli = [...tutte, ...state.cicli.filter(c => !tutte.some(n => n.id === c.id))];
     for (const { v, c } of coppie) if (v.data && v.q !== 3) await pianificaInData(ciclo(c.id) || c, parseISODate(v.data), fasciaDaOra(v.ora));
     render();
     if (r && r.cusc && nuove[0]) { await riempiCuscinetto(r.cusc, nuove[0].id); return nuove; }   // urgenza arrivata: va nel cuscinetto
     coppie.forEach(({ v, c }) => {
       if (ctx === 'lavoro' && !areaDi(c)) autoCategoria(c.title, '').then(area => area && patchCiclo(c.id, { macro_area: area })).catch(() => {});   // solo se la categoria non ha un'area
     });
-    if (coppie.length === 1) showToast(`Aggiunta: ${sintesiVoce(coppie[0].v)}`, 'success', { annulla: () => apriDettaglio(nuove[0].id), etichetta: 'Dettagli' });
+    const conPassi = v => (v.passi || []).length ? ` · con ${v.passi.length} ${v.passi.length === 1 ? 'passo' : 'passi'}` : '';
+    if (coppie.length === 1) showToast(`Aggiunta: ${sintesiVoce(coppie[0].v)}${conPassi(coppie[0].v)}`, 'success', { annulla: () => apriDettaglio(nuove[0].id), etichetta: 'Dettagli' });
     else showToast(`${coppie.length} cose aggiunte`, 'success');
     return nuove;
   } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
@@ -11439,7 +11486,7 @@ function disegnaAnteprimaCattura() {
   const voci = vociDaRighe(righeCattura(), {});
   box.hidden = !voci.length;
   if (!voci.length) { box.innerHTML = ''; return; }
-  const prime = voci.slice(0, 2).map(v => `<span class="p-q${v.q}"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i>${escHtml(sintesiVoce(v))}</span>`).join('');
+  const prime = voci.slice(0, 2).map(v => `<span class="p-q${v.q}"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i>${escHtml(sintesiVoce(v))}${v.passi.length ? ` — ${frasePassi(v.passi.length)}` : ''}</span>`).join('');
   box.innerHTML = `<div class="ca-voci">${prime}${voci.length > 2 ? `<span class="muted">+ altre ${voci.length - 2}</span>` : ''}</div>
     <button type="button" class="btn btn-ghost btn-sm" data-act="cattura-modifica"><i class="ti ti-pencil"></i>Modifica</button>`;
 }
@@ -11822,12 +11869,238 @@ function sezioneClaude() {
 }
 AZIONI['apikey-togli'] = () => { localStorage.removeItem(LS.CLAUDE_KEY); showToast('Chiave tolta da questo browser', 'success'); render(); };
 
+// ══════════════════════════════════════════════════════════════
+// v9 · PILA DEI FOGLI: l'ultimo aperto sta sopra; conferme e scelte sopra qualsiasi foglio.
+// (prima avevano tutti z-index 40 e vinceva l'ordine nel DOM: la conferma finiva sotto)
+// Menu e riquadri (60) restano sopra i fogli, i toast (90) sopra tutto.
+// ══════════════════════════════════════════════════════════════
+const PILA = { FOGLI: 40, CONFERME: 70, MAX: 19, CONFERME_ID: ['confermaOverlay', 'proteggiOverlay', 'serieOverlay'], SEL: '.modal-overlay, .bp-slot-panel' };
+let _pilaN = 0;
+function aggiornaPila(el) {
+  const aperto = el.classList.contains('open');
+  if (aperto === (el.dataset.pila === '1')) return;
+  if (!aperto) {
+    delete el.dataset.pila;
+    el.style.zIndex = '';
+    if (!document.querySelector('.modal-overlay.open, .bp-slot-panel.open')) _pilaN = 0;
+    return;
+  }
+  el.dataset.pila = '1';
+  _pilaN += 1;
+  el.style.zIndex = String((PILA.CONFERME_ID.includes(el.id) ? PILA.CONFERME : PILA.FOGLI) + Math.min(_pilaN, PILA.MAX));
+}
+new MutationObserver(lista => lista.forEach(m => { if (m.target.matches && m.target.matches(PILA.SEL)) aggiornaPila(m.target); }))
+  .observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+document.querySelectorAll(PILA.SEL).forEach(aggiornaPila);
+
+// ══════════════════════════════════════════════════════════════
+// v9 · APPUNTAMENTI TOCCABILI
+// Il cerchio spunta l'appuntamento (solo nell'app, mai su Google); la riga apre il suo foglio.
+// Spunte: tabella eventi_fatti se c'è (supabase_migration_eventi_fatti.sql), altrimenti questo browser.
+// ══════════════════════════════════════════════════════════════
+const EVT_FATTI = { LS: 'eventi_fatti', LS_PORTATI: 'eventi_fatti_portati', TABELLA: 'eventi_fatti', GIORNI: 60 };
+function leggiEvtFattiLocali() {
+  try { const v = JSON.parse(localStorage.getItem(EVT_FATTI.LS) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+  catch (_) { return {}; }
+}
+function scriviEvtFattiLocali(mappa) {
+  const limite = toISODate(new Date(Date.now() - EVT_FATTI.GIORNI * 864e5));
+  const recenti = Object.fromEntries(Object.entries(mappa).filter(([, g]) => g >= limite));
+  try { localStorage.setItem(EVT_FATTI.LS, JSON.stringify(recenti)); } catch (_) { /* senza spazio: restano per questa sessione */ }
+}
+state.evtFatti = leggiEvtFattiLocali();   // { id evento: 'YYYY-MM-DD' }
+state.evtFattiDb = false;
+
+async function caricaEventiFatti() {
+  const da = toISODate(new Date(Date.now() - EVT_FATTI.GIORNI * 864e5));
+  const { data, error } = await db.from(EVT_FATTI.TABELLA).select('evento_id,giorno').gte('giorno', da);
+  if (error) { state.evtFattiDb = false; return; }   // tabella non ancora creata: si resta sul browser
+  state.evtFattiDb = true;
+  const dalDb = Object.fromEntries((data || []).map(r => [r.evento_id, r.giorno]));
+  let portati = false;
+  try { portati = !!localStorage.getItem(EVT_FATTI.LS_PORTATI); } catch (_) { portati = true; }
+  const soloQui = portati ? [] : Object.entries(state.evtFatti).filter(([id]) => !dalDb[id]);
+  if (soloQui.length) {
+    const r = await db.from(EVT_FATTI.TABELLA).upsert(soloQui.map(([evento_id, giorno]) => ({ evento_id, giorno })), { onConflict: 'evento_id' });
+    if (r.error) console.warn('[Appuntamenti] spunte del browser non portate:', r.error.message);
+  }
+  try { localStorage.setItem(EVT_FATTI.LS_PORTATI, '1'); } catch (_) { /* niente */ }
+  state.evtFatti = { ...dalDb, ...Object.fromEntries(soloQui) };
+  scriviEvtFattiLocali(state.evtFatti);
+  render();
+}
+
+// si spunta un appuntamento con un orario (non quelli di giornata, non la routine)
+function eventoSpuntabile(e) { return !!(e && e.id && !e.routine && !eGiornata(e)); }
+function eventoFatto(e) { return !!(e && e.id && (state.evtFatti || {})[e.id]); }
+function appuntamentiSpuntabili(d) { return typeof gcalEraCollegato === 'function' && gcalEraCollegato() ? eventiDelGiorno(d).filter(eventoSpuntabile) : []; }
+// Chiudi la settimana: le cose del piano più gli appuntamenti spuntabili di quella settimana
+function statRevConEventi() {
+  const st = bpStats(revItems());
+  const bp = state.bp;
+  const ev = bp ? (ui.eventi[settKey(bp.settimana, bp.anno)] || []).filter(eventoSpuntabile) : [];
+  const tot = st.tot + ev.length, done = st.done + ev.filter(eventoFatto).length;
+  return { tot, done, pct: tot ? Math.round(done / tot * 100) : 0 };
+}
+
+async function segnaEvento(id, fatto) {
+  const e = eventoPerId(id);
+  if (!eventoSpuntabile(e)) return;
+  const prima = state.evtFatti;
+  const { [id]: _tolto, ...senza } = prima;
+  state.evtFatti = fatto ? { ...senza, [id]: e.giorno } : senza;
+  scriviEvtFattiLocali(state.evtFatti);
+  render();
+  if ($('evtOverlay').classList.contains('open')) disegnaFoglioEvento(id);
+  try {
+    if (state.evtFattiDb) {
+      const r = fatto
+        ? await db.from(EVT_FATTI.TABELLA).upsert({ evento_id: id, giorno: e.giorno }, { onConflict: 'evento_id' })
+        : await db.from(EVT_FATTI.TABELLA).delete().eq('evento_id', id);
+      if (r.error) throw r.error;
+    }
+  } catch (err) {
+    state.evtFatti = prima;
+    scriviEvtFattiLocali(prima);
+    render();
+    showToast('Non riesco a salvare la spunta: ' + err.message, 'error');
+    return;
+  }
+  showToast(fatto ? `«${e.titolo}» fatto` : `«${e.titolo}» non ancora fatto`, 'success', { annulla: () => segnaEvento(id, !fatto) });
+}
+
+const nomeCalendario = e => (CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || 'Google Calendar';
+rigaEvento = function (e) {
+  const dati = [`<span class="mono">${orarioEvento(e)}</span>`, `<span>${nomeCalendario(e)}</span>`];
+  const sovrapposto = coseSovrapposte(e);
+  const sovr = [
+    sovrapposto.length ? `<span class="evt-nota"><i class="ti ti-alert-triangle"></i><span>si sovrappone a ${escHtml(sovrapposto[0])}${sovrapposto.length > 1 ? ` e altre ${sovrapposto.length - 1}` : ''}</span></span>` : '',
+    e.orarioDiverso ? `<span class="evt-nota evt-diverso" data-tip="Nel titolo c'è ${e.oraTitolo}, l'evento è alle ${e.ora}"><i class="ti ti-clock-exclamation"></i><span>orario nel titolo diverso (${e.oraTitolo})</span></span>` : ''].join('');
+  const spunta = eventoSpuntabile(e), fatto = spunta && eventoFatto(e);
+  const apri = e.id && !e.routine ? ` data-act="evt-apri" data-evt="${esc(e.id)}" role="button" tabindex="0" aria-label="Apri l'appuntamento ${esc(e.titolo)}"` : '';
+  const segno = spunta
+    ? `<button type="button" class="evt-ico evt-spunta" data-act="evt-fatto" data-evt="${esc(e.id)}" aria-pressed="${fatto}" aria-label="${fatto ? 'Fatto' : 'Segna come fatto'}: ${esc(e.titolo)}"><span class="evt-cerchio${fatto ? ' on' : ''}">${fatto ? '<i class="ti ti-check"></i>' : ''}</span></button>`
+    : `<span class="evt-ico" aria-hidden="true"><i class="ti ti-calendar-event"></i></span>`;
+  const tag = e.coach ? '<span class="tag-coach">Coach</span>' : e.prepCoach ? '<span class="tag-coach tag-prep">Preparazione coach</span>' : '';
+  return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}${fatto ? ' is-fatto' : ''}"${apri}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}>${segno}
+    <span class="evt-main"><span class="item-title">${tag}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
+};
+
+document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="evtOverlay" onclick="closeModalOnBg(event,'evtOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="evt-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><h3 class="t-title" id="evt-titolo">Appuntamento</h3><button type="button" class="btn btn-icon" onclick="closeModal('evtOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="evt-corpo"></div>
+  </div>
+</div>`);
+// link dell'evento; se Google non lo dà, il giorno nel calendario
+const linkEvento = e => e.link || `https://calendar.google.com/calendar/r/day/${e.giorno.replace(/-/g, '/')}`;
+function apriFoglioEvento(id) {
+  if (!eventoPerId(id)) return;
+  $('evtOverlay').classList.add('open');
+  disegnaFoglioEvento(id);
+}
+function disegnaFoglioEvento(id) {
+  const e = eventoPerId(id), corpo = $('evt-corpo');
+  if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
+  $('evt-titolo').textContent = e.titolo;
+  const spunta = eventoSpuntabile(e), fatto = spunta && eventoFatto(e);
+  const chi = e.orgIo ? '' : ` · lo organizza ${escHtml(e.org || 'un\'altra persona')}`;
+  const riga = (act, ico, testo, sotto) => `<button type="button" class="riga-link" data-act="${act}" data-evt="${esc(e.id)}"><i class="ti ${ico}"></i><span>${testo}${sotto ? `<small>${sotto}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>`;
+  corpo.innerHTML = `<p class="t-label muted evt-quando">${fmtGiornoLungo(parseISODate(e.giorno))} · <span class="mono">${orarioEvento(e)}</span> · calendario ${escHtml(nomeCalendario(e))}${chi}</p>
+    <div class="group">
+      ${spunta ? riga('evt-fatto', fatto ? 'ti-circle-check' : 'ti-circle', fatto ? 'Fatto' : 'Segna come fatto', fatto ? 'tocca per toglierlo' : 'solo nell\'app, non su Google') : ''}
+      <a class="riga-link" href="${esc(linkEvento(e))}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i><span>Apri in Google Calendar</span><span></span><i class="ti ti-chevron-right"></i></a>
+      ${riga('evt-foglio-sposta', 'ti-arrows-move', 'Sposta', e.ricorrente ? 'solo questa volta o anche le prossime' : '')}
+      ${riga('evt-in-elenco', 'ti-list-check', 'È una cosa da fare', 'mettila nell\'elenco')}
+    </div>`;
+}
+async function eventoInElenco(id) {
+  const e = eventoPerId(id);
+  if (!e) return;
+  const ctx = e.cal === 'privato' ? 'personale' : 'lavoro';
+  const gia = state.cicli.find(c => !c.done && normTitolo(c.title) === normTitolo(e.titolo));
+  if (gia) { closeModal('evtOverlay'); showToast('È già tra le cose da fare', 'info', { annulla: () => apriDettaglio(gia.id), etichetta: 'Dettagli' }); return; }
+  try {
+    const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: `Dal calendario ${nomeCalendario(e)}: «${e.titoloOrig || e.titolo}» del ${fmtGgMm(e.giorno)}` });
+    if (c) state.cicli = [c, ...state.cicli];
+    closeModal('evtOverlay');
+    render();
+    showToast('Messa tra le cose da fare, come Importante', 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Dettagli' } : undefined);
+  } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
+}
+AZIONI['evt-apri'] = el => apriFoglioEvento(el.dataset.evt);
+AZIONI['evt-fatto'] = el => segnaEvento(el.dataset.evt, !eventoFatto(eventoPerId(el.dataset.evt)));
+AZIONI['evt-foglio-sposta'] = el => { closeModal('evtOverlay'); apriSpostaEvento(el.dataset.evt); };
+AZIONI['evt-in-elenco'] = el => eventoInElenco(el.dataset.evt);
+
+// Sposta un appuntamento di tutto il giorno: solo la data (niente ora né durata)
+const giorniEvento = e => {
+  const a = e.startRaw && e.startRaw.date, b = e.endRaw && e.endRaw.date;
+  return a && b ? Math.max(1, Math.round((parseISODate(b) - parseISODate(a)) / 864e5)) : 1;
+};
+const _disegnaSpostaEventoV9 = disegnaSpostaEvento;
+disegnaSpostaEvento = function () {
+  const s = ui.sevt, e = s && eventoPerId(s.id);
+  if (!e || !e.tuttoIlGiorno || !e.orgIo || serveScopeEventi()) return _disegnaSpostaEventoV9();
+  const dopo = parseISODate(e.giorno); dopo.setDate(dopo.getDate() + 1);
+  const domani = toISODate(dopo), w = isoWeekParts(parseISODate(s.giorno));
+  const giorni = GIORNI.map((g, i) => { const iso = toISODate(bpDataGiorno(w.week, w.year, i)); return `<button type="button" class="chip" data-act="sevt-giorno" data-v="${iso}" aria-pressed="${iso === s.giorno}" aria-label="${g.label} ${fmtGgMm(iso)}">${g.label.slice(0, 3)} ${parseISODate(iso).getDate()}</button>`; }).join('');
+  const serie = e.ricorrente ? `<p class="dl-label">Si ripete</p><div class="seg" role="group" aria-label="Quali spostare">
+      <button type="button" data-act="sevt-serie" data-v="una" aria-pressed="${!s.tutte}">Solo questa volta</button>
+      <button type="button" data-act="sevt-serie" data-v="tutte" aria-pressed="${s.tutte}">Anche le prossime</button></div>` : '';
+  const invitati = e.nomiInvitati || [];
+  $('sevt-corpo').innerHTML = `<div class="chips chips-wrap" role="group" aria-label="Quando">
+      <button type="button" class="chip" data-act="sevt-giorno" data-v="${domani}" aria-pressed="${domani === s.giorno}"><i class="ti ti-arrow-right"></i>Domani</button>${giorni}</div>
+    <div class="sevt-campi"><label><span class="dl-label">Giorno</span><input type="date" class="input" id="sevt-data" value="${s.giorno}"></label></div>
+    <p class="t-caption muted">Resta un appuntamento di tutto il giorno${giorniEvento(e) > 1 ? `, di ${giorniEvento(e)} giorni` : ''}.</p>
+    ${serie}
+    <p class="t-caption" id="sevt-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="sevt-conferma" id="sevt-conferma"><i class="ti ti-check"></i>${invitati.length ? 'Sposta e avvisa' : 'Sposta'}</button></div>`;
+};
+const _confermaSpostaEventoV9 = confermaSpostaEvento;
+confermaSpostaEvento = async function () {
+  const s = ui.sevt, e = s && eventoPerId(s.id);
+  if (!e || !e.tuttoIlGiorno) return _confermaSpostaEventoV9();
+  const errore = msg => { const el = $('sevt-errore'); el.textContent = msg; el.hidden = false; };
+  const manca = serveScopeEventi();
+  if (manca) { errore(manca); return; }
+  if (!s.giorno || s.giorno < oggiLocale()) { errore('Questo giorno è già passato: scegline uno da oggi in poi.'); return; }
+  const inizio = parseISODate(s.giorno), fine = parseISODate(s.giorno);
+  fine.setDate(fine.getDate() + giorniEvento(e));
+  const invia = (e.nomiInvitati || []).length ? 'all' : 'none';
+  const btn = $('sevt-conferma');
+  btn.disabled = true;
+  const path = `/calendars/${encodeURIComponent(e.calId)}/events/${encodeURIComponent(e.id)}`;
+  try {
+    let annulla;
+    if (e.ricorrente && s.tutte) annulla = await spostaSerieEvento(e, inizio, fine, invia);
+    else {
+      await gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: { date: toISODate(inizio) }, end: { date: toISODate(fine) } });
+      annulla = () => gcalFetch(`${path}?sendUpdates=${invia}`, 'PATCH', { start: e.startRaw, end: e.endRaw });
+    }
+    closeModal('spostaEvtOverlay');
+    ui.sevt = null;
+    const da = parseISODate(e.giorno);
+    ricaricaEventi(da, inizio);
+    showToast(`${e.titolo}: ${fmtGiorno(inizio)}${invia === 'all' ? ' · invitati avvisati' : ''}`, 'success', { annulla: async () => {
+      try { await annulla(); ricaricaEventi(da, inizio); } catch (err) { showToast('Non riesco a rimetterlo com\'era: ' + err.message, 'error'); }
+    } });
+  } catch (err) {
+    btn.disabled = false;
+    console.warn('[GCal] sposta appuntamento di giornata:', err.message);
+    errore('Non sono riuscito a spostarlo: ' + err.message);
+  }
+};
+
 const _avviaAppV9 = avviaApp;
 avviaApp = function (sessione) {
   const prima = _appAvviata;
   _avviaAppV9(sessione);
   if (prima) return;
   controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
+  caricaEventiFatti().catch(err => console.warn('[Appuntamenti] spunte:', err.message));
 };
 
 // ══════════════════════════════════════════════════════════════
