@@ -32,6 +32,30 @@
   if (scala === '112' || scala === '125') document.documentElement.style.fontSize = scala + '%';
   if (contrasto === 'alto') document.documentElement.setAttribute('data-contrast', 'alto');
 })();
+// 24/10 · raccolta errori: gli ultimi 30 restano nel telefono (localStorage cicli_errori),
+// si copiano da Altro → Impostazioni → «Copia errori». Parte prima di tutto il resto.
+(function () {
+  var CHIAVE = 'cicli_errori', MAX = 30;
+  function salva(tipo, msg, dove) {
+    try {
+      var lista = JSON.parse(localStorage.getItem(CHIAVE) || '[]');
+      if (!Array.isArray(lista)) lista = [];
+      lista.push({ t: new Date().toISOString(), tipo: tipo, msg: String(msg || '').slice(0, 500), dove: String(dove || '').slice(0, 300),
+        schermo: (window.innerWidth || 0) + 'x' + (window.innerHeight || 0), ua: String(navigator.userAgent || '').slice(0, 160) });
+      localStorage.setItem(CHIAVE, JSON.stringify(lista.slice(-MAX)));
+    } catch (e) {}
+  }
+  window.__salvaErrore = salva;
+  window.addEventListener('error', function (e) {
+    try {
+      if (e && e.target && e.target !== window && (e.target.src || e.target.href)) { salva('risorsa', 'non caricata', e.target.src || e.target.href); return; }
+      salva('errore', e && e.message, (e && e.filename ? e.filename.split('/').pop() : '') + ':' + (e && e.lineno) + ':' + (e && e.colno) + (e && e.error && e.error.stack ? ' ' + String(e.error.stack).split('\n').slice(0, 3).join(' | ') : ''));
+    } catch (_) {}
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    try { var r = e && e.reason; salva('promessa', r && r.message ? r.message : String(r), r && r.stack ? String(r.stack).split('\n').slice(0, 3).join(' | ') : ''); } catch (_) {}
+  });
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -359,6 +383,10 @@ a { color: var(--primary-ink); }
 .cattura textarea { flex: 1; min-width: 0; min-height: var(--tap); max-height: 120px; padding: 10px var(--sp-3); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); font-size: var(--fs-body); line-height: 22px; resize: none; }
 .cattura textarea:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
 .cattura-mic.ascolta { background: var(--q1-soft); color: var(--q1); }
+/* 24/10 · suggerimento sotto il campo quando la dettatura non va (iPhone: il microfono della tastiera) */
+.detta-aiuto { flex: 1 0 100%; margin: 0; padding: var(--sp-1) 2px 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.detta-aiuto .ti { color: var(--primary-ink); margin-right: 4px; }
+.vh .gcal-ieri { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-3); }
 .cattura-add { display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); }
 .cattura-add .ti { font-size: 24px; }
 .cattura-add:active { transform: translateY(1px); }
@@ -8061,7 +8089,7 @@ ui.rapido = { subito: false, oggi: false, persona: null, con: false };
 function apriRapido() {
   ui.rapido = { subito: false, oggi: false, persona: null, con: false };
   $('rapido-testo').value = '';
-  $('rapido-mic').hidden = !Riconoscimento;
+  $('rapido-mic').hidden = !micDaMostrare();
   disegnaRapido();
   $('rapidoOverlay').classList.add('open');
   setTimeout(() => $('rapido-testo').focus(), 150);
@@ -8084,8 +8112,10 @@ function chiudiRapido() { fermaDettatura(); closeModal('rapidoOverlay'); }
 function rigaNuova(title, r, ctx) {
   const oggi = todayISO();
   const p = personaDi(r.persona);
+  // 24/10 · senza giorno resta senza data: scheduled_date solo se la cosa va in Oggi (o in un giorno preciso)
+  const giorno = r.oggi ? oggi : (r.data || null);
   return { title, note: null, cat: ctx === 'personale' ? 'salute' : 'management', due_date: null, week: state.week, year: state.year,
-    q: r.subito ? 1 : 2, ctx, persone_menzionate: p ? [p.nome] : [], done: false, da_plaud: false, scheduled_date: oggi, scheduled_time: null,
+    q: r.subito ? 1 : 2, ctx, persone_menzionate: p ? [p.nome] : [], done: false, da_plaud: false, scheduled_date: giorno, scheduled_time: null,
     macro_area: null, execution_status: 'planned', sync_status: 'pending', settimana_anno: isoWeekStr(new Date(oggi)) };
 }
 async function salvaRapido() {
@@ -8116,23 +8146,100 @@ async function aggiungiRighe(righe, r) {
 }
 
 // Dettatura (Web Speech API, it-IT): il testo finisce nel campo, dopo quello già scritto.
-const DETTATURA = { SILENZIO_MS: 3000 };
+// 24/10 · iPhone: la dettatura del browser va e viene (nell'app sulla Home spesso manca o dà «service-not-allowed»).
+// Su iPhone: continuous = false e si riascolta da capo finché non passano 3 secondi senza parlare o tocchi di nuovo il microfono.
+// Se non c'è o non va: il campo prende il cursore e sotto compare, una volta, «Usa il microfono della tastiera dell'iPhone».
+const DETTATURA = { SILENZIO_MS: 3000, PAUSA_RIAVVIO_MS: 80, AIUTO_MS: 10000,
+  BLOCCANTI: ['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported', 'bad-grammar'] };
+const IOS_DETTATURA = /iP(hone|ad|od)/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const micDaMostrare = () => !!Riconoscimento || IOS_DETTATURA;
+ui.dettaAiutoVisto = {};
+ui.dettaSpenta = false;   // su iPhone, dopo «not-allowed»/«service-not-allowed»: in questa sessione si va diretti alla tastiera
+function testoAiutoDettatura(errore) {
+  if (IOS_DETTATURA) return 'Usa il microfono della tastiera dell\'iPhone (in basso a destra)';
+  if (errore === 'not-allowed' || errore === 'service-not-allowed') return 'Il browser non dà il permesso del microfono: consentilo nelle impostazioni del sito, oppure scrivi.';
+  if (errore === 'audio-capture') return 'Non trovo un microfono: controlla che sia collegato, oppure scrivi.';
+  if (errore === 'network') return 'La dettatura ha bisogno di internet: controlla la connessione, oppure scrivi.';
+  return 'La dettatura non è disponibile qui: scrivi nel campo.';
+}
+// Il suggerimento sotto il campo: uno solo, una volta per campo in questa sessione; il campo prende il cursore
+function aiutoDettatura(campo, errore) {
+  if (!campo) return;
+  try { campo.focus(); } catch (_) {}
+  const chiave = campo.id || 'campo';
+  if (ui.dettaAiutoVisto[chiave]) return;
+  ui.dettaAiutoVisto[chiave] = true;
+  const id = chiave + '-aiuto';
+  let p = document.getElementById(id);
+  if (!p) {
+    p = document.createElement('p');
+    p.id = id;
+    p.className = 'detta-aiuto';
+    p.setAttribute('role', 'status');
+    const contenitore = campo.closest('.cattura') || campo.parentNode;
+    if (contenitore === campo.parentNode) campo.insertAdjacentElement('afterend', p); else contenitore.appendChild(p);
+  }
+  p.innerHTML = `<i class="ti ti-microphone" aria-hidden="true"></i>${escHtml(testoAiutoDettatura(errore))}`;
+  p.hidden = false;
+  const togli = () => { p.hidden = true; campo.removeEventListener('input', togli); };
+  campo.addEventListener('input', togli);
+  setTimeout(togli, DETTATURA.AIUTO_MS);
+}
 function dettatura(campoId, micId) {
-  if (!Riconoscimento) return;
-  if (_ascolto) { fermaDettatura(); return; }
   const campo = $(campoId || 'rapido-testo'), mic = $(micId || 'rapido-mic');
-  const base = campo.value.trim() ? campo.value.replace(/\s*$/, ' ') : '';
-  const rec = new Riconoscimento();
-  rec.lang = 'it-IT';
-  rec.interimResults = true;
-  rec.continuous = true;                                         // si ferma con il tasto o dopo DETTATURA.SILENZIO_MS senza parlare
-  let silenzio = null;
-  const attendi = () => { clearTimeout(silenzio); silenzio = setTimeout(() => { try { rec.stop(); } catch (_) {} }, DETTATURA.SILENZIO_MS); };
-  rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; campo.value = base + t; campo.dispatchEvent(new Event('input', { bubbles: true })); attendi(); };
-  rec.onerror = e => { if (e.error !== 'aborted' && e.error !== 'no-speech') showToast('Dettatura non riuscita: ' + e.error, 'error'); };
-  rec.onend = () => { clearTimeout(silenzio); _ascolto = null; mic.setAttribute('aria-pressed', 'false'); mic.classList.remove('ascolta'); };
-  try { rec.start(); attendi(); } catch (e) { showToast('Dettatura non disponibile', 'error'); return; }
-  _ascolto = rec;
+  if (_ascolto) { fermaDettatura(); return; }
+  if (!Riconoscimento || (IOS_DETTATURA && ui.dettaSpenta)) { aiutoDettatura(campo, 'non-supportato'); return; }
+  let base = campo.value.trim() ? campo.value.replace(/\s*$/, ' ') : '';
+  let fermato = false, finito = false, errore = null, rec = null, silenzio = null, ultimaVoce = Date.now();
+  const finisci = () => {
+    if (finito) return;
+    finito = true;
+    clearTimeout(silenzio);
+    if (_ascolto === controllo) _ascolto = null;
+    mic.setAttribute('aria-pressed', 'false');
+    mic.classList.remove('ascolta');
+  };
+  const attendi = () => { clearTimeout(silenzio); silenzio = setTimeout(() => { fermato = true; try { rec && rec.stop(); } catch (_) {} }, DETTATURA.SILENZIO_MS); };
+  const avvia = () => {
+    rec = new Riconoscimento();
+    rec.lang = 'it-IT';
+    rec.interimResults = true;
+    rec.continuous = !IOS_DETTATURA;   // computer: si ferma con il tasto o dopo SILENZIO_MS senza parlare; iPhone: un pezzo alla volta
+    rec.onresult = e => {
+      let t = '';
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      campo.value = base + t;
+      campo.dispatchEvent(new Event('input', { bubbles: true }));
+      ultimaVoce = Date.now();
+      attendi();
+    };
+    rec.onerror = e => {
+      const tipo = (e && e.error) || 'sconosciuto';
+      if (tipo === 'aborted' || tipo === 'no-speech') return;   // fermata o silenzio: niente avvisi
+      errore = tipo;
+      fermato = true;
+      console.warn('[Dettatura] errore:', tipo);
+      if (IOS_DETTATURA && (tipo === 'not-allowed' || tipo === 'service-not-allowed')) ui.dettaSpenta = true;
+      aiutoDettatura(campo, tipo);
+    };
+    rec.onend = () => {
+      // iPhone: la sessione finisce a ogni pausa; si riparte finché non ci sono 3 secondi di silenzio
+      if (IOS_DETTATURA && !fermato && !errore && Date.now() - ultimaVoce < DETTATURA.SILENZIO_MS) {
+        base = campo.value.trim() ? campo.value.replace(/\s*$/, ' ') : '';
+        setTimeout(() => {
+          if (fermato) { finisci(); return; }
+          try { avvia(); } catch (err) { console.warn('[Dettatura] riavvio:', err.message); finisci(); }
+        }, DETTATURA.PAUSA_RIAVVIO_MS);
+        return;
+      }
+      finisci();
+    };
+    rec.start();
+  };
+  const controllo = { stop() { fermato = true; clearTimeout(silenzio); try { rec && rec.stop(); } catch (_) {} if (!rec) finisci(); } };
+  try { avvia(); attendi(); }
+  catch (e) { console.warn('[Dettatura] avvio:', e.message); finisci(); aiutoDettatura(campo, 'avvio'); return; }
+  _ascolto = controllo;
   mic.setAttribute('aria-pressed', 'true');
   mic.classList.add('ascolta');
 }
@@ -10304,7 +10411,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── 3. CAMPO FISSO DEL TELEFONO ─────────────────────────────
-function righeCattura() { return ($('cattura-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean); }
+function righeCattura() { return righeCampo($('cattura-testo').value); }   // 24/10 · con le righe vuote: chiudono un'intestazione («Mattina 26»)
 async function salvaCattura() {
   const righe = righeCattura();
   if (!righe.length) { apriRapido(); return; }       // campo vuoto: [+] apre il foglio con Subito / Oggi / Con…
@@ -10326,7 +10433,7 @@ $('cattura-testo').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); salvaCattura(); }
 });
 $('cattura-testo').addEventListener('input', allungaCattura);
-$('cattura-mic').hidden = !Riconoscimento;
+$('cattura-mic').hidden = !micDaMostrare();
 
 // «+ Ciclo» di una colonna: il foglio rapido con il giorno già scelto
 const _disegnaRapidoV5 = disegnaRapido;
@@ -11385,22 +11492,65 @@ function interpretaFrase(testo, oggi = new Date()) {
 const fmtGiornoCorto = iso => { const d = parseISODate(iso); return d ? `${['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'][d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}` : ''; };
 const escAttr = s => escHtml(s).replace(/"/g, '&quot;');
 function sintesiVoce(v) {
-  const quando = v.data ? `${fmtGiornoCorto(v.data)}${v.ora ? ' ' + v.ora : ''}` : v.ora ? `oggi ${v.ora}` : 'Tutto, senza data';
+  const quando = v.data ? `${fmtGiornoCorto(v.data)}${v.ora ? ' ' + v.ora : v.fascia ? ' · ' + v.fascia : ''}` : v.ora ? `oggi ${v.ora}` : 'Tutto, senza data';
   if (v.q === 3 && v.delega) return [v.title, `Delega a ${v.delega.nome}${v.delega.id ? '' : ' (nuova persona)'}`, `controlli ${v.data ? fmtGiornoCorto(v.data) + (v.controllaGiorno ? ' (controlla il giorno)' : '') : 'tra ' + FRASE.CONTROLLO_GIORNI + ' giorni'}`].join(' · ');
   return [v.title, quando + (v.controllaGiorno ? ' (controlla il giorno)' : ''), TIPI[v.q].label].join(' · ');
 }
 // v9 · «Spesa:» con sotto righe che iniziano con «-», «•» o «*» = UNA cosa (senza i due punti) con quei passi
 const PUNTO_ELENCO = /^[-•*]\s*/;
+// 24/10 · le righe di un campo: tolte le righe vuote in testa e in coda, ne resta al massimo una di fila
+// (serve a chiudere un'intestazione «Mattina 26»: vale per le righe sotto fino a una riga vuota)
+function righeCampo(t) {
+  const out = [];
+  String(t || '').split(/\r?\n/).map(x => x.trim()).forEach(x => { if (x || (out.length && out[out.length - 1])) out.push(x); });
+  while (out.length && !out[out.length - 1]) out.pop();
+  return out;
+}
+// 24/10 · una riga che dice solo QUANDO non è una cosa: «Mattina 26», «Lunedì:», «Domani pomeriggio», «Venerdì 30 ottobre».
+// Restituisce { data, fascia, controllaGiorno } oppure null. «lunedì 26 chiamare Ale» NON è un'intestazione (c'è la cosa).
+const QUANDO_PAROLE = new Set(['oggi', 'domani', 'dopodomani', 'stamattina', 'stamani', 'domattina', 'stasera', 'mattina', 'mattino', 'pomeriggio', 'sera',
+  'il', 'lo', 'la', 'l', 'di', 'del', 'della', 'per', 'prossimo', 'prossima', 'settimana', 'in', 'mattinata', 'serata']);
+function intestazioneQuando(riga, oggi = new Date()) {
+  const pulita = String(riga || '').replace(/^[-•*#\s]+/, '').replace(/[\s:.,;–—-]+$/, '').trim();
+  if (!pulita || pulita.length > 40) return null;
+  const parole = senzaAccenti(pulita).replace(/[,']/g, ' ').split(/\s+/).filter(Boolean);
+  let numero = null, quando = false;
+  for (const w of parole) {
+    const x = w.replace(/°$/, '');
+    if (FRASE.GIORNI.includes(x) || FRASE.MESI.includes(x) || /^(?:oggi|domani|dopodomani|stamattina|stamani|domattina|stasera|settimana|mattina|mattino|mattinata|pomeriggio|sera|serata)$/.test(x)) { quando = true; continue; }
+    if (/^\d{1,2}$/.test(x)) { if (+x >= 1 && +x <= 31) { numero = numero == null ? +x : numero; quando = true; continue; } return null; }
+    if (/^\d{1,2}[/\-]\d{1,2}(?:[/\-]\d{2,4})?$/.test(x) || /^\d{4}$/.test(x)) { quando = true; continue; }
+    if (QUANDO_PAROLE.has(x)) continue;
+    return null;   // c'è altro: è una cosa da fare
+  }
+  if (!quando) return null;
+  const t = senzaAccenti(pulita);
+  const fascia = /\b(?:pomeriggio)\b/.test(t) ? 'pomeriggio' : /\b(?:sera|stasera|serata)\b/.test(t) ? 'sera' : /\b(?:mattina|mattino|mattinata|stamattina|stamani|domattina)\b/.test(t) ? 'mattina' : null;
+  const base = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  const f = interpretaFrase(pulita, base);
+  let data = f.data, controlla = !!f.controllaGiorno;
+  if (!data && numero != null) { const d = giornoDelMese(numero, base); data = d ? toISODate(d) : null; }   // «Mattina 26» = il 26
+  if (!data && numero != null) return null;
+  if (!data && fascia) data = toISODate(base);   // «Pomeriggio:» da solo = oggi pomeriggio
+  if (!data) return null;
+  return { data, fascia, controllaGiorno: controlla };
+}
 function gruppiDaRighe(righe) {
-  const gruppi = righe.reduce((acc, riga) => {
-    const ultimo = acc[acc.length - 1];
-    if (PUNTO_ELENCO.test(riga) && ultimo && ultimo.apre) {
+  const lista = righe || [], gruppi = [];
+  let quando = null;
+  lista.forEach((riga, i) => {
+    if (!riga) { quando = null; return; }   // riga vuota: l'intestazione finisce qui
+    const q = intestazioneQuando(riga);
+    if (q && lista[i + 1]) { quando = q; return; }   // un'intestazione vale solo se sotto c'è almeno una riga
+    const ultimo = gruppi[gruppi.length - 1];
+    if (PUNTO_ELENCO.test(riga) && ultimo && ultimo.apre && ultimo.quando === quando) {
       const passo = riga.replace(PUNTO_ELENCO, '').trim();
-      return passo ? [...acc.slice(0, -1), { ...ultimo, passi: [...ultimo.passi, passo] }] : acc;
+      if (passo) ultimo.passi.push(passo);
+      return;
     }
-    return [...acc, { testo: riga, apre: /:\s*$/.test(riga), passi: [] }];
-  }, []);
-  return gruppi.map(g => ({ testo: g.testo, titolo: g.passi.length ? g.testo.replace(/\s*:\s*$/, '') : g.testo, passi: g.passi }));
+    gruppi.push({ testo: riga, apre: /:\s*$/.test(riga), passi: [], quando });
+  });
+  return gruppi.map(g => ({ testo: g.testo, titolo: g.passi.length ? g.testo.replace(/\s*:\s*$/, '') : g.quando ? g.testo.replace(PUNTO_ELENCO, '') : g.testo, passi: g.passi, quando: g.quando }));
 }
 const frasePassi = n => `1 cosa con ${n} ${n === 1 ? 'passo' : 'passi'}`;
 // Le righe del campo con le scelte del foglio (Subito, Oggi, il giorno della colonna) e le correzioni a mano
@@ -11409,6 +11559,9 @@ function vociDaRighe(righe, r) {
   return gruppiDaRighe(righe).map((g, i) => {
     const testo = g.testo;
     let v = { ...interpretaFrase(g.titolo), testo, passi: g.passi.map(maiuscola) };
+    // sotto un'intestazione («Mattina 26»): il suo giorno e la sua fascia, se la riga non ne dice altri
+    if (g.quando && !v.data && v.q !== 3) v = { ...v, data: g.quando.data, controllaGiorno: g.quando.controllaGiorno };
+    if (g.quando && g.quando.fascia && !v.ora && v.q !== 3) v = { ...v, fascia: g.quando.fascia };
     if (r && r.subito && v.q !== 3) v = { ...v, q: 1 };
     if (!v.data && r && r.data) v = { ...v, data: r.data };
     if (!v.data && r && r.oggi && v.q !== 3) v = { ...v, data: oggiLocale() };
@@ -11434,7 +11587,7 @@ function editorVoce(v, i) {
 function disegnaAnteprima() {
   const box = $('rapido-anteprima');
   if (!box) return;
-  const voci = vociDaRighe(righeDi($('rapido-testo').value), ui.rapido);
+  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
   box.hidden = !voci.length;
   box.innerHTML = voci.map((v, i) => `<div class="rap-voce p-q${v.q}" data-i="${i}">
     <div class="rap-sintesi"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i><span>${escHtml(sintesiVoce(v))}</span>
@@ -11444,7 +11597,7 @@ function disegnaAnteprima() {
 }
 // una correzione nel riepilogo: vale finché la riga del campo resta uguale
 function correggiVoce(i, campo, valore) {
-  const righe = righeDi($('rapido-testo').value);
+  const righe = righeCampo($('rapido-testo').value);
   const v = vociDaRighe(righe, ui.rapido)[i];
   if (!v) return;
   const valori = { title: v.title, data: v.data, ora: v.ora, q: v.q, delega: v.delega, controllaGiorno: campo === 'data' ? false : !!v.controllaGiorno };   // data scelta a mano: niente avviso
@@ -11495,7 +11648,7 @@ async function rigaDaVoce(v, r, ctx) {
     if (p && state.delegaColsOk) return { ...riga, delega_persona_id: p.id, delega_controllo: v.data || toISODate(dataPiu(FRASE.CONTROLLO_GIORNI)), persone_menzionate: unici([...base.persone_menzionate, p.nome]) };
     return p ? { ...riga, persone_menzionate: unici([...base.persone_menzionate, p.nome]) } : riga;
   }
-  return v.data ? { ...riga, scheduled_date: v.data, scheduled_time: v.ora || null } : riga;
+  return v.data ? { ...riga, scheduled_date: v.data, scheduled_time: v.ora || null, ...(v.fascia && state.agendaColsOk ? { fascia_oraria: v.fascia } : {}) } : riga;
 }
 async function aggiungiFrasi(voci, r) {
   const ctx = state.ctx;
@@ -11518,7 +11671,7 @@ async function aggiungiFrasi(voci, r) {
     }
     const nuove = coppie.map(x => x.c), tutte = [...nuove, ...passiNuovi];
     state.cicli = [...tutte, ...state.cicli.filter(c => !tutte.some(n => n.id === c.id))];
-    for (const { v, c } of coppie) if (v.data && v.q !== 3) await pianificaInData(ciclo(c.id) || c, parseISODate(v.data), fasciaDaOra(v.ora));
+    for (const { v, c } of coppie) if (v.data && v.q !== 3) await pianificaInData(ciclo(c.id) || c, parseISODate(v.data), v.fascia || fasciaDaOra(v.ora));
     render();
     if (r && r.cusc && nuove[0]) { await riempiCuscinetto(r.cusc, nuove[0].id); return nuove; }   // urgenza arrivata: va nel cuscinetto
     coppie.forEach(({ v, c }) => {
@@ -11531,7 +11684,7 @@ async function aggiungiFrasi(voci, r) {
   } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
 }
 salvaRapido = async function () {
-  const righe = righeDi($('rapido-testo').value);
+  const righe = righeCampo($('rapido-testo').value);
   if (!righe.length) { $('rapido-testo').focus(); return; }
   fermaDettatura();
   if (await aggiungiFrasi(vociDaRighe(righe, ui.rapido), { ...ui.rapido })) closeModal('rapidoOverlay');
@@ -12294,7 +12447,7 @@ vociDaRighe = function (righe, r) {
 const _disegnaAnteprimaV9 = disegnaAnteprima;
 disegnaAnteprima = function () {
   _disegnaAnteprimaV9();
-  const voci = vociDaRighe(righeDi($('rapido-testo').value), ui.rapido);
+  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
   document.querySelectorAll('#rapido-anteprima .rap-voce[data-i]').forEach(box => {
     const v = voci[+box.dataset.i], h = spuntaAvviso(v, `data-avvisa="${box.dataset.i}"`);
     if (h) box.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', h);
@@ -12312,7 +12465,7 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'cattura-avvisa') { ui.catturaNoAvviso = !t.checked; return; }
   if (!t.matches || !t.matches('#rapido-anteprima [data-avvisa]')) return;
-  const v = vociDaRighe(righeDi($('rapido-testo').value), ui.rapido)[+t.dataset.avvisa];
+  const v = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido)[+t.dataset.avvisa];
   if (!v) return;
   const no = (ui.rapido.noAvviso || []).filter(x => x !== v.testo);
   ui.rapido = { ...ui.rapido, noAvviso: t.checked ? no : [...no, v.testo] };
@@ -13013,7 +13166,7 @@ disegnaAnteprima = function () {
   _disegnaAnteprimaDopp();
   const box = $('rapido-anteprima');
   if (!box || box.hidden) return;
-  vociDaRighe(righeDi($('rapido-testo').value), ui.rapido).forEach((v, i) => {
+  vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido).forEach((v, i) => {
     const m = trovaDoppione(v.title), voce = box.querySelector(`.rap-voce[data-i="${i}"]`);
     if (!m || !voce) return;
     if (forte(m.livello)) voce.querySelector('.rap-sintesi > span').insertAdjacentHTML('afterend', etichettaDopp(m));
@@ -13295,6 +13448,202 @@ function avviaApp(sessione) {
   });
   window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
 }
+
+// ══════════════════════════════════════════════════════════════
+// 24/10 · IPHONE: la vista non resta «scivolata» sotto la barra dopo la tastiera o il microfono
+// Il documento non scorre mai (scorre solo #main): a tastiera chiusa si riporta in cima, e se l'app non copre
+// lo schermo visibile se ne fissa l'altezza. Se Oggi resta vuota con i dati caricati: errore in console e ridisegno.
+// ══════════════════════════════════════════════════════════════
+const VISTA = { RITARDO_MS: 350, RIDISEGNO_MIN_MS: 2000 };
+const campoAttivo = () => {
+  const a = document.activeElement;
+  if (!a || a === document.body) return false;
+  if (a.isContentEditable || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT') return true;
+  return a.tagName === 'INPUT' && !['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file'].includes(a.type);
+};
+function altezzaVisibile() {
+  const vv = window.visualViewport;
+  return Math.round(vv ? vv.height * (vv.scale || 1) : window.innerHeight);
+}
+let _oggiRidisegnata = 0;
+function controllaOggiVuota(motivo) {
+  if (!_appAvviata || ui.tab !== 'oggi' || ui.sub || state.loading || state.searchQuery) return;
+  const view = $('view');
+  if (!view || !(state.cicli || []).length) return;
+  if (view.querySelector('.vh') && view.getBoundingClientRect().height > 0) return;
+  const msg = `[Oggi] vista vuota con ${state.cicli.length} cose caricate (${motivo}): la ridisegno`;
+  console.error(msg);
+  if (window.__salvaErrore) window.__salvaErrore('vista', msg, '');
+  if (Date.now() - _oggiRidisegnata < VISTA.RIDISEGNO_MIN_MS) return;
+  _oggiRidisegnata = Date.now();
+  delete view.dataset.vista;
+  render();
+}
+function ripristinaVista(motivo) {
+  if (campoAttivo()) return;   // tastiera aperta: è iOS che sposta la vista, apposta
+  const se = document.scrollingElement || document.documentElement;
+  if (window.scrollY || window.pageYOffset || se.scrollTop || document.body.scrollTop) {
+    window.scrollTo(0, 0);
+    se.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+  const app = $('app'), main = $('main'), view = $('view');
+  if (app && window.innerWidth < 768) {
+    const h = altezzaVisibile(), r = app.getBoundingClientRect();
+    if (Math.abs(r.top) > 1 || Math.abs(r.height - h) > 2) {
+      app.style.height = h + 'px';
+      console.warn(`[Vista] app spostata (${motivo}): top ${Math.round(r.top)}, alta ${Math.round(r.height)} su ${h}: rimessa a posto`);
+    }
+  }
+  // il contenuto finito fuori dalla parte che scorre: si torna in cima
+  if (main && view) {
+    const rm = main.getBoundingClientRect(), rv = view.getBoundingClientRect();
+    if (rv.bottom < rm.top || rv.top > rm.bottom) main.scrollTop = 0;
+  }
+  controllaOggiVuota(motivo);
+}
+let _vistaTimer = null;
+function ripristinaVistaPoi(motivo, azzeraAltezza) {
+  clearTimeout(_vistaTimer);
+  _vistaTimer = setTimeout(() => {
+    if (azzeraAltezza && !campoAttivo() && $('app')) $('app').style.height = '';
+    ripristinaVista(motivo);
+  }, VISTA.RITARDO_MS);
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => ripristinaVistaPoi('tastiera'));
+  window.visualViewport.addEventListener('scroll', () => ripristinaVistaPoi('scorrimento'));
+}
+document.addEventListener('focusout', () => ripristinaVistaPoi('campo lasciato'));
+window.addEventListener('orientationchange', () => ripristinaVistaPoi('rotazione', true));
+window.addEventListener('resize', () => ripristinaVistaPoi('dimensioni', true));
+window.addEventListener('pageshow', () => ripristinaVistaPoi('riapertura', true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ripristinaVistaPoi('primo piano', true); });
+// dopo ogni disegno: Oggi non deve restare vuota
+const _renderVista = render;
+render = function () {
+  const r = _renderVista.apply(this, arguments);
+  setTimeout(() => controllaOggiVuota('disegno'), 0);
+  return r;
+};
+
+// ══════════════════════════════════════════════════════════════
+// 24/10 · APPUNTAMENTI SEMPRE RILETTI DA GOOGLE
+// Prima una settimana letta restava in memoria (e nella copia locale) finché non si ricaricava la pagina:
+// un appuntamento cancellato su Google restava in Oggi. Ora: a ogni apertura e ogni 5 minuti si rilegge
+// ogni settimana da Google e la si SOSTITUISCE (niente unione); gli annullati non entrano.
+// La copia locale si usa solo finché Google non risponde; se ha più di 12 ore la vista lo dice («dati di ieri»).
+// ══════════════════════════════════════════════════════════════
+const EVENTI_AGG = { OGNI_MS: 5 * 60 * 1000, RIPROVA_MS: 60 * 1000, VECCHI_MS: 12 * 3600 * 1000, TS: 'gcal_eventi_cache_ts', MAX_SETTIMANE: 10 };
+ui.eventiLetti = {};      // settimana → quando è arrivata da Google (in questa apertura)
+ui.eventiTentati = {};    // settimana → ultimo tentativo (anche fallito)
+ui.eventiCacheTs = leggiJson(EVENTI_AGG.TS, {});
+const _salvaCacheEventiAgg = salvaCacheEventi;
+salvaCacheEventi = function () {
+  _salvaCacheEventiAgg();
+  const ts = {}, prima = leggiJson(EVENTI_AGG.TS, {});
+  settimaneDaTenere().forEach(k => {
+    if (Array.isArray(ui.eventi[k]) && !ui.eventiDaCache.has(k) && ui.eventiLetti[k]) ts[k] = ui.eventiLetti[k];
+    else if (prima[k]) ts[k] = prima[k];
+  });
+  ui.eventiCacheTs = ts;
+  try { localStorage.setItem(EVENTI_AGG.TS, JSON.stringify(ts)); } catch (e) { console.warn('[GCal] data della copia locale:', e.message); }
+};
+function rileggiSettimana(week, year) {
+  const k = settKey(week, year);
+  if (ui.eventiCarico[k]) return ui.eventiCarico[k];
+  ui.eventiTentati[k] = Date.now();
+  const da = getWeekStart(week, year), a = new Date(da); a.setDate(a.getDate() + 7);
+  const p = leggiEventi(da, a).then(lista => {
+    // a token scaduto durante la lettura Google non ha risposto davvero: si tiene quello che c'è
+    if (!isGcalTokenValid() && !lista.length) return ui.eventi[k] || [];
+    ui.eventi[k] = lista.filter(e => e && e.status !== 'cancelled');   // sostituisce la settimana intera
+    ui.eventiDaCache.delete(k);
+    ui.eventiLetti[k] = Date.now();
+    if (settimaneDaTenere().includes(k)) salvaCacheEventi();
+    render();
+    return ui.eventi[k];
+  }).catch(e => { console.warn('[GCal] lettura appuntamenti:', e.message); return ui.eventi[k] || []; })
+    .finally(() => { delete ui.eventiCarico[k]; });
+  ui.eventiCarico[k] = p;
+  return p;
+}
+caricaEventi = function (week, year) {
+  const k = settKey(week, year);
+  if (!isGcalTokenValid()) return Promise.resolve(ui.eventi[k] || []);
+  if (ui.eventiCarico[k]) return ui.eventiCarico[k];
+  const letto = ui.eventiLetti[k] || 0;
+  if (ui.eventi[k] && !ui.eventiDaCache.has(k) && letto && Date.now() - letto < EVENTI_AGG.OGNI_MS) return Promise.resolve(ui.eventi[k]);
+  const fallito = (ui.eventiTentati[k] || 0) > letto;
+  if (fallito && Date.now() - ui.eventiTentati[k] < EVENTI_AGG.RIPROVA_MS) return Promise.resolve(ui.eventi[k] || []);
+  return rileggiSettimana(week, year);
+};
+function chiaveSett(k) { const m = /^(\d{4})-W(\d{2})$/.exec(k); return m ? { week: +m[2], year: +m[1] } : null; }
+function aggiornaEventiAperti(motivo) {
+  if (!_appAvviata || !isGcalTokenValid() || document.visibilityState === 'hidden') return;
+  const chiavi = [...new Set([...settimaneDaTenere(), settKey(state.week, state.year), ...Object.keys(ui.eventi || {})])].slice(0, EVENTI_AGG.MAX_SETTIMANE);
+  chiavi.forEach(k => {
+    const w = chiaveSett(k);
+    if (!w || ui.eventiCarico[k]) return;
+    const letto = ui.eventiLetti[k] || 0;
+    if (letto && !ui.eventiDaCache.has(k) && Date.now() - letto < EVENTI_AGG.OGNI_MS - 5000) return;
+    rileggiSettimana(w.week, w.year);
+  });
+}
+setInterval(() => aggiornaEventiAperti('ogni 5 minuti'), EVENTI_AGG.OGNI_MS);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') aggiornaEventiAperti('primo piano'); });
+window.addEventListener('pageshow', e => { if (e.persisted) aggiornaEventiAperti('riapertura'); });
+const _handleGcalTokenAgg = _handleGcalToken;
+_handleGcalToken = async function (resp) {
+  const r = await _handleGcalTokenAgg.apply(this, arguments);
+  aggiornaEventiAperti('nuovo token');
+  return r;
+};
+// «dati di ieri»: la settimana di oggi viene da una lettura di più di 12 ore fa (copia locale o token scaduto)
+function eventiVecchi() {
+  if (!gcalEraCollegato()) return false;
+  const cur = bpSettimanaCorrente(), k = settKey(cur.week, cur.year);
+  if (!Array.isArray(ui.eventi[k])) return false;
+  const quando = ui.eventiLetti[k] || (ui.eventiDaCache.has(k) ? (ui.eventiCacheTs || {})[k] || 0 : 0);
+  return Date.now() - quando > EVENTI_AGG.VECCHI_MS;
+}
+const notaEventiVecchi = () => eventiVecchi() ? '<p class="gcal-ieri"><i class="ti ti-cloud-off" aria-hidden="true"></i>Appuntamenti: dati di ieri</p>' : '';
+const _vistaOggiAgg = vistaOggi;
+vistaOggi = function () { const h = _vistaOggiAgg.apply(this, arguments); const n = notaEventiVecchi(); return n ? h.replace('</h1></div>', '</h1>' + n + '</div>') : h; };
+const _vistaPianificaAgg = vistaPianifica;
+vistaPianifica = function () { const h = _vistaPianificaAgg.apply(this, arguments); const n = notaEventiVecchi(); return n && h.includes('</h1></div>') ? h.replace('</h1></div>', '</h1>' + n + '</div>') : h; };
+
+// ══════════════════════════════════════════════════════════════
+// 24/10 · «COPIA ERRORI» in Altro → Impostazioni (gli errori li raccoglie lo script in testa alla pagina)
+// ══════════════════════════════════════════════════════════════
+const ERRORI_LS = 'cicli_errori';
+function erroriSalvati() { try { const l = JSON.parse(localStorage.getItem(ERRORI_LS) || '[]'); return Array.isArray(l) ? l : []; } catch (_) { return []; } }
+function testoErrori() {
+  const l = erroriSalvati();
+  if (!l.length) return 'Nessun errore registrato.';
+  return l.map(e => [e.t, e.tipo, e.msg, e.dove, e.schermo].filter(Boolean).join(' · ')).join('\n') + '\n' + (l[l.length - 1].ua || '');
+}
+ui.erroriTesto = false;
+function sezioneErrori() {
+  const n = erroriSalvati().length;
+  return `<p class="list-head"><span>Problemi</span><span class="mono">${n}</span></p>
+    <div class="group"><button type="button" class="riga-link" data-act="errori-copia"><i class="ti ti-bug"></i><span>Copia errori<small>${n ? plurale(n, 'errore registrato', 'errori registrati') + ' su questo dispositivo' : 'Nessun errore registrato'}</small></span><span></span><i class="ti ti-copy"></i></button>
+    ${ui.erroriTesto ? `<div class="riga-link" style="grid-template-columns:minmax(0,1fr)"><textarea class="input" id="errori-testo" rows="8" readonly aria-label="Errori registrati" style="min-height:160px;font-size:12px;line-height:16px">${escHtml(testoErrori())}</textarea></div>` : ''}</div>`;
+}
+AZIONI['errori-copia'] = async () => {
+  const t = testoErrori();
+  try {
+    await navigator.clipboard.writeText(t);
+    showToast(erroriSalvati().length ? 'Errori copiati: incollali in un messaggio' : 'Nessun errore da copiare', 'success');
+  } catch (_) {
+    ui.erroriTesto = true;
+    render();
+    setTimeout(() => { const ta = $('errori-testo'); if (ta) { ta.focus(); ta.select(); } }, 50);
+    showToast('Selezionali nel riquadro e copia', 'info');
+  }
+};
+const _vistaImpostazioniErr = vistaImpostazioni;
+vistaImpostazioni = function () { return _vistaImpostazioniErr.apply(this, arguments) + sezioneErrori(); };
 
 </script>
 </body>
