@@ -1054,7 +1054,9 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
 /* ══ v5 · metodo i-Time ══ */
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
-.tag-dopp { display: inline-flex; align-items: center; flex: none; margin-left: var(--sp-2); padding: 0 6px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: var(--fs-caption); font-weight: var(--fw-strong); line-height: 18px; white-space: nowrap; }
+.tag-dopp { display: inline-flex; align-items: center; gap: 4px; flex: none; margin-left: var(--sp-2); padding: 0 8px; min-height: 24px; border-radius: var(--r-full); border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); font-size: var(--fs-caption); font-weight: var(--fw-strong); line-height: 16px; white-space: nowrap; }
+.tag-dopp .ti { font-size: 14px; color: var(--text-2); }
+.rap-sintesi > .tag-dopp { flex: none; min-width: auto; }   /* la regola .rap-sintesi > span la allargava come un campo vuoto */
 .dopp-parente { display: flex; gap: 6px; align-items: center; margin: 2px 0 0; padding-left: 28px; color: var(--text-2); font-size: var(--fs-caption); }
 .dopp-domanda { margin: var(--sp-2) 0 0; font-weight: var(--fw-strong); }
 .dopp-domanda small { display: block; font-weight: normal; color: var(--text-2); }
@@ -3219,23 +3221,41 @@ function saveApiKey() {
 let _tipTimer = null;
 const _tip = () => document.getElementById('tooltip');
 
+// Solo con un mouse vero: su telefono (hover: none) o dopo un tocco il tooltip non compare,
+// e si chiude da solo se l'elemento sparisce (cambio vista), al tocco altrove, scorrendo o con un tasto.
+const _hoverVero = () => !window.matchMedia || window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+let _ultimoPuntatore = 'mouse', _tipAncora = null, _tipControllo = null;
+function nascondiTip() {
+  clearTimeout(_tipTimer); clearInterval(_tipControllo); _tipControllo = null; _tipAncora = null;
+  const tip = _tip(); if (tip) tip.classList.remove('visible');
+}
+document.addEventListener('pointerdown', e => { _ultimoPuntatore = e.pointerType || 'mouse'; nascondiTip(); }, true);
+document.addEventListener('touchstart', () => { _ultimoPuntatore = 'touch'; nascondiTip(); }, { capture: true, passive: true });
+document.addEventListener('keydown', nascondiTip, true);
+document.addEventListener('scroll', nascondiTip, { capture: true, passive: true });
+window.addEventListener('resize', nascondiTip);
+window.addEventListener('blur', nascondiTip);
+
 document.addEventListener('mouseover', e => {
   const el = e.target.closest('[data-tip]');
   if (!el) return;
   clearTimeout(_tipTimer);
+  if (!_hoverVero() || _ultimoPuntatore !== 'mouse') return;
   _tipTimer = setTimeout(() => {
-    const tip = _tip(); if (!tip) return;
+    const tip = _tip(); if (!tip || !el.isConnected || !el.matches(':hover')) return;
     tip.textContent = el.dataset.tip;
     tip.classList.add('visible');
     positionTooltip(tip, el);
+    _tipAncora = el;
+    clearInterval(_tipControllo);
+    _tipControllo = setInterval(() => { if (!_tipAncora || !_tipAncora.isConnected || !_tipAncora.matches(':hover')) nascondiTip(); }, 300);
   }, 400);
 });
 
 document.addEventListener('mouseout', e => {
   const el = e.target.closest('[data-tip]');
   if (!el) return;
-  clearTimeout(_tipTimer);
-  const tip = _tip(); if (tip) tip.classList.remove('visible');
+  nascondiTip();
 });
 
 function positionTooltip(tip, anchor) {
@@ -13230,7 +13250,7 @@ function trovaDoppione(titolo, opz = {}) {
 }
 const GG_SETT = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
 const giornoEvento = e => `${GG_SETT[parseISODate(e.giorno).getDay()]} ${fmtGgMm(e.giorno)}`;
-const etichettaDopp = m => !m || !forte(m.livello) ? '' : `<span class="tag-dopp" data-tip="${esc(testoDopp(m))}">${m.livello === 'uguale' ? 'c\'è già' : 'simile'}</span>`;
+const etichettaDopp = m => !m || !forte(m.livello) ? '' : `<span class="tag-dopp" data-tip="${esc(testoDopp(m))}"><i class="ti ti-copy" aria-hidden="true"></i>${m.livello === 'uguale' ? 'c\'è già' : 'simile'}</span>`;
 function testoDopp(m) {
   if (m.tipo === 'aperta') return `C'è già: ${m.c.title} (${TIPI[m.c.q] ? TIPI[m.c.q].label : 'Importante'}, dal ${fmtGgMm(giornoIso(m.c.created_at))})`;
   if (m.tipo === 'fatta') return `L'hai già fatta il ${fmtGgMm(giornoIso(m.c.chiuso_at || m.c.updated_at))}: la riapro o ne faccio una nuova?`;
@@ -13942,7 +13962,7 @@ function formMeta(m) {
     <input type="text" class="input" id="${m ? 'meta-testo-mod' : 'meta-testo'}" maxlength="160" value="${esc(v.testo || '')}" placeholder="Fra 5 anni voglio… (es. SSI con 2.000 clienti)" aria-label="La meta">
     <div class="meta-form-riga">
       ${aree.length ? `<select class="input" id="${m ? 'meta-area-mod' : 'meta-area'}" aria-label="Area"><option value="">Area (facoltativa)</option>${aree.map(a => `<option${a === v.area ? ' selected' : ''}>${escHtml(a)}</option>`).join('')}</select>` : ''}
-      <input type="date" class="input" id="${m ? 'meta-entro-mod' : 'meta-entro'}" value="${v.entro || ''}" aria-label="Entro (facoltativo)" title="Entro (facoltativo)">
+      <input type="date" lang="it" class="input" id="${m ? 'meta-entro-mod' : 'meta-entro'}" value="${v.entro || ''}" aria-label="Entro (facoltativo)" title="Entro (facoltativo)">
       ${m ? `<button type="button" class="btn btn-primary btn-sm" data-act="meta-salva" data-id="${esc(m.id)}">Salva</button>` : '<button type="button" class="btn btn-primary btn-sm" data-act="meta-aggiungi"><i class="ti ti-plus"></i>Aggiungi</button>'}
     </div>
     ${m ? `<div class="tools-row"><button type="button" class="btn btn-ghost btn-sm" data-act="meta-annulla">Annulla</button>
