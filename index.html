@@ -15039,26 +15039,32 @@ const altroCtx = c => c === 'personale' ? 'lavoro' : 'personale';
 const nomeCtx = c => SN.NOMI_CTX[c] || 'Lavoro';
 
 // ─── 3 · indovinaContesto(testo) → { ctx, motivo, sicuro } ───
-// Segnali con un peso (+ = Personale, − = Lavoro): calendario di origine, persone note (dal contesto
-// prevalente delle cose che le nominano), parole chiave, parole delle cose che hai già (impara da sole
-// quando sposti una cosa) e le correzioni fatte toccando l'etichetta. Sotto la soglia: il contesto in vista.
+// Segnali con un peso (+ = Personale, − = Lavoro): calendario di origine, persone note, parole delle cose
+// che hai già (impara da sole quando sposti una cosa), correzioni fatte toccando l'etichetta e, solo dove
+// l'app non ha ancora imparato niente, una lista fissa di parole. Quello che hai già scritto vince sulla lista:
+// una parola che usi soprattutto in un contesto porta lì; una che usi in tutti e due (es. un progetto tenuto
+// sia in Lavoro sia in Personale) non decide niente e toglie il «sicuro». Sotto la soglia: il contesto in vista.
 const CTX_P = 'personale', CTX_L = 'lavoro';
 const CTX_PAROLE = [
   // famiglia e persone di casa
   [/\bsamira\b|\bsami\b/, CTX_P, 4, 'Samira'], [/\bfrancesca\b|\bfranci\b/, CTX_P, 4, 'Francesca'], [/\btia\b/, CTX_P, 3, 'Tia'],
-  [/\bfigli[ae]?\b|\bbimb[ei]\b|\bragazze\b/, CTX_P, 3], [/\bmamma\b|\bpapa\b|\bnonn[aio]\b|\bsuocer[ao]\b/, CTX_P, 3],
+  [/\bfigli[ae]?\b|\bbimb[ei]\b/, CTX_P, 3], [/\bmamma\b|\bpapa\b|\bnonn[aio]\b|\bsuocer[ao]\b|\bgenitori\b|\bmiei genitori\b/, CTX_P, 3],
+  [/\bfamiglia\b|\bfamiliar\w*\b|\bcoppia\b|\bsogni\b/, CTX_P, 2],
+  // crescita personale
+  [/\bmeditazion\w*\b|\bkundalini\b|\bipnosi\b|\bintrospettiv\w*\b/, CTX_P, 5], [/\bdesideri\b|\bmete\b/, CTX_P, 4], [/\bscrittura\b|\blibro\b/, CTX_P, 3], [/\bcapitolo\b/, CTX_P, 2],
   // scuola, sport, salute
   [/\bscuola\b|\bpagella\b|\bprofessor\w*\b|\bmaestr[ae]\b|\bcompiti\b|\bgita\b/, CTX_P, 3], [/\bverifica\b|\binterrogazion\w*\b/, CTX_P, 2],
-  [/\bpallavolo\b|\bcalcetto\b|\bnuoto\b|\bpartita\b/, CTX_P, 3], [/\bdentista\b|\bpediatra\b|\bortopedico\b|\boculista\b|\bveterinari[oa]\b/, CTX_P, 3],
-  [/\bvisita\b/, CTX_P, 2], [/\bmedico\b/, CTX_P, 2], [/\bpalestra\b|\bems\b|\bintegrator\w*\b|\ballenament\w*\b/, CTX_P, 3],
-  // casa e vita
-  [/\bcasa\b|\bcondominio\b|\bmutuo\b/, CTX_P, 2], [/\bspesa\b|\bsupermercato\b/, CTX_P, 3], [/\bbollett\w*\b/, CTX_P, 3],
-  [/\bvan\b|\bvacanz\w*\b|\bferie\b|\bviaggio\b/, CTX_P, 3], [/\bregal[oi]\b|\bcompleann\w*\b|\bcresima\b|\bcatechismo\b|\bcomunione\b/, CTX_P, 3],
+  [/\bpallavolo\b|\bcalcetto\b|\bnuoto\b|\bpartita\b/, CTX_P, 3], [/\bdentista\b|\bpediatra\b|\bortopedico\b|\boculista\b|\bveterinari[oa]\b/, CTX_P, 3], [/\bortodonzi\w*\b|\bodontoiatric\w*\b|\bginocchi[oa]?\b/, CTX_P, 4],
+  [/\bvisita\b/, CTX_P, 2], [/\bmedico\b/, CTX_P, 2], [/\bpalestra\b/, CTX_P, 5], [/\bems\b|\bintegrator\w*\b|\ballenament\w*\b|\bbilancia\b/, CTX_P, 3],
+  // casa, soldi di casa, svago
+  [/\bcasa\b|\bcondominio\b|\bmutuo\b/, CTX_P, 2], [/\bspesa\b|\bsupermercato\b|\borto\b/, CTX_P, 3], [/\bbollett\w*\b|\bamex\b|\bconto addebito\b|\baddebito\b|\btasse da pagare\b/, CTX_P, 3],
+  [/\bamazon\b/, CTX_P, 3], [/\bbonifico\b/, CTX_P, 3], [/\bcentro commerciale\b/, CTX_P, 6, 'centro commerciale'], [/\bnaruto\b|\bboruto\b/, CTX_P, 4],
+  [/\bvan\b|\bvacanz\w*\b|\bferie\b|\bviaggio\b/, CTX_P, 3], [/\bregal[oi]\b|\bcompleann\w*\b|\bcresima\b|\bcatechismo\b|\bcomunione\b/, CTX_P, 2],
   [/\bcane\b|\bcrocchette\b/, CTX_P, 3], [/\btagliando\b|\bgomme\b|\bbollo auto\b|\bparrucchiere\b|\bbarbiere\b/, CTX_P, 3],
   [/\bcripto\w*\b|\bbinance\b|\bcoinbase\b|\bdichiarazione dei redditi\b|\b730\b/, CTX_P, 3],
-  // associazioni e progetti personali
-  [/\byoga tribe\b|\brione shanghai\b|\bil dragone\b|\boltre le mura\b|\bking kendzee\b|\bkendzee\b|\bkeyloo\b|\binterrogai\b/, CTX_P, 4],
-  [/\byoga\b|\bshanghai\b|\bdragone\b|\brione\b/, CTX_P, 3], [/\ba\.?n\.?i\.?m\.?a\.?(?=\s|$)|\banima\b/, CTX_P, 3, 'A.N.I.M.A.'], [/\blibro\b|\bcapitolo\b/, CTX_P, 2],
+  // associazioni e progetti personali (Yoga Tribe no: Roby la tiene in tutti e due i contesti)
+  [/\brione shanghai\b|\bil dragone\b|\boltre le mura\b|\bking kendzee\b|\bkendzee\b|\bkeyloo\b|\binterrogai\b/, CTX_P, 4],
+  [/\bshanghai\b|\bdragone\b|\brione\b/, CTX_P, 3], [/\ba\.?n\.?i\.?m\.?a\.?(?=\s|$)|\banima\b/, CTX_P, 3, 'A.N.I.M.A.'],
   // lavoro
   [/\bssi\b|\bsi soluzioni\b|\bsoluzioni impresa\b/, CTX_L, 4, 'SSI'], [/\bclient[ei]\b/, CTX_L, 3], [/\bpreventiv[oi]\b|\bofferta\b|\bofferte\b/, CTX_L, 3],
   [/\bagent[ei]\b|\bprovvigion\w*\b|\bcapi? area\b|\bmansionario\b|\bcommercial[ei]\b/, CTX_L, 3], [/\bdvr\b|\brspp\b|\bhaccp\b|\btdp\b/, CTX_L, 4],
@@ -15068,9 +15074,14 @@ const CTX_PAROLE = [
   [/\bazienda\b|\baziende\b|\bufficio\b|\bfornitor[ei]\b|\breport\b|\bbando\b|\bcontratt[oi]\b|\bsicurezza\b|\bprivacy\b/, CTX_L, 2]
 ];
 // nomi e parole che non dicono niente (Marco e Francesco: soci e familiari; il commercialista: per tutti e due)
-const CTX_AMBIGUE = new Set('marco francesco commercialista riunione mail email telefonata chiamare chiamata sentire fare preparare mandare scrivere'.split(' '));
+const CTX_AMBIGUE = new Set('marco francesco commercialista riunione mail email telefonata chiamare chiamata sentire fare preparare mandare scrivere leadership app'.split(' '));
+const CTX_IMP = { MISTO: 0.15, SUPPORTO_VETO: 2 };   // parola «mista»: almeno il 15% nell'altro contesto
+// progetti che Roby tiene sia in Lavoro sia in Personale: mai «sicuro», qualunque cosa dicano le altre parole
+const CTX_MISTI = /\byoga\b|\btribe\b/;
 function testoCtx(t) { return togliAccenti(String(t || '')).toLowerCase().replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim(); }
 function paroleCtx(t) { return testoCtx(t).split(/[^a-z0-9]+/).filter(w => w.length >= 3 && !/^\d+$/.test(w) && !DOPP_VUOTE.has(w) && !CTX_AMBIGUE.has(w)); }
+// le parole con la maiuscola non in testa (nomi, clienti, progetti), già pulite
+function nomiCtx(t) { return String(t || '').split(/\s[-–—+:]\s|[.:;(]\s*/).flatMap(seg => seg.trim().split(/\s+/).slice(1)).filter(w => /^[A-ZÀ-Ý]/.test(w)).flatMap(w => paroleCtx(w)); }   // non la prima parola di ogni pezzo («… - Mettere»)
 // «Mia» è anche un possessivo: vale solo come nome (maiuscola non in testa, o «per mia» in fondo)
 function segnaleMia(testo) {
   const t = String(testo || '').trim(), resto = t.replace(/^\S+\s*/, '');
@@ -15078,18 +15089,15 @@ function segnaleMia(testo) {
   return /\b(?:per|con|a|e|da)\s+mia(?:\s+(?:a|al|alla|allo|ai|e|da|dal|dalla|in|per|domani|oggi)\b|\s*[.,;!?]?\s*$)/i.test(testoCtx(t));
 }
 // parole delle cose che hai: quante volte stanno in Lavoro e in Personale (si rifà quando cambia qualcosa)
-let _ctxImp = { chiave: '', pesi: new Map(), persone: new Map() };
+let _ctxImp = { chiave: '', conta: new Map(), persone: new Map() };
 function imparatoCtx() {
-  const cicli = state.cicli || [], np = cicli.filter(c => c.ctx === CTX_P).length;
-  const chiave = `${cicli.length}:${np}:${(state.persone || []).length}`;
+  const cicli = (state.cicli || []).filter(c => c.ctx === CTX_P || c.ctx === CTX_L), np = cicli.filter(c => c.ctx === CTX_P).length;
+  const chiave = `${cicli.length}:${np}:${cicli.reduce((s, c) => s + String(c.title || '').length * (c.ctx === CTX_P ? 3 : 1), 0)}:${(state.persone || []).length}`;
   if (_ctxImp.chiave === chiave) return _ctxImp;
   const conta = new Map();
-  cicli.forEach(c => { if (c.ctx !== CTX_P && c.ctx !== CTX_L) return; new Set(paroleCtx(c.title)).forEach(w => { const x = conta.get(w) || { p: 0, l: 0 }; x[c.ctx === CTX_P ? 'p' : 'l']++; conta.set(w, x); }); });
-  const nl = cicli.length - np, pesi = new Map();
-  conta.forEach((x, w) => {
-    if (x.p + x.l < 2) return;
-    const lo = Math.log(((x.p + 1) / (np + 2)) / ((x.l + 1) / (nl + 2)));
-    if (Math.abs(lo) >= 0.8) pesi.set(w, Math.max(-2.5, Math.min(2.5, lo)));
+  cicli.forEach(c => {
+    const nomi = new Set(nomiCtx(c.title)), minuscole = new Set(String(c.title || '').split(/\s+/).filter(w => /^[a-zà-ÿ]/.test(w)).flatMap(w => paroleCtx(w)));
+    new Set(paroleCtx(c.title)).forEach(w => { const x = conta.get(w) || { p: 0, l: 0, nome: false, minuscola: false }; x[c.ctx === CTX_P ? 'p' : 'l']++; if (nomi.has(w)) x.nome = true; if (minuscole.has(w)) x.minuscola = true; conta.set(w, x); });
   });
   // le persone: il contesto prevalente delle cose che le nominano
   const persone = new Map();
@@ -15103,7 +15111,7 @@ function imparatoCtx() {
     const quota = pp / n;
     if (quota >= 0.75 || quota <= 0.25) persone.set(nome, { ctx: quota >= 0.75 ? CTX_P : CTX_L, peso: n >= 3 ? 3 : 2, nome: p.nome });
   });
-  _ctxImp = { chiave, pesi, persone };
+  _ctxImp = { chiave, conta, persone };
   return _ctxImp;
 }
 const correzioniCtx = () => leggiJson(SN.CORR_LS, {});
@@ -15113,31 +15121,64 @@ function imparaCtx(titolo, ctx) {
   paroleCtx(titolo).filter(w => !eVerbo(w)).forEach(w => { const x = corr[w] || { p: 0, l: 0 }; x[ctx === CTX_P ? 'p' : 'l']++; corr[w] = x; });
   scriviJson(SN.CORR_LS, corr);
 }
+const mistaCtx = x => !!x && x.p >= 1 && x.l >= 1 && Math.min(x.p, x.l) / (x.p + x.l) >= CTX_IMP.MISTO;
+// quanto pesa una parola imparata: 1 volta = poco, 3+ volte = quanto una parola chiave; i verbi la metà
+function pesoImparato(x, w) {
+  const n = x.p + x.l, peso = n === 1 ? 1 : n === 2 ? 2.5 : Math.min(4, 3 + (n - 3) * 0.25);
+  return (eVerbo(w) ? peso / 2 : peso) * (x.p > x.l ? 1 : -1);
+}
 function indovinaContesto(testo, opz = {}) {
   const base = opz.ctx || state.ctx || CTX_L;
   const t = testoCtx(testo), contributi = [];
+  let veto = CTX_MISTI.test(t);
   const metti = (ctx, peso, etichetta) => contributi.push({ v: ctx === CTX_P ? peso : -peso, etichetta });
   if (opz.cal === 'privato') metti(CTX_P, 6, 'calendario Privato');
   else if (opz.cal === 'lavoro') metti(CTX_L, 6, 'calendario Lavoro');
-  if (segnaleMia(testo)) metti(CTX_P, 4, 'Mia');
-  const usate = new Set();
-  CTX_PAROLE.forEach(([re, ctx, peso, et]) => { const m = re.exec(t); if (m) { metti(ctx, peso, et || m[0]); m[0].split(/\s+/).forEach(w => usate.add(w)); } });
-  const imp = imparatoCtx(), corr = correzioniCtx();
-  paroleCtx(testo).forEach(w => {
-    const p = imp.persone.get(w);
-    if (p) { metti(p.ctx, p.peso, p.nome); usate.add(w); return; }
+  const imp = imparatoCtx(), corr = correzioniCtx(), parole = unici(paroleCtx(testo));
+  // 1. quello che hai già scritto: correzioni, persone, parole imparate
+  const decise = new Map();   // parola → 'misto' | ctx
+  parole.forEach(w => {
     const c = corr[w];
-    if (c && c.p !== c.l) { metti(c.p > c.l ? CTX_P : CTX_L, 3, w); usate.add(w); return; }
-    if (usate.has(w)) return;
-    const lo = imp.pesi.get(w);
-    if (lo) contributi.push({ v: lo, etichetta: w, appreso: true });
+    if (c && c.p !== c.l) { metti(c.p > c.l ? CTX_P : CTX_L, 3, w); decise.set(w, c.p > c.l ? CTX_P : CTX_L); return; }
+    const p = imp.persone.get(w);
+    if (p) { metti(p.ctx, p.peso, p.nome); decise.set(w, p.ctx); return; }
+    const x = imp.conta.get(w);
+    if (!x) return;
+    if (mistaCtx(x)) { decise.set(w, 'misto'); if (x.nome && !x.minuscola && x.p + x.l >= CTX_IMP.SUPPORTO_VETO) veto = true; return; }   // un nome o progetto usato in tutti e due: niente «sicuro»
+    decise.set(w, x.p > x.l ? CTX_P : CTX_L);
+    contributi.push({ v: pesoImparato(x, w), etichetta: w, appreso: true, w });
+  });
+  // 2. la lista fissa, solo dove l'app non sa già com'è (se dice lo stesso, vale il peso più alto)
+  const segnali = [...(segnaleMia(testo) ? [[null, CTX_P, 4, 'Mia', 'mia']] : []),
+    ...CTX_PAROLE.map(([re, ctx, peso, et]) => { const m = re.exec(t); return m ? [m, ctx, peso, et || m[0], m[0]] : null; }).filter(Boolean)];
+  const coperte = new Set();   // parole già dentro una frase della lista («centro commerciale»)
+  segnali.forEach(([, ctx, peso, et, trovato]) => {
+    const ws = trovato.split(/[^a-z0-9]+/).filter(Boolean), dette = ws.map(w => decise.get(w)).filter(Boolean);
+    if (ws.every(w => coperte.has(w))) return;
+    if (ws.length > 1) {   // una frase intera dice più delle sue parole prese una a una, a meno che tu non l'abbia già usata
+      const re = new RegExp(`\\b${ws.join('\\W+')}\\b`), gia = (state.cicli || []).filter(c => (c.ctx === CTX_P || c.ctx === CTX_L) && re.test(testoCtx(c.title)));
+      const gp = gia.filter(c => c.ctx === CTX_P).length, x = { p: gp, l: gia.length - gp };
+      if (mistaCtx(x)) { veto = true; return; }
+      if (gia.length && (x.p > x.l ? CTX_P : CTX_L) !== ctx) { ws.forEach(w => coperte.add(w)); return; }   // la usi nell'altro contesto: valgono le parole imparate
+      ws.forEach(w => coperte.add(w));
+      for (let k = contributi.length - 1; k >= 0; k--) if (contributi[k].appreso && ws.includes(contributi[k].w)) contributi.splice(k, 1);
+      metti(ctx, peso, et);
+      return;
+    }
+    if (dette.some(d => d === 'misto' || d !== ctx)) return;   // impara: vince quello che fai tu
+    if (dette.length) {   // stesso verso: si tiene il più forte, non si somma
+      const ap = contributi.find(c => c.appreso && ws.includes(c.w));
+      if (ap && Math.abs(ap.v) >= peso) return;
+      if (ap) { ap.v = ctx === CTX_P ? peso : -peso; ap.etichetta = et; return; }
+    }
+    metti(ctx, peso, et);
   });
   const s = contributi.reduce((x, c) => x + c.v, 0), forza = Math.abs(s);
-  if (forza < SN.SEGNALE) return { ctx: base, motivo: '', sicuro: false, segnale: false, punti: s, parole: [] };
-  const ctx = s > 0 ? CTX_P : CTX_L, sicuro = forza >= SN.SICURO;
-  const parole = unici(contributi.filter(c => Math.sign(c.v) === Math.sign(s)).sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).map(c => c.etichetta)).slice(0, 2);
-  // un segnale debole contro il contesto in vista non sposta niente
-  return { ctx: sicuro || ctx === base ? ctx : base, motivo: parole.length ? `riconosciuta da ${parole.map(p => `«${p}»`).join(', ')}` : '', sicuro, segnale: true, punti: s, parole, indovinato: ctx };
+  if (forza < SN.SEGNALE) return { ctx: base, motivo: '', sicuro: false, segnale: false, punti: s, parole: [], misto: veto };
+  const ctx = s > 0 ? CTX_P : CTX_L, sicuro = forza >= SN.SICURO && !veto;
+  const quali = unici(contributi.filter(c => Math.sign(c.v) === Math.sign(s)).sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).map(c => c.etichetta)).slice(0, 2);
+  // un segnale debole (o un progetto che tieni in tutti e due i contesti) non sposta niente
+  return { ctx: sicuro || ctx === base ? ctx : base, motivo: quali.length ? `riconosciuta da ${quali.map(p => `«${p}»`).join(', ')}` : '', sicuro, segnale: true, punti: s, parole: quali, indovinato: ctx, misto: veto };
 }
 
 // ─── Le voci: il contesto per riga (indovinato o toccato) ───
@@ -15195,7 +15236,7 @@ function htmlVoceSn(v, i, dove, sola) {
     ${aperta ? editorVoce(v, i) + spuntaAvviso(v, `data-avvisa="${i}"`) + (v.q !== 3 ? `<div class="rap-breve"><button type="button" class="chip" data-act="rap-cinque" data-i="${i}" aria-pressed="${!!v.cinque}"><i class="ti ti-clock-bolt"></i>5 min</button></div>` : '') : ''}</div>`;
 }
 function notaCtx(voci, corta) {
-  const fuori = voci.filter(v => v.ctx !== state.ctx);
+  const fuori = voci.filter(v => v.ctx !== state.ctx && (v.ctxToccato || (v.ctxGuess && v.ctxGuess.sicuro)));   // solo con un segnale sicuro (o se l'hai cambiato tu)
   if (!fuori.length) return '';
   const dove = nomeCtx(fuori[0].ctx);
   if (corta) return `<p class="sn-nota-ctx" role="status"><i class="ti ti-info-circle" aria-hidden="true"></i><span>Sei in ${nomeCtx(state.ctx)}: ${voci.length === 1 ? 'la metto' : fuori.length + ' le metto'} in <b>${dove}</b>. Se sbaglio, tocca l'etichetta.</span></p>`;
