@@ -1352,6 +1352,87 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .evt-riga[data-act="evt-apri"]:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
 @media (hover: hover) { .evt-riga[data-act="evt-apri"]:hover { filter: brightness(.98); } }
 .evt-quando { margin: 0 0 var(--sp-3); }
+/* 25/10 · mete, tempo per il futuro, falla ora, sera, deleghe */
+.meta-tag { display: inline-flex; align-items: center; gap: 3px; max-width: 14em; color: var(--q2); font-weight: var(--fw-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta-tag .ti { font-size: 13px; flex: none; }
+.mete-intro { margin: 0 0 var(--sp-4); }
+.mete-conto { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--text-2); }
+.mete-conto .bar { flex: 1; }
+.meta-riga { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-4); }
+.meta-riga + .meta-riga { border-top: 1px solid var(--border); }
+.meta-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--r-full); background: var(--q2-soft); color: var(--q2); font-weight: var(--fw-strong); font-size: var(--fs-label); margin-top: 2px; }
+.meta-riga.raggiunta .meta-n { background: var(--q2-mark); color: var(--on-primary); }
+.meta-riga.raggiunta .meta-testo { color: var(--done-title); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+.meta-testo { display: block; font-weight: var(--fw-strong); color: var(--text); overflow-wrap: anywhere; }
+.meta-info { display: flex; flex-wrap: wrap; gap: 2px var(--sp-2); margin-top: 2px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.meta-info .ferma { color: var(--warn); font-weight: var(--fw-strong); }
+.meta-tasti { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
+@media (max-width: 767px) { .meta-riga { grid-template-columns: 32px minmax(0, 1fr); } .meta-tasti { grid-column: 2; justify-content: flex-start; margin-left: -10px; } .meta-riga > span:empty { display: none; } }
+.meta-tasti .btn-icon[aria-pressed="true"] { color: var(--q2); }
+.meta-form { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); }
+.meta-form-riga { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--sp-2); }
+@media (max-width: 479px) { .meta-form-riga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .meta-form-riga .btn { grid-column: 1 / -1; } }
+.meta-form .input { min-height: var(--tap); width: 100%; }
+.det-meta { margin-top: var(--sp-3); }
+.rio-mete { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0 0; }
+.rio-mete > b { font-size: var(--fs-label); color: var(--text); }
+.rio-dire-no { display: grid; gap: var(--sp-2); margin-top: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md); background: var(--warn-soft); color: var(--warn); }
+.rio-dire-no b { color: var(--text); }
+.rio-dire-no .tasti { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.rio-vaga, .rap-vaga { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); margin: var(--sp-2) 0 0; font-size: var(--fs-label); color: var(--warn); }
+.rap-vaga { margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.ca-vaga { color: var(--warn); }
+.rap-breve { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); }
+.rap-breve .chip { min-height: 32px; padding: 0 var(--sp-3); font-size: var(--fs-caption); }
+.ca-falla { flex: none; }
+/* tempo per il futuro */
+.futuro { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--q2-soft); color: var(--q2); margin-bottom: var(--sp-3); }
+.futuro.basso { background: var(--warn-soft); color: var(--warn); }
+.futuro-testa { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--sp-2); color: var(--text); font-size: var(--fs-label); }
+.futuro-testa b { font-size: var(--fs-body); }
+.futuro-testa span { color: var(--text-2); }
+.futuro-bar { position: relative; height: 8px; border-radius: var(--r-full); background: var(--surface); overflow: hidden; }
+.futuro-bar > i { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-full); background: var(--q2-mark); }
+.futuro.basso .futuro-bar > i { background: var(--warn); }
+.futuro-obj { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--text-2); border-right: 2px solid var(--text-2); }
+.futuro-hint { margin: 0; font-size: var(--fs-label); font-weight: var(--fw-strong); }
+.futuro-come summary { cursor: pointer; font-size: var(--fs-caption); color: var(--text-2); min-height: 28px; display: flex; align-items: center; }
+.futuro-come p { margin: var(--sp-1) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.futuro-mete { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: var(--fs-label); color: var(--text); }
+.futuro-mete li { display: flex; justify-content: space-between; gap: var(--sp-2); }
+.futuro-mete li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.futuro-mete li span.ferma { color: var(--warn); font-weight: var(--fw-strong); white-space: normal; overflow: visible; }
+.bpw-futuro { display: grid; gap: var(--sp-2); min-width: 0; }
+.bpw-futuro > *, .futuro { min-width: 0; }
+.futuro-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 var(--sp-3); border: 1px solid var(--q2-mark); border-radius: var(--r-full); background: var(--q2-soft); color: var(--q2); font: inherit; font-size: var(--fs-caption); font-weight: var(--fw-strong); cursor: pointer; }
+.futuro-chip.basso { border-color: var(--warn); background: var(--warn-soft); color: var(--warn); }
+.futuro-riga { display: flex; justify-content: center; margin: calc(-1 * var(--sp-2)) 0 var(--sp-3); }
+.bt-stat .futuro-chip { margin-left: var(--sp-2); vertical-align: middle; }
+/* falla ora */
+.falla-ora { position: fixed; z-index: 85; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + 92px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-lg); background: var(--inverse-bg); color: var(--inverse-text); box-shadow: var(--shadow-3); }
+.falla-ora[hidden] { display: none; }
+.falla-ora .fo-testa { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.falla-ora .fo-testa span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.falla-ora .fo-tempo { font-family: var(--font-mono); font-size: var(--fs-title); color: var(--inverse-accent); }
+.falla-ora .fo-tasti { display: flex; gap: var(--sp-2); }
+.falla-ora .fo-tasti .btn { flex: 1; }
+.falla-ora .btn-secondary { background: transparent; color: var(--inverse-text); border-color: var(--inverse-text); }
+@media (min-width: 768px) { .falla-ora { left: auto; right: var(--sp-5); bottom: var(--sp-5); width: 360px; } }
+/* sera e deleghe */
+.sera-riga { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2); min-height: 52px; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); }
+.sera-riga + .sera-riga { border-top: 1px solid var(--border); }
+.sera-riga small { display: block; color: var(--text-2); font-size: var(--fs-caption); }
+.sera-domani { margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--text-2); }
+.delega-avviso .banner-azioni { flex-wrap: wrap; }
+.persona-avviso { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-label); }
+.persona-avviso .banner-azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.spinta { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface-2); }
+.spinta > b { color: var(--text); }
+.spinta .input { min-height: var(--tap); }
+.spinta-passate { margin: 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.spec-riga { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); }
+.spec-riga + .spec-riga { border-top: 1px solid var(--border); }
+.spec-riga .tasti { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 </style>
 </head>
 <body>
@@ -13645,6 +13726,1008 @@ AZIONI['errori-copia'] = async () => {
 const _vistaImpostazioniErr = vistaImpostazioni;
 vistaImpostazioni = function () { return _vistaImpostazioniErr.apply(this, arguments) + sezioneErrori(); };
 
+// ══════════════════════════════════════════════════════════════
+// 25/10 · I 18 PRINCIPI (Ruggeri) NELL'APP
+// A · Mete e «dire no» (12, 16, 5) · B · Tempo per il futuro 25–30% (1, 6, 7, 17)
+// C · Fallo subito e specifico (4, 2) · D · Sera, deleghe, demotivazione (3, 9, 10, 11)
+// Tabelle nuove (additive): mete, non_doppioni; colonna cicli.meta_id. Se mancano, le funzioni si spengono.
+// ══════════════════════════════════════════════════════════════
+const PRINC = {
+  METE_MIN: 7, METE_MAX: 10, METE_FERMA_GG: 28,
+  FUTURO_MIN: 25, FUTURO_MAX: 30, GIORNI_LAV: 5,
+  BREVE_MIN: 5, TIMER_MS: 5 * 60 * 1000,
+  SERA_DA: '18:30', DOMANI_ORA: '18:45', DOMANI_FINE: '18:50',
+  DELEGHE_GG: 60, DELEGHE_PERSONA: 3, DELEGHE_COSA: 2, DELEGHE_OK_GG: 30,
+  SPINTA_NON_FATTE: 0.4, SPINTA_RINVIATE: 3,
+  LS: { METE_CARD: 'mete_card_sett', METE_CHIUDI: 'mete_chiudi_chiesto', NON_DOPP_MIGR: 'non_doppioni_migrati', SPEC_OK: 'specifiche_ok',
+    SERA: 'sera_piano_fatto', DELEGHE_OK: 'deleghe_ok' }
+};
+state.mete = null;          // null = non lette (o tabella assente)
+state.meteOk = undefined;   // tabella mete
+state.metaColOk = undefined; // colonna cicli.meta_id
+state.nonDopp = new Set();
+state.nonDoppOk = undefined;
+
+async function rilevaPrincipi() {
+  const prova = async (tabella, colonne) => { try { const { error } = await db.from(tabella).select(colonne).limit(1); return !error; } catch (_) { return false; } };
+  [state.meteOk, state.metaColOk] = await Promise.all([prova('mete', 'id,testo,area,entro,ordine,raggiunta'), prova('cicli', 'id,meta_id')]);
+  if (state.meteOk) await caricaMete();
+  await caricaNonDoppioni();
+  render();
+}
+async function caricaMete() {
+  try {
+    const { data, error } = await db.from('mete').select('*').order('ordine', { ascending: true });
+    if (error) throw error;
+    state.mete = ordinaMete(data || []);
+  } catch (e) { console.warn('[Mete] lettura:', e.message); state.meteOk = false; state.mete = null; }
+}
+const ordinaMete = l => l.slice().sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0) || String(a.created_at || '').localeCompare(String(b.created_at || '')));
+const meteTutte = () => state.meteOk && Array.isArray(state.mete) ? state.mete : [];
+const meteAperte = () => meteTutte().filter(m => !m.raggiunta);
+const metaPerId = id => id ? meteTutte().find(m => String(m.id) === String(id)) || null : null;
+const metaDi = c => c && state.metaColOk ? metaPerId(c.meta_id) : null;
+const corta = (t, n) => { const s = String(t || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };
+
+// ─── «Non sono doppioni»: tabella non_doppioni, localStorage come riserva ───
+async function caricaNonDoppioni() {
+  try {
+    const { data, error } = await db.from('non_doppioni').select('chiave');
+    if (error) throw error;
+    state.nonDoppOk = true;
+    state.nonDopp = new Set((data || []).map(r => r.chiave).filter(Boolean));
+  } catch (e) { state.nonDoppOk = false; console.warn('[Doppioni] tabella non_doppioni:', e.message); return; }
+  // una volta: le scelte già fatte su questo dispositivo vanno nella tabella
+  if (lsLeggi(PRINC.LS.NON_DOPP_MIGR) !== '1') {
+    const locali = leggiJson(DOPP.LS_NO, []).filter(k => k && !state.nonDopp.has(k));
+    try {
+      if (locali.length) {
+        const { error } = await db.from('non_doppioni').upsert(locali.map(chiave => ({ chiave })), { onConflict: 'chiave' });
+        if (error) throw error;
+        locali.forEach(k => state.nonDopp.add(k));
+      }
+      lsScrivi(PRINC.LS.NON_DOPP_MIGR, '1');
+    } catch (e) { console.warn('[Doppioni] migrazione:', e.message); }
+  }
+  scriviJson(DOPP.LS_NO, unici([...leggiJson(DOPP.LS_NO, []), ...state.nonDopp]));   // la copia locale resta allineata
+}
+gruppiAperti = function () {
+  const no = new Set([...doppioniNo(), ...state.nonDopp]);
+  return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
+};
+AZIONI['dopp-no'] = async el => {
+  const k = el.dataset.k;
+  scriviJson(DOPP.LS_NO, unici([...doppioniNo(), k]));
+  state.nonDopp = new Set([...state.nonDopp, k]);
+  render();
+  if (state.nonDoppOk) {
+    try { const { error } = await db.from('non_doppioni').upsert({ chiave: k }, { onConflict: 'chiave' }); if (error) throw error; }
+    catch (e) { console.warn('[Doppioni] salvataggio:', e.message); }
+  }
+  showToast('Non te li propongo più', 'info', { annulla: async () => {
+    scriviJson(DOPP.LS_NO, doppioniNo().filter(x => x !== k));
+    const s = new Set(state.nonDopp); s.delete(k); state.nonDopp = s;
+    if (state.nonDoppOk) { try { await db.from('non_doppioni').delete().eq('chiave', k); } catch (e) { console.warn('[Doppioni] annulla:', e.message); } }
+    render();
+  } });
+};
+
+// ══════════════════════════════════════════════════════════════
+// A · LE MIE METE (principio 12: abbi chiara la meta · 16: costruisci qualcosa · 5: impara a dire no)
+// ══════════════════════════════════════════════════════════════
+ui.metaEdit = null;
+function cicliDiMeta(m) { return state.metaColOk ? state.cicli.filter(c => String(c.meta_id || '') === String(m.id)) : []; }
+// l'ultima volta che qualcosa di questa meta era in programma o è stato fatto (ISO) — null se mai
+function ultimaAttivitaMeta(m, extra) {
+  const date = cicliDiMeta(m).flatMap(c => [c.pianificato_data, c.scheduled_date, c.done ? giornoIso(c.chiuso_at || c.updated_at) : null]).filter(Boolean);
+  if (extra) date.push(...extra);
+  return date.length ? date.sort().pop() : null;
+}
+// ferma = da 4 settimane niente (e la meta ha più di 4 settimane)
+function metaFerma(m, extra) {
+  if (m.raggiunta) return false;
+  const limite = toISODate(piuGiorni(new Date(), -PRINC.METE_FERMA_GG));
+  if (giornoIso(m.created_at || '') > limite) return false;
+  const u = ultimaAttivitaMeta(m, extra);
+  return !u || u < limite;
+}
+function rigaMeta(m, i) {
+  const n = cicliDiMeta(m).filter(c => !c.done).length, fatte = cicliDiMeta(m).filter(c => c.done).length;
+  const info = [m.area ? escHtml(m.area) : '', m.entro ? `entro il ${fmtGgMm(m.entro)}/${String(m.entro).slice(0, 4)}` : '', state.metaColOk ? plurale(n, 'cosa aperta', 'cose aperte') + (fatte ? ` · ${fatte} fatte` : '') : '',
+    metaFerma(m) ? '<span class="ferma">da 4 settimane niente in programma</span>' : ''].filter(Boolean);
+  if (ui.metaEdit === m.id) return `<div class="meta-riga" data-meta="${esc(m.id)}"><span class="meta-n mono">${i + 1}</span>${formMeta(m)}<span></span></div>`;
+  const tot = meteTutte().length;
+  return `<div class="meta-riga${m.raggiunta ? ' raggiunta' : ''}" data-meta="${esc(m.id)}"><span class="meta-n mono">${m.raggiunta ? '<i class="ti ti-check"></i>' : i + 1}</span>
+    <div><span class="meta-testo">${escHtml(m.testo)}</span>${info.length ? `<span class="meta-info">${info.join('<span class="sep">·</span>')}</span>` : ''}</div>
+    <div class="meta-tasti">
+      <button type="button" class="btn btn-icon" data-act="meta-su" data-id="${esc(m.id)}" aria-label="Sposta su"${i === 0 ? ' disabled' : ''}><i class="ti ti-arrow-up"></i></button>
+      <button type="button" class="btn btn-icon" data-act="meta-giu" data-id="${esc(m.id)}" aria-label="Sposta giù"${i === tot - 1 ? ' disabled' : ''}><i class="ti ti-arrow-down"></i></button>
+      <button type="button" class="btn btn-icon" data-act="meta-raggiunta" data-id="${esc(m.id)}" aria-pressed="${!!m.raggiunta}" aria-label="${m.raggiunta ? 'Non ancora raggiunta' : 'Raggiunta'}" data-tip="${m.raggiunta ? 'Non ancora raggiunta' : 'Raggiunta'}"><i class="ti ti-flag-check"></i></button>
+      <button type="button" class="btn btn-icon" data-act="meta-modifica" data-id="${esc(m.id)}" aria-label="Modifica"><i class="ti ti-pencil"></i></button>
+    </div></div>`;
+}
+function formMeta(m) {
+  const v = m || {}, aree = nomiAree();
+  return `<div class="meta-form${m ? '' : ' meta-nuova'}" style="padding:0">
+    <input type="text" class="input" id="${m ? 'meta-testo-mod' : 'meta-testo'}" maxlength="160" value="${esc(v.testo || '')}" placeholder="Fra 5 anni voglio… (es. SSI con 2.000 clienti)" aria-label="La meta">
+    <div class="meta-form-riga">
+      ${aree.length ? `<select class="input" id="${m ? 'meta-area-mod' : 'meta-area'}" aria-label="Area"><option value="">Area (facoltativa)</option>${aree.map(a => `<option${a === v.area ? ' selected' : ''}>${escHtml(a)}</option>`).join('')}</select>` : ''}
+      <input type="date" class="input" id="${m ? 'meta-entro-mod' : 'meta-entro'}" value="${v.entro || ''}" aria-label="Entro (facoltativo)" title="Entro (facoltativo)">
+      ${m ? `<button type="button" class="btn btn-primary btn-sm" data-act="meta-salva" data-id="${esc(m.id)}">Salva</button>` : '<button type="button" class="btn btn-primary btn-sm" data-act="meta-aggiungi"><i class="ti ti-plus"></i>Aggiungi</button>'}
+    </div>
+    ${m ? `<div class="tools-row"><button type="button" class="btn btn-ghost btn-sm" data-act="meta-annulla">Annulla</button><button type="button" class="btn btn-ghost btn-danger btn-sm" data-act="meta-togli" data-id="${esc(m.id)}">Togli la meta</button></div>` : ''}
+  </div>`;
+}
+function vistaMete() {
+  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Le mie mete</h1></div></div>
+    <p class="t-label muted mete-intro">Che cosa stai costruendo? Scrivi 7–10 mete da qui a 5 anni: ti aiutano a scegliere cosa conta e a dire di no al resto.</p>`;
+  if (state.meteOk === false) return h + vuoto('ti-database-off', 'Le mete non sono disponibili', 'Manca la tabella delle mete nel database: le altre funzioni vanno lo stesso.');
+  if (!Array.isArray(state.mete)) return h + '<div class="skel"></div>';
+  const l = meteTutte(), n = l.length;
+  h += `<div class="mete-conto"><span><b class="mono">${n}</b> ${n === 1 ? 'meta' : 'mete'}${n < PRINC.METE_MIN ? ` · ne mancano ${PRINC.METE_MIN - n} per arrivare a 7` : n > PRINC.METE_MAX ? ' · sono tante: tieni le 10 che contano di più' : ''}</span>
+    <div class="bar" aria-hidden="true"><i style="width:${Math.min(100, Math.round(n / PRINC.METE_MIN * 100))}%"></i></div></div>`;
+  if (n) h += `<div class="group">${l.map(rigaMeta).join('')}</div>`;
+  h += `<p class="list-head"><span>${n ? 'Un\'altra meta' : 'La prima meta'}</span></p><div class="group">${formMeta(null).replace('style="padding:0"', '')}</div>`;
+  if (n && state.metaColOk) h += `<p class="t-caption muted" style="margin-top:var(--sp-3)">Collega le cose alle mete dal dettaglio («Serve a quale meta?») o in Riordina: quelle collegate hanno il segno <i class="ti ti-target-arrow"></i>.</p>`;
+  return h;
+}
+async function aggiungiMeta() {
+  const testo = ($('meta-testo').value || '').trim();
+  if (!testo) { $('meta-testo').focus(); showToast('Scrivi la meta', 'warn'); return; }
+  const riga = { testo: testo.slice(0, 160), area: ($('meta-area') || {}).value || null, entro: $('meta-entro').value || null, ordine: meteTutte().length };
+  try {
+    const { data, error } = await db.from('mete').insert(riga).select();
+    if (error) throw error;
+    state.mete = ordinaMete([...meteTutte(), (data && data[0]) || { ...riga, id: 'tmp' + Date.now() }]);
+    render();
+    showToast('Meta aggiunta', 'success');
+    setTimeout(() => { const t = $('meta-testo'); if (t) t.focus(); }, 60);
+    proponiChiudiScrivereMete();
+  } catch (e) { showToast('Meta non salvata: ' + e.message, 'error'); }
+}
+// Con 7 mete scritte: «SCRIVERE LE METE» si può chiudere (una volta sola)
+function proponiChiudiScrivereMete() {
+  if (meteTutte().length < PRINC.METE_MIN) return;
+  const c = state.cicli.find(x => !x.done && /\bscriver\w*\s+(?:le\s+)?(?:mie\s+)?mete\b/i.test(senzaAccenti(x.title)));
+  if (!c || lsLeggi(PRINC.LS.METE_CHIUDI) === String(c.id)) return;
+  lsScrivi(PRINC.LS.METE_CHIUDI, String(c.id));
+  setTimeout(() => apriConferma({ titolo: `Hai scritto ${meteTutte().length} mete`, testo: `Chiudo «${c.title}»?`, ok: 'Sì, è fatta', no: 'Non ancora', onOk: () => azioneFatto(c.id) }), 300);
+}
+async function salvaMeta(id) {
+  const m = metaPerId(id);
+  if (!m) return;
+  const testo = ($('meta-testo-mod').value || '').trim();
+  if (!testo) { $('meta-testo-mod').focus(); return; }
+  await patchMeta(id, { testo: testo.slice(0, 160), area: ($('meta-area-mod') || {}).value || (m.area && !nomiAree().length ? m.area : null), entro: $('meta-entro-mod').value || null });
+  ui.metaEdit = null;
+  render();
+  showToast('Meta salvata', 'success');
+}
+async function patchMeta(id, patch) {
+  const conData = { ...patch, updated_at: new Date().toISOString() };
+  const { error } = await db.from('mete').update(conData).eq('id', id);
+  if (error) { showToast('Non salvata: ' + error.message, 'error'); throw error; }
+  state.mete = ordinaMete(meteTutte().map(m => String(m.id) === String(id) ? { ...m, ...conData } : m));
+}
+async function spostaMeta(id, dir) {
+  const l = meteTutte().slice(), i = l.findIndex(m => String(m.id) === String(id)), j = i + dir;
+  if (i < 0 || j < 0 || j >= l.length) return;
+  [l[i], l[j]] = [l[j], l[i]];
+  const cambiate = l.map((m, k) => ({ m, k })).filter(({ m, k }) => (m.ordine ?? -1) !== k);
+  state.mete = l.map((m, k) => ({ ...m, ordine: k }));
+  render();
+  try { for (const { m, k } of cambiate) { const { error } = await db.from('mete').update({ ordine: k }).eq('id', m.id); if (error) throw error; } }
+  catch (e) { showToast('Ordine non salvato: ' + e.message, 'error'); }
+}
+function togliMeta(id) {
+  const m = metaPerId(id);
+  if (!m) return;
+  const n = cicliDiMeta(m).length;
+  apriConferma({ titolo: 'Togli questa meta?', testo: `«${m.testo}»${n ? `: ${plurale(n, 'cosa resta', 'cose restano')} ma senza meta` : ''}.`, ok: 'Sì, toglila', no: 'Annulla', onOk: async () => {
+    try {
+      const { error } = await db.from('mete').delete().eq('id', id);
+      if (error) throw error;
+      state.mete = meteTutte().filter(x => String(x.id) !== String(id));
+      state.cicli = state.cicli.map(c => String(c.meta_id || '') === String(id) ? { ...c, meta_id: null } : c);   // nel database: on delete set null
+      ui.metaEdit = null;
+      render();
+      showToast('Meta tolta', 'info');
+    } catch (e) { showToast('Non riesco: ' + e.message, 'error'); }
+  } });
+}
+Object.assign(AZIONI, {
+  'meta-aggiungi': () => aggiungiMeta(),
+  'meta-modifica': el => { ui.metaEdit = el.dataset.id; render(); setTimeout(() => { const t = $('meta-testo-mod'); if (t) t.focus(); }, 50); },
+  'meta-annulla': () => { ui.metaEdit = null; render(); },
+  'meta-salva': el => salvaMeta(el.dataset.id).catch(() => {}),
+  'meta-togli': el => togliMeta(el.dataset.id),
+  'meta-su': el => spostaMeta(el.dataset.id, -1),
+  'meta-giu': el => spostaMeta(el.dataset.id, 1),
+  'meta-raggiunta': async el => { const m = metaPerId(el.dataset.id); if (!m) return; try { await patchMeta(m.id, { raggiunta: !m.raggiunta }); render(); showToast(m.raggiunta ? 'Di nuovo in corso' : 'Meta raggiunta: bel lavoro', 'success'); } catch (_) {} },
+  'mete-apri': () => vai('altro', { sub: 'mete' }),
+  'mete-card-chiudi': () => { const c = bpSettimanaCorrente(); lsScrivi(PRINC.LS.METE_CARD, settKey(c.week, c.year)); render(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  if (e.target.id === 'meta-testo') { e.preventDefault(); aggiungiMeta(); }
+  if (e.target.id === 'meta-testo-mod') { e.preventDefault(); const r = e.target.closest('[data-meta]'); if (r) salvaMeta(r.dataset.meta).catch(() => {}); }
+});
+
+// La card gentile in Oggi: nessuna meta → una volta a settimana
+function cardMete() {
+  if (!state.meteOk || !Array.isArray(state.mete) || state.mete.length || modoSemplice()) return '';
+  const c = bpSettimanaCorrente();
+  if (lsLeggi(PRINC.LS.METE_CARD) === settKey(c.week, c.year)) return '';
+  return `<section class="banner-piano banner-leggero" aria-label="Le tue mete"><i class="ti ti-target-arrow"></i>
+    <div><b>Non hai ancora scritto le tue mete</b><p class="t-caption muted">Che cosa stai costruendo da qui a 5 anni? Con le mete scritte è più facile dire di no a quello che non serve.</p>
+      <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="mete-apri">Scrivile</button></div></div>
+    <button type="button" class="btn btn-icon" data-act="mete-card-chiudi" aria-label="Non ora" data-tip="Non questa settimana"><i class="ti ti-x"></i></button></section>`;
+}
+
+// ─── Nel dettaglio: «Serve a quale meta?» (si salva subito) ───
+$('det-passi').insertAdjacentHTML('afterend', `<div id="det-meta" class="det-meta" hidden>
+  <label class="field-label" for="f-meta">Serve a quale meta?</label>
+  <select class="input" id="f-meta" aria-label="Serve a quale meta?"></select></div>`);
+function disegnaDetMeta(c) {
+  const box = $('det-meta');
+  const l = meteTutte();
+  const mostra = !!c && !!state.metaColOk && l.length > 0;
+  box.hidden = !mostra;
+  if (!mostra) return;
+  const att = c.meta_id ? String(c.meta_id) : '';
+  const voci = l.filter(m => !m.raggiunta || String(m.id) === att);
+  $('f-meta').innerHTML = `<option value="">Nessuna</option>${voci.map(m => `<option value="${esc(m.id)}"${String(m.id) === att ? ' selected' : ''}>${escHtml(corta(m.testo, 60))}</option>`).join('')}`;
+}
+const _apriDettaglioPr = apriDettaglio;
+apriDettaglio = function (id) { const r = _apriDettaglioPr.apply(this, arguments); disegnaDetMeta(ciclo(id)); return r; };
+const _apriNuovoPr = apriNuovo;
+apriNuovo = function () { const r = _apriNuovoPr.apply(this, arguments); $('det-meta').hidden = true; return r; };
+async function collegaMeta(id, metaId, silenzioso) {
+  const c = ciclo(id);
+  if (!c || !state.metaColOk) return;
+  const prima = c.meta_id || null, dopo = metaId || null;
+  if (String(prima || '') === String(dopo || '')) return;
+  try {
+    await patchCiclo(id, { meta_id: dopo });
+    render();
+    const m = metaPerId(dopo);
+    if (!silenzioso) showToast(m ? `Serve a: ${corta(m.testo, 40)}` : 'Senza meta', 'success', { annulla: async () => { await patchCiclo(id, { meta_id: prima }); if (editingId === id) disegnaDetMeta(ciclo(id)); render(); } });
+  } catch (e) { showToast('Non collegata: ' + e.message, 'error'); }
+}
+document.addEventListener('change', e => { if (e.target.id === 'f-meta' && editingId) collegaMeta(editingId, e.target.value); });
+
+// ─── Nella riga: il segno della meta ───
+const _rigaPr = riga;
+riga = function (r, opz) {
+  const h = _rigaPr(r, opz);
+  const m = r && r.c && metaDi(r.c);
+  if (!m) return h;
+  const tag = `<span class="meta-tag" data-tip="Serve a: ${esc(m.testo)}"><i class="ti ti-target-arrow" aria-hidden="true"></i>${escHtml(corta(m.testo, 22))}</span>`;
+  return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + dentro + (dentro.trim() ? '<span class="sep">·</span>' : '') + tag + b);
+};
+
+// ─── Riordina: un'Importante ti avvicina a una meta? Se no: Delega o Lascia stare (dire no) ───
+const _disegnaRiordinaPr = disegnaRiordina;
+disegnaRiordina = function () {
+  _disegnaRiordinaPr();
+  const r = ui.rio;
+  if (!r || r.rimaste || r.i >= r.ids.length) return;
+  const c = ciclo(r.ids[r.i]), corpo = $('rio-corpo');
+  if (!c || !corpo) return;
+  const m = metaDi(c), meta = corpo.querySelector('.rio-meta');
+  if (m && meta) meta.insertAdjacentHTML('beforeend', `<span class="meta-tag"><i class="ti ti-target-arrow" aria-hidden="true"></i>${escHtml(corta(m.testo, 28))}</span>`);
+  const cosa = corpo.querySelector('.rio-cosa');
+  if (cosa && troppoGenerica(c)) cosa.insertAdjacentHTML('afterend', `<p class="rio-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span><button type="button" class="btn btn-secondary btn-sm" data-act="rio-spacchetta"><i class="ti ti-list-tree"></i>Spacchettala</button></p>`);
+  if (r.scelta !== 'importante' || !state.metaColOk || !meteAperte().length) return;
+  const date = corpo.querySelector('.rio-date');
+  if (!date) return;
+  const scelta = r.metaScelta && r.metaScelta.id === c.id ? r.metaScelta.v : (c.meta_id ? String(c.meta_id) : null);
+  const chip = (v, l) => `<button type="button" class="chip" data-act="rio-meta" data-v="${esc(v)}" aria-pressed="${scelta === v}">${l}</button>`;
+  const domanda = `<div class="rio-mete" role="group" aria-label="Ti avvicina a una meta?"><b>Ti avvicina a una meta?</b>
+    <div class="chips chips-wrap">${meteAperte().map(x => chip(String(x.id), `<i class="ti ti-target-arrow"></i>${escHtml(corta(x.testo, 30))}`)).join('')}${chip('nessuna', 'Nessuna')}</div>
+    ${scelta === 'nessuna' ? `<div class="rio-dire-no"><b>Allora è una Delega o Lascia stare?</b><span class="t-caption">Se non ti avvicina a niente di quello che stai costruendo, puoi dire di no.</span>
+      <div class="tasti"><button type="button" class="btn btn-secondary btn-sm" data-act="rio-tipo" data-v="delega"><i class="ti ti-user-share"></i>Delega</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-act="rio-tipo" data-v="lascia"><i class="ti ti-wind"></i>Lascia stare</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-act="rio-meta" data-v="comunque">È Importante lo stesso</button></div></div>` : ''}</div>`;
+  date.insertAdjacentHTML('beforebegin', domanda);
+  if (scelta === 'nessuna') date.hidden = true;
+};
+AZIONI['rio-meta'] = async el => {
+  const r = ui.rio;
+  if (!r) return;
+  const c = ciclo(r.ids[r.i]);
+  if (!c) return;
+  const v = el.dataset.v;
+  r.metaScelta = { id: c.id, v };
+  if (v === 'nessuna') { if (c.meta_id) await collegaMeta(c.id, null, true); }
+  else if (v !== 'comunque') await collegaMeta(c.id, v, true);
+  disegnaRiordina();
+};
+
+// ══════════════════════════════════════════════════════════════
+// B · TEMPO PER IL FUTURO (principi 1, 6, 7, 17): 25–30% del tempo di lavoro sulle Importanti
+// Futuro = minuti delle cose Importanti nel piano (durata, 30 min se non c'è) + Esercizio Q2 in agenda.
+// Tempo di lavoro = lun–ven 9–19 (50 ore), oppure di più se tra cose, cuscinetti e appuntamenti ne hai messe di più.
+// ══════════════════════════════════════════════════════════════
+const minFinestra = e => {
+  if (!e || !e.ora || !e.fine || e.tuttoIlGiorno || (typeof eGiornata === 'function' && eGiornata(e))) return 0;
+  const s = Math.max(minDi(e.ora), minDi(GIORNATA.INIZIO)), f = Math.min(minDi(e.fine) > minDi(e.ora) ? minDi(e.fine) : 24 * 60, minDi(GIORNATA.FINE));
+  return Math.max(0, f - s);
+};
+const eQ2App = e => !!e && (e.app === 'q2' || (!!e.app && /esercizio q2/i.test(e.titolo || '')));
+function quotaDa(p) {
+  const disponibile = PRINC.GIORNI_LAV * (minDi(GIORNATA.FINE) - minDi(GIORNATA.INIZIO));
+  const pianificato = p.cose + p.cusc + p.app;
+  const base = Math.max(disponibile, pianificato);
+  const futuro = p.importanti + p.q2;
+  const pct = base ? Math.round(futuro / base * 100) : 0;
+  const manca = Math.max(0, Math.ceil(base * PRINC.FUTURO_MIN / 100) - futuro);
+  return { ...p, disponibile, pianificato, base, futuro, pct, manca };
+}
+const giorniLav = () => GIORNI.slice(0, PRINC.GIORNI_LAV);
+function eventiLavoro(dataDi) {
+  const evs = giorniLav().flatMap((_, idx) => eventiDelGiorno(dataDi(idx)));
+  const visti = new Set();
+  return evs.filter(e => e && !e.routine && !visti.has(e.id) && visti.add(e.id));
+}
+// La settimana in vista (Pianifica, Chiudi la settimana): tutte e due le parti, lavoro e personale
+function quotaSettimana() {
+  const prima = state.ctx, righe = [];
+  try {
+    for (const ctx of ['lavoro', 'personale']) { state.ctx = ctx; righe.push(...[...giorniLav().map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k))); }
+  } finally { state.ctx = prima; }
+  const visti = new Set(), uniche = righe.filter(r => !visti.has(r.c.id) && visti.add(r.c.id));
+  const dur = r => r.durata || BP_DURATA_DEFAULT;
+  const evs = eventiLavoro(dataDelGiorno);
+  return quotaDa({
+    importanti: uniche.filter(r => r.c.q === 2).reduce((s, r) => s + dur(r), 0),
+    cose: uniche.reduce((s, r) => s + dur(r), 0), n: uniche.length,
+    cusc: giorniLav().reduce((s, _, idx) => s + cuscinettiDelGiorno(dataDelGiorno(idx)).reduce((t, i) => t + bpDurata(i), 0), 0),
+    app: evs.reduce((s, e) => s + minFinestra(e), 0),
+    q2: evs.filter(eQ2App).reduce((s, e) => s + minFinestra(e), 0)
+  });
+}
+// Il wizard: quello che stai mettendo nel piano
+function quotaWizard() {
+  const voci = [..._bpwSel.entries()].map(([id, v]) => ({ c: ciclo(id), v })).filter(x => x.c);
+  const dur = x => x.v.durata || BP_DURATA_DEFAULT;
+  const evs = eventiLavoro(idx => bpDataGiorno(_bpwWeek, _bpwYear, idx));
+  const lav = new Set(giorniLav().map(g => g.key));
+  return quotaDa({
+    importanti: voci.filter(x => x.c.q === 2).reduce((s, x) => s + dur(x), 0),
+    cose: voci.reduce((s, x) => s + dur(x), 0), n: voci.length,
+    cusc: [..._bpwCusc.values()].filter(v => lav.has(v.giorno)).reduce((s, v) => s + (v.durata || CUSC.DURATA), 0),
+    app: evs.reduce((s, e) => s + minFinestra(e), 0),
+    q2: evs.filter(eQ2App).reduce((s, e) => s + minFinestra(e), 0)
+  });
+}
+function oreTesto(min) {
+  const mezze = Math.max(1, Math.ceil(min / 30)), h = Math.floor(mezze / 2), mezza = mezze % 2;
+  if (!h) return 'mezz\'ora';
+  return `${h === 1 ? 'un\'ora' : h + ' ore'}${mezza ? ' e mezza' : ''}`;
+}
+const fmtT = m => m ? fmtTempo(m) : '0 min';
+function testoCome(q) {
+  return `Conto i minuti che hai messo sulle Importanti (le cose segnate Importante, con la loro durata; 30 minuti se non ce l'hanno)${q.q2 ? ' più l\'Esercizio Q2 in agenda' : ''}: <b>${fmtT(q.futuro)}</b>. `
+    + `Li divido per il tempo di lavoro della settimana: da lunedì a venerdì, dalle 9 alle 19 (${fmtT(q.disponibile)}). `
+    + (q.pianificato > q.disponibile ? `Hai pianificato di più (${fmtT(q.pianificato)} tra cose, cuscinetti e appuntamenti): uso questo. ` : `Tra cose, cuscinetti e appuntamenti hai pianificato ${fmtT(q.pianificato)}. `)
+    + `Obiettivo: il 25–30% per il futuro.`;
+}
+function htmlFuturo(q, chiave) {
+  const basso = q.pct < PRINC.FUTURO_MIN;
+  const aperto = ui.futuroCome && ui.futuroCome[chiave] ? ' open' : '';
+  const scala = 50;   // la barra va da 0 al 50%: si vede bene la zona 25–30
+  return `<div class="futuro${basso ? ' basso' : ''}" data-futuro="${chiave}">
+    <div class="futuro-testa"><b>Tempo per il futuro: <span class="mono">${q.pct}%</span></b><span>(obiettivo 25–30%)</span></div>
+    <div class="futuro-bar" role="img" aria-label="${q.pct}% del tempo di lavoro sulle Importanti, obiettivo 25–30%"><i style="width:${Math.min(100, q.pct / scala * 100)}%"></i><span class="futuro-obj" style="left:${PRINC.FUTURO_MIN / scala * 100}%;width:${(PRINC.FUTURO_MAX - PRINC.FUTURO_MIN) / scala * 100}%"></span></div>
+    ${basso ? `<p class="futuro-hint">Blocca almeno ${oreTesto(q.manca)} per le Importanti, come appuntamenti veri.</p>` : q.pct > 45 ? '<p class="futuro-hint">Tanto futuro: controlla che le urgenze vere abbiano ancora spazio (i cuscinetti).</p>' : ''}
+    <details class="futuro-come" data-k="${chiave}"${aperto}><summary>Come lo calcolo</summary><p>${testoCome(q)}</p></details></div>`;
+}
+ui.futuroCome = {};
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details.futuro-come')) ui.futuroCome[d.dataset.k] = d.open; }, true);
+
+// Mete nel piano della settimana: quante Importanti per meta, e quelle ferme da 4 settimane
+function htmlMetePiano(perMeta, extraDi) {
+  const l = meteAperte();
+  if (!l.length || !state.metaColOk) return '';
+  const ferme = [];
+  const voci = l.map(m => {
+    const n = perMeta.get(String(m.id)) || 0;
+    if (!n && metaFerma(m, extraDi ? extraDi(m) : null)) ferme.push(m);
+    return `<li><span><i class="ti ti-target-arrow" aria-hidden="true"></i> ${escHtml(corta(m.testo, 40))}</span><span class="mono">${n ? plurale(n, 'Importante', 'Importanti') : '—'}</span></li>`;
+  }).join('');
+  const avviso = ferme.length ? `<li><span class="ferma">Da 4 settimane niente per ${ferme.length === 1 ? 'questa meta' : 'queste mete'}: ${ferme.map(m => '«' + escHtml(corta(m.testo, 30)) + '»').join(', ')}. Scegli un'Importante che ti avvicina.</span></li>` : '';
+  return `<div><span class="field-label" style="margin-top:0">Le tue mete in questo piano</span><ul class="futuro-mete">${voci}${avviso}</ul></div>`;
+}
+function disegnaFuturoWizard() {
+  const corpo = $('bpw-step2');
+  if (!corpo || !_bpwWeek) return;
+  let box = $('bpw-futuro');
+  if (!box) { corpo.insertAdjacentHTML('afterbegin', '<div id="bpw-futuro" class="bpw-futuro"></div>'); box = $('bpw-futuro'); }
+  const perMeta = new Map();
+  [..._bpwSel.keys()].map(ciclo).filter(c => c && c.q === 2 && c.meta_id).forEach(c => perMeta.set(String(c.meta_id), (perMeta.get(String(c.meta_id)) || 0) + 1));
+  box.innerHTML = htmlFuturo(quotaWizard(), 'wizard') + htmlMetePiano(perMeta, m => [..._bpwSel.keys()].map(ciclo).some(c => c && String(c.meta_id || '') === String(m.id)) ? [oggiLocale()] : null);
+}
+const _bpwRenderStep2Pr = bpwRenderStep2;
+bpwRenderStep2 = function () { const r = _bpwRenderStep2Pr.apply(this, arguments); disegnaFuturoWizard(); return r; };
+
+// In Settimana: una pillola compatta in testa, tocchi e vedi come lo calcolo
+function chipFuturo() {
+  const q = quotaSettimana();
+  if (!q.n) return '';
+  return `<button type="button" class="futuro-chip${q.pct < PRINC.FUTURO_MIN ? ' basso' : ''}" data-act="futuro-come" data-tip="Tempo per il futuro: ${q.pct}% (obiettivo 25–30%)" aria-label="Tempo per il futuro: ${q.pct}%, obiettivo 25–30%. Come lo calcolo"><i class="ti ti-target-arrow" aria-hidden="true"></i>Futuro ${q.pct}%</button>`;
+}
+const _navSettimanaPr = navSettimana;
+navSettimana = function () { const c = chipFuturo(); return _navSettimanaPr.apply(this, arguments) + (c ? `<div class="futuro-riga">${c}</div>` : ''); };
+const _testaBoardPr = testaBoard;
+testaBoard = function () { const h = _testaBoardPr.apply(this, arguments), c = chipFuturo(); return c ? h.replace(/(<p class="bt-stat">[\s\S]*?)(<\/p>)/, `$1${c}$2`) : h; };
+document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="futuroOverlay" onclick="closeModalOnBg(event,'futuroOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="futuro-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><h3 class="t-title" id="futuro-titolo">Tempo per il futuro</h3><button type="button" class="btn btn-icon" onclick="closeModal('futuroOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="futuro-corpo"></div>
+  </div>
+</div>`);
+AZIONI['futuro-come'] = () => {
+  const q = quotaSettimana();
+  ui.futuroCome = { ...ui.futuroCome, foglio: true };
+  $('futuro-corpo').innerHTML = htmlFuturo(q, 'foglio') + `<p class="t-caption muted">Principio 1: il tempo per il futuro va messo in agenda per primo. Le Importanti non urgenti, se non le blocchi, le mangiano le urgenze.</p>`;
+  $('futuroOverlay').classList.add('open');
+};
+
+// ══════════════════════════════════════════════════════════════
+// C · FALLO SUBITO (principio 4) E SPECIFICO (principio 2)
+// ══════════════════════════════════════════════════════════════
+const RE_BREVE = /(?:\b(?:ci\s+vogliono|ci\s+vuole|bastano|basta|in)\s+)?\b(?:5|cinque|2|due|3|tre)\s*min(?:uti|uto)?\b\.?|\bal\s+volo\b/gi;
+const togliBreve = t => { const s = String(t || '').replace(RE_BREVE, ' ').replace(/\s+([,.;:!?])/g, '$1').replace(/\s+/g, ' ').replace(/^[\s,;:.\-–—]+|[\s,;:\-–—]+$/g, '').trim(); return s ? s.charAt(0).toUpperCase() + s.slice(1) : String(t || ''); };
+const detto = (re, t) => { re.lastIndex = 0; const ok = re.test(t); re.lastIndex = 0; return ok; };
+
+// ─── Troppo generica? 1–2 parole senza un verbo, senza chi (persona, azienda) e senza quanto (numero, €) ───
+const VERBI_FORME = new Set(('chiama chiedi scrivi manda invia compra paga prenota fai porta ritira prepara leggi controlla verifica senti organizza rispondi vai ordina aggiorna rinnova disdici ' +
+  'telefona cerca trova finisci inizia completa chiudi apri consegna spedisci prova ricorda parla incontra vedi sistema fissa passa saluta ringrazia sollecita').split(' '));
+// finiscono come un infinito ma non sono verbi
+const NON_VERBI = new Set(('carattere potere piacere dovere cellulare solare regolare familiare popolare particolare militare scolare collare altare affare mare lunare polare singolare ' +
+  'salutare molare sire').split(' '));
+// cose di lavoro che con un nome bastano a dire cosa fare («Preventivo Rosseti», «Mail Raia»)
+const OGGETTI_LAVORO = new Set(('preventivo preventivi offerta offerte fattura fatture mail email contratto contratti ordine ordini report riunione incontro appuntamento chiamata telefonata ' +
+  'pagamento bonifico sollecito verbale documento documenti corso visita sopralluogo call proposta relazione consegna bolletta polizza ricevuta pratica certificato modulo dvr colloquio ' +
+  'presentazione demo meeting checkup check rinnovo scadenza nota messaggio whatsapp').split(' '));
+const eVerbo = w => VERBI_FORME.has(w) || (!NON_VERBI.has(w) && !/iere$/.test(w) && /^[a-z]{3,}(?:are|ere|ire|arre|orre|urre)(?:lo|la|li|le|gli|ne|ci|si|mi|ti|vi)?$/.test(w));
+function troppoGenericaTitolo(titolo, opz = {}) {
+  const t = String(titolo || '').replace(/\[[^\]]*\]/g, ' ').replace(/^\s*\d{1,2}(?:[.:]\d{2})?\s*[-–—]\s*/, '').trim();
+  if (!t || /[:]\s*$/.test(t)) return false;
+  if (/[\d€$%]/.test(t)) return false;   // un numero o un importo: c'è il «quanto»
+  const grezze = t.split(/[\s/+,;()«»"]+/).filter(Boolean);
+  if (grezze.length > 2) return false;
+  const tuttoMaiuscolo = !/[a-zà-ÿ]/.test(t);
+  const nomi = nomiNoti();
+  const parole = grezze.map((raw, j) => {
+    const w = parolaPulita(raw);
+    const lettere = togliAccenti(raw).replace(/[^A-Za-z]/g, '');
+    const nome = !!w && !OGGETTI_LAVORO.has(w) && !DOPP_COMUNI.has(w) && (
+      (!tuttoMaiuscolo && lettere.length >= 2 && lettere === lettere.toUpperCase()) ||   // sigla: ASM, DV
+      (!tuttoMaiuscolo && j > 0 && /^[A-ZÀ-Ý]/.test(raw)) ||                           // maiuscola non all'inizio
+      /^(?:srl|spa|snc|sas|srls)$/.test(w) || nomi.has(w));
+    return { w, nome };
+  }).filter(x => x.w);
+  if (!parole.length) return true;
+  if (parole.some(x => eVerbo(x.w))) return false;
+  const chi = parole.some(x => x.nome) || !!opz.persona;
+  const cosa = parole.some(x => OGGETTI_LAVORO.has(x.w) || DOPP_COMUNI.has(x.w)) || (parole.length === 2 && parole.some(x => !x.nome) && opz.persona);
+  return !(chi && cosa);
+}
+function troppoGenerica(c) {
+  if (!c || c.done || c.parent_id || isGiornaliero(c)) return false;
+  if (state.cicli.some(p => p.parent_id === c.id && !p.done)) return false;   // ha già i suoi passi
+  return troppoGenericaTitolo(c.title, { persona: (c.persone_menzionate || []).length > 0 || !!c.delega_persona_id });
+}
+const specificheOk = () => new Set(leggiJson(PRINC.LS.SPEC_OK, []));
+function daRendereSpecifiche() {
+  const ok = specificheOk();
+  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !ok.has(String(c.id)) && troppoGenerica(c))
+    .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+}
+function vistaSpecifiche() {
+  const l = daRendereSpecifiche();
+  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Da rendere specifiche</h1></div></div>
+    <p class="t-label muted mete-intro">Cose scritte in una o due parole: così non si capisce cosa fare. Scrivi cosa devi fare, con chi, quanto (principio 2), oppure spacchettala in passi.</p>`;
+  if (!l.length) return h + vuoto('ti-checks', 'Sono tutte chiare', `In ${etichettaCtx()} ogni cosa aperta dice cosa fare.`);
+  return h + `<div class="group">${l.map(c => `<div class="spec-riga" data-id="${c.id}"><button type="button" class="item-main" data-act="apri" data-id="${c.id}" style="padding:0"><span class="item-title">${escHtml(c.title)}</span><span class="item-meta">${tagTipo(computeEffectiveQ(c))}<span class="sep">·</span><span>dal ${fmtGgMm(giornoIso(c.created_at))}</span></span></button>
+    <div class="tasti"><button type="button" class="btn btn-secondary btn-sm" data-act="q-scomponi" data-id="${c.id}"><i class="ti ti-list-tree"></i>Spacchettala</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="spec-riscrivi" data-id="${c.id}"><i class="ti ti-pencil"></i>Riscrivila</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="spec-ok" data-id="${c.id}">Va bene così</button></div></div>`).join('')}</div>`;
+}
+Object.assign(AZIONI, {
+  'spec-riscrivi': (el, id) => { apriDettaglio(id); setTimeout(() => { const t = $('f-title'); if (t) { t.focus(); t.select(); } }, 120); },
+  'spec-ok': (el, id) => { scriviJson(PRINC.LS.SPEC_OK, unici([...specificheOk(), String(id)])); render(); showToast('Non te la propongo più', 'info', { annulla: () => { scriviJson(PRINC.LS.SPEC_OK, [...specificheOk()].filter(x => x !== String(id))); render(); } }); }
+});
+
+// ─── Le voci del campo: «5 minuti», «al volo», «subito» o il chip «5 min» → breve; titolo generico → avviso ───
+const _vociDaRighePr = vociDaRighe;
+vociDaRighe = function (righe, r) {
+  const cinque = (r && r.cinque) || [];
+  return _vociDaRighePr(righe, r).map(v => {
+    const parlato = detto(RE_BREVE, v.testo);
+    const title = detto(RE_BREVE, v.title) ? togliBreve(v.title) : v.title;
+    const cinqueMin = parlato || cinque.includes(v.testo);
+    const breve = v.q !== 3 && (cinqueMin || /\bsubito\b/i.test(v.testo));
+    return { ...v, title, cinque: cinqueMin && v.q !== 3, breve, vaga: !(v.passi || []).length && troppoGenericaTitolo(title, { persona: !!v.delega || !!(r && r.persona) }) };
+  });
+};
+// la durata di 5 minuti la rende una Rapida (≤ 15 min, come prima)
+const _rigaDaVocePr = rigaDaVoce;
+rigaDaVoce = async function (v, r, ctx) {
+  const riga = await _rigaDaVocePr.apply(this, arguments);
+  return v && v.cinque && state.ritualiColsOk ? { ...riga, durata_minuti: PRINC.BREVE_MIN } : riga;
+};
+const _disegnaAnteprimaPr = disegnaAnteprima;
+disegnaAnteprima = function () {
+  _disegnaAnteprimaPr();
+  const box = $('rapido-anteprima');
+  if (!box || box.hidden) return;
+  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
+  box.querySelectorAll('.rap-voce[data-i]').forEach(el => {
+    const i = +el.dataset.i, v = voci[i];
+    if (!v) return;
+    const sintesi = el.querySelector('.rap-sintesi');
+    if (!sintesi) return;
+    let extra = '';
+    if (v.vaga) extra += `<p class="rap-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i>Troppo generica: cosa devi fare, con chi, quanto?</p>`;
+    if (v.q !== 3) extra += `<div class="rap-breve"><button type="button" class="chip" data-act="rap-cinque" data-i="${i}" aria-pressed="${!!v.cinque}"><i class="ti ti-clock-bolt"></i>5 min</button>
+      ${v.breve ? `<button type="button" class="btn btn-primary btn-sm" data-act="rap-fallaora" data-i="${i}"><i class="ti ti-player-play"></i>Falla ora</button><span class="t-caption muted">Ci vogliono pochi minuti? Falla adesso.</span>` : ''}</div>`;
+    sintesi.insertAdjacentHTML('afterend', extra);
+  });
+};
+const _disegnaAnteprimaCatturaPr = disegnaAnteprimaCattura;
+disegnaAnteprimaCattura = function () {
+  _disegnaAnteprimaCatturaPr();
+  const box = $('cattura-anteprima');
+  if (!box || box.hidden) return;
+  const voci = vociDaRighe(righeCattura(), {});
+  const spans = box.querySelectorAll('.ca-voci > span[class^="p-q"]');
+  spans.forEach((el, i) => { if (voci[i] && voci[i].vaga) el.insertAdjacentHTML('beforeend', ' <span class="ca-vaga">· troppo generica: cosa, con chi, quanto?</span>'); });
+  if (voci.length === 1 && voci[0].breve) {
+    const mod = box.querySelector('[data-act="cattura-modifica"]');
+    const b = '<button type="button" class="btn btn-primary btn-sm ca-falla" data-act="ca-fallaora"><i class="ti ti-player-play"></i>Falla ora</button>';
+    if (mod) mod.insertAdjacentHTML('beforebegin', b); else box.insertAdjacentHTML('beforeend', b);
+  }
+};
+AZIONI['rap-cinque'] = el => {
+  const v = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido)[+el.dataset.i];
+  if (!v) return;
+  const l = (ui.rapido.cinque || []).filter(x => x !== v.testo);
+  ui.rapido = { ...ui.rapido, cinque: el.getAttribute('aria-pressed') === 'true' ? l : [...l, v.testo] };
+  disegnaAnteprima();
+};
+AZIONI['rap-fallaora'] = el => {
+  const v = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido)[+el.dataset.i];
+  if (!v) return;
+  const r = { ...ui.rapido };
+  // tolta dal campo: le altre righe restano da salvare
+  const righe = $('rapido-testo').value.split(/\r?\n/);
+  const k = righe.findIndex(x => x.trim() === v.testo);
+  if (k >= 0) righe.splice(k, 1);
+  $('rapido-testo').value = righe.join('\n').trim();
+  if (!$('rapido-testo').value) { fermaDettatura(); closeModal('rapidoOverlay'); } else disegnaAnteprima();
+  avviaFallaOra({ voce: { ...v, cinque: true }, r });
+};
+AZIONI['ca-fallaora'] = () => {
+  const v = vociDaRighe(righeCattura(), {})[0];
+  if (!v) return;
+  fermaDettatura();
+  $('cattura-testo').value = '';
+  allungaCattura();
+  disegnaAnteprimaCattura();
+  avviaFallaOra({ voce: { ...v, cinque: true }, r: {} });
+};
+// dopo un salvataggio normale di una cosa breve: «Falla ora» nel messaggio
+const _salvaRapidoPr = salvaRapido;
+salvaRapido = async function () {
+  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
+  const idsPrima = new Set(state.cicli.map(c => c.id));
+  const r = await _salvaRapidoPr.apply(this, arguments);
+  offriFallaOraDopo(voci, idsPrima);
+  return r;
+};
+const _salvaCatturaPr = salvaCattura;
+salvaCattura = async function () {
+  const voci = vociDaRighe(righeCattura(), {});
+  const idsPrima = new Set(state.cicli.map(c => c.id));
+  const r = await _salvaCatturaPr.apply(this, arguments);
+  offriFallaOraDopo(voci, idsPrima);
+  return r;
+};
+function offriFallaOraDopo(voci, idsPrima) {
+  if (voci.length !== 1 || !voci[0].breve || ui.fallaOra) return;
+  const c = state.cicli.find(x => !idsPrima.has(x.id) && !x.parent_id && x.title === voci[0].title);
+  if (!c) return;
+  setTimeout(() => showToast('Ci vogliono pochi minuti?', 'info', { annulla: () => avviaFallaOra({ id: c.id, voce: voci[0] }), etichetta: 'Falla ora' }), 250);
+}
+
+// ─── Il timer di 5 minuti ───
+document.body.insertAdjacentHTML('beforeend', `<div class="falla-ora" id="fallaOra" role="status" aria-live="polite" hidden></div>`);
+ui.fallaOra = null;
+let _fallaTimer = null;
+function avviaFallaOra(o) {
+  if (ui.fallaOra) { showToast('Finisci prima quella che stai facendo', 'warn'); return; }
+  ui.fallaOra = { ...o, fine: Date.now() + PRINC.TIMER_MS };
+  disegnaFallaOra();
+  clearInterval(_fallaTimer);
+  _fallaTimer = setInterval(disegnaFallaOra, 1000);
+}
+function disegnaFallaOra() {
+  const box = $('fallaOra'), f = ui.fallaOra;
+  if (!f) { box.hidden = true; box.innerHTML = ''; clearInterval(_fallaTimer); return; }
+  const resto = Math.max(0, f.fine - Date.now()), m = Math.floor(resto / 60000), s = Math.floor(resto % 60000 / 1000);
+  const titolo = f.id ? (ciclo(f.id) || {}).title || f.voce.title : f.voce.title;
+  const tempo = resto ? `${m}:${String(s).padStart(2, '0')}` : 'tempo finito';
+  if (box.dataset.titolo === titolo && box.querySelector('.fo-tempo')) { box.querySelector('.fo-tempo').textContent = tempo; return; }
+  box.dataset.titolo = titolo;
+  box.innerHTML = `<div class="fo-testa"><i class="ti ti-player-play" aria-hidden="true"></i><span>Falla ora: <b>${escHtml(titolo)}</b></span><span class="fo-tempo" aria-label="Tempo che resta">${tempo}</span></div>
+    <div class="fo-tasti"><button type="button" class="btn btn-primary btn-sm" data-act="fo-fatta"><i class="ti ti-check"></i>Fatta</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="fo-salva">Non finita: salvala</button></div>`;
+  box.hidden = false;
+}
+function chiudiFallaOra() { ui.fallaOra = null; delete $('fallaOra').dataset.titolo; disegnaFallaOra(); }
+async function salvaVoceFalla(f) {
+  const nuove = await aggiungiFrasi([f.voce], f.r || {});
+  return nuove && nuove.find(c => !c.parent_id) || null;
+}
+AZIONI['fo-fatta'] = async () => {
+  const f = ui.fallaOra;
+  if (!f) return;
+  chiudiFallaOra();
+  try {
+    if (f.id) { await azioneFatto(f.id); return; }
+    const c = await salvaVoceFalla(f);
+    if (!c) return;
+    await azioneFatto(c.id);
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+};
+AZIONI['fo-salva'] = async () => {
+  const f = ui.fallaOra;
+  if (!f) return;
+  chiudiFallaOra();
+  if (f.id) { showToast('Resta tra le cose da fare: la ritrovi tra le Rapide', 'info'); return; }
+  await salvaVoceFalla(f);
+};
+
+// ══════════════════════════════════════════════════════════════
+// D · LA SERA PER DOMANI (principio 3) · DELEGHE (9, 10) · DEMOTIVAZIONE (11)
+// ══════════════════════════════════════════════════════════════
+function giornoDomani() {
+  const d = piuGiorni(new Date(), 1);
+  while (giornoIdxDi(d) > 4) d.setDate(d.getDate() + 1);   // venerdì sera: lunedì
+  return d;
+}
+function eSeraFeriale(ora = new Date()) { const g = giornoIdxDi(ora); return g <= 4 && hhmm(ora) >= PRINC.SERA_DA; }
+function bannerSera() {
+  if (!eSeraFeriale() || lsLeggi(PRINC.LS.SERA) === oggiLocale() || !eSettimanaCorrente() || modoSemplice()) return '';
+  return `<section class="banner-piano" aria-label="Piano di domani"><i class="ti ti-moon"></i>
+    <div><b>5 minuti per domani: scegli dalla settimana cosa fai domani</b><p class="t-caption muted">Chi decide la sera prima parte la mattina già sapendo cosa fare.</p>
+      <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="sera-apri">Scegli</button></div></div>
+    <button type="button" class="btn btn-icon" data-act="sera-chiudi" aria-label="Chiudi per oggi" data-tip="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
+}
+document.body.insertAdjacentHTML('beforeend', `
+<div class="modal-overlay" id="seraOverlay" onclick="closeModalOnBg(event,'seraOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-modal="true" aria-labelledby="sera-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><div class="sheet-head-txt"><h3 class="t-title" id="sera-titolo">Cosa fai domani?</h3><p class="t-label muted" id="sera-sotto"></p></div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('seraOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div id="sera-corpo"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="sera-fatto">Fatto, a domani</button></div>
+  </div>
+</div>`);
+ui.sera = null;
+function righeSera() {
+  const domani = giornoDomani(), kDomani = giornoKeyDi(domani), oggiK = giornoKeyDi(oggiData()), stessa = (() => { const w = isoWeekParts(domani); return w.week === state.week && w.year === state.year; })();
+  const idxOggi = giornoIdxDi(oggiData());
+  const aperte = rs => rs.filter(r => !r.fatto && !isGiornaliero(r.c));
+  const giorni = (da, a) => GIORNI.slice(da, a).filter(g => !(stessa && g.key === kDomani)).flatMap(g => aperte(righeGiorno(g.key)).map(r => ({ ...r, dove: g.label })));
+  const gia = stessa ? aperte(righeGiorno(kDomani)) : (ui.sera ? state.cicli.filter(c => ui.sera.spostate.has(c.id)).map(c => ({ c })) : []);
+  return {
+    domani, kDomani, stessa, gia,
+    gruppi: [
+      { t: 'In settimana, senza giorno', righe: aperte(righeGiorno('settimana')) },
+      { t: 'Rimaste indietro', righe: giorni(0, idxOggi) },
+      { t: 'Oggi, non fatte', righe: aperte(righeGiorno(oggiK)) },
+      { t: 'Più avanti in settimana', righe: giorni(idxOggi + 1) }
+    ].filter(g => g.righe.length)
+  };
+}
+function disegnaSera() {
+  const s = righeSera(), sp = ui.sera.spostate;
+  $('sera-sotto').textContent = `${fmtGiornoLungo(s.domani)} · ${plurale(s.gia.length, 'cosa in programma', 'cose in programma')}`;
+  const rigaS = (r, giaDomani) => { const fatta = giaDomani || sp.has(r.c.id); return `<div class="sera-riga" data-id="${r.c.id}"><span>${escHtml(r.c.title)}<small>${[TIPI[computeEffectiveQ(r.c)].label, r.dove || ''].filter(Boolean).join(' · ')}</small></span>
+    <button type="button" class="btn ${fatta ? 'btn-ghost' : 'btn-secondary'} btn-sm" data-act="sera-domani"${fatta ? ' disabled' : ''}>${fatta ? '<i class="ti ti-check"></i>Domani' : '<i class="ti ti-arrow-right"></i>Domani'}</button></div>`; };
+  $('sera-corpo').innerHTML = `<p class="sera-domani">Tocca «Domani» su quello che vuoi fare ${s.stessa ? 'domani' : fmtGiorno(s.domani)}: tre cose bastano.</p>`
+    + (s.gia.length ? `<p class="list-head"><span>${s.stessa ? 'Domani' : escHtml(fmtGiorno(s.domani))}</span><span class="mono">${s.gia.length}</span></p><div class="group">${s.gia.map(r => rigaS(r, true)).join('')}</div>` : '')
+    + (s.gruppi.length ? s.gruppi.map(g => `<p class="list-head"><span>${g.t}</span><span class="mono">${g.righe.length}</span></p><div class="group">${g.righe.map(rigaS).join('')}</div>`).join('')
+      : vuoto('ti-calendar-check', 'Niente da spostare', 'In questa settimana non ci sono cose senza giorno o rimaste indietro.'));
+}
+async function seraADomani(id) {
+  const c = ciclo(id), s = righeSera();
+  if (!c) return;
+  try {
+    if (s.stessa) await impostaGiorno(id, s.kDomani);
+    else { await pianificaInData(c, s.domani, null); render(); showToast(`Spostata a ${fmtGiorno(s.domani)}`, 'success'); }
+    ui.sera.spostate.add(id);
+    disegnaSera();
+  } catch (e) { showToast('Non spostata: ' + e.message, 'error'); }
+}
+Object.assign(AZIONI, {
+  'sera-apri': () => { ui.sera = { spostate: new Set() }; disegnaSera(); $('seraOverlay').classList.add('open'); },
+  'sera-domani': (el, id) => seraADomani(el.closest('[data-id]').dataset.id),
+  'sera-fatto': () => { lsScrivi(PRINC.LS.SERA, oggiLocale()); closeModal('seraOverlay'); render(); showToast(ui.sera && ui.sera.spostate.size ? `Domani: ${plurale(ui.sera.spostate.size, 'cosa scelta', 'cose scelte')} in più` : 'A domani', 'success'); },
+  'sera-chiudi': () => { lsScrivi(PRINC.LS.SERA, oggiLocale()); render(); }
+});
+let _seraEra = eSeraFeriale();
+setInterval(() => { const ora = eSeraFeriale(); if (ora !== _seraEra) { _seraEra = ora; if (ui.tab === 'oggi') render(); } }, 60000);
+
+// ─── Promemoria su Google Calendar: «18.45 - Piano di domani (5 minuti)», solo dal tasto ───
+function primoFerialeDa(ora) {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  if (hhmm(new Date()) >= ora) d.setDate(d.getDate() + 1);
+  while (giornoIdxDi(d) > 4) d.setDate(d.getDate() + 1);
+  return d;
+}
+const _corpoPromemoriaPr = corpoPromemoriaV10;
+corpoPromemoriaV10 = async function (tipo) {
+  if (tipo !== 'domani') return _corpoPromemoriaPr.apply(this, arguments);
+  const iso = toISODate(primoFerialeDa(PRINC.DOMANI_ORA));
+  return { firma: `domani|${calScelto()}`, corpo: {
+    summary: titoloAvviso(PRINC.DOMANI_ORA, 'Piano di domani (5 minuti)'),
+    description: `5 minuti per domani: apri l'app e scegli dalla settimana cosa fai domani.\n${APP_URL}`,
+    start: { dateTime: `${iso}T${PRINC.DOMANI_ORA}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${iso}T${PRINC.DOMANI_FINE}:00`, timeZone: 'Europe/Rome' },
+    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'],
+    reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+    extendedProperties: { private: { cicli_aperti: 'promemoria', promemoria: 'domani' } } } };
+};
+const _sezioneItimePr = sezioneItime;
+sezioneItime = function () {
+  const h = _sezioneItimePr.apply(this, arguments), prom = leggiJson(LS5.PROM, {}), collegato = isGcalTokenValid();
+  const tasto = `<button type="button" class="riga-link" data-act="prom-domani"${collegato ? '' : ' disabled'}><i class="ti ti-moon"></i><span>Piano di domani<small>${collegato ? (prom.domani ? `Dal lunedì al venerdì alle 18:45, 5 minuti, nel calendario ${escHtml(nomeCalScrittura())}` : 'Tocca per crearlo: dal lunedì al venerdì alle 18:45, 5 minuti') : 'Collega Google Calendar'}</small></span><span></span><i class="ti ti-refresh"></i></button>`;
+  const segno = 'data-act="prom-bp"';
+  const i = h.indexOf(segno);
+  if (i < 0) return h;
+  const fine = h.indexOf('</button>', i) + '</button>'.length;
+  return h.slice(0, fine) + tasto + h.slice(fine);
+};
+AZIONI['prom-domani'] = async el => {
+  el.disabled = true;
+  const id = await sincronizzaPromemoria('domani', true);
+  el.disabled = false;
+  render();
+  showToast(id ? 'Promemoria «Piano di domani» su Google Calendar: dal lunedì al venerdì alle 18:45' : 'Non riesco a scrivere su Google Calendar', id ? 'success' : 'error');
+};
+
+// ─── Deleghe che tornano (principio 9: istruzioni scritte e la persona giusta · 10: non riprenderle) ───
+const delegheOk = () => leggiJson(PRINC.LS.DELEGHE_OK, {});
+function avvisiDeleghe() {
+  if (!state.delegaColsOk) return [];
+  const limite = toISODate(piuGiorni(new Date(), -PRINC.DELEGHE_GG)), oggi = oggiLocale(), ok = delegheOk();
+  const per = new Map();
+  state.cicli.forEach(c => {
+    if (!c.delega_persona_id) return;
+    const tornata = (c.ritorni_delega || 0) > 0 && giornoIso(c.updated_at || c.created_at) >= limite;
+    const scaduta = !c.done && c.q === 3 && c.delega_controllo && c.delega_controllo < oggi && c.delega_controllo >= limite;
+    if (!tornata && !scaduta && (c.ritorni_delega || 0) < PRINC.DELEGHE_COSA) return;
+    const k = String(c.delega_persona_id);
+    const x = per.get(k) || { cose: [], ripetuta: null };
+    if (tornata || scaduta) x.cose.push(c);
+    if ((c.ritorni_delega || 0) >= PRINC.DELEGHE_COSA && !c.done) x.ripetuta = x.ripetuta && (x.ripetuta.ritorni_delega || 0) >= (c.ritorni_delega || 0) ? x.ripetuta : c;
+    per.set(k, x);
+  });
+  return [...per.entries()].map(([pid, x]) => ({ p: personaDi(pid), ...x }))
+    .filter(a => a.p && (a.cose.length >= PRINC.DELEGHE_PERSONA || a.ripetuta))
+    .filter(a => !ok[a.p.id] || Date.now() - new Date(ok[a.p.id]).getTime() > PRINC.DELEGHE_OK_GG * 864e5)
+    .map(a => ({ ...a, cosa: a.ripetuta || a.cose.filter(c => !c.done).sort((x, y) => String(y.updated_at || '').localeCompare(String(x.updated_at || '')))[0] || null }));
+}
+const testoAvvisoDelega = a => `Con ${a.p.nome} le deleghe tornano spesso: le hai dato istruzioni scritte? È la persona giusta?`;
+const tastiDelega = a => `<div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="del-istruzioni" data-p="${esc(a.p.id)}"><i class="ti ti-file-text"></i>Scrivi le istruzioni</button>
+  <button type="button" class="btn btn-secondary btn-sm" data-act="del-incontro" data-p="${esc(a.p.id)}"><i class="ti ti-calendar-repeat"></i>Fissa un incontro settimanale</button>
+  <button type="button" class="btn btn-ghost btn-sm" data-act="del-ok" data-p="${esc(a.p.id)}">Ok</button></div>`;
+function cardDeleghe() {
+  const l = avvisiDeleghe();
+  if (!l.length || modoSemplice()) return '';
+  return l.map(a => `<section class="banner-piano banner-leggero delega-avviso" aria-label="Deleghe con ${esc(a.p.nome)}"><i class="ti ti-arrow-back-up"></i>
+    <div><b>${escHtml(testoAvvisoDelega(a))}</b><p class="t-caption muted">${a.ripetuta ? `«${escHtml(a.ripetuta.title)}» è tornata ${a.ripetuta.ritorni_delega} volte.` : `${plurale(a.cose.length, 'delega tornata o scaduta', 'deleghe tornate o scadute')} negli ultimi 60 giorni.`}</p>${tastiDelega(a)}</div></section>`).join('');
+}
+function avvisoPerPersona(a) { lsScrivi(PRINC.LS.DELEGHE_OK, JSON.stringify({ ...delegheOk(), [a.p.id]: new Date().toISOString() })); }
+const trovaAvviso = pid => avvisiDeleghe().find(a => String(a.p.id) === String(pid)) || null;
+Object.assign(AZIONI, {
+  'del-ok': el => { const a = trovaAvviso(el.dataset.p); if (a) avvisoPerPersona(a); render(); },
+  'del-istruzioni': async el => {
+    const a = trovaAvviso(el.dataset.p);
+    if (!a) return;
+    const titolo = `Scrivere le istruzioni per ${a.p.nome}${a.cosa ? '' : ' (deleghe)'}`;
+    try {
+      let p = null;
+      if (a.cosa && state.passiColOk) p = await creaPassoDi(a.cosa, { title: titolo, q: 2 }, a.cosa.ctx || state.ctx);
+      else { p = await upsertCiclo({ ...rigaNuova(titolo, { subito: false }, 'lavoro'), persone_menzionate: [a.p.nome] }); if (p) state.cicli = [p, ...state.cicli]; }
+      avvisoPerPersona(a);
+      render();
+      showToast(a.cosa && state.passiColOk ? `Passo aggiunto a «${a.cosa.title}»` : 'Aggiunta: ' + titolo, 'success', p ? { annulla: () => apriDettaglio(a.cosa && state.passiColOk ? a.cosa.id : p.id), etichetta: 'Apri' } : undefined);
+    } catch (e) { showToast('Non aggiunta: ' + e.message, 'error'); }
+  },
+  'del-incontro': async el => {
+    const a = trovaAvviso(el.dataset.p);
+    if (!a) return;
+    const titolo = `Punto settimanale con ${a.p.nome}`;
+    const gia = state.cicli.find(c => !c.done && senzaAccenti(c.title) === senzaAccenti(titolo));
+    if (gia) { avvisoPerPersona(a); render(); showToast('C\'è già: ' + gia.title, 'info', { annulla: () => apriDettaglio(gia.id), etichetta: 'Apri' }); return; }
+    const lun = lunediDopo(new Date());
+    try {
+      const c = await upsertCiclo({ ...rigaNuova(titolo, { subito: false }, 'lavoro'), q: 2, persone_menzionate: [a.p.nome], ricorrenza: 'settimanale',
+        ...(state.pianificaColsOk ? { pianificato_ripetizione: 'settimanale', pianificato_data: toISODate(lun) } : {}) });
+      if (c) state.cicli = [c, ...state.cicli];
+      avvisoPerPersona(a);
+      render();
+      showToast(`Importante, ogni settimana da ${fmtGiorno(lun)}: ${titolo}`, 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Apri' } : undefined);
+    } catch (e) { showToast('Non aggiunta: ' + e.message, 'error'); }
+  }
+});
+// in Oggi: sopra «Da controllare» (o tra i banner); in Tutto → Persone: sotto il nome
+const _vistaOggiPr = vistaOggi;
+vistaOggi = function () {
+  const h = _vistaOggiPr.apply(this, arguments);
+  const segno = '<p class="list-head"><span><i class="ti ti-user-check lh-ico"></i>Da controllare';
+  const card = h.includes(segno) ? cardDeleghe() : '';
+  return card ? h.replace(segno, card + segno) : h;
+};
+const _bannerCicliCalPr = bannerCicliCal;
+bannerCicliCal = function () {
+  const conControlli = daControllare().length > 0;
+  return _bannerCicliCalPr.apply(this, arguments) + bannerSera() + cardMete() + (conControlli ? '' : cardDeleghe());
+};
+const _tuttoPersonePr = tuttoPersone;
+tuttoPersone = function (lista) {
+  const h = _tuttoPersonePr.apply(this, arguments);
+  return avvisiDeleghe().reduce((out, a) => {
+    const testa = `${escHtml(a.p.nome)}</span><span class="mono">`;
+    const i = out.indexOf(testa);
+    if (i < 0) return out;
+    const g = out.indexOf('<div class="group">', i);
+    if (g < 0) return out;
+    const dopo = g + '<div class="group">'.length;
+    return out.slice(0, dopo) + `<div class="persona-avviso"><span>${escHtml(testoAvvisoDelega(a))}</span>${tastiDelega(a)}</div>` + out.slice(dopo);
+  }, h);
+};
+// «Riprendila io» e «Mi è tornata indietro»: prima una domanda (principio 10)
+const _rispondiConfermaPr = rispondiConferma;
+rispondiConferma = function (si) { const o = ui.conferma; _rispondiConfermaPr.apply(this, arguments); if (!si && o && o.onNo) o.onNo(); };
+function primaDiRiprendere(id, poi, seNo) {
+  const c = ciclo(id);
+  if (!c) return;
+  const p = state.delegaColsOk ? personaDi(c.delega_persona_id) : null;
+  const chi = p ? p.nome : 'chi l\'aveva';
+  apriConferma({ titolo: 'Prima di riprenderla: è un\'urgenza vera?', testo: `Se la riprendi tu, la prossima volta tornerà di nuovo da te. Se non brucia, ridalla a ${chi} con due righe di istruzioni.`,
+    ok: 'Sì, la riprendo', no: `No, resta a ${chi}`, onOk: poi, onNo: seNo });
+}
+const _ctrlRiprendiPr = AZIONI['ctrl-riprendi'], _qTornataPr = AZIONI['q-tornata'];
+AZIONI['ctrl-riprendi'] = (el, id, data) => primaDiRiprendere(id, () => _ctrlRiprendiPr(el, id, data), () => showToast('Resta delegata', 'info'));
+AZIONI['q-tornata'] = (el, id, data) => primaDiRiprendere(id, () => _qTornataPr(el, id, data), async () => {
+  // è tornata, ma la ridai: si conta il ritorno e si ricontrolla tra 2 giorni
+  const c = ciclo(id);
+  if (!c) return;
+  const quando = toISODate(dataPiu(2));
+  try {
+    await patchCiclo(id, { ...(state.delegaColsOk ? { delega_controllo: quando } : {}), ...(state.ritorniColOk ? { ritorni_delega: (c.ritorni_delega || 0) + 1 } : {}) });
+    render();
+    showToast(`Resta delegata · controlli il ${fmtGgMm(quando)}`, 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+});
+
+// ─── Chiudi la settimana: tempo per il futuro, e «Cosa ti ha tolto la spinta?» (principio 11) ───
+const SPINTA = [
+  { k: 'persona', l: 'Una persona' }, { k: 'azienda', l: 'Una cosa successa in azienda' }, { k: 'stanchezza', l: 'Stanchezza' },
+  { k: 'urgenze', l: 'Troppe urgenze di altri' }, { k: 'altro', l: 'Altro' }];
+const _openBpReviewPr = openBpReview;
+openBpReview = function () {
+  const r = _openBpReviewPr.apply(this, arguments);
+  if (!state.bp) return r;
+  const gia = (state.bp.motivi || {}).spinta;
+  ui.rev = { ...ui.rev, spinta: { scelte: new Set((gia && gia.scelte) || []), testo: (gia && gia.testo) || '' }, rinviate: 0, spintePassate: null };
+  caricaRinviate().then(() => { if (ui.rev.passo === 2) disegnaReview(); });
+  caricaSpintePassate().then(() => { if (ui.rev.passo === 2) disegnaReview(); });
+  return r;
+};
+// rinviate 2+ volte: la stessa cosa nel piano di almeno 2 settimane prima di questa, senza essere fatta
+async function caricaRinviate() {
+  if (!state.bp) return;
+  const ids = unici(revItems().filter(i => !i.completato).map(i => i.ciclo_id));
+  if (!ids.length) return;
+  try {
+    const { data, error } = await db.from('battle_plan_items').select('ciclo_id,battle_plan_id,completato').in('ciclo_id', ids);
+    if (error) throw error;
+    const piani = new Map();
+    (data || []).filter(x => x.battle_plan_id !== state.bp.id && !x.completato).forEach(x => piani.set(x.ciclo_id, new Set([...(piani.get(x.ciclo_id) || []), x.battle_plan_id])));
+    ui.rev = { ...ui.rev, rinviate: [...piani.values()].filter(s => s.size >= 2).length };
+  } catch (e) { console.warn('[Review] rinviate:', e.message); }
+}
+async function caricaSpintePassate() {
+  if (!state.statsColOk) { ui.rev = { ...ui.rev, spintePassate: [] }; return; }
+  try {
+    const { data, error } = await db.from('battle_plan').select('id,settimana,anno,motivi').eq('stato', 'chiuso');
+    if (error) throw error;
+    const l = (data || []).filter(p => p.id !== (state.bp && state.bp.id) && p.motivi && p.motivi.spinta && ((p.motivi.spinta.scelte || []).length || p.motivi.spinta.testo))
+      .sort((a, b) => (b.anno - a.anno) || (b.settimana - a.settimana)).slice(0, 3);
+    ui.rev = { ...ui.rev, spintePassate: l };
+  } catch (e) { console.warn('[Review] settimane passate:', e.message); ui.rev = { ...ui.rev, spintePassate: [] }; }
+}
+const testoSpinta = s => [...(s.scelte || []).map(k => (SPINTA.find(x => x.k === k) || { l: k }).l.toLowerCase()), s.testo ? `«${s.testo}»` : ''].filter(Boolean).join(', ');
+function serveSpinta() {
+  const st = statRevConEventi();
+  return (st.tot && (st.tot - st.done) / st.tot >= PRINC.SPINTA_NON_FATTE) || (ui.rev.rinviate || 0) >= PRINC.SPINTA_RINVIATE;
+}
+function htmlSpinta() {
+  const passate = (ui.rev.spintePassate || []).map(p => `sett. ${p.settimana}: ${escHtml(testoSpinta(p.motivi.spinta))}`);
+  const giaDetta = state.bp && (state.bp.motivi || {}).spinta;
+  const passateHtml = passate.length ? `<p class="spinta-passate"><b>Le ultime volte:</b> ${passate.join(' · ')}</p>` : '';
+  if (!serveSpinta() && !giaDetta) return passateHtml ? `<div class="spinta">${passateHtml}</div>` : '';
+  const s = ui.rev.spinta;
+  return `<div class="spinta" id="rev-spinta"><b>Cosa ti ha tolto la spinta questa settimana?</b>
+    <span class="t-caption muted">Capita. Saperlo aiuta a non ripeterlo: scegli quello che c'entra, anche più di uno.</span>
+    <div class="chips chips-wrap" role="group" aria-label="Cosa ti ha tolto la spinta">${SPINTA.map(x => `<button type="button" class="chip" data-act="rev-spinta" data-v="${x.k}" aria-pressed="${s.scelte.has(x.k)}">${x.l}</button>`).join('')}</div>
+    <input type="text" class="input" id="rev-spinta-testo" maxlength="160" value="${esc(s.testo)}" placeholder="Se vuoi, due parole (facoltativo)" aria-label="Cosa è successo">
+    ${passateHtml}</div>`;
+}
+const _disegnaReviewPr = disegnaReview;
+disegnaReview = function () {
+  const notaPrima = ui.rev && ui.rev.passo === 2 && $('bprev-note') ? $('bprev-note').value : null;   // la nota già scritta non si perde
+  const r = _disegnaReviewPr.apply(this, arguments);
+  if (ui.rev.passo !== 2 || !state.bp) return r;
+  const body = $('bprev-body');
+  const dove = body.querySelector('.rev-stat') || body.querySelector('label[for="bprev-note"]');
+  const nota = $('bprev-note'), testoNota = notaPrima;
+  body.querySelectorAll('.futuro, .spinta').forEach(x => x.remove());
+  const h = htmlFuturo(quotaSettimana(), 'review') + (ui.rev.spinta ? htmlSpinta() : '');
+  if (dove) dove.insertAdjacentHTML('beforebegin', h); else body.insertAdjacentHTML('beforeend', h);
+  if (nota && testoNota !== null) nota.value = testoNota;
+  return r;
+};
+AZIONI['rev-spinta'] = el => {
+  const s = ui.rev.spinta, k = el.dataset.v;
+  if (s.scelte.has(k)) s.scelte.delete(k); else s.scelte.add(k);
+  el.setAttribute('aria-pressed', String(s.scelte.has(k)));   // senza ridisegnare: la nota resta com'è
+};
+document.addEventListener('input', e => { if (e.target.id === 'rev-spinta-testo' && ui.rev && ui.rev.spinta) ui.rev.spinta.testo = e.target.value; });
+const _revMotiviConteggioPr = revMotiviConteggio;
+revMotiviConteggio = function () {
+  const out = _revMotiviConteggioPr.apply(this, arguments), s = ui.rev && ui.rev.spinta;
+  if (s && (s.scelte.size || s.testo.trim())) out.spinta = { scelte: [...s.scelte], testo: s.testo.trim().slice(0, 160), quando: new Date().toISOString() };
+  else if (state.bp && state.bp.motivi && state.bp.motivi.spinta) out.spinta = state.bp.motivi.spinta;
+  return out;
+};
+
+// ══════════════════════════════════════════════════════════════
+// ALTRO: «Le mie mete» e «Da rendere specifiche» · GUIDA · AVVIO
+// ══════════════════════════════════════════════════════════════
+const _vistaAltroPr = vistaAltro;
+vistaAltro = function () {
+  if (ui.sub === 'mete') return vistaMete();
+  if (ui.sub === 'specifiche') return vistaSpecifiche();
+  const n = meteTutte().length, vaghe = daRendereSpecifiche().length;
+  const righe = `<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="mete"><i class="ti ti-target-arrow"></i><span>Le mie mete<small>${state.meteOk === false ? 'non disponibili' : n ? plurale(n, 'meta', 'mete') + ' da qui a 5 anni' : 'ancora da scrivere'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>
+    <button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="specifiche"><i class="ti ti-zoom-question"></i><span>Da rendere specifiche<small>${vaghe ? plurale(vaghe, 'cosa troppo generica', 'cose troppo generiche') : 'nessuna'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>`;
+  const segno = '<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="fatte">';
+  const h = _vistaAltroPr.apply(this, arguments);
+  return h.includes(segno) ? h.replace(segno, righe + segno) : h;
+};
+GUIDA_ITIME.push(
+  { titolo: 'Le mete (principi 12, 16 e 5)', testo: `<p><strong>Principio 12: abbi chiara la meta.</strong> In Altro → <strong>Le mie mete</strong> scrivi 7–10 mete da qui a 5 anni: cosa stai costruendo, nel lavoro e fuori.</p><p><strong>Principio 16: costruisci qualcosa.</strong> Nel dettaglio di una cosa scegli «Serve a quale meta?»: le cose collegate hanno il segno <i class="ti ti-target-arrow"></i>. Nel piano della settimana vedi quante Importanti vanno a ogni meta, e quale è ferma da 4 settimane.</p><p><strong>Principio 5: impara a dire no.</strong> In Riordina, quando segni Importante, l'app chiede «Ti avvicina a una meta?». Se no, propone Delega o Lascia stare.</p>` },
+  { titolo: 'Tempo per il futuro: 25–30% (principi 1, 6, 7, 17)', testo: `<p><strong>Principio 1: il tempo per il futuro va prima di tutto.</strong> Un quarto del tempo di lavoro va alle Importanti: sviluppo, collaboratori, clienti nuovi, salute.</p><p>In Prepara la settimana (passo 3), in Chiudi la settimana e in cima alla Settimana vedi «Tempo per il futuro» con una barra. Sotto il 25% l'app ti dice quante ore bloccare: mettile in agenda come appuntamenti veri (Blocca in agenda), così diventano inderogabili.</p><p>Il calcolo: minuti delle Importanti nel piano (30 minuti se non hanno durata) più l'Esercizio Q2, diviso il tempo di lavoro da lunedì a venerdì, dalle 9 alle 19.</p>` },
+  { titolo: 'Fallo subito, e scrivilo specifico (principi 4 e 2)', testo: `<p><strong>Principio 4: se ci vogliono pochi minuti, fallo subito.</strong> Quando scrivi una cosa con «5 minuti», «al volo» o «subito», o tocchi il chip «5 min» nel riepilogo, compare <strong>Falla ora</strong>: parte un timer di 5 minuti con «Fatta» e «Non finita: salvala».</p><p><strong>Principio 2: una cosa specifica si fa, una generica si rimanda.</strong> «Incassi» o «Orto» non dicono cosa fare: l'app avvisa «Troppo generica: cosa devi fare, con chi, quanto?». Le trovi in Riordina e in Altro → <strong>Da rendere specifiche</strong>, con Spacchettala.</p>` },
+  { titolo: 'La sera, le deleghe, la spinta (principi 3, 9, 10, 11)', testo: `<p><strong>Principio 3: prepara la giornata la sera prima.</strong> Dalle 18:30, nei giorni feriali, in Oggi compare «5 minuti per domani»: scegli dalla settimana cosa fai domani. In Impostazioni → Promemoria su Google Calendar c'è anche «Piano di domani», un promemoria alle 18:45 (lo crei tu con il tasto).</p><p><strong>Principio 9: delega con istruzioni scritte, alla persona giusta.</strong> Se con qualcuno le deleghe tornano spesso, l'app te lo dice e propone di scrivere le istruzioni o un punto settimanale con lui.</p><p><strong>Principio 10: non riprenderti il lavoro delegato.</strong> Prima di riprenderla, l'app chiede: è un'urgenza vera?</p><p><strong>Principio 11: accorgiti di cosa ti toglie la spinta.</strong> Se la settimana è andata storta, Chiudi la settimana chiede cosa ti ha tolto la spinta, e ti mostra le risposte delle ultime volte.</p>` }
+);
+const _avviaAppPr = avviaApp;
+avviaApp = function (sessione) {
+  const prima = _appAvviata;
+  _avviaAppPr(sessione);
+  if (prima) return;
+  dopoIlCaricamento().then(() => rilevaPrincipi()).catch(e => console.warn('[Principi] avvio:', e.message));
+};
 </script>
 </body>
 </html>
