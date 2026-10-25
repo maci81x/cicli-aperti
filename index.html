@@ -1352,87 +1352,172 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .evt-riga[data-act="evt-apri"]:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
 @media (hover: hover) { .evt-riga[data-act="evt-apri"]:hover { filter: brightness(.98); } }
 .evt-quando { margin: 0 0 var(--sp-3); }
-/* 25/10 · mete, tempo per il futuro, falla ora, sera, deleghe */
-.meta-tag { display: inline-flex; align-items: center; gap: 3px; max-width: 14em; color: var(--q2); font-weight: var(--fw-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta-tag .ti { font-size: 13px; flex: none; }
-.mete-intro { margin: 0 0 var(--sp-4); }
-.mete-conto { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--text-2); }
-.mete-conto .bar { flex: 1; }
-.meta-riga { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-4); }
+/* 25/10 · mete, tempo per il futuro, falla ora, sera, deleghe (rivisto 25/10: colori neutri per la meta, barra con la fascia 25–30) */
+:root { --meta-ink: var(--text-2); }   /* la meta non usa i colori dei tipi: testo secondario + bandierina */
+.meta-tag { display: inline-flex; align-items: center; gap: 3px; flex: 0 1 auto; min-width: 0; max-width: 13em; color: var(--meta-ink); font-weight: var(--fw-strong); white-space: nowrap; overflow: hidden; }
+.meta-tag > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.meta-tag .ti { font-size: 14px; flex: none; }
+.mete-intro { margin: 0 0 var(--sp-4); max-width: 34em; }
+/* sommario: anello «N di 7» */
+.mete-sommario { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: var(--sp-4); margin: 0 0 var(--sp-5); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); }
+.mete-anello { position: relative; width: 64px; height: 64px; }
+.mete-anello svg { display: block; width: 64px; height: 64px; transform: rotate(-90deg); }
+.mete-anello circle { fill: none; stroke-width: 6; }
+.mete-anello .tr { stroke: var(--surface-2); }
+.mete-anello .ar { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset var(--t-slow) var(--ease-out); }
+.mete-anello span { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1; }
+.mete-anello b { font-size: var(--fs-title); color: var(--text); }
+.mete-anello small { margin-top: 2px; font-size: var(--fs-caption); color: var(--text-2); font-family: var(--font-sans); }
+.mete-sommario-txt b { display: block; font-size: var(--fs-body); line-height: var(--lh-body); color: var(--text); }
+.mete-sommario-txt span { display: block; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); }
+.mete-testa { align-items: center; }
+/* righe */
+.meta-riga { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; min-height: 64px; padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-4); }
 .meta-riga + .meta-riga { border-top: 1px solid var(--border); }
-.meta-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--r-full); background: var(--q2-soft); color: var(--q2); font-weight: var(--fw-strong); font-size: var(--fs-label); margin-top: 2px; }
-.meta-riga.raggiunta .meta-n { background: var(--q2-mark); color: var(--on-primary); }
-.meta-riga.raggiunta .meta-testo { color: var(--done-title); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+.meta-n { display: grid; place-items: center; width: 28px; height: 28px; margin-top: 2px; border-radius: var(--r-full); background: var(--surface-2); color: var(--text); font-size: var(--fs-label); font-weight: var(--fw-strong); }
+.meta-n .ti { font-size: 16px; }
+.meta-riga.raggiunta .meta-n { background: var(--primary); color: var(--on-primary); }
+.meta-riga.raggiunta .meta-testo { color: var(--text-2); }
+.meta-corpo { display: block; min-width: 0; min-height: var(--tap); margin: -4px 0; padding: 4px 0; border: 0; background: none; text-align: left; color: inherit; border-radius: var(--r-sm); -webkit-tap-highlight-color: transparent; }
+.meta-corpo:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .meta-testo { display: block; font-weight: var(--fw-strong); color: var(--text); overflow-wrap: anywhere; }
-.meta-info { display: flex; flex-wrap: wrap; gap: 2px var(--sp-2); margin-top: 2px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
-.meta-info .ferma { color: var(--warn); font-weight: var(--fw-strong); }
-.meta-tasti { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
-@media (max-width: 767px) { .meta-riga { grid-template-columns: 32px minmax(0, 1fr); } .meta-tasti { grid-column: 2; justify-content: flex-start; margin-left: -10px; } .meta-riga > span:empty { display: none; } }
-.meta-tasti .btn-icon[aria-pressed="true"] { color: var(--q2); }
+.meta-info { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--sp-2); margin-top: 2px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.meta-info .sep { color: var(--border-strong); }
+.meta-info .ferma { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); font-weight: var(--fw-strong); }
+.meta-info .ferma .ti { font-size: 14px; }
+.meta-tasti { display: flex; gap: 0; margin-top: -6px; }
+.meta-tasti .btn-icon { color: var(--text-2); }
+.meta-tasti .btn-icon:disabled { opacity: .35; cursor: default; }
+@media (hover: hover) { .meta-corpo:hover .meta-testo { text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 3px; } }
+.meta-riga.in-modifica { grid-template-columns: 28px minmax(0, 1fr); padding-right: var(--sp-4); }
 .meta-form { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); }
 .meta-form-riga { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--sp-2); }
 @media (max-width: 479px) { .meta-form-riga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .meta-form-riga .btn { grid-column: 1 / -1; } }
 .meta-form .input { min-height: var(--tap); width: 100%; }
-.det-meta { margin-top: var(--sp-3); }
-.rio-mete { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0 0; }
+.meta-form .tools-row { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); }
+.meta-form .tools-row .btn-danger { margin-left: auto; }
+.mete-nota { display: flex; gap: var(--sp-2); align-items: flex-start; margin: var(--sp-3) var(--sp-1) 0; }
+.mete-nota .ti { font-size: 16px; margin-top: 0; flex: none; color: var(--meta-ink); }
+.det-meta .field-label { margin-top: 0; display: flex; align-items: center; gap: 6px; }
+.det-meta .field-label .ti { font-size: 16px; color: var(--meta-ink); }
+.det-meta .input { background: var(--surface); }
+/* Riordina */
+.rio-mete { display: grid; gap: var(--sp-2); margin: var(--sp-4) 0 0; }
 .rio-mete > b { font-size: var(--fs-label); color: var(--text); }
-.rio-dire-no { display: grid; gap: var(--sp-2); margin-top: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md); background: var(--warn-soft); color: var(--warn); }
+.rio-mete .chip .ti { font-size: 16px; color: var(--meta-ink); }
+.rio-mete .chip[aria-pressed="true"] .ti { color: inherit; }
+.rio-dire-no { display: grid; gap: var(--sp-2); margin-top: var(--sp-2); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
 .rio-dire-no b { color: var(--text); }
-.rio-dire-no .tasti { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.rio-vaga, .rap-vaga { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); margin: var(--sp-2) 0 0; font-size: var(--fs-label); color: var(--warn); }
-.rap-vaga { margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); }
+.rio-dire-no .t-caption { color: var(--text-2); }
+.rio-dire-no .tasti { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-1); }
+.btn-q3 { background: var(--q3-soft); color: var(--q3); box-shadow: inset 0 0 0 1px var(--q3-mark); }
+.btn-q4 { background: var(--q4-soft); color: var(--q4); box-shadow: inset 0 0 0 1px var(--q4-mark); }
+[data-theme="dark"] .btn-q4 { color: var(--text-2); }
+.rio-vaga { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: start; gap: var(--sp-1) var(--sp-2); margin: var(--sp-3) 0 0; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--warn); }
+.rio-vaga .ti { font-size: 18px; margin-top: 1px; }
+.rio-vaga .btn { grid-column: 2; justify-self: start; }
+.rap-vaga { display: flex; align-items: flex-start; gap: var(--sp-1); margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--warn); }
+.rap-vaga .ti { font-size: 14px; margin-top: 1px; }
 .ca-vaga { color: var(--warn); }
 .rap-breve { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); }
-.rap-breve .chip { min-height: 32px; padding: 0 var(--sp-3); font-size: var(--fs-caption); }
+.rap-breve .chip { height: 36px; }
+.rap-breve .chip .ti { font-size: 16px; }
 .ca-falla { flex: none; }
-/* tempo per il futuro */
-.futuro { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--q2-soft); color: var(--q2); margin-bottom: var(--sp-3); }
-.futuro.basso { background: var(--warn-soft); color: var(--warn); }
-.futuro-testa { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--sp-2); color: var(--text); font-size: var(--fs-label); }
-.futuro-testa b { font-size: var(--fs-body); }
-.futuro-testa span { color: var(--text-2); }
-.futuro-bar { position: relative; height: 8px; border-radius: var(--r-full); background: var(--surface); overflow: hidden; }
-.futuro-bar > i { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-full); background: var(--q2-mark); }
-.futuro.basso .futuro-bar > i { background: var(--warn); }
-.futuro-obj { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--text-2); border-right: 2px solid var(--text-2); }
-.futuro-hint { margin: 0; font-size: var(--fs-label); font-weight: var(--fw-strong); }
-.futuro-come summary { cursor: pointer; font-size: var(--fs-caption); color: var(--text-2); min-height: 28px; display: flex; align-items: center; }
-.futuro-come p { margin: var(--sp-1) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
-.futuro-mete { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: var(--fs-label); color: var(--text); }
-.futuro-mete li { display: flex; justify-content: space-between; gap: var(--sp-2); }
-.futuro-mete li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.futuro-mete li span.ferma { color: var(--warn); font-weight: var(--fw-strong); white-space: normal; overflow: visible; }
-.bpw-futuro { display: grid; gap: var(--sp-2); min-width: 0; }
-.bpw-futuro > *, .futuro { min-width: 0; }
-.futuro-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 var(--sp-3); border: 1px solid var(--q2-mark); border-radius: var(--r-full); background: var(--q2-soft); color: var(--q2); font: inherit; font-size: var(--fs-caption); font-weight: var(--fw-strong); cursor: pointer; }
-.futuro-chip.basso { border-color: var(--warn); background: var(--warn-soft); color: var(--warn); }
-.futuro-riga { display: flex; justify-content: center; margin: calc(-1 * var(--sp-2)) 0 var(--sp-3); }
-.bt-stat .futuro-chip { margin-left: var(--sp-2); vertical-align: middle; }
-/* falla ora */
-.falla-ora { position: fixed; z-index: 85; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + 92px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-lg); background: var(--inverse-bg); color: var(--inverse-text); box-shadow: var(--shadow-3); }
+/* tempo per il futuro: barra 0–50% con la fascia 25–30 segnata; sotto / dentro / sopra */
+.futuro { display: grid; gap: var(--sp-2); min-width: 0; margin-bottom: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface-2); --f-col: var(--primary); --f-ink: var(--primary-ink); }
+.futuro[data-stato="basso"] { --f-col: var(--warn); --f-ink: var(--warn); }
+.futuro-testa { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.futuro-tit { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-label); line-height: var(--lh-label); font-weight: var(--fw-strong); color: var(--text); }
+.futuro-tit .ti { font-size: 18px; color: var(--f-ink); }
+.futuro-pct { font-size: var(--fs-title); line-height: var(--lh-title); color: var(--f-ink); }
+.futuro-bar { position: relative; height: 10px; margin: 6px 0 2px; border-radius: var(--r-full); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
+[data-theme="dark"] .futuro-bar { background: var(--bg); }
+.futuro-bar > i { position: absolute; inset: 0 auto 0 0; min-width: 4px; border-radius: var(--r-full); background: var(--f-col); transition: width var(--t-slow) var(--ease-out); }
+.futuro-banda { position: absolute; z-index: 1; top: -5px; bottom: -5px; border-left: 2px solid var(--text-2); border-right: 2px solid var(--text-2); border-radius: 2px; background: color-mix(in srgb, var(--primary) 14%, transparent); pointer-events: none; }
+.futuro-scala { position: relative; display: flex; justify-content: space-between; height: 16px; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.futuro-scala .obj { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; font-weight: var(--fw-strong); color: var(--text); }
+.futuro-stato { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: var(--sp-2); margin: 2px 0 0; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text); }
+.futuro-stato .ti { font-size: 18px; margin-top: 1px; color: var(--f-ink); }
+.futuro-stato b { color: var(--f-ink); }
+.futuro-come summary { display: inline-flex; align-items: center; gap: 4px; min-height: var(--tap); margin: -8px 0 -12px; cursor: pointer; list-style: none; font-size: var(--fs-caption); font-weight: var(--fw-strong); color: var(--text-2); }
+.futuro-come summary::-webkit-details-marker { display: none; }
+.futuro-come summary .ti { font-size: 14px; transition: transform var(--t-base) var(--ease-out); }
+.futuro-come[open] summary .ti { transform: rotate(90deg); }
+.futuro-come p { margin: var(--sp-2) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.futuro-mete { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text); }
+.futuro-mete li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); min-height: 36px; }
+.futuro-mete li + li { border-top: 1px solid var(--border); }
+.futuro-mete .fm-nome { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.futuro-mete .fm-nome > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.futuro-mete .fm-nome .ti { font-size: 16px; flex: none; color: var(--meta-ink); }
+.futuro-mete .fm-n { white-space: nowrap; font-size: var(--fs-caption); color: var(--text-2); }
+.futuro-mete .fm-n b { font-size: var(--fs-label); color: var(--text); }
+.futuro-mete .fm-n.zero { color: var(--text-3); }
+.futuro-mete li.ferma { grid-template-columns: 18px minmax(0, 1fr); align-items: start; padding: var(--sp-2) 0 0; color: var(--warn); }
+.futuro-mete li.ferma .ti { font-size: 16px; margin-top: 2px; }
+.bpw-futuro { display: grid; gap: var(--sp-3); min-width: 0; margin-bottom: var(--sp-3); }
+.bpw-futuro > * { min-width: 0; }
+.bpw-futuro > .futuro { margin-bottom: 0; }
+.bpw-mete { padding: var(--sp-3) var(--sp-4) var(--sp-2); border: 1px solid var(--border); border-radius: var(--r-md); }
+.bpw-mete .field-label { margin: 0 0 var(--sp-1); }
+/* la pillola in testa alla Settimana */
+.futuro-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 var(--sp-3) 0 10px; border: 1px solid var(--border-strong); border-radius: var(--r-full); background: var(--surface); color: var(--text); font: inherit; font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-strong); cursor: pointer; --f-col: var(--primary); --f-ink: var(--primary-ink); -webkit-tap-highlight-color: transparent; }
+.futuro-chip::after { content: ''; position: absolute; inset: -4px 0; }
+.futuro-chip[data-stato="basso"] { --f-col: var(--warn); --f-ink: var(--warn); }
+.futuro-chip .ti { font-size: 16px; color: var(--f-ink); }
+.futuro-chip b { font-size: var(--fs-label); color: var(--f-ink); }
+.fchip-bar { position: relative; width: 36px; height: 6px; border-radius: var(--r-full); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
+.fchip-bar > i { position: absolute; inset: 0 auto 0 0; min-width: 3px; border-radius: inherit; background: var(--f-col); }
+.fchip-bar > s { position: absolute; top: -3px; bottom: -3px; border-left: 1.5px solid var(--text-2); border-right: 1.5px solid var(--text-2); }
+@media (hover: hover) { .futuro-chip:hover { background: var(--surface-2); } }
+.futuro-riga { display: flex; justify-content: center; margin: calc(-1 * var(--sp-1)) 0 var(--sp-3); }
+.bt-stat .futuro-chip { margin-left: var(--sp-2); vertical-align: middle; height: 32px; }
+.futuro-principio { margin-top: var(--sp-3); }
+/* falla ora: una card calma con l'anello dei 5 minuti */
+.falla-ora { position: fixed; z-index: 85; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--nav-h) + 76px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--sp-3) var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-3); animation: fo-entra var(--t-base) var(--ease-out); }
+@keyframes fo-entra { from { opacity: 0; transform: translateY(8px); } }
 .falla-ora[hidden] { display: none; }
-.falla-ora .fo-testa { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
-.falla-ora .fo-testa span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.falla-ora .fo-tempo { font-family: var(--font-mono); font-size: var(--fs-title); color: var(--inverse-accent); }
-.falla-ora .fo-tasti { display: flex; gap: var(--sp-2); }
+.fo-anello { position: relative; width: 56px; height: 56px; }
+.fo-anello svg { display: block; width: 56px; height: 56px; transform: rotate(-90deg); }
+.fo-anello circle { fill: none; stroke-width: 4; }
+.fo-anello .tr { stroke: var(--surface-2); }
+.fo-anello .ar { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.falla-ora .fo-tempo { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: var(--fs-label); color: var(--text); }
+.fo-txt { min-width: 0; }
+.fo-et { display: flex; align-items: center; gap: 4px; font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-strong); color: var(--primary-ink); }
+.fo-et .ti { font-size: 14px; }
+.falla-ora.finito .fo-et { color: var(--warn); }
+.fo-tit { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: var(--fs-body); line-height: 22px; font-weight: var(--fw-strong); overflow-wrap: anywhere; }
+.falla-ora .fo-tasti { grid-column: 1 / -1; display: flex; gap: var(--sp-2); }
 .falla-ora .fo-tasti .btn { flex: 1; }
-.falla-ora .btn-secondary { background: transparent; color: var(--inverse-text); border-color: var(--inverse-text); }
 @media (min-width: 768px) { .falla-ora { left: auto; right: var(--sp-5); bottom: var(--sp-5); width: 360px; } }
 /* sera e deleghe */
-.sera-riga { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2); min-height: 52px; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); }
+.sera-riga { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2); min-height: 56px; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); }
 .sera-riga + .sera-riga { border-top: 1px solid var(--border); }
 .sera-riga small { display: block; color: var(--text-2); font-size: var(--fs-caption); }
+.sera-riga .btn-ghost:disabled { color: var(--primary-ink); opacity: 1; }
 .sera-domani { margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--text-2); }
+.delega-avviso > .ti, .persona-avviso > .ti { color: var(--q3); }
+.delega-avviso .da-dom, .persona-avviso .da-dom { display: block; margin: -4px 0 var(--sp-1); font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text); }
 .delega-avviso .banner-azioni { flex-wrap: wrap; }
-.persona-avviso { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-label); }
+.delega-avviso .banner-azioni .btn, .persona-avviso .banner-azioni .btn { flex: 1 1 auto; }
+.banner-leggero.delega-avviso .btn-icon { color: var(--text-2); }
+.persona-avviso { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: start; gap: var(--sp-3); padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-label); }
+.persona-avviso > .ti { margin-top: 2px; }
+.persona-avviso b { display: block; margin: 2px 0 var(--sp-2); color: var(--text); }
+.persona-avviso .btn-icon { margin-top: -6px; }
 .persona-avviso .banner-azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.persona-avviso .btn-secondary { background: var(--surface); box-shadow: var(--shadow-1); }
 .spinta { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface-2); }
 .spinta > b { color: var(--text); }
-.spinta .input { min-height: var(--tap); }
-.spinta-passate { margin: 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.spinta .input { min-height: var(--tap); background: var(--surface); }
+.spinta-passate { display: grid; gap: 2px; margin: var(--sp-1) 0 0; padding: var(--sp-2) 0 0; border-top: 1px solid var(--border); list-style: none; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.spinta-passate b { color: var(--text); }
+.spinta-passate .mono { color: var(--text); }
 .spec-riga { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); }
 .spec-riga + .spec-riga { border-top: 1px solid var(--border); }
 .spec-riga .tasti { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.spec-riga .tasti .btn-ghost { margin-left: auto; }
 </style>
 </head>
 <body>
@@ -13831,44 +13916,62 @@ function metaFerma(m, extra) {
   const u = ultimaAttivitaMeta(m, extra);
   return !u || u < limite;
 }
-function rigaMeta(m, i) {
+ui.meteRiordina = false;
+const ICO_META = 'ti-flag';
+function infoMeta(m) {
   const n = cicliDiMeta(m).filter(c => !c.done).length, fatte = cicliDiMeta(m).filter(c => c.done).length;
-  const info = [m.area ? escHtml(m.area) : '', m.entro ? `entro il ${fmtGgMm(m.entro)}/${String(m.entro).slice(0, 4)}` : '', state.metaColOk ? plurale(n, 'cosa aperta', 'cose aperte') + (fatte ? ` · ${fatte} fatte` : '') : '',
-    metaFerma(m) ? '<span class="ferma">da 4 settimane niente in programma</span>' : ''].filter(Boolean);
-  if (ui.metaEdit === m.id) return `<div class="meta-riga" data-meta="${esc(m.id)}"><span class="meta-n mono">${i + 1}</span>${formMeta(m)}<span></span></div>`;
-  const tot = meteTutte().length;
-  return `<div class="meta-riga${m.raggiunta ? ' raggiunta' : ''}" data-meta="${esc(m.id)}"><span class="meta-n mono">${m.raggiunta ? '<i class="ti ti-check"></i>' : i + 1}</span>
-    <div><span class="meta-testo">${escHtml(m.testo)}</span>${info.length ? `<span class="meta-info">${info.join('<span class="sep">·</span>')}</span>` : ''}</div>
-    <div class="meta-tasti">
-      <button type="button" class="btn btn-icon" data-act="meta-su" data-id="${esc(m.id)}" aria-label="Sposta su"${i === 0 ? ' disabled' : ''}><i class="ti ti-arrow-up"></i></button>
-      <button type="button" class="btn btn-icon" data-act="meta-giu" data-id="${esc(m.id)}" aria-label="Sposta giù"${i === tot - 1 ? ' disabled' : ''}><i class="ti ti-arrow-down"></i></button>
-      <button type="button" class="btn btn-icon" data-act="meta-raggiunta" data-id="${esc(m.id)}" aria-pressed="${!!m.raggiunta}" aria-label="${m.raggiunta ? 'Non ancora raggiunta' : 'Raggiunta'}" data-tip="${m.raggiunta ? 'Non ancora raggiunta' : 'Raggiunta'}"><i class="ti ti-flag-check"></i></button>
-      <button type="button" class="btn btn-icon" data-act="meta-modifica" data-id="${esc(m.id)}" aria-label="Modifica"><i class="ti ti-pencil"></i></button>
-    </div></div>`;
+  const entro = m.entro ? `entro il ${fmtGgMm(m.entro)}/${String(m.entro).slice(0, 4)}` : '';
+  const cose = state.metaColOk && !m.raggiunta ? (n || fatte ? plurale(n, 'cosa aperta', 'cose aperte') + (fatte ? `, ${fatte} fatte` : '') : 'nessuna cosa collegata') : '';
+  const ferma = metaFerma(m) ? '<span class="ferma"><i class="ti ti-zzz" aria-hidden="true"></i>da 4 settimane niente in programma</span>' : '';
+  return [m.area ? escHtml(m.area) : '', entro, cose, ferma].filter(Boolean);
+}
+function rigaMeta(m, i, gruppo) {
+  const pos = gruppo.indexOf(m), info = infoMeta(m);
+  const num = m.raggiunta ? '<i class="ti ti-check" aria-hidden="true"></i><span class="sr-only">Raggiunta</span>' : i + 1;
+  if (ui.metaEdit === m.id) return `<div class="meta-riga in-modifica" data-meta="${esc(m.id)}"><span class="meta-n mono">${num}</span>${formMeta(m)}</div>`;
+  const tasti = ui.meteRiordina && !m.raggiunta ? `<div class="meta-tasti">
+      <button type="button" class="btn btn-icon" data-act="meta-su" data-id="${esc(m.id)}" aria-label="Sposta su: ${esc(m.testo)}"${pos === 0 ? ' disabled' : ''}><i class="ti ti-arrow-up"></i></button>
+      <button type="button" class="btn btn-icon" data-act="meta-giu" data-id="${esc(m.id)}" aria-label="Sposta giù: ${esc(m.testo)}"${pos === gruppo.length - 1 ? ' disabled' : ''}><i class="ti ti-arrow-down"></i></button></div>` : '<span></span>';
+  return `<div class="meta-riga${m.raggiunta ? ' raggiunta' : ''}" data-meta="${esc(m.id)}"><span class="meta-n mono">${num}</span>
+    <button type="button" class="meta-corpo" data-act="meta-modifica" data-id="${esc(m.id)}" aria-label="Modifica la meta: ${esc(m.testo)}"><span class="meta-testo">${escHtml(m.testo)}</span>${info.length ? `<span class="meta-info">${info.join('<span class="sep" aria-hidden="true">·</span>')}</span>` : ''}</button>
+    ${tasti}</div>`;
 }
 function formMeta(m) {
   const v = m || {}, aree = nomiAree();
-  return `<div class="meta-form${m ? '' : ' meta-nuova'}" style="padding:0">
+  return `<div class="meta-form${m ? '' : ' meta-nuova'}"${m ? ' style="padding:0"' : ''}>
     <input type="text" class="input" id="${m ? 'meta-testo-mod' : 'meta-testo'}" maxlength="160" value="${esc(v.testo || '')}" placeholder="Fra 5 anni voglio… (es. SSI con 2.000 clienti)" aria-label="La meta">
     <div class="meta-form-riga">
       ${aree.length ? `<select class="input" id="${m ? 'meta-area-mod' : 'meta-area'}" aria-label="Area"><option value="">Area (facoltativa)</option>${aree.map(a => `<option${a === v.area ? ' selected' : ''}>${escHtml(a)}</option>`).join('')}</select>` : ''}
       <input type="date" class="input" id="${m ? 'meta-entro-mod' : 'meta-entro'}" value="${v.entro || ''}" aria-label="Entro (facoltativo)" title="Entro (facoltativo)">
       ${m ? `<button type="button" class="btn btn-primary btn-sm" data-act="meta-salva" data-id="${esc(m.id)}">Salva</button>` : '<button type="button" class="btn btn-primary btn-sm" data-act="meta-aggiungi"><i class="ti ti-plus"></i>Aggiungi</button>'}
     </div>
-    ${m ? `<div class="tools-row"><button type="button" class="btn btn-ghost btn-sm" data-act="meta-annulla">Annulla</button><button type="button" class="btn btn-ghost btn-danger btn-sm" data-act="meta-togli" data-id="${esc(m.id)}">Togli la meta</button></div>` : ''}
+    ${m ? `<div class="tools-row"><button type="button" class="btn btn-ghost btn-sm" data-act="meta-annulla">Annulla</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="meta-raggiunta" data-id="${esc(m.id)}" aria-pressed="${!!m.raggiunta}"><i class="ti ${m.raggiunta ? 'ti-arrow-back-up' : 'ti-flag-check'}"></i>${m.raggiunta ? 'Non ancora raggiunta' : 'Raggiunta'}</button>
+      <button type="button" class="btn btn-ghost btn-danger btn-sm" data-act="meta-togli" data-id="${esc(m.id)}">Togli la meta</button></div>` : ''}
   </div>`;
 }
+function anelloMete(n) {
+  const obj = n > PRINC.METE_MIN ? PRINC.METE_MAX : PRINC.METE_MIN, r = 27, giro = 2 * Math.PI * r, pieno = Math.min(1, n / obj);
+  return `<div class="mete-anello" role="img" aria-label="${n} mete scritte su ${obj}"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="tr" cx="32" cy="32" r="${r}"/><circle class="ar" cx="32" cy="32" r="${r}" stroke-dasharray="${giro.toFixed(1)}" stroke-dashoffset="${(giro * (1 - pieno)).toFixed(1)}"${n ? '' : ' style="display:none"'}/></svg>
+    <span aria-hidden="true"><b class="mono">${n}</b><small>di ${obj}</small></span></div>`;
+}
 function vistaMete() {
-  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Le mie mete</h1></div></div>
-    <p class="t-label muted mete-intro">Che cosa stai costruendo? Scrivi 7–10 mete da qui a 5 anni: ti aiutano a scegliere cosa conta e a dire di no al resto.</p>`;
+  const l0 = Array.isArray(state.mete) ? meteTutte() : [];
+  const aperteL = l0.filter(m => !m.raggiunta), fatteL = l0.filter(m => m.raggiunta);
+  const riordina = aperteL.length > 1 && state.meteOk ? `<button type="button" class="btn ${ui.meteRiordina ? 'btn-primary' : 'btn-secondary'} btn-sm" data-act="mete-riordina" aria-pressed="${ui.meteRiordina}"><i class="ti ${ui.meteRiordina ? 'ti-check' : 'ti-arrows-sort'}"></i>${ui.meteRiordina ? 'Fine' : 'Riordina'}</button>` : '';
+  let h = `${indietro('altro', 'Altro')}<div class="vh mete-testa"><div><h1>Le mie mete</h1></div>${riordina}</div>
+    <p class="t-label muted mete-intro">Cosa stai costruendo da qui a 5 anni? Scrivi 7–10 mete: ti aiutano a scegliere cosa conta e a dire di no al resto.</p>`;
   if (state.meteOk === false) return h + vuoto('ti-database-off', 'Le mete non sono disponibili', 'Manca la tabella delle mete nel database: le altre funzioni vanno lo stesso.');
   if (!Array.isArray(state.mete)) return h + '<div class="skel"></div>';
-  const l = meteTutte(), n = l.length;
-  h += `<div class="mete-conto"><span><b class="mono">${n}</b> ${n === 1 ? 'meta' : 'mete'}${n < PRINC.METE_MIN ? ` · ne mancano ${PRINC.METE_MIN - n} per arrivare a 7` : n > PRINC.METE_MAX ? ' · sono tante: tieni le 10 che contano di più' : ''}</span>
-    <div class="bar" aria-hidden="true"><i style="width:${Math.min(100, Math.round(n / PRINC.METE_MIN * 100))}%"></i></div></div>`;
-  if (n) h += `<div class="group">${l.map(rigaMeta).join('')}</div>`;
-  h += `<p class="list-head"><span>${n ? 'Un\'altra meta' : 'La prima meta'}</span></p><div class="group">${formMeta(null).replace('style="padding:0"', '')}</div>`;
-  if (n && state.metaColOk) h += `<p class="t-caption muted" style="margin-top:var(--sp-3)">Collega le cose alle mete dal dettaglio («Serve a quale meta?») o in Riordina: quelle collegate hanno il segno <i class="ti ti-target-arrow"></i>.</p>`;
+  const n = l0.length;
+  const titolo = n < PRINC.METE_MIN ? (n ? `Ne mancano ${PRINC.METE_MIN - n} per arrivare a 7` : 'Comincia dalla prima') : n > PRINC.METE_MAX ? 'Sono tante: tieni le 10 che contano di più' : 'Hai le tue mete';
+  const collegate = state.metaColOk ? state.cicli.filter(c => c.meta_id && !c.done && metaPerId(c.meta_id)).length : 0;
+  const sotto = [plurale(n, 'meta scritta', 'mete scritte'), fatteL.length ? plurale(fatteL.length, 'raggiunta', 'raggiunte') : '', state.metaColOk && n ? plurale(collegate, 'cosa collegata', 'cose collegate') : ''].filter(Boolean).join(' · ');
+  h += `<section class="mete-sommario" aria-label="Quante mete">${anelloMete(n)}<div class="mete-sommario-txt"><b>${titolo}</b><span>${sotto}</span></div></section>`;
+  if (aperteL.length) h += `<p class="list-head"><span>In corso</span><span class="mono">${aperteL.length}</span></p><div class="group">${aperteL.map((m, i) => rigaMeta(m, i, aperteL)).join('')}</div>`;
+  if (fatteL.length) h += `<p class="list-head"><span>Raggiunte</span><span class="mono">${fatteL.length}</span></p><div class="group">${fatteL.map((m, i) => rigaMeta(m, i, fatteL)).join('')}</div>`;
+  h += `<p class="list-head"><span>${n ? 'Un\'altra meta' : 'La prima meta'}</span></p><div class="group">${formMeta(null)}</div>`;
+  if (n && state.metaColOk) h += `<p class="t-caption muted mete-nota"><i class="ti ${ICO_META}" aria-hidden="true"></i><span>Tocca una meta per modificarla o segnarla raggiunta. Collega le cose alle mete dal dettaglio («Serve a quale meta?») o in Riordina.</span></p>`;
   return h;
 }
 async function aggiungiMeta() {
@@ -13910,8 +14013,11 @@ async function patchMeta(id, patch) {
   state.mete = ordinaMete(meteTutte().map(m => String(m.id) === String(id) ? { ...m, ...conData } : m));
 }
 async function spostaMeta(id, dir) {
-  const l = meteTutte().slice(), i = l.findIndex(m => String(m.id) === String(id)), j = i + dir;
-  if (i < 0 || j < 0 || j >= l.length) return;
+  const l = meteTutte().slice(), i = l.findIndex(m => String(m.id) === String(id));
+  if (i < 0) return;
+  let j = i + dir;
+  while (j >= 0 && j < l.length && !!l[j].raggiunta !== !!l[i].raggiunta) j += dir;
+  if (j < 0 || j >= l.length) return;
   [l[i], l[j]] = [l[j], l[i]];
   const cambiate = l.map((m, k) => ({ m, k })).filter(({ m, k }) => (m.ordine ?? -1) !== k);
   state.mete = l.map((m, k) => ({ ...m, ordine: k }));
@@ -13937,13 +14043,14 @@ function togliMeta(id) {
 }
 Object.assign(AZIONI, {
   'meta-aggiungi': () => aggiungiMeta(),
-  'meta-modifica': el => { ui.metaEdit = el.dataset.id; render(); setTimeout(() => { const t = $('meta-testo-mod'); if (t) t.focus(); }, 50); },
+  'meta-modifica': el => { ui.metaEdit = el.dataset.id; ui.meteRiordina = false; render(); setTimeout(() => { const t = $('meta-testo-mod'); if (t) t.focus(); }, 50); },
   'meta-annulla': () => { ui.metaEdit = null; render(); },
   'meta-salva': el => salvaMeta(el.dataset.id).catch(() => {}),
   'meta-togli': el => togliMeta(el.dataset.id),
   'meta-su': el => spostaMeta(el.dataset.id, -1),
   'meta-giu': el => spostaMeta(el.dataset.id, 1),
-  'meta-raggiunta': async el => { const m = metaPerId(el.dataset.id); if (!m) return; try { await patchMeta(m.id, { raggiunta: !m.raggiunta }); render(); showToast(m.raggiunta ? 'Di nuovo in corso' : 'Meta raggiunta: bel lavoro', 'success'); } catch (_) {} },
+  'meta-raggiunta': async el => { const m = metaPerId(el.dataset.id); if (!m) return; try { await patchMeta(m.id, { raggiunta: !m.raggiunta }); ui.metaEdit = null; render(); showToast(m.raggiunta ? 'Di nuovo in corso' : 'Meta raggiunta: bel lavoro', 'success'); } catch (_) {} },
+  'mete-riordina': () => { ui.meteRiordina = !ui.meteRiordina; ui.metaEdit = null; render(); },
   'mete-apri': () => vai('altro', { sub: 'mete' }),
   'mete-card-chiudi': () => { const c = bpSettimanaCorrente(); lsScrivi(PRINC.LS.METE_CARD, settKey(c.week, c.year)); render(); }
 });
@@ -13958,15 +14065,15 @@ function cardMete() {
   if (!state.meteOk || !Array.isArray(state.mete) || state.mete.length || modoSemplice()) return '';
   const c = bpSettimanaCorrente();
   if (lsLeggi(PRINC.LS.METE_CARD) === settKey(c.week, c.year)) return '';
-  return `<section class="banner-piano banner-leggero" aria-label="Le tue mete"><i class="ti ti-target-arrow"></i>
-    <div><b>Non hai ancora scritto le tue mete</b><p class="t-caption muted">Che cosa stai costruendo da qui a 5 anni? Con le mete scritte è più facile dire di no a quello che non serve.</p>
+  return `<section class="banner-piano banner-leggero" aria-label="Le tue mete"><i class="ti ti-flag"></i>
+    <div><b>Non hai ancora scritto le tue mete</b><p class="t-caption muted">Cosa stai costruendo da qui a 5 anni? Con le mete scritte è più facile dire di no a quello che non serve.</p>
       <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="mete-apri">Scrivile</button></div></div>
     <button type="button" class="btn btn-icon" data-act="mete-card-chiudi" aria-label="Non ora" data-tip="Non questa settimana"><i class="ti ti-x"></i></button></section>`;
 }
 
 // ─── Nel dettaglio: «Serve a quale meta?» (si salva subito) ───
-$('det-passi').insertAdjacentHTML('afterend', `<div id="det-meta" class="det-meta" hidden>
-  <label class="field-label" for="f-meta">Serve a quale meta?</label>
+$('det-passi').insertAdjacentHTML('afterend', `<div id="det-meta" class="det-box det-meta" hidden>
+  <label class="field-label" for="f-meta"><i class="ti ti-flag" aria-hidden="true"></i>Serve a quale meta?</label>
   <select class="input" id="f-meta" aria-label="Serve a quale meta?"></select></div>`);
 function disegnaDetMeta(c) {
   const box = $('det-meta');
@@ -14002,7 +14109,7 @@ riga = function (r, opz) {
   const h = _rigaPr(r, opz);
   const m = r && r.c && metaDi(r.c);
   if (!m) return h;
-  const tag = `<span class="meta-tag" data-tip="Serve a: ${esc(m.testo)}"><i class="ti ti-target-arrow" aria-hidden="true"></i>${escHtml(corta(m.testo, 22))}</span>`;
+  const tag = `<span class="meta-tag" data-tip="Serve a: ${esc(m.testo)}"><i class="ti ti-flag" aria-hidden="true"></i><span><span class="sr-only">Meta: </span>${escHtml(corta(m.testo, 28))}</span></span>`;
   return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + dentro + (dentro.trim() ? '<span class="sep">·</span>' : '') + tag + b);
 };
 
@@ -14015,19 +14122,19 @@ disegnaRiordina = function () {
   const c = ciclo(r.ids[r.i]), corpo = $('rio-corpo');
   if (!c || !corpo) return;
   const m = metaDi(c), meta = corpo.querySelector('.rio-meta');
-  if (m && meta) meta.insertAdjacentHTML('beforeend', `<span class="meta-tag"><i class="ti ti-target-arrow" aria-hidden="true"></i>${escHtml(corta(m.testo, 28))}</span>`);
+  if (m && meta) meta.insertAdjacentHTML('beforeend', `<span class="meta-tag"><i class="ti ti-flag" aria-hidden="true"></i><span>${escHtml(corta(m.testo, 28))}</span></span>`);
   const cosa = corpo.querySelector('.rio-cosa');
-  if (cosa && troppoGenerica(c)) cosa.insertAdjacentHTML('afterend', `<p class="rio-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span><button type="button" class="btn btn-secondary btn-sm" data-act="rio-spacchetta"><i class="ti ti-list-tree"></i>Spacchettala</button></p>`);
+  if (cosa && troppoGenerica(c)) cosa.insertAdjacentHTML('afterend', `<div class="rio-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span><button type="button" class="btn btn-secondary btn-sm" data-act="rio-spacchetta"><i class="ti ti-list-tree"></i>Spacchettala</button></div>`);
   if (r.scelta !== 'importante' || !state.metaColOk || !meteAperte().length) return;
   const date = corpo.querySelector('.rio-date');
   if (!date) return;
   const scelta = r.metaScelta && r.metaScelta.id === c.id ? r.metaScelta.v : (c.meta_id ? String(c.meta_id) : null);
   const chip = (v, l) => `<button type="button" class="chip" data-act="rio-meta" data-v="${esc(v)}" aria-pressed="${scelta === v}">${l}</button>`;
   const domanda = `<div class="rio-mete" role="group" aria-label="Ti avvicina a una meta?"><b>Ti avvicina a una meta?</b>
-    <div class="chips chips-wrap">${meteAperte().map(x => chip(String(x.id), `<i class="ti ti-target-arrow"></i>${escHtml(corta(x.testo, 30))}`)).join('')}${chip('nessuna', 'Nessuna')}</div>
+    <div class="chips chips-wrap">${meteAperte().map(x => chip(String(x.id), `<i class="ti ti-flag" aria-hidden="true"></i>${escHtml(corta(x.testo, 34))}`)).join('')}${chip('nessuna', 'Nessuna')}</div>
     ${scelta === 'nessuna' ? `<div class="rio-dire-no"><b>Allora è una Delega o Lascia stare?</b><span class="t-caption">Se non ti avvicina a niente di quello che stai costruendo, puoi dire di no.</span>
-      <div class="tasti"><button type="button" class="btn btn-secondary btn-sm" data-act="rio-tipo" data-v="delega"><i class="ti ti-user-share"></i>Delega</button>
-        <button type="button" class="btn btn-secondary btn-sm" data-act="rio-tipo" data-v="lascia"><i class="ti ti-wind"></i>Lascia stare</button>
+      <div class="tasti"><button type="button" class="btn btn-q3 btn-sm" data-act="rio-tipo" data-v="delega"><i class="ti ti-user-share"></i>Delega</button>
+        <button type="button" class="btn btn-q4 btn-sm" data-act="rio-tipo" data-v="lascia"><i class="ti ti-wind"></i>Lascia stare</button>
         <button type="button" class="btn btn-ghost btn-sm" data-act="rio-meta" data-v="comunque">È Importante lo stesso</button></div></div>` : ''}</div>`;
   date.insertAdjacentHTML('beforebegin', domanda);
   if (scelta === 'nessuna') date.hidden = true;
@@ -14113,15 +14220,21 @@ function testoCome(q) {
     + (q.pianificato > q.disponibile ? `Hai pianificato di più (${fmtT(q.pianificato)} tra cose, cuscinetti e appuntamenti): uso questo. ` : `Tra cose, cuscinetti e appuntamenti hai pianificato ${fmtT(q.pianificato)}. `)
     + `Obiettivo: il 25–30% per il futuro.`;
 }
+const statoFuturo = pct => pct < PRINC.FUTURO_MIN ? 'basso' : pct <= PRINC.FUTURO_MAX ? 'ok' : 'alto';
+const FUTURO_SCALA = 50;   // la barra va da 0 al 50%: la fascia 25–30 sta a metà e si vede bene
 function htmlFuturo(q, chiave) {
-  const basso = q.pct < PRINC.FUTURO_MIN;
+  const st = statoFuturo(q.pct), sc = FUTURO_SCALA;
   const aperto = ui.futuroCome && ui.futuroCome[chiave] ? ' open' : '';
-  const scala = 50;   // la barra va da 0 al 50%: si vede bene la zona 25–30
-  return `<div class="futuro${basso ? ' basso' : ''}" data-futuro="${chiave}">
-    <div class="futuro-testa"><b>Tempo per il futuro: <span class="mono">${q.pct}%</span></b><span>(obiettivo 25–30%)</span></div>
-    <div class="futuro-bar" role="img" aria-label="${q.pct}% del tempo di lavoro sulle Importanti, obiettivo 25–30%"><i style="width:${Math.min(100, q.pct / scala * 100)}%"></i><span class="futuro-obj" style="left:${PRINC.FUTURO_MIN / scala * 100}%;width:${(PRINC.FUTURO_MAX - PRINC.FUTURO_MIN) / scala * 100}%"></span></div>
-    ${basso ? `<p class="futuro-hint">Blocca almeno ${oreTesto(q.manca)} per le Importanti, come appuntamenti veri.</p>` : q.pct > 45 ? '<p class="futuro-hint">Tanto futuro: controlla che le urgenze vere abbiano ancora spazio (i cuscinetti).</p>' : ''}
-    <details class="futuro-come" data-k="${chiave}"${aperto}><summary>Come lo calcolo</summary><p>${testoCome(q)}</p></details></div>`;
+  const banda = `left:${PRINC.FUTURO_MIN / sc * 100}%;width:${(PRINC.FUTURO_MAX - PRINC.FUTURO_MIN) / sc * 100}%`;
+  const stato = st === 'basso' ? ['ti-alert-circle', 'Sotto l\'obiettivo.', `Blocca almeno ${oreTesto(q.manca)} per le Importanti, come appuntamenti veri.`]
+    : st === 'ok' ? ['ti-circle-check', 'Nell\'obiettivo.', 'Tieni le Importanti bloccate in agenda come appuntamenti veri.']
+    : ['ti-circle-check', 'Sopra l\'obiettivo.', q.pct > 45 ? 'Tanto futuro: controlla che le urgenze vere abbiano ancora spazio (i cuscinetti).' : 'Il futuro ha il suo spazio.'];
+  return `<div class="futuro" data-stato="${st}" data-futuro="${chiave}">
+    <div class="futuro-testa"><span class="futuro-tit"><i class="ti ti-seeding" aria-hidden="true"></i>Tempo per il futuro</span><span class="futuro-pct mono">${q.pct}%</span></div>
+    <div class="futuro-bar" role="img" aria-label="${q.pct}% del tempo di lavoro sulle Importanti, obiettivo 25–30%"><i style="width:${Math.min(100, q.pct / sc * 100)}%"></i><span class="futuro-banda" style="${banda}"></span></div>
+    <div class="futuro-scala" aria-hidden="true"><span class="mono">0</span><span class="obj" style="left:${(PRINC.FUTURO_MIN + PRINC.FUTURO_MAX) / 2 / sc * 100}%">obiettivo 25–30%</span><span class="mono">50%</span></div>
+    <p class="futuro-stato"><i class="ti ${stato[0]}" aria-hidden="true"></i><span><b>${stato[1]}</b> ${stato[2]}</span></p>
+    <details class="futuro-come" data-k="${chiave}"${aperto}><summary><i class="ti ti-chevron-right" aria-hidden="true"></i>Come lo calcolo</summary><p>${testoCome(q)}</p></details></div>`;
 }
 ui.futuroCome = {};
 document.addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details.futuro-come')) ui.futuroCome[d.dataset.k] = d.open; }, true);
@@ -14134,10 +14247,10 @@ function htmlMetePiano(perMeta, extraDi) {
   const voci = l.map(m => {
     const n = perMeta.get(String(m.id)) || 0;
     if (!n && metaFerma(m, extraDi ? extraDi(m) : null)) ferme.push(m);
-    return `<li><span><i class="ti ti-target-arrow" aria-hidden="true"></i> ${escHtml(corta(m.testo, 40))}</span><span class="mono">${n ? plurale(n, 'Importante', 'Importanti') : '—'}</span></li>`;
+    return `<li><span class="fm-nome"><i class="ti ti-flag" aria-hidden="true"></i><span>${escHtml(m.testo)}</span></span><span class="fm-n${n ? '' : ' zero'}">${n ? `<b class="mono">${n}</b> ${n === 1 ? 'Importante' : 'Importanti'}` : 'nessuna'}</span></li>`;
   }).join('');
-  const avviso = ferme.length ? `<li><span class="ferma">Da 4 settimane niente per ${ferme.length === 1 ? 'questa meta' : 'queste mete'}: ${ferme.map(m => '«' + escHtml(corta(m.testo, 30)) + '»').join(', ')}. Scegli un'Importante che ti avvicina.</span></li>` : '';
-  return `<div><span class="field-label" style="margin-top:0">Le tue mete in questo piano</span><ul class="futuro-mete">${voci}${avviso}</ul></div>`;
+  const avviso = ferme.length ? `<li class="ferma"><i class="ti ti-zzz" aria-hidden="true"></i><span>Da 4 settimane niente per ${ferme.length === 1 ? 'questa meta' : 'queste mete'}: ${ferme.map(m => '«' + escHtml(corta(m.testo, 30)) + '»').join(', ')}. Scegli un'Importante che ti avvicina.</span></li>` : '';
+  return `<div class="bpw-mete"><span class="field-label">Le tue mete in questo piano</span><ul class="futuro-mete">${voci}${avviso}</ul></div>`;
 }
 function disegnaFuturoWizard() {
   const corpo = $('bpw-step2');
@@ -14155,7 +14268,8 @@ bpwRenderStep2 = function () { const r = _bpwRenderStep2Pr.apply(this, arguments
 function chipFuturo() {
   const q = quotaSettimana();
   if (!q.n) return '';
-  return `<button type="button" class="futuro-chip${q.pct < PRINC.FUTURO_MIN ? ' basso' : ''}" data-act="futuro-come" data-tip="Tempo per il futuro: ${q.pct}% (obiettivo 25–30%)" aria-label="Tempo per il futuro: ${q.pct}%, obiettivo 25–30%. Come lo calcolo"><i class="ti ti-target-arrow" aria-hidden="true"></i>Futuro ${q.pct}%</button>`;
+  const sc = FUTURO_SCALA;
+  return `<button type="button" class="futuro-chip" data-stato="${statoFuturo(q.pct)}" data-act="futuro-come" data-tip="Tempo per il futuro: ${q.pct}% (obiettivo 25–30%)" aria-label="Tempo per il futuro: ${q.pct}%, obiettivo 25–30%. Come lo calcolo"><i class="ti ti-seeding" aria-hidden="true"></i>Futuro <b class="mono">${q.pct}%</b><span class="fchip-bar" aria-hidden="true"><i style="width:${Math.min(100, q.pct / sc * 100)}%"></i><s style="left:${PRINC.FUTURO_MIN / sc * 100}%;width:${(PRINC.FUTURO_MAX - PRINC.FUTURO_MIN) / sc * 100}%"></s></span></button>`;
 }
 const _navSettimanaPr = navSettimana;
 navSettimana = function () { const c = chipFuturo(); return _navSettimanaPr.apply(this, arguments) + (c ? `<div class="futuro-riga">${c}</div>` : ''); };
@@ -14172,7 +14286,7 @@ document.body.insertAdjacentHTML('beforeend', `
 AZIONI['futuro-come'] = () => {
   const q = quotaSettimana();
   ui.futuroCome = { ...ui.futuroCome, foglio: true };
-  $('futuro-corpo').innerHTML = htmlFuturo(q, 'foglio') + `<p class="t-caption muted">Principio 1: il tempo per il futuro va messo in agenda per primo. Le Importanti non urgenti, se non le blocchi, le mangiano le urgenze.</p>`;
+  $('futuro-corpo').innerHTML = htmlFuturo(q, 'foglio') + `<p class="t-caption muted futuro-principio">Principio 1: il tempo per il futuro va messo in agenda per primo. Le Importanti non urgenti, se non le blocchi, le mangiano le urgenze.</p>`;
   $('futuroOverlay').classList.add('open');
 };
 
@@ -14231,7 +14345,7 @@ function daRendereSpecifiche() {
 function vistaSpecifiche() {
   const l = daRendereSpecifiche();
   let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Da rendere specifiche</h1></div></div>
-    <p class="t-label muted mete-intro">Cose scritte in una o due parole: così non si capisce cosa fare. Scrivi cosa devi fare, con chi, quanto (principio 2), oppure spacchettala in passi.</p>`;
+    <p class="t-label muted mete-intro">Scritte in una o due parole non dicono cosa fare. Aggiungi cosa, con chi e quanto, oppure spacchettale in passi.</p>`;
   if (!l.length) return h + vuoto('ti-checks', 'Sono tutte chiare', `In ${etichettaCtx()} ogni cosa aperta dice cosa fare.`);
   return h + `<div class="group">${l.map(c => `<div class="spec-riga" data-id="${c.id}"><button type="button" class="item-main" data-act="apri" data-id="${c.id}" style="padding:0"><span class="item-title">${escHtml(c.title)}</span><span class="item-meta">${tagTipo(computeEffectiveQ(c))}<span class="sep">·</span><span>dal ${fmtGgMm(giornoIso(c.created_at))}</span></span></button>
     <div class="tasti"><button type="button" class="btn btn-secondary btn-sm" data-act="q-scomponi" data-id="${c.id}"><i class="ti ti-list-tree"></i>Spacchettala</button>
@@ -14273,9 +14387,9 @@ disegnaAnteprima = function () {
     const sintesi = el.querySelector('.rap-sintesi');
     if (!sintesi) return;
     let extra = '';
-    if (v.vaga) extra += `<p class="rap-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i>Troppo generica: cosa devi fare, con chi, quanto?</p>`;
+    if (v.vaga) extra += `<p class="rap-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span></p>`;
     if (v.q !== 3) extra += `<div class="rap-breve"><button type="button" class="chip" data-act="rap-cinque" data-i="${i}" aria-pressed="${!!v.cinque}"><i class="ti ti-clock-bolt"></i>5 min</button>
-      ${v.breve ? `<button type="button" class="btn btn-primary btn-sm" data-act="rap-fallaora" data-i="${i}"><i class="ti ti-player-play"></i>Falla ora</button><span class="t-caption muted">Ci vogliono pochi minuti? Falla adesso.</span>` : ''}</div>`;
+      ${v.breve ? `<button type="button" class="btn btn-secondary btn-sm" data-act="rap-fallaora" data-i="${i}"><i class="ti ti-player-play"></i>Falla ora</button><span class="t-caption muted">Ci vogliono pochi minuti? Falla adesso.</span>` : ''}</div>`;
     sintesi.insertAdjacentHTML('afterend', extra);
   });
 };
@@ -14289,7 +14403,7 @@ disegnaAnteprimaCattura = function () {
   spans.forEach((el, i) => { if (voci[i] && voci[i].vaga) el.insertAdjacentHTML('beforeend', ' <span class="ca-vaga">· troppo generica: cosa, con chi, quanto?</span>'); });
   if (voci.length === 1 && voci[0].breve) {
     const mod = box.querySelector('[data-act="cattura-modifica"]');
-    const b = '<button type="button" class="btn btn-primary btn-sm ca-falla" data-act="ca-fallaora"><i class="ti ti-player-play"></i>Falla ora</button>';
+    const b = '<button type="button" class="btn btn-secondary btn-sm ca-falla" data-act="ca-fallaora"><i class="ti ti-player-play"></i>Falla ora</button>';
     if (mod) mod.insertAdjacentHTML('beforebegin', b); else box.insertAdjacentHTML('beforeend', b);
   }
 };
@@ -14346,7 +14460,7 @@ function offriFallaOraDopo(voci, idsPrima) {
 }
 
 // ─── Il timer di 5 minuti ───
-document.body.insertAdjacentHTML('beforeend', `<div class="falla-ora" id="fallaOra" role="status" aria-live="polite" hidden></div>`);
+document.body.insertAdjacentHTML('beforeend', `<div class="falla-ora" id="fallaOra" role="region" aria-label="Falla ora" hidden></div>`);
 ui.fallaOra = null;
 let _fallaTimer = null;
 function avviaFallaOra(o) {
@@ -14356,17 +14470,27 @@ function avviaFallaOra(o) {
   clearInterval(_fallaTimer);
   _fallaTimer = setInterval(disegnaFallaOra, 1000);
 }
+const FO_R = 25, FO_GIRO = 2 * Math.PI * FO_R;
 function disegnaFallaOra() {
   const box = $('fallaOra'), f = ui.fallaOra;
   if (!f) { box.hidden = true; box.innerHTML = ''; clearInterval(_fallaTimer); return; }
   const resto = Math.max(0, f.fine - Date.now()), m = Math.floor(resto / 60000), s = Math.floor(resto % 60000 / 1000);
   const titolo = f.id ? (ciclo(f.id) || {}).title || f.voce.title : f.voce.title;
-  const tempo = resto ? `${m}:${String(s).padStart(2, '0')}` : 'tempo finito';
-  if (box.dataset.titolo === titolo && box.querySelector('.fo-tempo')) { box.querySelector('.fo-tempo').textContent = tempo; return; }
+  const tempo = `${m}:${String(s).padStart(2, '0')}`;
+  const off = (FO_GIRO * (1 - resto / PRINC.TIMER_MS)).toFixed(1);
+  const et = resto ? '<i class="ti ti-player-play" aria-hidden="true"></i>Falla ora · 5 minuti' : '<i class="ti ti-clock-check" aria-hidden="true"></i>Tempo finito: com\'è andata?';
+  box.classList.toggle('finito', !resto);
+  if (box.dataset.titolo === titolo && box.querySelector('.fo-tempo')) {
+    box.querySelector('.fo-tempo').textContent = tempo;
+    box.querySelector('.fo-anello .ar').setAttribute('stroke-dashoffset', off);
+    const e = box.querySelector('.fo-et'); if (!resto && !e.dataset.finito) { e.innerHTML = et; e.dataset.finito = '1'; }
+    return;
+  }
   box.dataset.titolo = titolo;
-  box.innerHTML = `<div class="fo-testa"><i class="ti ti-player-play" aria-hidden="true"></i><span>Falla ora: <b>${escHtml(titolo)}</b></span><span class="fo-tempo" aria-label="Tempo che resta">${tempo}</span></div>
+  box.innerHTML = `<div class="fo-anello"><svg viewBox="0 0 56 56" aria-hidden="true"><circle class="tr" cx="28" cy="28" r="${FO_R}"/><circle class="ar" cx="28" cy="28" r="${FO_R}" stroke-dasharray="${FO_GIRO.toFixed(1)}" stroke-dashoffset="${off}"/></svg><span class="fo-tempo" role="timer" aria-label="Tempo che resta">${tempo}</span></div>
+    <div class="fo-txt"><span class="fo-et">${et}</span><b class="fo-tit">${escHtml(titolo)}</b></div>
     <div class="fo-tasti"><button type="button" class="btn btn-primary btn-sm" data-act="fo-fatta"><i class="ti ti-check"></i>Fatta</button>
-      <button type="button" class="btn btn-secondary btn-sm" data-act="fo-salva">Non finita: salvala</button></div>`;
+      <button type="button" class="btn btn-secondary btn-sm" data-act="fo-salva"><i class="ti ti-bookmark"></i>Non finita: salvala</button></div>`;
   box.hidden = false;
 }
 function chiudiFallaOra() { ui.fallaOra = null; delete $('fallaOra').dataset.titolo; disegnaFallaOra(); }
@@ -14405,7 +14529,7 @@ function eSeraFeriale(ora = new Date()) { const g = giornoIdxDi(ora); return g <
 function bannerSera() {
   if (!eSeraFeriale() || lsLeggi(PRINC.LS.SERA) === oggiLocale() || !eSettimanaCorrente() || modoSemplice()) return '';
   return `<section class="banner-piano" aria-label="Piano di domani"><i class="ti ti-moon"></i>
-    <div><b>5 minuti per domani: scegli dalla settimana cosa fai domani</b><p class="t-caption muted">Chi decide la sera prima parte la mattina già sapendo cosa fare.</p>
+    <div><b>5 minuti per domani</b><p class="t-caption muted">Scegli dalla settimana cosa fai domani: la mattina parti già sapendo cosa fare.</p>
       <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="sera-apri">Scegli</button></div></div>
     <button type="button" class="btn btn-icon" data-act="sera-chiudi" aria-label="Chiudi per oggi" data-tip="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
 }
@@ -14524,15 +14648,16 @@ function avvisiDeleghe() {
     .filter(a => !ok[a.p.id] || Date.now() - new Date(ok[a.p.id]).getTime() > PRINC.DELEGHE_OK_GG * 864e5)
     .map(a => ({ ...a, cosa: a.ripetuta || a.cose.filter(c => !c.done).sort((x, y) => String(y.updated_at || '').localeCompare(String(x.updated_at || '')))[0] || null }));
 }
-const testoAvvisoDelega = a => `Con ${a.p.nome} le deleghe tornano spesso: le hai dato istruzioni scritte? È la persona giusta?`;
-const tastiDelega = a => `<div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="del-istruzioni" data-p="${esc(a.p.id)}"><i class="ti ti-file-text"></i>Scrivi le istruzioni</button>
-  <button type="button" class="btn btn-secondary btn-sm" data-act="del-incontro" data-p="${esc(a.p.id)}"><i class="ti ti-calendar-repeat"></i>Fissa un incontro settimanale</button>
-  <button type="button" class="btn btn-ghost btn-sm" data-act="del-ok" data-p="${esc(a.p.id)}">Ok</button></div>`;
+const testoAvvisoDelega = a => `Con ${a.p.nome} le deleghe tornano spesso`;
+const DOMANDA_DELEGA = 'Le hai dato istruzioni scritte? È la persona giusta?';
+const tastiDelega = a => `<div class="banner-azioni"><button type="button" class="btn btn-secondary btn-sm" data-act="del-istruzioni" data-p="${esc(a.p.id)}"><i class="ti ti-file-text"></i>Scrivi le istruzioni</button>
+  <button type="button" class="btn btn-secondary btn-sm" data-act="del-incontro" data-p="${esc(a.p.id)}"><i class="ti ti-calendar-repeat"></i>Incontro settimanale</button></div>`;
+const chiudiDelega = a => `<button type="button" class="btn btn-icon" data-act="del-ok" data-p="${esc(a.p.id)}" aria-label="Ok, lo so: non mostrarlo per 30 giorni" data-tip="Non mostrarlo per 30 giorni"><i class="ti ti-x"></i></button>`;
 function cardDeleghe() {
   const l = avvisiDeleghe();
   if (!l.length || modoSemplice()) return '';
-  return l.map(a => `<section class="banner-piano banner-leggero delega-avviso" aria-label="Deleghe con ${esc(a.p.nome)}"><i class="ti ti-arrow-back-up"></i>
-    <div><b>${escHtml(testoAvvisoDelega(a))}</b><p class="t-caption muted">${a.ripetuta ? `«${escHtml(a.ripetuta.title)}» è tornata ${a.ripetuta.ritorni_delega} volte.` : `${plurale(a.cose.length, 'delega tornata o scaduta', 'deleghe tornate o scadute')} negli ultimi 60 giorni.`}</p>${tastiDelega(a)}</div></section>`).join('');
+  return l.map(a => `<section class="banner-piano banner-leggero delega-avviso" aria-label="Deleghe con ${esc(a.p.nome)}"><i class="ti ti-arrow-back-up" aria-hidden="true"></i>
+    <div><b>${escHtml(testoAvvisoDelega(a))}</b> <span class="da-dom">${DOMANDA_DELEGA}</span><p class="t-caption muted">${a.ripetuta ? `«${escHtml(a.ripetuta.title)}» è tornata ${a.ripetuta.ritorni_delega} volte.` : `${plurale(a.cose.length, 'delega tornata o scaduta', 'deleghe tornate o scadute')} negli ultimi 60 giorni.`}</p>${tastiDelega(a)}</div>${chiudiDelega(a)}</section>`).join('');
 }
 function avvisoPerPersona(a) { lsScrivi(PRINC.LS.DELEGHE_OK, JSON.stringify({ ...delegheOk(), [a.p.id]: new Date().toISOString() })); }
 const trovaAvviso = pid => avvisiDeleghe().find(a => String(a.p.id) === String(pid)) || null;
@@ -14591,7 +14716,7 @@ tuttoPersone = function (lista) {
     const g = out.indexOf('<div class="group">', i);
     if (g < 0) return out;
     const dopo = g + '<div class="group">'.length;
-    return out.slice(0, dopo) + `<div class="persona-avviso"><span>${escHtml(testoAvvisoDelega(a))}</span>${tastiDelega(a)}</div>` + out.slice(dopo);
+    return out.slice(0, dopo) + `<div class="persona-avviso"><i class="ti ti-arrow-back-up" aria-hidden="true"></i><div><b>${escHtml(testoAvvisoDelega(a))}</b> <span class="da-dom">${DOMANDA_DELEGA}</span>${tastiDelega(a)}</div>${chiudiDelega(a)}</div>` + out.slice(dopo);
   }, h);
 };
 // «Riprendila io» e «Mi è tornata indietro»: prima una domanda (principio 10)
@@ -14662,9 +14787,9 @@ function serveSpinta() {
   return (st.tot && (st.tot - st.done) / st.tot >= PRINC.SPINTA_NON_FATTE) || (ui.rev.rinviate || 0) >= PRINC.SPINTA_RINVIATE;
 }
 function htmlSpinta() {
-  const passate = (ui.rev.spintePassate || []).map(p => `sett. ${p.settimana}: ${escHtml(testoSpinta(p.motivi.spinta))}`);
+  const passate = (ui.rev.spintePassate || []).map(p => `<li><b>sett. ${p.settimana}</b>: ${escHtml(testoSpinta(p.motivi.spinta))}</li>`);
   const giaDetta = state.bp && (state.bp.motivi || {}).spinta;
-  const passateHtml = passate.length ? `<p class="spinta-passate"><b>Le ultime volte:</b> ${passate.join(' · ')}</p>` : '';
+  const passateHtml = passate.length ? `<ul class="spinta-passate"><li><b>Le ultime volte</b></li>${passate.join('')}</ul>` : '';
   if (!serveSpinta() && !giaDetta) return passateHtml ? `<div class="spinta">${passateHtml}</div>` : '';
   const s = ui.rev.spinta;
   return `<div class="spinta" id="rev-spinta"><b>Cosa ti ha tolto la spinta questa settimana?</b>
@@ -14709,14 +14834,14 @@ vistaAltro = function () {
   if (ui.sub === 'mete') return vistaMete();
   if (ui.sub === 'specifiche') return vistaSpecifiche();
   const n = meteTutte().length, vaghe = daRendereSpecifiche().length;
-  const righe = `<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="mete"><i class="ti ti-target-arrow"></i><span>Le mie mete<small>${state.meteOk === false ? 'non disponibili' : n ? plurale(n, 'meta', 'mete') + ' da qui a 5 anni' : 'ancora da scrivere'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>
+  const righe = `<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="mete"><i class="ti ti-flag"></i><span>Le mie mete<small>${state.meteOk === false ? 'non disponibili' : n ? plurale(n, 'meta', 'mete') + ' da qui a 5 anni' : 'ancora da scrivere'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>
     <button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="specifiche"><i class="ti ti-zoom-question"></i><span>Da rendere specifiche<small>${vaghe ? plurale(vaghe, 'cosa troppo generica', 'cose troppo generiche') : 'nessuna'}</small></span><span></span><i class="ti ti-chevron-right"></i></button>`;
   const segno = '<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="fatte">';
   const h = _vistaAltroPr.apply(this, arguments);
   return h.includes(segno) ? h.replace(segno, righe + segno) : h;
 };
 GUIDA_ITIME.push(
-  { titolo: 'Le mete (principi 12, 16 e 5)', testo: `<p><strong>Principio 12: abbi chiara la meta.</strong> In Altro → <strong>Le mie mete</strong> scrivi 7–10 mete da qui a 5 anni: cosa stai costruendo, nel lavoro e fuori.</p><p><strong>Principio 16: costruisci qualcosa.</strong> Nel dettaglio di una cosa scegli «Serve a quale meta?»: le cose collegate hanno il segno <i class="ti ti-target-arrow"></i>. Nel piano della settimana vedi quante Importanti vanno a ogni meta, e quale è ferma da 4 settimane.</p><p><strong>Principio 5: impara a dire no.</strong> In Riordina, quando segni Importante, l'app chiede «Ti avvicina a una meta?». Se no, propone Delega o Lascia stare.</p>` },
+  { titolo: 'Le mete (principi 12, 16 e 5)', testo: `<p><strong>Principio 12: abbi chiara la meta.</strong> In Altro → <strong>Le mie mete</strong> scrivi 7–10 mete da qui a 5 anni: cosa stai costruendo, nel lavoro e fuori.</p><p><strong>Principio 16: costruisci qualcosa.</strong> Nel dettaglio di una cosa scegli «Serve a quale meta?»: le cose collegate hanno il segno <i class="ti ti-flag"></i>. Nel piano della settimana vedi quante Importanti vanno a ogni meta, e quale è ferma da 4 settimane.</p><p><strong>Principio 5: impara a dire no.</strong> In Riordina, quando segni Importante, l'app chiede «Ti avvicina a una meta?». Se no, propone Delega o Lascia stare.</p>` },
   { titolo: 'Tempo per il futuro: 25–30% (principi 1, 6, 7, 17)', testo: `<p><strong>Principio 1: il tempo per il futuro va prima di tutto.</strong> Un quarto del tempo di lavoro va alle Importanti: sviluppo, collaboratori, clienti nuovi, salute.</p><p>In Prepara la settimana (passo 3), in Chiudi la settimana e in cima alla Settimana vedi «Tempo per il futuro» con una barra. Sotto il 25% l'app ti dice quante ore bloccare: mettile in agenda come appuntamenti veri (Blocca in agenda), così diventano inderogabili.</p><p>Il calcolo: minuti delle Importanti nel piano (30 minuti se non hanno durata) più l'Esercizio Q2, diviso il tempo di lavoro da lunedì a venerdì, dalle 9 alle 19.</p>` },
   { titolo: 'Fallo subito, e scrivilo specifico (principi 4 e 2)', testo: `<p><strong>Principio 4: se ci vogliono pochi minuti, fallo subito.</strong> Quando scrivi una cosa con «5 minuti», «al volo» o «subito», o tocchi il chip «5 min» nel riepilogo, compare <strong>Falla ora</strong>: parte un timer di 5 minuti con «Fatta» e «Non finita: salvala».</p><p><strong>Principio 2: una cosa specifica si fa, una generica si rimanda.</strong> «Incassi» o «Orto» non dicono cosa fare: l'app avvisa «Troppo generica: cosa devi fare, con chi, quanto?». Le trovi in Riordina e in Altro → <strong>Da rendere specifiche</strong>, con Spacchettala.</p>` },
   { titolo: 'La sera, le deleghe, la spinta (principi 3, 9, 10, 11)', testo: `<p><strong>Principio 3: prepara la giornata la sera prima.</strong> Dalle 18:30, nei giorni feriali, in Oggi compare «5 minuti per domani»: scegli dalla settimana cosa fai domani. In Impostazioni → Promemoria su Google Calendar c'è anche «Piano di domani», un promemoria alle 18:45 (lo crei tu con il tasto).</p><p><strong>Principio 9: delega con istruzioni scritte, alla persona giusta.</strong> Se con qualcuno le deleghe tornano spesso, l'app te lo dice e propone di scrivere le istruzioni o un punto settimanale con lui.</p><p><strong>Principio 10: non riprenderti il lavoro delegato.</strong> Prima di riprenderla, l'app chiede: è un'urgenza vera?</p><p><strong>Principio 11: accorgiti di cosa ti toglie la spinta.</strong> Se la settimana è andata storta, Chiudi la settimana chiede cosa ti ha tolto la spinta, e ti mostra le risposte delle ultime volte.</p>` }

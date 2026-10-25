@@ -259,6 +259,13 @@ Nel dettaglio, riquadro `det-box`: «Passi» + «2/5 fatti» in mono, barra da 6
 ### Fatte → Settimane (v4)
 «Trend: +2% rispetto alla settimana scorsa» con `ti-trending-up/down`; grafico a barre SVG alto 60px, barre da 24px con angoli arrotondati solo in alto, `--primary` (l'ultima piena, le altre al 55 %), linea tratteggiata `--border-strong` all'80 %, numero della settimana in mono sotto; `<title>` e tooltip su ogni barra; sotto la tabella Settimana · Pianificate · Fatte · % (vista accessibile degli stessi dati).
 
+### Mete, tempo per il futuro, Falla ora (v7, 25/10)
+- **Meta**: non ha un colore di tipo. Segno `ti-flag` + nome in `--meta-ink` (= `--text-2`), 700, tagliato con i puntini; raggiunta `ti-flag-check`. `ti-target` / `ti-target-arrow` restano di Importante.
+- **Le mie mete**: testata con [Riordina] (le frecce su/giù compaiono solo lì, 44×44), sommario con anello da 64 «N di 7» (`--primary` su `--surface-2`), gruppi «In corso» numerati (cerchio 28 `--surface-2`) e «Raggiunte» (cerchio pieno `--primary` con la spunta). Tocchi la meta per modificarla; nel modulo [Raggiunta] e «Togli la meta».
+- **Tempo per il futuro**: riquadro `--surface-2` raggio 12; titolo con `ti-seeding`, percentuale in mono 20 a destra; barra da 10 che va da 0 al 50% con la **fascia 25–30 segnata** (bordi 2px `--text-2`, fondo primario al 14%), sotto «0 · obiettivo 25–30% · 50%». Stati: sotto = `--warn` (barra, numero, `ti-alert-circle` «Sotto l'obiettivo.» + quante ore bloccare), dentro / sopra = `--primary` (`ti-circle-check`). «Come lo calcolo» con freccia che ruota. In Settimana la pillola «Futuro N%» (36, bordo `--border-strong`) con la stessa barra in piccolo.
+- **Falla ora**: card `--surface` con ombra 3 sopra il campo (in basso a destra da 768px), anello da 56 che si svuota in 5 minuti con il tempo in mono, «Falla ora · 5 minuti», titolo su due righe, [Fatta] primario e [Non finita: salvala] secondario. Nel foglio «+» «Falla ora» è secondario (il primario resta Invio).
+- **Deleghe che tornano**: banner leggero con `ti-arrow-back-up` in `--q3`, titolo «Con X le deleghe tornano spesso», la domanda sotto, due secondari, X per «non mostrarlo per 30 giorni»; uguale (fascia `--surface-2`) sotto il nome in Tutto → Persone. In Riordina «Allora è una Delega o Lascia stare?» usa i bottoni col colore del tipo (`.btn-q3`, `.btn-q4`).
+
 ### Contrasto alto e movimento
 `html[data-contrast="alto"]`: `--border` e `--border-strong` più scuri, `--text-2`/`--text-3` più scuri, tipi e badge con bordo, chip e campi con bordo 2px. Con `prefers-reduced-motion: reduce` animazioni e transizioni durano 0.
 
