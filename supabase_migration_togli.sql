@@ -18,3 +18,7 @@ CREATE POLICY "solo_proprietario" ON public.eventi_nascosti
   FOR ALL TO authenticated
   USING      (lower((SELECT auth.jwt() ->> 'email')) = 'maci81x@gmail.com')
   WITH CHECK (lower((SELECT auth.jwt() ->> 'email')) = 'maci81x@gmail.com');
+
+-- 26/10 · Piano inviato al coach e stampato: anche nel database, così si vede da tutti i dispositivi.
+ALTER TABLE public.battle_plan ADD COLUMN IF NOT EXISTS inviato_at timestamptz;
+ALTER TABLE public.battle_plan ADD COLUMN IF NOT EXISTS stampato_at timestamptz;
