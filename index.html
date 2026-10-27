@@ -1726,6 +1726,16 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v12-unisci { align-self: flex-end; margin: 0 0 4px auto; display: block; min-height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
 .v12-capito { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); margin: 0 0 var(--sp-2); font-size: var(--fs-label); }
 .v12-capito span { color: var(--text-2); font-size: var(--fs-caption); }
+
+/* v13 · una lista sola */
+.top { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.top-ctx { grid-auto-columns: auto; min-width: 0; flex: 0 1 auto; }
+.top-ctx button { padding: 0 var(--sp-3); white-space: nowrap; }
+@media (max-width: 480px) { .top { gap: var(--sp-2); } .top-ctx button { padding: 0 8px; font-size: 13px; } .logo-top { font-size: 19px; letter-spacing: 1px; min-width: 0; overflow: hidden; text-overflow: clip; } }
+@media (max-width: 360px) { .top-ctx button { padding: 0 6px; font-size: 12px; } .logo-top { font-size: 18px; letter-spacing: 1px; } }
+
+.tag-pers { display: inline-flex; align-items: center; padding: 0 7px; border-radius: var(--r-full); background: #F6F0FD; color: #6D28D9; font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; }
+[data-theme="dark"] .tag-pers { background: #2A1F3D; color: #C4B5FD; }
 </style>
 </head>
 <body>
@@ -1744,7 +1754,8 @@ button.sn-r { width: 100%; cursor: pointer; }
   <header class="top">
     <div class="logo logo-top">CICLI <span>APERTI</span></div>
     <div class="seg top-ctx" role="group" aria-label="Ambito">
-      <button type="button" id="ctx-lavoro" data-act="ctx" data-ctx="lavoro" aria-pressed="true">Lavoro</button>
+      <button type="button" id="ctx-tutto" data-act="ctx" data-ctx="tutto" aria-pressed="true">Tutto</button>
+      <button type="button" id="ctx-lavoro" data-act="ctx" data-ctx="lavoro" aria-pressed="false">Lavoro</button>
       <button type="button" id="ctx-personale" data-act="ctx" data-ctx="personale" aria-pressed="false">Personale</button>
     </div>
     <label class="top-search">
@@ -4317,7 +4328,7 @@ function haPianificazione(c) {
 
 // Cicli aperti del contesto corrente, con i filtri di sidebar applicati
 function agendaBaseCicli() {
-  return applyFilters(state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c)));
+  return applyFilters(state.cicli.filter(c => vedi(c.ctx) && isAttivo(c)));
 }
 
 // I rituali giornalieri hanno un blocco dedicato: escludili dalla griglia
@@ -4329,9 +4340,9 @@ function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianifi
 // Aperta (non fatta, non parcheggiata), senza giorno, senza data (né scadenza né data pianificata), fuori dal piano della settimana.
 // Non conta le routine di ogni giorno né le cose divise in passi (contano i passi).
 const ETICHETTA_CTX = { lavoro: 'Lavoro', personale: 'Personale', tutti: 'Tutti' };
-const etichettaCtx = ctx => ETICHETTA_CTX[ctx || state.ctx] || ETICHETTA_CTX.tutti;
+const etichettaCtx = ctx => ETICHETTA_CTX[ctx || ctxVista()] || ETICHETTA_CTX.tutti;
 function senzaGiornoNePiano(ctx) {
-  const k = ctx || state.ctx;
+  const k = ctx || ctxVista();
   const nelPiano = new Set((state.bpItems || []).map(i => i.ciclo_id).filter(Boolean));
   return state.cicli.filter(c => (k === 'tutti' || c.ctx === k) && isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c)
     && !c.giorno_settimana && !c.pianificato_data && !agendaOverrideFor(c.id) && !nelPiano.has(c.id));
@@ -4726,7 +4737,7 @@ function formatOra(t) {
 // Rituali del contesto corrente, ordinati per ora_inizio
 function ritualiQuotidiani() {
   return state.cicli
-    .filter(c => c.ctx === state.ctx && isAttivo(c) && isGiornaliero(c))
+    .filter(c => vedi(c.ctx) && isAttivo(c) && isGiornaliero(c))
     .sort((a, b) => formatOra(a.ora_inizio).localeCompare(formatOra(b.ora_inizio)));
 }
 
@@ -4992,7 +5003,7 @@ function bpwDisegnaSettimana() {
 // Armadio: cicli aperti del contesto, esclusi i rituali quotidiani
 function bpwCandidati() {
   return state.cicli
-    .filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c))   // si pianificano i passi, non la cosa intera
+    .filter(c => isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c))   // si pianificano i passi, non la cosa intera
     .sort((a, b) => {
       const qa = computeEffectiveQ(a), qb = computeEffectiveQ(b);
       if (qa !== qb) return qa - qb;
@@ -5153,7 +5164,7 @@ function bpwRenderStep1() {
   // in modifica: quello che è già nel piano sta in cima, anche se nel frattempo è stato tolto la spunta
   const nelPiano = filtra([..._bpwNelPiano]
     .map(id => state.cicli.find(c => c.id === id))
-    .filter(c => c && c.ctx === state.ctx && inPasso(c)));
+    .filter(c => c && inPasso(c)));
   const cicli = filtra(bpwCandidati().filter(c => !_bpwNelPiano.has(c.id) && inPasso(c)));
 
   const intro = document.createElement('p');
@@ -5948,14 +5959,14 @@ function righeGiorno(gk) {
   if (state.bp) {
     bpItemsValidi().filter(i => i.giorno === gk).forEach(i => {
       const c = bpCiclo(i);
-      if (c.ctx !== state.ctx || isParcheggiato(c)) return;
+      if (!vedi(c.ctx) || isParcheggiato(c)) return;
       const ora = bpOra(i) || oraDi(c);
       out.set(c.id, { c, item: i, fascia: fasciaDi(i.fascia, ora), conFascia: !!(i.fascia || ora), haFascia: !!i.fascia, ora, durata: bpDurata(i), fatto: !!i.completato || !!c.done });
     });
   }
   if (gk !== 'settimana') {
     state.cicli.forEach(c => {
-      if (c.ctx !== state.ctx || isParcheggiato(c) || isGiornaliero(c) || out.has(c.id)) return;
+      if (!vedi(c.ctx) || isParcheggiato(c) || isGiornaliero(c) || out.has(c.id)) return;
       if (state.bp && itemDelPiano(c.id)) return;
       const slot = agendaSlotForWeek(c, state.week, state.year);
       if (slot.giorno !== gk || !fattaVisibile(c, slot)) return;
@@ -6440,15 +6451,15 @@ async function salvaCategoria() {
 }
 
 function categorieDelContesto() {
-  const builtin = (CAT_BUILTIN[state.ctx] || []).map(k => ({ v: k, nome: CAT_LABELS[k] || k }));
-  const custom = (state.categorie || []).filter(c => c.ctx === state.ctx).sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0)).map(c => ({ v: 'custom_' + c.id, nome: c.nome }));
+  const builtin = (ctxVista() === 'tutti' ? [...new Set([...(CAT_BUILTIN.lavoro || []), ...(CAT_BUILTIN.personale || [])])] : (CAT_BUILTIN[ctxVista()] || [])).map(k => ({ v: k, nome: CAT_LABELS[k] || k }));
+  const custom = (state.categorie || []).filter(c => vedi(c.ctx)).sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0)).map(c => ({ v: 'custom_' + c.id, nome: c.nome }));
   return [...builtin, ...custom];
 }
 function nFiltri() { return ui.filtri.cats.size + ui.filtri.tipi.size + ui.filtri.aree.size; }
 
 function apriFiltri() { disegnaFiltri(); $('filtriOverlay').classList.add('open'); }
 function disegnaFiltri() {
-  const base = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c));
+  const base = state.cicli.filter(c => vedi(c.ctx) && isAttivo(c));
   const conta = fn => base.filter(fn).length;
   const chip = (gruppo, v, testo, n, icona) => `<button type="button" class="chip" data-act="filtro" data-g="${gruppo}" data-v="${esc(v)}" aria-pressed="${ui.filtri[gruppo].has(String(v))}">${icona ? `<i class="ti ${icona}"></i>` : ''}${escHtml(testo)} <span class="mono">${n}</span></button>`;
   const cats = categorieDelContesto().map(k => ({ ...k, n: conta(c => c.cat === k.v) })).filter(k => k.n > 0 || k.v.startsWith('custom_'));
@@ -6536,7 +6547,7 @@ function vistaOggi() {
   const rapide = rapideDiOggi(righe, focusIds);
   const controllo = daControllare();
   const inVista = new Set([...righe, ...rapide].map(r => r.c.id).concat(controllo.map(c => c.id)));
-  const scadenza = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !inVista.has(c.id) && getEscalation(c) === 'crit')
+  const scadenza = state.cicli.filter(c => vedi(c.ctx) && isAttivo(c) && !inVista.has(c.id) && getEscalation(c) === 'crit')
     .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
   const eventi = eventiDelGiorno(oggi);
   const opz = { data: iso, stellaDi: r => r.item && state.focusColOk ? (focusIds.has(r.c.id) ? 'on' : 'off') : null };
@@ -6632,7 +6643,7 @@ function cardPiano() {
     return `<div class="bp-wiz-right piano-card"><div class="pc-top"><div><span class="bp-sum-h">Nessun piano</span><p class="t-label muted">Scegli cosa portare a casa ${bpwFrase(state.week, state.year).nome}.</p></div>
       <button type="button" class="btn btn-primary btn-sm" data-act="wizard">Prepara la settimana</button></div></div>`;
   }
-  const items = bpItemsValidi().filter(i => bpCiclo(i).ctx === state.ctx);
+  const items = bpItemsValidi().filter(i => vedi(bpCiclo(i).ctx));
   const st = bpStats(items);
   const minuti = items.reduce((s, i) => s + bpDurata(i), 0);
   const chiuso = state.bp.stato === 'chiuso';
@@ -6741,7 +6752,7 @@ function pianMese() {
   const mese = base.getMonth(), anno = base.getFullYear();
   const primo = new Date(anno, mese, 1);
   const inizio = new Date(primo); inizio.setDate(1 - giornoIdxDi(primo));
-  const attivi = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c));
+  const attivi = state.cicli.filter(c => vedi(c.ctx) && isAttivo(c) && !isGiornaliero(c));
   const ovs = ui.ovMese || state.agendaOverrides;
   const oggiIso = oggiLocale();
   let celle = '';
@@ -6799,7 +6810,7 @@ function cicliFiltrati() {
   const q = ui.q.trim().toLowerCase();
   const semplice = modoSemplice();   // in modalità semplice niente filtri, solo la ricerca
   return state.cicli.filter(c => {
-    if (c.ctx !== state.ctx || !isAttivo(c)) return false;
+    if (!vedi(c.ctx) || !isAttivo(c)) return false;
     if (c.parent_id && !q && state.passiColOk) return false;   // i passi stanno dentro la loro cosa (si trovano cercando)
     if (semplice) return !q || (c.title || '').toLowerCase().includes(q) || (c.note || '').toLowerCase().includes(q);
     if (ui.filtri.cats.size && !ui.filtri.cats.has(String(c.cat))) return false;
@@ -6839,7 +6850,7 @@ function aggiornaTutto() {
   const nf = nFiltri();
   $('btn-filtri').innerHTML = `<i class="ti ti-adjustments-horizontal"></i>Filtri${nf ? ` <span class="badge">${nf}</span>` : ''}`;
   const lista = cicliFiltrati();
-  const attesa = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c)).length;
+  const attesa = state.cicli.filter(c => vedi(c.ctx) && !c.done && isParcheggiato(c)).length;
   let h = '';
   if (!lista.length) {
     const filtrato = ui.q || nf;
@@ -6898,7 +6909,7 @@ function tuttoPersone(lista) {
 function indietro(tab, etichetta) { return `<button type="button" class="back" data-act="sub" data-tab="${tab}" data-sub=""><i class="ti ti-chevron-left"></i>${etichetta}</button>`; }
 
 function vistaAttesa() {
-  const lista = state.cicli.filter(c => c.ctx === state.ctx && !c.done && isParcheggiato(c))
+  const lista = state.cicli.filter(c => vedi(c.ctx) && !c.done && isParcheggiato(c))
     .sort((a, b) => String(b.parcheggiato_at || '').localeCompare(String(a.parcheggiato_at || '')));
   let h = `${indietro('tutto', 'Cose aperte')}<div class="vh"><div><h1>Un giorno${btnAiuto('attesa')}</h1></div></div>`;
   if (!lista.length) return h + vuoto('ti-hourglass-empty', 'Niente qui', 'Quello che decidi di lasciar stare finisce qui: un giorno, forse. Fuori dalla vista.', `<button type="button" class="btn btn-secondary btn-sm" data-act="sub" data-tab="tutto" data-sub="">Torna alle cose aperte</button>`);
@@ -7224,7 +7235,7 @@ async function caricaRimaste() {
 function rimasteVisibili() {
   return ui.carry.filter(({ item, plan }) => {
     const c = ciclo(item.ciclo_id);
-    if (!c || c.done || isParcheggiato(c) || isGiornaliero(c) || c.ctx !== state.ctx) return false;
+    if (!c || c.done || isParcheggiato(c) || isGiornaliero(c) || !vedi(c.ctx)) return false;
     if (state.bp && state.bp.id === plan.id) {
       const fresco = state.bpItems.find(i => i.id === item.id);
       return !!fresco && !fresco.completato && fresco.giorno === item.giorno;
@@ -7419,7 +7430,7 @@ async function caricaSettimane() {
     if (error) throw error;
     const cur = bpSettimanaCorrente(), inizio = getWeekStart(cur.week, cur.year);
     ui.settimane = (data || []).filter(p => p.stato === 'chiuso' || getWeekStart(p.settimana, p.anno) < inizio).map(p => {
-      const items = (p.battle_plan_items || []).filter(i => { const c = ciclo(i.ciclo_id); return c && c.ctx === state.ctx; });
+      const items = (p.battle_plan_items || []).filter(i => { const c = ciclo(i.ciclo_id); return !!c; });
       // senza righe (cose eliminate dopo) restano i numeri salvati alla chiusura
       if (!items.length && p.pianificate) return { ...p, tot: p.pianificate, done: p.completate || 0, pct: p.percentuale || 0 };
       return { ...p, ...bpStats(items) };
@@ -7514,7 +7525,7 @@ function creaPdfSettimana() {
   const LARGO_TIT = COL_L - (X_TIT - M);
   const nota = v => v.tipo === 'cosa' && v.r.c.note ? pdfTxt(String(v.r.c.note).split(/\r?\n/).find(x => x.trim()) || '') : '';
   // il titolo di una voce: testo, font e larghezza disponibile (sulle cose a destra c'è il tipo)
-  const tipoDi = v => { const q = computeEffectiveQ(v.r.c); return pdfTxt(TIPI[q].label + (v.r.c.inderogabile && q === 2 ? ' - fissa' : '')); };
+  const tipoDi = v => { const q = computeEffectiveQ(v.r.c); return pdfTxt(TIPI[q].label + (v.r.c.inderogabile && q === 2 ? ' - fissa' : '') + (v.r.c.ctx === 'personale' ? ' · Personale' : '')); };
   const testoVoce = v => {
     if (v.tipo === 'cosa') return { testo: (computeEffectiveQ(v.r.c) === 1 ? '! ' : '') + pdfTxt(v.r.c.title), stile: computeEffectiveQ(v.r.c) === 1 ? 'bold' : 'normal', tipo: tipoDi(v) };
     if (v.tipo === 'evento') return { testo: pdfTxt(`${v.e.coach ? 'Coach: ' : v.e.prepCoach ? 'Preparazione coach: ' : ''}${v.e.titolo}${coseSovrapposte(v.e).length ? '  *' : ''}`), stile: 'normal' };
@@ -7621,7 +7632,7 @@ function creaPdfSettimana() {
     doc.text(`Fatte ____ / ${nPiano}`, M, y);
     doc.text('Q2 spostate ____', M + 52 * s, y);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
-    doc.text(state.ctx === 'personale' ? 'Personale' : 'Lavoro', W - M, y, { align: 'right' });
+    doc.text('Lavoro e personale', W - M, y, { align: 'right' });
     // legenda
     y += 6 * s;
     let lx = M;
@@ -8294,7 +8305,7 @@ function rapideDiOggi(righe, focusIds) {
   if (diOggi.length >= RAPIDE_DA_TUTTO) return diOggi;
   const gia = new Set(righe.map(r => r.c.id));
   const senzaData = state.cicli
-    .filter(c => c.ctx === state.ctx && isAttivo(c) && !gia.has(c.id) && !haPianificazione(c) && !haPassiAperti(c) && eRapida(c, null))
+    .filter(c => vedi(c.ctx) && isAttivo(c) && !gia.has(c.id) && !haPianificazione(c) && !haPassiAperti(c) && eRapida(c, null))
     .slice(0, RAPIDE_DA_TUTTO - diOggi.length)
     .map(c => ({ c, fatto: false }));
   return [...diOggi, ...senzaData];
@@ -8392,7 +8403,7 @@ function delegaTesto(c) {
 function daControllare() {
   if (!state.delegaColsOk) return [];
   const oggi = oggiLocale();
-  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && c.q === 3 && c.delega_controllo && c.delega_controllo <= oggi)
+  return state.cicli.filter(c => vedi(c.ctx) && isAttivo(c) && c.q === 3 && c.delega_controllo && c.delega_controllo <= oggi)
     .sort((a, b) => String(a.delega_controllo).localeCompare(String(b.delega_controllo)));
 }
 function rigaControllo(c) {
@@ -8712,7 +8723,7 @@ async function caricaSerie() {
     const perGiorno = new Map();
     (data || []).filter(p => getWeekStart(p.settimana, p.anno) >= limite).forEach(p => (p.battle_plan_items || []).forEach(i => {
       const idx = GIORNI.findIndex(g => g.key === i.giorno), c = ciclo(i.ciclo_id);
-      if (idx < 0 || !c || c.ctx !== state.ctx) return;
+      if (idx < 0 || !c ) return;
       const iso = toISODate(bpDataGiorno(p.settimana, p.anno, idx));
       const v = perGiorno.get(iso) || { tot: 0, fatte: 0 };
       const fatta = i.completato && i.completato_at && toISODate(new Date(i.completato_at)) <= iso;
@@ -8862,7 +8873,7 @@ async function bpwCaricaRiferimento(week, year) {
     for (const p of data || []) {
       const d = getWeekStart(p.settimana, p.anno);
       if (d >= inizio || (p.stato !== 'chiuso' && d >= oggiSett)) continue;
-      const items = (p.battle_plan_items || []).filter(i => { const c = ciclo(i.ciclo_id); return c && c.ctx === state.ctx; });
+      const items = (p.battle_plan_items || []).filter(i => { const c = ciclo(i.ciclo_id); return !!c; });
       const st = items.length ? bpStats(items) : p.pianificate ? { tot: p.pianificate, done: p.completate || 0, pct: p.percentuale || 0 } : null;
       if (!st || !st.tot) continue;
       const dopo = bpSettimanaSuccessiva(p.settimana, p.anno);
@@ -8879,7 +8890,7 @@ async function bpwCaricaRiferimento(week, year) {
 function candidatiRiempi(item) {
   const min = bpDurata(item);
   const giaOggi = new Set(righeGiorno(item.giorno).map(r => r.c.id));
-  const base = state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c)
+  const base = state.cicli.filter(c => isAttivo(c) && !isGiornaliero(c) && !haPassiAperti(c)
     && !giaOggi.has(c.id) && (c.durata_minuti || BP_DURATA_DEFAULT) <= min);
   const ordinate = [
     ...base.filter(c => computeEffectiveQ(c) === 1).sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999'))),
@@ -9068,16 +9079,17 @@ function corpoEvento(c, slot) {
     start: { dateTime: `${slot.data}T${slot.ora}:00`, timeZone: 'Europe/Rome' },
     end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' } };
 }
-const percorsoEventi = () => `/calendars/${encodeURIComponent(gcal.calendarId)}/events`;
+// 27/10 · ogni cosa sul suo calendario: personali sul Privato (se si può scrivere), le altre su quello di scrittura
+function percorsoEventi(c) { return `/calendars/${encodeURIComponent(calDellaCosa(c))}/events`; }
 // Aggiorna l'evento esistente. false = su Google non c'è più (l'id viene tolto dalla cosa).
 async function scriviEvento(c, slot, eventId) {
-  try { await gcalFetch(`${percorsoEventi()}/${eventId}`, 'PATCH', corpoEvento(c, slot)); return true; }
+  try { await gcalFetch(`${percorsoEventi(c)}/${eventId}`, 'PATCH', corpoEvento(c, slot)); return true; }
   catch (e) { if (nonEsiste(e)) { await patchCiclo(c.id, { calendar_event_id: null }); return false; } throw e; }
 }
 async function creaBlocco(c, slot, silenzioso) {
-  const ev = await gcalFetch(percorsoEventi(), 'POST', corpoEvento(c, slot));
+  const ev = await gcalFetch(percorsoEventi(c), 'POST', corpoEvento(c, slot));
   if (!ev || !ev.id) throw new Error('Google Calendar non ha creato l\'evento');
-  await patchCiclo(c.id, { calendar_event_id: ev.id });
+  await patchCiclo(c.id, { calendar_event_id: ev.id, ...(state.calColCosaOk ? { calendar_event_cal: calDellaCosa(c) } : {}) });
   if (silenzioso) return ev.id;
   render();
   showToast(`Bloccata in agenda: ${fmtGiorno(parseISODate(slot.data))}, ${slot.ora}–${oraFine(slot.ora, slot.durata)}`, 'success', { annulla: () => togliBlocco(ciclo(c.id), true) });
@@ -9085,7 +9097,7 @@ async function creaBlocco(c, slot, silenzioso) {
 }
 async function togliBlocco(c, silenzioso) {
   if (!c || !c.calendar_event_id) return;
-  try { await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'DELETE'); }
+  try { await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'DELETE'); }
   catch (e) { if (!nonEsiste(e)) throw e; }
   await patchCiclo(c.id, { calendar_event_id: null });
   if (!silenzioso) { render(); showToast('Tolta dall\'agenda', 'info'); }
@@ -9158,7 +9170,7 @@ async function chiudiBlocco(c) {
     const slot = slotBlocco(c);
     const futuro = slot.completo && new Date(`${slot.data}T${slot.ora}:00`) > new Date();
     if (futuro) await togliBlocco(c, true);
-    else await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + c.title });
+    else await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + c.title });
   } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi blocco:', e.message); }
 }
 
@@ -10150,7 +10162,7 @@ async function salvaSvuota() {
 // v5 · TUTTO: «N cose aperte» e com'era 7 giorni fa (meno è meglio)
 // ══════════════════════════════════════════════════════════════
 function statoAperte() {
-  const base = c => c.ctx === state.ctx && !(c.parent_id && state.passiColOk);
+  const base = c => vedi(c.ctx) && !(c.parent_id && state.passiColOk);
   const T = Date.now() - 7 * 864e5, t = s => s ? new Date(s).getTime() : 0;
   const ora = state.cicli.filter(c => base(c) && isAttivo(c)).length;
   // 7 giorni fa: esisteva, non era ancora chiusa (updated_at di una chiusa ≈ quando è stata chiusa) e non era in Un giorno
@@ -11168,7 +11180,7 @@ async function caricaScorsa(week, year) {
   try {
     const { data, error } = await db.from('battle_plan').select('id,battle_plan_items(ciclo_id,completato,tipo_slot)').eq('settimana', w.week).eq('anno', w.year).maybeSingle();
     if (error) throw error;
-    const items = ((data && data.battle_plan_items) || []).filter(i => i.ciclo_id && i.tipo_slot !== 'cuscinetto').filter(i => { const c = ciclo(i.ciclo_id); return c && c.ctx === state.ctx; });
+    const items = ((data && data.battle_plan_items) || []).filter(i => i.ciclo_id && i.tipo_slot !== 'cuscinetto').filter(i => { const c = ciclo(i.ciclo_id); return !!c; });
     ui.scorsa[k] = items.length ? bpStats(items) : { tot: 0 };
     if (boardAttiva()) render();
   } catch (e) { console.warn('[Pianifica] settimana scorsa:', e.message); }
@@ -12726,7 +12738,7 @@ function corpoAvviso(c, slot) {
 // l'evento collegato alla cosa, solo se l'ha creato l'app (null se non c'è o non è nostro)
 async function eventoDellApp(c) {
   if (!c || !c.calendar_event_id || bloccoEsterno(c)) return null;
-  try { return await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'GET'); }
+  try { return await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'GET'); }
   catch (e) { if (nonEsiste(e)) return null; throw e; }
 }
 // ultimo contenuto scritto per ogni avviso: uno spostamento visto due volte si scrive una volta sola
@@ -12742,10 +12754,10 @@ async function creaAvviso(id) {
   try {
     await ensureGcalCalendar();
     if (!gcal.calendarId) return null;
-    const ev = await gcalFetch(percorsoEventi(), 'POST', corpoAvviso(c, slot));
+    const ev = await gcalFetch(percorsoEventi(c), 'POST', corpoAvviso(c, slot));
     if (!ev || !ev.id) throw new Error('Google Calendar non ha creato l\'evento');
     _avvisoScritto.set(c.id, firmaAvviso(c, slot));
-    await patchCiclo(c.id, { calendar_event_id: ev.id });
+    await patchCiclo(c.id, { calendar_event_id: ev.id, ...(state.calColCosaOk ? { calendar_event_cal: calDellaCosa(c) } : {}) });
     render();
     return ev.id;
   } catch (e) { showToast('Avviso non messo su Calendar: ' + e.message, 'error'); return null; }
@@ -12766,7 +12778,7 @@ aggiornaBlocco = async function (id) {
     if (!eAvviso(ev)) return _aggiornaBloccoV9(id);
     if (!slot) { _avvisoScritto.delete(id); await togliBlocco(c, true); render(); return; }
     _avvisoScritto.set(id, firmaAvviso(c, slot));
-    await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'PATCH', corpoAvviso(c, slot));
+    await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', corpoAvviso(c, slot));
   } catch (e) { console.warn('[GCal] aggiorna avviso:', e.message); }
 };
 // chiusa: l'avviso si cancella sempre (il blocco di «Blocca in agenda» fa come prima)
@@ -13098,7 +13110,7 @@ chiudiBlocco = async function (c) {
     const inizio = ev.start && (ev.start.dateTime || ev.start.date);
     const futuro = inizio && new Date(inizio) > new Date();
     if (eAvviso(ev) || futuro) { await togliBlocco(ciclo(c.id) || c, true); return; }
-    if (!/^✓ /.test(ev.summary || '')) await gcalFetch(`${percorsoEventi()}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + (ev.summary || c.title) });
+    if (!/^✓ /.test(ev.summary || '')) await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + (ev.summary || c.title) });
   } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi:', e.message); }
 };
 
@@ -14569,7 +14581,7 @@ function troppoGenerica(c) {
 const specificheOk = () => new Set(leggiJson(PRINC.LS.SPEC_OK, []));
 function daRendereSpecifiche() {
   const ok = specificheOk();
-  return state.cicli.filter(c => c.ctx === state.ctx && isAttivo(c) && !ok.has(String(c.id)) && troppoGenerica(c))
+  return state.cicli.filter(c => vedi(c.ctx) && isAttivo(c) && !ok.has(String(c.id)) && troppoGenerica(c))
     .sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
 }
 function vistaSpecifiche() {
@@ -16433,7 +16445,7 @@ function inRitardoOggi(r, adesso = new Date()) {
 function cicliIndietro() {
   const oggi = oggiLocale();
   const daPiano = new Set(rimasteVisibili().map(x => x.item.ciclo_id));
-  const sciolte = state.cicli.filter(c => c.ctx === state.ctx && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c)
+  const sciolte = state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c)
     && c.pianificato_data && c.pianificato_data < oggi && !daPiano.has(c.id));
   return { daPiano: daPiano.size, sciolte: sciolte.sort((a, b) => a.pianificato_data.localeCompare(b.pianificato_data)) };
 }
@@ -16575,6 +16587,111 @@ avviaApp = function (sessione) {
   if (prima) return;
   setTimeout(ripristinaBozzaCattura, 300);
   caricaInviiDb().catch(err => console.warn('[Piano] invii:', err.message));
+};
+
+// ══════════════════════════════════════════════════════════════
+// v13 · 27/10 · UNA LISTA SOLA: lavoro e personale insieme
+// · l'interruttore diventa un filtro «Tutto · Lavoro · Personale» che vale solo per guardare (Oggi e Tutto) e parte da Tutto
+// · Prepara la settimana, Settimana, 3 mesi, foglio del coach, Tempo per il futuro: sempre tutto
+// · sulle righe l'etichetta «Personale»; le personali vanno sul calendario Privato
+// · state.ctx resta il contesto proposto per le cose nuove (Lavoro, Personale se filtri Personale)
+// ══════════════════════════════════════════════════════════════
+const V13 = { PRIVATO: (CAL_LETTURA.find(c => c.tipo === 'privato') || {}).id || 'maci81x@gmail.com',
+  PIANO: ['bpWizOverlay', 'bpRevOverlay', 'bpSnOverlay', 'prontoOverlay', 'inviaOverlay', 'riempiOverlay', 'seraOverlay', 'futuroOverlay', 'proteggiOverlay', 'bloccaOverlay'] };
+state.filtro = 'tutto';
+state.ctx = 'lavoro';
+ui._tuttiCtx = 0;
+// il filtro vale solo in Oggi e Tutto, e mai mentre prepari o chiudi la settimana
+function filtroQui() {
+  if (state.filtro === 'tutto' || ui._tuttiCtx > 0) return false;
+  if (!['oggi', 'tutto'].includes(ui.tab)) return false;
+  return !V13.PIANO.some(id => { const el = document.getElementById(id); return el && el.classList.contains('open'); });
+}
+function ctxVista() { return filtroQui() ? state.filtro : 'tutti'; }
+function vedi(ctx) { const v = ctxVista(); return v === 'tutti' || ctx === v; }
+// esegue fn vedendo tutto (anche se in Oggi c'è il filtro)
+function conTutto(fn) { return function () { ui._tuttiCtx++; try { return fn.apply(this, arguments); } finally { ui._tuttiCtx--; } }; }
+['creaPdfSettimana', 'quotaSettimana', 'vociCoach', 'bpwCandidati', 'righePdfGiorno'].forEach(nome => { if (typeof window[nome] === 'function') window[nome] = conTutto(window[nome]); });
+
+// --- il filtro in alto ---
+switchCtx = function (ctx) {
+  state.filtro = ['lavoro', 'personale'].includes(ctx) ? ctx : 'tutto';
+  state.ctx = state.filtro === 'personale' ? 'personale' : 'lavoro';
+  state.filter_cat = null;
+  state.filter_persona = null;
+  try { localStorage.setItem(LS.CAT_FILTER, ''); } catch (_) { /* niente */ }
+  render();
+};
+const _disegnaV13 = disegna;
+disegna = function () {
+  const r = _disegnaV13.apply(this, arguments);
+  [['ctx-tutto', 'tutto'], ['ctx-lavoro', 'lavoro'], ['ctx-personale', 'personale']].forEach(([id, v]) => { const b = $(id); if (b) b.setAttribute('aria-pressed', String(state.filtro === v)); });
+  const seg = document.querySelector('.top-ctx');
+  if (seg) {
+    const qui = ['oggi', 'tutto'].includes(ui.tab);
+    seg.style.visibility = qui ? '' : 'hidden';
+    seg.setAttribute('aria-label', 'Mostra');
+  }
+  return r;
+};
+
+// --- l'etichetta «Personale» ---
+const TAG_PERS = '<span class="tag-pers">Personale</span>';
+const _rigaV13 = riga;
+riga = function (r, opz) {
+  const h = _rigaV13.apply(this, arguments);
+  if (!r || !r.c || r.c.ctx !== 'personale' || state.filtro === 'personale' && filtroQui()) return h;
+  return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + dentro + (dentro.trim() ? '<span class="sep">·</span>' : '') + TAG_PERS + b);
+};
+const _rigaSceltaSnV13 = rigaSceltaSn;
+rigaSceltaSn = function (id) {
+  const h = _rigaSceltaSnV13.apply(this, arguments), c = ciclo(id);
+  return c && c.ctx === 'personale' ? h.replace(/(<span class="sn-pick-txt"><span>)([\s\S]*?)(<\/span>)/, (x, a, t, b) => `${a}${t} ${TAG_PERS}${b}`) : h;
+};
+
+// --- aggiungere: con «Tutto» niente «Sei in Lavoro: la metto in Personale» ---
+const _notaCtxV13 = notaCtx;
+notaCtx = function () { return state.filtro === 'tutto' ? '' : _notaCtxV13.apply(this, arguments); };
+const _etichettaSalvaV13 = etichettaSalva;
+etichettaSalva = function (voci) { return state.filtro === 'tutto' && voci && voci.length === 1 ? 'Salva' : _etichettaSalvaV13.apply(this, arguments); };
+const _dopoIlSalvataggioV13 = dopoIlSalvataggio;
+dopoIlSalvataggio = function (fatte, vista) {
+  if (state.filtro !== 'tutto') return _dopoIlSalvataggioV13.apply(this, arguments);
+  return _dopoIlSalvataggioV13((fatte || []).map(x => ({ ...x, c: { ...x.c, ctx: vista } })), vista);
+};
+
+// --- calendario della cosa: personali sul Privato, se l'account può scriverci ---
+state.calPrivatoOk = null;   // null = non ancora verificato → si scrive sul calendario di sempre
+state.calColCosaOk = false;
+function calDellaCosa(c) {
+  if (c && c.calendar_event_id && c.calendar_event_cal) return c.calendar_event_cal;   // l'evento sta dove è stato creato
+  if (c && c.ctx === 'personale' && state.calPrivatoOk === true) return V13.PRIVATO;
+  return gcal.calendarId;
+}
+async function verificaCalPrivato() {
+  if (state.calPrivatoOk !== null || !isGcalTokenValid()) return;
+  try {
+    const r = await gcalFetch(`/users/me/calendarList/${encodeURIComponent(V13.PRIVATO)}`, 'GET');
+    state.calPrivatoOk = !!(r && ['owner', 'writer'].includes(r.accessRole));
+  } catch (e) { state.calPrivatoOk = false; console.warn('[GCal] Privato non scrivibile:', e.message); }
+}
+const _ensureGcalCalendarV13 = ensureGcalCalendar;
+ensureGcalCalendar = async function () {
+  const r = await _ensureGcalCalendarV13.apply(this, arguments);
+  await verificaCalPrivato();
+  return r;
+};
+
+// all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
+const _avviaAppV13 = avviaApp;
+avviaApp = function (sessione) {
+  const prima = _appAvviata;
+  _avviaAppV13(sessione);
+  if (prima) return;
+  state.filtro = 'tutto';
+  state.ctx = 'lavoro';
+  db.from('cicli').select('id,calendar_event_cal').limit(1).then(({ error }) => { state.calColCosaOk = !error; });
+  verificaCalPrivato().catch(() => {});
 };
 </script>
 </body>

@@ -22,3 +22,6 @@ CREATE POLICY "solo_proprietario" ON public.eventi_nascosti
 -- 26/10 · Piano inviato al coach e stampato: anche nel database, così si vede da tutti i dispositivi.
 ALTER TABLE public.battle_plan ADD COLUMN IF NOT EXISTS inviato_at timestamptz;
 ALTER TABLE public.battle_plan ADD COLUMN IF NOT EXISTS stampato_at timestamptz;
+
+-- 27/10 · Su quale calendario è l'evento della cosa (le personali sul Privato).
+ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS calendar_event_cal text;
