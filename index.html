@@ -16490,6 +16490,10 @@ function primaDiTutto() {
   const righe = righeGiornoData(adesso);
   const late = righe.filter(r => inRitardoOggi(r, adesso));
   const subito = righe.filter(r => !r.fatto && computeEffectiveQ(r.c) === 1 && !late.includes(r));
+  // 28/10 · le Subito senza giorno: vanno fatte oggi anche se non hanno una data
+  const nelGiorno = new Set(righe.map(r => r.c.id));
+  state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c) && !c.pianificato_data && !nelGiorno.has(c.id) && computeEffectiveQ(c) === 1)
+    .forEach(c => subito.push({ c, item: null, fascia: 'mattina', conFascia: false, haFascia: false, ora: oraDi(c), durata: c.durata_minuti || null, fatto: false }));
   const lista = [...late.filter(r => computeEffectiveQ(r.c) === 1), ...late.filter(r => computeEffectiveQ(r.c) !== 1), ...subito];
   const ind = cicliIndietro(), nInd = ind.daPiano + ind.sciolte.length;
   if (lista.length || nInd) {
