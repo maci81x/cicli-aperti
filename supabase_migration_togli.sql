@@ -29,3 +29,6 @@ ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS calendar_event_cal text;
 -- 28/10 · Appuntamenti fatti: il titolo (per ritrovarli in Fatte) e il feedback scritto chiudendoli.
 ALTER TABLE public.eventi_fatti ADD COLUMN IF NOT EXISTS titolo text;
 ALTER TABLE public.eventi_fatti ADD COLUMN IF NOT EXISTS feedback text;
+
+-- 28/10 · Le cose senza giorno restano senza data: prima il salvataggio falliva («null value in column scheduled_date»).
+ALTER TABLE public.cicli ALTER COLUMN scheduled_date DROP NOT NULL;
