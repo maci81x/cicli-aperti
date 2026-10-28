@@ -6094,7 +6094,10 @@ function prossimaData(iso, rip) {
 // con la data (e la scadenza, se c'è) spostate di un passo.
 async function chiudiERicrea(c) {
   const rip = ripetizioneDi(c);
-  const prossima = prossimaData(c.pianificato_data || c.scheduled_date || oggiLocale(), rip);
+  // 28/10 · la prossima volta è sempre dopo oggi: se era rimasta indietro di settimane non torna «lun 19 ott»
+  let prossima = prossimaData(c.pianificato_data || c.scheduled_date || oggiLocale(), rip), passi = 1;
+  while (prossima && toISODate(prossima) <= oggiLocale() && passi < 400) { prossima = prossimaData(toISODate(prossima), rip); passi++; }
+  const scadenzaDopo = iso => { let d = parseISODate(iso); for (let i = 0; i < passi && d; i++) d = prossimaData(toISODate(d), rip); return d; };
   const now = new Date().toISOString();
   const { id, created_at, updated_at, google_event_id, ...resto } = c;
   const nuova = {
@@ -6102,7 +6105,7 @@ async function chiudiERicrea(c) {
     ...(resto.calendar_event_id !== undefined ? { calendar_event_id: null } : {}),   // l'evento bloccato era di questa volta
     pianificato_data: toISODate(prossima), scheduled_date: toISODate(prossima),
     settimana_anno: isoWeekStr(prossima), week: isoWeekParts(prossima).week, year: prossima.getFullYear(),
-    due_date: c.due_date ? toISODate(prossimaData(c.due_date, rip)) : null,
+    due_date: c.due_date ? toISODate(scadenzaDopo(c.due_date)) : null,
     created_at: now, updated_at: now
   };
   const { data, error } = await db.from('cicli').insert(nuova).select();
