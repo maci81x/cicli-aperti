@@ -25,3 +25,7 @@ ALTER TABLE public.battle_plan ADD COLUMN IF NOT EXISTS stampato_at timestamptz;
 
 -- 27/10 · Su quale calendario è l'evento della cosa (le personali sul Privato).
 ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS calendar_event_cal text;
+
+-- 28/10 · Appuntamenti fatti: il titolo (per ritrovarli in Fatte) e il feedback scritto chiudendoli.
+ALTER TABLE public.eventi_fatti ADD COLUMN IF NOT EXISTS titolo text;
+ALTER TABLE public.eventi_fatti ADD COLUMN IF NOT EXISTS feedback text;
