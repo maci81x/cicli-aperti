@@ -32,3 +32,12 @@ ALTER TABLE public.eventi_fatti ADD COLUMN IF NOT EXISTS feedback text;
 
 -- 28/10 · Le cose senza giorno restano senza data: prima il salvataggio falliva («null value in column scheduled_date»).
 ALTER TABLE public.cicli ALTER COLUMN scheduled_date DROP NOT NULL;
+
+-- 29/10 · Le cose che arrivano dalla posta di lavoro (applicata come migrazione «posta_lavoro_cicli»).
+ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS fonte text;
+ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS posta_tipo text;
+ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS posta_thread text[];
+ALTER TABLE public.cicli ADD COLUMN IF NOT EXISTS posta_ultima_at timestamptz;
+CREATE TABLE IF NOT EXISTS public.posta_thread (thread_id text PRIMARY KEY, ciclo_id uuid REFERENCES public.cicli(id) ON DELETE SET NULL, oggetto text, esito text NOT NULL DEFAULT 'cosa', motivo text, ultima_mail_at timestamptz, visto_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS public.posta_scansioni (id bigserial PRIMARY KEY, iniziata_at timestamptz NOT NULL DEFAULT now(), finita_at timestamptz, dal timestamptz, al timestamptz, thread_letti int, cose_nuove int, cose_aggiornate int, report int, esito text, messaggio text);
+-- (RLS «solo_proprietario» su entrambe, come eventi_nascosti)
