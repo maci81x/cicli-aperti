@@ -825,3 +825,9 @@ Id presenti nell'HTML ma mai usati dallo script: `#searchBar`, `#fabBtn`, `#hamb
 ### Da fare sul database
 
 `supabase_migration_annuale.sql` non è ancora nel repo né applicata: allargare il CHECK di `cicli.pianificato_ripetizione` con `'annuale'`. Finché non c'è, l'annuale funziona tramite `cicli.ricorrenza`.
+
+## Versione dell'app (v20, 29/10/2026)
+In fondo a index.html c'è `const VERSIONE_APP = '…'`. A ogni rilascio va cambiata (data + vNN): le app rimaste aperte su telefono o computer
+la confrontano con quella pubblicata quando tornano in primo piano (e ogni 10 minuti) e si ricaricano da sole.
+Se non la cambi non succede niente di male: semplicemente le app aperte restano alla versione di prima finché non le ricarichi.
+Motivo: il 29/10 un'app rimasta aperta col codice di prima del 27/10 ha ricreato tre volte la «Lettera a Gio Evan».
