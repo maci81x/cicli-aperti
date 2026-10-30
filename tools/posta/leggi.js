@@ -1,4 +1,4 @@
-// Lettura della posta di lavoro per Cicli Aperti — si incolla in una scheda di Gmail (mail.google.com/mail/u/0) con javascript_tool.
+// Lettura della posta di lavoro per Cicli Aperti — si incolla in una scheda di Gmail aperta sull'account r.macinai (mail.google.com/mail/?authuser=r.macinai@sisoluzioniimpresa.it) con javascript_tool.
 // NON segna niente come letto: legge la «vista di stampa» (view=pt) e gli allegati «visualizza come HTML» (disp=vah) con fetch.
 // Non apre mai la vista di stampa come pagina (aprirebbe la finestra di stampa e bloccherebbe la scheda).
 // Uso:
@@ -8,7 +8,8 @@
 //   __posta.mostra(0)                           → mette la parte 0 del testo in pagina, da leggere con get_page_text (45.000 caratteri a parte)
 (() => {
   const IK = (window.GLOBALS || [])[9] || (document.body.innerHTML.match(/"ik":"([0-9a-f]{6,})"/) || [])[1];
-  const BASE = location.origin + '/mail/u/0/';
+  // l'account giusto: Gmail mette ogni account in /mail/u/N/ (0, 1, 2…): si usa quello della scheda aperta
+  const BASE = location.origin + ((location.pathname.match(/^\/mail\/u\/\d+\//) || ['/mail/u/0/'])[0]);
   const MESI = { gennaio: 0, febbraio: 1, marzo: 2, aprile: 3, maggio: 4, giugno: 5, luglio: 6, agosto: 7, settembre: 8, ottobre: 9, novembre: 10, dicembre: 11 };
   const RX_VIA = /Le informazioni contenute|destinat[ae] esclusivamente|diffusione, distribuzione|Regulation \(EU\)|All information and attachments|must not share|by mistake|Non permettendo Internet|declina ogni responsabilit|per errore vi preghiamo|G\.D\.P\.R|Posta Certificata|06402320482|SUBM70N|Loc\. Drove|0577 ?-? ?980881|Fax\.? ?0577|Regolamento \(UE\) n\. 2016|^\s*\[Testo tra virgolette nascosto\]\s*$|^_{8,}|of 27 April 2016|delete this message|autorizzazione espressa|^\s*\|\s*$|confidential\/privileged|intended recipient|DueEsseTi S\.r\.l\. opera|AVVISO: Questo documento|DISCLAIMER:/i;
   const strip = h => h.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<head[\s\S]*?<\/head>/gi, ' ')
@@ -37,7 +38,8 @@
   const vah = async url => { const raw = await (await fetch(url.replace(/disp=\w+/, 'disp=vah'), { credentials: 'same-origin' })).text();
     const nome = ((raw.match(/<title>([^<]{1,250})<\/title>/i) || [])[1] || 'allegato').replace(/&amp;/g, '&').replace(/&#39;/g, "'").trim();
     return { nome, testo: strip(raw).replace(/^.*?Scarica l'allegato originale/s, '').replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim() }; };
-  const P = window.__posta = { IK, out: '', allegati: {} };
+  const ACCOUNT = (document.title.match(/[\w.+-]+@[\w.-]+\.\w+/) || [''])[0];
+  const P = window.__posta = { IK, BASE, ACCOUNT, out: '', allegati: {} };
   P.lista = () => [...document.querySelectorAll('tr.zA')].filter(r => r.offsetParent).map(r => ({
     id: (r.querySelector('[data-legacy-thread-id]') || { getAttribute: () => null }).getAttribute('data-legacy-thread-id'),
     nonLetta: r.classList.contains('zE'),
@@ -75,5 +77,5 @@
     if (!k) { const h = await pt(id); for (const a of urlAllegati(h)) { const x = await vah(a.url); P.allegati[id + '|' + x.nome] = a.url; } k = Object.keys(P.allegati).find(k => k.startsWith(id + '|') && k.toLowerCase().includes(String(pezzo).toLowerCase())); }
     if (!k) return 0; const x = await vah(P.allegati[k]); P.out = `##### ALLEGATO ${k}\n` + x.testo.slice(0, max); return P.out.length; };
   P.mostra = (i = 0, n = 45000) => { const pre = document.createElement('pre'); pre.textContent = `[parte ${i} di ${Math.max(0, Math.ceil(P.out.length / n) - 1)}]\n` + P.out.slice(i * n, (i + 1) * n); document.body.replaceChildren(pre); return 'ok'; };
-  return 'posta pronta · ik ' + (IK ? 'ok' : 'MANCANTE');
+  return 'posta pronta · ik ' + (IK ? 'ok' : 'MANCANTE') + ' · ' + BASE.replace(location.origin, '') + ' · account ' + (ACCOUNT === 'r.macinai@sisoluzioniimpresa.it' ? 'GIUSTO' : 'SBAGLIATO (' + ACCOUNT + ')');
 })();
