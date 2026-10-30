@@ -1795,6 +1795,16 @@ button.sn-r { width: 100%; cursor: pointer; }
 .det-posta-testa .ti { color: #1D5FA8; font-size: 18px; }
 .det-posta-link { display: flex; flex-wrap: wrap; gap: 6px; }
 .det-posta-nota { white-space: pre-wrap; max-height: 46vh; overflow: auto; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font-size: var(--fs-label); line-height: 1.5; }
+/* v21 · settimana da oggi, stampa del giorno */
+.v21-passati { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; padding: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
+.v21-passati span { flex: 1; min-width: 0; }
+.v21-passati b { color: var(--primary-ink); font-weight: var(--fw-strong); white-space: nowrap; }
+.v21-passati:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.v21-hdx { display: inline-flex; align-items: center; gap: 4px; }
+.v21-stampa { width: 32px; min-width: 32px; height: 32px; min-height: 32px; }
+.v21-stampa .ti { font-size: 17px; }
+.vh .v21-stampa-oggi { width: var(--tap); min-width: var(--tap); height: var(--tap); min-height: var(--tap); }
+@media (max-width: 480px) { .v21-passati b { display: none; } .v21-passati span::after { content: ' · tocca per vedere'; color: var(--text-3); } .v21-passati[aria-expanded="true"] span::after { content: ' · tocca per chiudere'; } }
 </style>
 </head>
 <body>
@@ -7575,18 +7585,19 @@ function righePdfGiorno(righe, d) {
 // v5 · il foglio nel formato del piano i-Time: in cima il riquadro giallo «Settimana (pensaci dopo)», poi un blocco
 // per giorno (cose con quadratino, appuntamenti con cerchio e orario, cuscinetti con righe vuote, note in grigio),
 // a destra le righe per gli appunti a penna, in fondo «Nuove cose emerse» e «Fatte __ / __». Leggibile in bianco e nero.
-function creaPdfSettimana() {
+function creaPdfSettimana(opz = {}) {
+  const unGiorno = opz.giorno != null;
   const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
   if (!jsPDFCtor) { showToast('Libreria PDF non caricata, riprova', 'error'); return null; }
   const giorni = GIORNI.map((g, idx) => {
     const d = dataDelGiorno(idx), voci = righePdfGiorno(righeGiorno(g.key), d), routine = arcoRoutine(routineDelGiorno(d));
     const pieno = idx < 5 && !cuscinettiDelGiorno(d).length && giornataPiena(d, occupatiPiano(g.key));
     // sabato e domenica solo se c'è una cosa, un cuscinetto o un appuntamento non ricorrente
-    return { titolo: `${g.label} ${d.getDate()}/${d.getMonth() + 1}`, voci: routine ? [{ tipo: 'routine', routine }, ...voci] : voci, pieno, weekend: idx > 4, haVoci: voci.some(v => v.tipo !== 'evento' || !v.e.serie) };
-  }).filter(z => !z.weekend || z.haVoci);
-  const inSett = righeGiorno('settimana').map(r => ({ tipo: 'cosa', r }));
+    return { idx, titolo: `${g.label} ${d.getDate()}/${d.getMonth() + 1}`, voci: routine ? [{ tipo: 'routine', routine }, ...voci] : voci, pieno, weekend: idx > 4, haVoci: voci.some(v => v.tipo !== 'evento' || !v.e.serie) };
+  }).filter(z => unGiorno ? z.idx === opz.giorno : (!z.weekend || z.haVoci));
+  const inSett = unGiorno ? daPianificarePdf(giorni[0]) : righeGiorno('settimana').map(r => ({ tipo: 'cosa', r }));
   const cose = [...inSett, ...giorni.flatMap(z => z.voci.filter(v => v.tipo === 'cosa'))];
-  if (!cose.length && !giorni.some(z => z.haVoci)) { showToast('Niente da stampare in questa settimana', 'warn'); return null; }
+  if (!unGiorno && !cose.length && !giorni.some(z => z.haVoci)) { showToast('Niente da stampare in questa settimana', 'warn'); return null; }
 
   const formato = formatoFoglio(), s = formato === 'a5' ? .84 : 1;
   const prova = new jsPDFCtor({ unit: 'mm', format: formato, orientation: 'portrait' }), pagina = prova.internal.pageSize;
@@ -7627,7 +7638,7 @@ function creaPdfSettimana() {
   const stima = Math.max(RIGA_MIN, Math.min(7.2 * s, (LIMITE - M - fissi) / totRighe));
   // v6 · colori del foglio = colori dell'app (tema chiaro); il fondo delle Subito è un po' più carico, sulla carta #FFF4F3 non si vede
   const PDF_COL = { 1: [217, 45, 32], 2: [15, 118, 110], 3: [37, 99, 235], 4: [122, 134, 130], evt: [124, 58, 237], evtInk: [109, 40, 217], subitoFondo: [253, 226, 223], giallo: [255, 244, 179] };
-  const nPiano = cose.length;
+  const nPiano = unGiorno ? giorni[0].voci.filter(v => v.tipo === 'cosa').length : cose.length;
   // tutto su un foglio quando si può: se esce su due pagine si rifà con le righe più strette, fino al minimo leggibile
   const costruisci = RIGA => {
     const doc = new jsPDFCtor({ unit: 'mm', format: formato, orientation: 'portrait' });
@@ -7694,7 +7705,7 @@ function creaPdfSettimana() {
     // intestazione
     const da = getWeekStart(state.week, state.year), a = new Date(da); a.setDate(da.getDate() + 6);
     const dm = d => `${d.getDate()}/${d.getMonth() + 1}`;
-    const titolo = pdfTxt(`Business Plan Settimanale — ${nomeUtente()} — Settimana ${state.week} (${dm(da)}–${dm(a)})`);
+    const titolo = pdfTxt(unGiorno ? `Giornata — ${nomeUtente()} — ${fmtGiornoLungo(dataDelGiorno(opz.giorno))} (settimana ${state.week})` : `Business Plan Settimanale — ${nomeUtente()} — Settimana ${state.week} (${dm(da)}–${dm(a)})`);
     doc.setFont('helvetica', 'bold');
     let ft = 15 * s;
     doc.setFontSize(ft);
@@ -7704,7 +7715,7 @@ function creaPdfSettimana() {
     y += 13 * s;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
     doc.text(`Fatte ____ / ${nPiano}`, M, y);
-    doc.text('Q2 spostate ____', M + 52 * s, y);
+    if (!unGiorno) doc.text('Q2 spostate ____', M + 52 * s, y);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
     doc.text('Lavoro e personale', W - M, y, { align: 'right' });
     // legenda
@@ -7721,16 +7732,19 @@ function creaPdfSettimana() {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(70); doc.text('APPUNTI · NUOVE COSE EMERSE', COL_R_X, y); doc.setTextColor(0);
     y += 4.5 * s;
 
-    // riquadro giallo: le cose senza giorno
+    // riquadro giallo: le cose senza giorno (nella giornata stampata va in fondo: «Da pianificare»)
+    const boxGiallo = () => {
     const hBox = 8 * s + righeZona(inSett, peso) * RIGA + 1.5 * s;
     spazio(hBox);
     colore(PDF_COL.giallo, 'setFillColor'); doc.setDrawColor(190); doc.roundedRect(M - 2 * s, y - 4.5 * s, COL_L + 4 * s, hBox, 1.5, 1.5, 'FD'); doc.setDrawColor(0);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(Math.max(9.5, 10.5 * s)); doc.text('Settimana (pensaci dopo)', M, y);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(Math.max(9.5, 10.5 * s)); doc.text(unGiorno ? 'Da pianificare (Subito e rimaste indietro)' : 'Settimana (pensaci dopo)', M, y);
     punteggiata(COL_R_X, y, COL_R_W);
     y += RIGA;
     inSett.forEach(disegnaVoce);
     if (inSett.length < MIN_RIGHE) righeVuote(MIN_RIGHE - inSett.length);
     y += 3.5 * s;
+    };
+    if (!unGiorno) boxGiallo();
 
     // un blocco per giorno
     giorni.forEach(z => {
@@ -7741,16 +7755,22 @@ function creaPdfSettimana() {
       punteggiata(COL_R_X, y, COL_R_W);
       y += RIGA;
       z.voci.forEach(disegnaVoce);
-      const usate = z.voci.reduce((t, v) => t + peso(v), 0);
-      if (usate < MIN_RIGHE) righeVuote(Math.ceil(MIN_RIGHE - usate));
+      if (unGiorno && !z.voci.some(v => v.tipo === 'cosa' || v.tipo === 'evento')) {
+        spazio(RIGA); doc.setFont('helvetica', 'bold'); doc.setFontSize(corpo); doc.setTextColor(185, 28, 28);
+        doc.splitTextToSize(pdfTxt('Nessuna attività pianificata per questo giorno: scegli dal riquadro qui sotto.'), LARGO_TIT).forEach(t => { spazio(RIGA); doc.text(t, X_TIT, y); y += RIGA * .85; });
+        doc.setTextColor(0); y += RIGA * .15;
+      }
+      const usate = z.voci.reduce((t, v) => t + peso(v), 0), minimo = unGiorno ? 10 : MIN_RIGHE;
+      if (usate < minimo) righeVuote(Math.ceil(minimo - usate));
       y += RIGA * .5;
     });
+    if (unGiorno) { y += 3 * s; boxGiallo(); }
 
     // le righe libere a destra continuano fino in fondo: lì vanno le cose nuove scritte a penna
     while (y + RIGA < LIMITE - 6) { punteggiata(COL_R_X, y, COL_R_W); y += RIGA; }
     // piè di pagina su ogni foglio: Stampato il … · Inviato a …
     const oggi = new Date(), inv = inviatoIl(state.week, state.year);
-    const piede = pdfTxt(`Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()}  ·  Inviato a ${emailCoach()}${inv ? ' il ' + inv : ' ________'}`);
+    const piede = pdfTxt(unGiorno ? `Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()} alle ${String(oggi.getHours()).padStart(2, '0')}:${String(oggi.getMinutes()).padStart(2, '0')}` : `Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()}  ·  Inviato a ${emailCoach()}${inv ? ' il ' + inv : ' ________'}`);
     for (let pg = 1; pg <= doc.getNumberOfPages(); pg++) {
       doc.setPage(pg);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
@@ -7769,8 +7789,8 @@ function creaPdfSettimana() {
     cuscinetti: cusc.length, minutiCusc: cusc.reduce((t, i) => t + bpDurata(i), 0),
     appuntamenti: giorni.reduce((t, z) => t + z.voci.filter(v => v.tipo === 'evento').length, 0)
   };
-  const nome = `business-plan-${state.year}-W${String(state.week).padStart(2, '0')}${formato === 'a5' ? '-a5' : ''}.pdf`;
-  ui.ultimoPdf = { pagine: doc.getNumberOfPages(), nome, riepilogo, formato };
+  const nome = unGiorno ? `giornata-${toISODate(dataDelGiorno(opz.giorno))}${formato === 'a5' ? '-a5' : ''}.pdf` : `business-plan-${state.year}-W${String(state.week).padStart(2, '0')}${formato === 'a5' ? '-a5' : ''}.pdf`;
+  if (!unGiorno) ui.ultimoPdf = { pagine: doc.getNumberOfPages(), nome, riepilogo, formato };
   return { doc, nome, riepilogo };
 }
 
@@ -17386,7 +17406,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-10-29 v20';
+const VERSIONE_APP = '2026-10-30 v21';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -17404,6 +17424,157 @@ async function controllaVersione() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controllaVersione(); });
 window.addEventListener('focus', () => controllaVersione());
 setInterval(controllaVersione, 10 * 60 * 1000);
+
+// ══════════════════════════════════════════════════════════════
+// v21 · 30/10 · LA SETTIMANA DA OGGI E LA GIORNATA STAMPATA
+// 1. Pianifica → Settimana (questa settimana): i giorni da oggi a domenica. I giorni passati stanno in una riga
+//    «Lun 26 – Gio 29 · 6 fatte · 2 rimaste indietro» che li riapre. Il piano della settimana non cambia.
+// 2. Stampa del singolo giorno (icona stampante in Oggi e su ogni giorno di Pianifica): agenda ora per ora,
+//    le cose del giorno senza ora, in fondo «Da pianificare» (Subito e rimaste indietro) e righe per gli appunti.
+//    Se nel giorno non c'è niente, lo dice nel foglio e con un avviso.
+// ══════════════════════════════════════════════════════════════
+ui.v21Passati = false;
+function v21Da() { return eSettimanaCorrente() && !ui.v21Passati ? giornoIdxDi(oggiData()) : 0; }
+function v21RigaPassati() {
+  if (!eSettimanaCorrente()) return '';
+  const o = giornoIdxDi(oggiData());
+  if (o <= 0) return '';
+  const g = i => `${GIORNI[i].label.slice(0, 3)} ${dataDelGiorno(i).getDate()}`;
+  const righe = GIORNI.slice(0, o).flatMap(x => righeGiorno(x.key));
+  const fatte = righe.filter(r => r.fatto).length, rimaste = righe.length - fatte;
+  const conti = righe.length ? `${plurale(fatte, 'fatta', 'fatte')} · ${rimaste} rimast${rimaste === 1 ? 'a' : 'e'} indietro` : 'niente in programma';
+  return `<button type="button" class="v21-passati" data-act="v21-passati" aria-expanded="${ui.v21Passati}"><i class="ti ti-chevron-${ui.v21Passati ? 'up' : 'down'}" aria-hidden="true"></i><span>${o > 1 ? `${g(0)} – ${g(o - 1)}` : g(0)} · ${conti}</span><b>${ui.v21Passati ? 'Nascondi i giorni passati' : 'Mostra i giorni passati'}</b></button>`;
+}
+AZIONI['v21-passati'] = () => {
+  ui.v21Passati = !ui.v21Passati;
+  if (!ui.v21Passati && eSettimanaCorrente() && ui.giorno < giornoIdxDi(oggiData())) ui.giorno = giornoIdxDi(oggiData());
+  render();
+};
+function v21BtnStampa(idx, extra = '') {
+  const d = dataDelGiorno(idx);
+  return `<button type="button" class="btn btn-icon v21-stampa" data-act="v21-stampa-giorno" data-i="${idx}"${extra} aria-label="Stampa ${GIORNI[idx].label.toLowerCase()} ${d.getDate()}" data-tip="Stampa la giornata"><i class="ti ti-printer"></i></button>`;
+}
+// mette il bottone a destra nell'intestazione, insieme a quello che c'è già dopo il primo elemento
+function v21InTesta(testa, btnHtml) {
+  if (!testa) return;
+  const dx = document.createElement('span');
+  dx.className = 'v21-hdx';
+  [...testa.children].slice(1).forEach(x => dx.appendChild(x));
+  dx.insertAdjacentHTML('beforeend', btnHtml);
+  testa.appendChild(dx);
+}
+function v21Tpl(html) { const t = document.createElement('template'); t.innerHTML = html; return t; }
+
+// board (≥ 1100 px)
+const _giorniVisibiliV21 = giorniVisibili;
+giorniVisibili = function () {
+  if (!eSettimanaCorrente()) return _giorniVisibiliV21.apply(this, arguments);
+  const da = v21Da();
+  return GIORNI.map((g, idx) => ({ g, idx })).filter(({ idx }) => idx >= da);
+};
+const _colonnaGiornoV21 = colonnaGiorno;
+colonnaGiorno = function (gg, idx) {
+  const t = v21Tpl(_colonnaGiornoV21.apply(this, arguments));
+  v21InTesta(t.content.querySelector('.bcol-h'), v21BtnStampa(idx));
+  return t.innerHTML;
+};
+const _pianLargoV21 = pianLargo;
+pianLargo = function () {
+  let h = _pianLargoV21.apply(this, arguments);
+  if (!eSettimanaCorrente()) return h;
+  h = h.replace(/<button type="button" class="btn btn-ghost btn-sm" data-act="weekend">[^<]*<\/button>/, '');
+  return h.replace('<div class="board-scorri">', v21RigaPassati() + '<div class="board-scorri">');
+};
+
+// colonne (768–1100 px)
+const _pianSettimanaColonneV21 = pianSettimanaColonne;
+pianSettimanaColonne = function (eOggi) {
+  const corrente = eSettimanaCorrente(), w = ui.weekend;
+  if (corrente) ui.weekend = true;
+  let h;
+  try { h = _pianSettimanaColonneV21.apply(this, arguments); } finally { ui.weekend = w; }
+  const t = v21Tpl(h), cols = t.content.querySelector('.cols');
+  if (!cols) return h;
+  const da = corrente ? v21Da() : 0;
+  [...cols.children].forEach((col, i) => { if (i < da) col.remove(); else v21InTesta(col.querySelector('.col-h'), v21BtnStampa(i)); });
+  if (corrente) {
+    const n = 7 - da;
+    cols.classList.remove('sette');
+    cols.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+    const tools = t.content.querySelector('.tools-row');
+    if (tools) { const riga = v21RigaPassati(); if (riga) tools.outerHTML = riga; else tools.remove(); }
+  }
+  return t.innerHTML;
+};
+
+// telefono: i giorni da oggi in poi nella fila in alto
+const _pianSettimanaV21 = pianSettimana;
+pianSettimana = function () {
+  const da = v21Da();
+  if (window.innerWidth < 768 && ui.giorno < da) ui.giorno = da;
+  const h = _pianSettimanaV21.apply(this, arguments);
+  const t = v21Tpl(h), days = t.content.querySelector('.days');
+  if (!days) return h;
+  days.querySelectorAll('.day').forEach(b => { if (+b.dataset.i < da) b.remove(); });
+  if (da) days.style.gridTemplateColumns = `repeat(${7 - da}, 1fr)`;
+  const riga = v21RigaPassati();
+  if (riga) days.insertAdjacentHTML('beforebegin', riga);
+  const testa = days.nextElementSibling;
+  if (testa && testa.classList.contains('list-head')) v21InTesta(testa, v21BtnStampa(ui.giorno));
+  return t.innerHTML;
+};
+
+// Oggi: la stampante accanto al titolo
+const _vistaOggiV21 = vistaOggi;
+vistaOggi = function () {
+  const h = _vistaOggiV21.apply(this, arguments);
+  const t = v21Tpl(h), vh = t.content.querySelector('.vh');
+  if (!vh) return h;
+  const btn = v21BtnStampa(giornoIdxDi(oggiData()), ' data-oggi="1"').replace('data-tip="Stampa la giornata"', 'data-tip="Stampa la giornata di oggi"').replace('v21-stampa"', 'v21-stampa v21-stampa-oggi"');
+  v21InTesta(vh, btn);
+  return t.innerHTML;
+};
+
+// «Da pianificare» del foglio del giorno: prima le rimaste indietro, poi le Subito non ancora messe in un giorno
+function daPianificarePdf(z) {
+  const nelGiorno = new Set(z.voci.filter(v => v.tipo === 'cosa').map(v => v.r.c.id));
+  const pianificate = new Set([...GIORNI.map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k).map(r => r.c.id)));
+  const visti = new Set(nelGiorno), out = [];
+  const metti = c => { if (!c || visti.has(c.id) || c.done) return; visti.add(c.id); out.push({ tipo: 'cosa', r: { c, fatto: false, ora: '' } }); };
+  // rimaste indietro come in Oggi: dal piano delle settimane scorse e quelle con la data passata
+  try { rimasteVisibili().forEach(({ item }) => metti(ciclo(item.ciclo_id))); cicliIndietro().sciolte.forEach(metti); } catch (_) {}
+  state.cicli.filter(c => vedi(c.ctx) && isAttivo(c) && !c.parent_id && !isGiornaliero(c) && !c.pianificato_data && computeEffectiveQ(c) === 1 && !pianificate.has(c.id))
+    .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
+    .forEach(metti);
+  return out.slice(0, 12);
+}
+function v21GiornoVuoto(idx) {
+  return !righeGiorno(GIORNI[idx].key).length && !eventiDelGiorno(dataDelGiorno(idx)).length;
+}
+async function stampaGiorno(idx, daOggi) {
+  if (daOggi && !eSettimanaCorrente()) {
+    const c = bpSettimanaCorrente();
+    state.week = c.week; state.year = c.year;
+    try { localStorage.setItem(LS.WEEK, state.week); } catch (_) {}
+    await reloadWeekData();
+    try { await caricaEventi(state.week, state.year); } catch (_) {}
+    render();
+    idx = giornoIdxDi(oggiData());
+  }
+  const pdf = creaPdfSettimana({ giorno: idx });
+  if (!pdf) return;
+  const { doc, nome } = pdf, vuoto = v21GiornoVuoto(idx);
+  const msg = vuoto ? 'Nessuna attività pianificata per questo giorno: nel foglio trovi le cose da pianificare' : 'Giornata pronta per la stampa';
+  try {
+    const url = URL.createObjectURL(doc.output('blob'));
+    const win = window.open(url, '_blank');
+    if (!win) doc.save(nome);
+    showToast(win ? msg : (vuoto ? msg : 'PDF della giornata scaricato'), vuoto ? 'warn' : 'success');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) { doc.save(nome); showToast(vuoto ? msg : 'PDF della giornata scaricato', vuoto ? 'warn' : 'info'); }
+  window.__v21UltimaGiornata = { nome, vuoto, pagine: doc.getNumberOfPages() };
+}
+AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), el.dataset.oggi === '1'); };
 </script>
 </body>
 </html>

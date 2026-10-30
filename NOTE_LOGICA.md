@@ -831,3 +831,7 @@ In fondo a index.html c'è `const VERSIONE_APP = '…'`. A ogni rilascio va camb
 la confrontano con quella pubblicata quando tornano in primo piano (e ogni 10 minuti) e si ricaricano da sole.
 Se non la cambi non succede niente di male: semplicemente le app aperte restano alla versione di prima finché non le ricarichi.
 Motivo: il 29/10 un'app rimasta aperta col codice di prima del 27/10 ha ricreato tre volte la «Lettera a Gio Evan».
+
+## Settimana da oggi e giornata stampata (v21, 30/10/2026)
+- **Pianifica → Settimana, settimana corrente**: si vedono i giorni da oggi a domenica (sabato e domenica compresi, il tasto «Mostra sabato e domenica» sparisce). I giorni passati diventano una riga «Lun 26 – Gio 29 · N fatte · N rimaste indietro» che li riapre e li richiude (`ui.v21Passati`). Le altre settimane restano come prima. Il Battle Plan non cambia: è solo cosa si vede. Vale su board (`giorniVisibili`), colonne (`pianSettimanaColonne`) e telefono (chip `.days`).
+- **Stampa del giorno**: `creaPdfSettimana({ giorno: idx })`, icona stampante in Oggi e sull'intestazione di ogni giorno. Foglio: agenda ora per ora, cose senza ora, in fondo «Da pianificare (Subito e rimaste indietro)» (`daPianificarePdf`: rimaste come in Oggi = piano delle settimane scorse + `pianificato_data` passata; Subito senza data e fuori dal piano; massimo 12), righe per gli appunti. Giorno vuoto: scritta rossa nel foglio + avviso. Nome `giornata-AAAA-MM-GG.pdf`; non segna la settimana come stampata.
