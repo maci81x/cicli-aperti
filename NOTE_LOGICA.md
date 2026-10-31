@@ -840,3 +840,9 @@ Motivo: il 29/10 un'app rimasta aperta col codice di prima del 27/10 ha ricreato
 Dai disegni 6 e 7 del canvas «versione snella». Solo presentazione: `vistaPianifica` passa per `v22Board` (board ≥ 1100 px) o `v22Telefono` (< 768 px); 768–1100 resta com'era.
 - **Board**: la testata del piano (`.board-testa`) diventa una riga sotto il titolo (`.v22-testa`: settimana, cose/ore, Futuro, stampa come icona, Invia, Prepara/Modifica); senza piano il bottone principale è «Prepara la settimana». La legenda va in fondo (`.board-piede`). «Per il coach» è una riga (`v22RigaCoach`, `ui.v22Coach` la apre) affiancata alla riga dei giorni passati.
 - **Telefono**: Settimana/Mese accanto al titolo, settimana su una riga, i giorni passati come primo tasto della fila (`.day.v22-passati` → `v21-passati`), sotto il giorno due righe: piano (con la pillola Futuro) e coach.
+
+## Oggi: «Da rispondere (N)» (v23, 31/10/2026)
+Richiesta di Roby del 31/10: il promemoria che il giro della posta mette a calendario ogni mattina («8.30 - Da rispondere (N): …») deve dire la stessa cosa dell'app.
+- In **Oggi**, subito sotto la testata, una riga rossa `section.v23-posta` con «Da rispondere (N)», le scadute e i nomi dei clienti (`v23Cliente`: la parte del titolo prima di « – », «: » o « (»). Tocco → si apre (`ui.v23Aperto`, non persiste) e mostra le righe con `riga()`: spunta = Fatta come ovunque (`azioneFatto`), tocco = dettaglio.
+- Lista `v23DaRispondere()`: cose aperte non parcheggiate, `fonte = 'posta'`, `posta_tipo` in `da_fare`/`preventivo`, `computeEffectiveQ === 1`, nel contesto in vista; ordine per `due_date` poi `posta_ultima_at`. È la stessa query del passo 13 del compito «Posta di lavoro — controllo giornaliero» (scratchpad `posta/prompt_posta.md`).
+- Nessuna cosa → nessun blocco. Si aggancia con un wrapper di `vistaOggi` (dopo quello v12) e inserisce il blocco nel DOM dopo `.vh`.
