@@ -39,7 +39,20 @@
     const nome = ((raw.match(/<title>([^<]{1,250})<\/title>/i) || [])[1] || 'allegato').replace(/&amp;/g, '&').replace(/&#39;/g, "'").trim();
     return { nome, testo: strip(raw).replace(/^.*?Scarica l'allegato originale/s, '').replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim() }; };
   const ACCOUNT = (document.title.match(/[\w.+-]+@[\w.-]+\.\w+/) || [''])[0];
-  const P = window.__posta = { IK, BASE, ACCOUNT, out: '', allegati: {} };
+  // inviti di calendario (.ics di Teams, Outlook, Google): data, ora, titolo, luogo, organizzatore
+  const invito = async url => {
+    const raw = (await (await fetch(url.replace(/disp=\w+/, 'disp=att'), { credentials: 'same-origin' })).text()).replace(/\r?\n[ \t]/g, '');
+    const ev = (raw.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/) || [''])[0]; if (!ev) return null;
+    const g = k => (ev.match(new RegExp('^' + k + '(?:;[^:\\n]*)?:(.*)$', 'm')) || ['', ''])[1].trim();
+    const d = s => { const m = s.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?(Z?)/); if (!m) return null;
+      const dt = m[6] ? new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5])) : new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+      return { dt, tutto: !m[4] }; };
+    const a = d(g('DTSTART')), b = d(g('DTEND'));
+    const G = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'], hm = x => String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0');
+    const quando = a ? `${G[a.dt.getDay()]} ${a.dt.getDate()}/${a.dt.getMonth() + 1}/${a.dt.getFullYear()}${a.tutto ? ' (tutto il giorno)' : ' ' + hm(a.dt) + (b ? '–' + hm(b.dt) : '')}` : 'data non letta';
+    const metodo = (raw.match(/^METHOD:(.*)$/m) || ['', ''])[1].trim();
+    return `INVITO ${metodo === 'CANCEL' ? 'ANNULLATO ' : ''}«${g('SUMMARY')}» · ${quando} · ${g('LOCATION').slice(0, 80) || 'luogo non indicato'} · organizza ${(g('ORGANIZER').match(/mailto:([^\s]+)/i) || ['', g('ORGANIZER')])[1]}`; };
+  const P = window.__posta = { IK, BASE, ACCOUNT, out: '', allegati: {}, invito };
   P.lista = () => [...document.querySelectorAll('tr.zA')].filter(r => r.offsetParent).map(r => ({
     id: (r.querySelector('[data-legacy-thread-id]') || { getAttribute: () => null }).getAttribute('data-legacy-thread-id'),
     nonLetta: r.classList.contains('zE'),
@@ -61,9 +74,13 @@
       for (const m of nuovi) s += `\n>>> ${m.hdr.slice(0, 260)}\n${pulisci(m.body.join('\n'), inoltro).replace(/\n\d+ allegat[io][\s\S]*$/, '').slice(0, opz.maxM || 3500)}`;
       const nomiVisti = new Set();
       for (const a of urlAllegati(h)) {
-        let x; try { x = await vah(a.url); } catch (e) { s += '\n  · allegato non leggibile'; continue; }
+        let x = null; try { x = await vah(a.url); } catch (e) { x = null; }
+        // un invito di calendario non ha la vista HTML: si legge il file .ics
+        if (!x || /\.ics$/i.test(x.nome)) { let inv = null; try { inv = await invito(a.url); } catch (_) { inv = null; }
+          if (inv) { if (nomiVisti.has(inv)) continue; nomiVisti.add(inv); s += `\n  · ${inv}`; continue; }
+          if (!x) { s += '\n  · allegato non leggibile'; continue; } }
         if (nomiVisti.has(x.nome)) continue; nomiVisti.add(x.nome);
-        if (/\.(jpe?g|png|gif|heic|zip|p7m|rar|ics)$/i.test(x.nome) || /^image\d|PastedGraphic|Outlook-/i.test(x.nome)) { s += `\n  · allegato: ${x.nome}`; continue; }
+        if (/\.(jpe?g|png|gif|heic|zip|p7m|rar)$/i.test(x.nome) || /^image\d|PastedGraphic|Outlook-/i.test(x.nome)) { s += `\n  · allegato: ${x.nome}`; continue; }
         if (a.d && a.d < da) { s += `\n  · allegato (vecchio): ${x.nome}`; continue; }
         const offerta = /^offerta_|preventiv/i.test(x.nome), rep = REPORT.test(x.nome) && !offerta, foglio = /\.(xlsx?|ods|csv)$/i.test(x.nome);
         const cap = rep ? (opz.maxR || 400) : offerta ? 700 : foglio ? 600 : 300;
