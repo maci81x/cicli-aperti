@@ -856,3 +856,11 @@ Dal disegno 8 del canvas «versione snella» e dalla critica UX del 2/11.
 - **Correggi il titolo**: quando l'ora nel titolo non è quella dell'evento e l'evento è tuo, un tasto fa `PATCH summary` su Google via `gcalFetchUtente` (è un tuo comando, passa il controllo «solo eventi dell'app»), con la convenzione «8.45 - …»; sulle serie solo quella volta; Annulla rimette il titolo di prima.
 - **Spazi liberi** grigi, puntinati, con «+» e «libero» (prima avevano la forma di un impegno). Legenda: «Con altri» e «Tempo tuo» al posto di «Appuntamento».
 - **Da pianificare**: senza filtri né ricerca, se le cose sono più di 8 si vedono tutte le Subito e poche Importanti, poi «Altre N» (`ui.v24DpTutte`).
+
+## Il menu segue il ritmo, l'armadio delle sezioni (v25, 2/11/2026)
+Dalla call con Leonardo Beretta del 2/11 e dall'Excel «Lista cicli aperti» di Roby (colonne per area).
+- **Menu**: Oggi · Settimana · Cicli · Altro (gli id `data-tab` restano oggi/pianifica/tutto/altro). Sul computer ogni voce ha il «quando» in `data-tip`.
+- **«Adesso tocca a…»** (`v25RitmoCard`, in Oggi sotto la testata): cambia con ora e giorno — mattina (<9.30, feriali: stampa il foglio), giornata (sul foglio: aggiungi), sera (≥17.30: Riporta il foglio), venerdì ≥14 e weekend (Prepara la settimana; «piano mandato» se `bp.inviato_at`), lunedì <9.30 (riunione venditori). «Chiudi per oggi» in sessionStorage.
+- **Cicli → Armadio** (`ui.tutto = 'armadio'`, predefinita la prima volta: `localStorage.cicli_tutto_v25`): una colonna per area di `macro_aree` nell'ordine della tabella, più «Da delegare» (le cose con tipo Delega) e «Da smistare» (lavoro senza area). Sul computer si vedono tutte le aree, anche vuote (`#view.largo`); sul telefono solo quelle piene, come accordion con la prima aperta. Ricerca e filtri sono quelli di Tutto (`cicliFiltrati`).
+- **Sezione proposta** (`v25SuggerisciArea`): parole chiave per area (`V25_PAROLE`), altrimenti la sezione con più parole in comune tra le cose già smistate; `autoCategoria` prova prima questa e solo dopo Claude (se c'è la chiave). Toast «Messa in «Vendite» · Cambia».
+- **Smistamento del 2/11**: 70 cose spostate da Management alle sezioni giuste con un update diretto (chat); le aree restano le 8 della tabella.
