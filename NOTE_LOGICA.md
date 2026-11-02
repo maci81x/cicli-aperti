@@ -846,3 +846,13 @@ Richiesta di Roby del 31/10: il promemoria che il giro della posta mette a calen
 - In **Oggi**, subito sotto la testata, una riga rossa `section.v23-posta` con «Da rispondere (N)», le scadute e i nomi dei clienti (`v23Cliente`: la parte del titolo prima di « – », «: » o « (»). Tocco → si apre (`ui.v23Aperto`, non persiste) e mostra le righe con `riga()`: spunta = Fatta come ovunque (`azioneFatto`), tocco = dettaglio.
 - Lista `v23DaRispondere()`: cose aperte non parcheggiate, `fonte = 'posta'`, `posta_tipo` in `da_fare`/`preventivo`, `computeEffectiveQ === 1`, nel contesto in vista; ordine per `due_date` poi `posta_ultima_at`. È la stessa query del passo 13 del compito «Posta di lavoro — controllo giornaliero» (scratchpad `posta/prompt_posta.md`).
 - Nessuna cosa → nessun blocco. Si aggancia con un wrapper di `vistaOggi` (dopo quello v12) e inserisce il blocco nel DOM dopo `.vh`.
+
+## Appuntamenti con altri e tempo tuo (v24, 2/11/2026)
+Dal disegno 8 del canvas «versione snella» e dalla critica UX del 2/11.
+- **Due colori per gli eventi del calendario**: `con altri` (viola pieno, barra a sinistra, riga «con Massimo · Meet») quando l'evento ha invitati, un link Meet/Teams/Zoom (`hangoutLink`, `conferenceData`, o la parola nel luogo/descrizione), una sala, è un invito ricevuto o è col coach; altrimenti `tempo tuo` (bordo tratteggiato, cerchio tratteggiato). Calcolo in `eventoDa` (campi `luogo`, `call`, `comeCall`, `sala`, `conAltriAuto`), lettura con `tipoEvento(e)`.
+- **Scelta a mano** dal foglio dell'appuntamento («È con altre persone» / «È tempo mio» / «Decidi tu»): tabella `eventi_tipo` (chiave = id evento o `serie:<recurringEventId>`, tipo `altri`|`mio`), copia nel browser (`localStorage.eventi_tipo`), caricata dopo `caricaEventiNascosti`. Per le serie vale per tutte le volte.
+- **Il promemoria «N - Da rispondere (N): …» del giro della posta** (descrizione con «Cicli Aperti · posta») non entra nell'app: `eventoDa` lo scarta. Su Google resta.
+- **Ore del giorno** nella board: riga `.v24-ore` sotto l'intestazione («2h45 con altri · 3h tue · 1 senza ora»), solo eventi con orario, routine escluse.
+- **Correggi il titolo**: quando l'ora nel titolo non è quella dell'evento e l'evento è tuo, un tasto fa `PATCH summary` su Google via `gcalFetchUtente` (è un tuo comando, passa il controllo «solo eventi dell'app»), con la convenzione «8.45 - …»; sulle serie solo quella volta; Annulla rimette il titolo di prima.
+- **Spazi liberi** grigi, puntinati, con «+» e «libero» (prima avevano la forma di un impegno). Legenda: «Con altri» e «Tempo tuo» al posto di «Appuntamento».
+- **Da pianificare**: senza filtri né ricerca, se le cose sono più di 8 si vedono tutte le Subito e poche Importanti, poi «Altre N» (`ui.v24DpTutte`).
