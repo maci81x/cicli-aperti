@@ -1994,6 +1994,28 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v29-slot.v29-pieno { background: var(--q1-soft); color: var(--text); }
 .v29-sc-campi { display: grid; gap: 6px; }
 .v29-sc-err { color: var(--q1-mark); margin: 6px 0 0; }
+/* v29.1 · Scegli tu: i giorni */
+.v29-sc { max-height: 92vh; overflow: auto; }
+.v29-sc-dur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.v29-sc-guida { margin: 0 0 8px; }
+.v29-giorni { display: grid; gap: 12px; margin-bottom: 12px; }
+.v29-g-h { margin: 0 0 4px; font-size: var(--fs-label); font-weight: 800; }
+.v29-g-h::first-letter { text-transform: uppercase; }
+.v29-g-pieno { font-weight: 400; color: var(--text-2); }
+.v29-g-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.v29-g-lista li { display: grid; grid-template-columns: 96px 1fr; gap: 8px; align-items: start; padding: 6px 8px; border-radius: var(--r-sm); font-size: var(--fs-label); line-height: 1.35; }
+.v29-g-lista .mono { font-size: 12px; color: var(--text-2); padding-top: 2px; }
+.v29-g-evt { background: var(--surface-2); }
+.v29-g-evt .ti { font-size: 14px; color: var(--text-2); vertical-align: -2px; }
+.v29-g-questo { background: var(--q1-soft); }
+.v29-g-cosa { background: var(--surface-2); color: var(--text-2); }
+.v29-g-libero { background: var(--primary-soft); color: var(--primary-ink); }
+.v29-g-lt { display: block; font-weight: 700; margin-bottom: 4px; }
+.v29-g-inizi { display: flex; flex-wrap: wrap; gap: 6px; }
+.v29-sc-cal { margin: 4px 0 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.v29-sc-altro { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.v29-sc-altro summary { cursor: pointer; font-size: var(--fs-label); color: var(--text-2); min-height: 32px; }
+.v29-sc-altro .btn { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -17603,7 +17625,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-03 v29';
+const VERSIONE_APP = '2026-11-03 v29.1';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19126,6 +19148,7 @@ eventoDa = function (raw, cal) {
   const esterno = m => { m = String(m || '').toLowerCase(); return m.includes('@') && !MIE_EMAIL.has(m) && !m.endsWith('@' + V29.DOMINIO) && !/calendar\.google\.com$/.test(m); };
   e.esterni = unici([...(raw.attendees || []).filter(x => !x.self && !x.resource).map(x => x.email), raw.organizer && !raw.organizer.self ? raw.organizer.email : null].filter(esterno).map(m => m.toLowerCase()));
   e.descrBreve = String(raw.description || '').slice(0, 600);
+  e.interni = unici((raw.attendees || []).filter(x => !x.self && !x.resource).map(x => String(x.email || '').toLowerCase()).filter(m => m.endsWith('@' + V29.DOMINIO)));
   return e;
 };
 
@@ -19348,42 +19371,99 @@ Object.assign(AZIONI, {
   'v29-sc-salva': () => v29SalvaScegli()
 });
 
-// --- «Scegli tu»: giorno, ora, durata ---
+// --- «Scegli tu»: i tuoi giorni fino all'appuntamento, con appuntamenti, cose e spazi liberi (v29.1) ---
 document.body.insertAdjacentHTML('beforeend', `
 <div class="modal-overlay" id="v29Overlay" onclick="closeModalOnBg(event,'v29Overlay')">
-  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="v29-sc-titolo">
+  <div class="modal sheet v29-sc" role="dialog" aria-labelledby="v29-sc-titolo">
     <div class="sheet-grab"></div>
     <div class="sheet-head"><div class="sheet-head-txt"><h3 class="t-title" id="v29-sc-titolo">Quando lo prepari?</h3><p class="t-label muted" id="v29-sc-evt">—</p></div>
       <button type="button" class="btn btn-icon" onclick="closeModal('v29Overlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
-    <div class="v29-sc-campi">
-      <label class="field-label" for="v29-sc-data">Giorno</label><input type="date" class="input" id="v29-sc-data">
-      <label class="field-label" for="v29-sc-ora">Ora</label><input type="time" class="input" id="v29-sc-ora" step="900">
-      <label class="field-label" for="v29-sc-dur">Quanto</label>
-      <select class="input" id="v29-sc-dur">${V29.MINUTI.filter(Boolean).concat([45, 90, 180]).sort((a, b) => a - b).map(m => `<option value="${m}">${v29Durata(m)}</option>`).join('')}</select>
-    </div>
-    <p class="t-caption v29-sc-err" id="v29-sc-err" hidden></p>
-    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="v29-sc-salva">Mettila qui</button></div>
+    <div id="v29-sc-corpo"></div>
+    <details class="v29-sc-altro"><summary>Un altro giorno o un'altra ora</summary>
+      <div class="v29-sc-campi">
+        <label class="field-label" for="v29-sc-data">Giorno</label><input type="date" class="input" id="v29-sc-data">
+        <label class="field-label" for="v29-sc-ora">Ora</label><input type="time" class="input" id="v29-sc-ora" step="900">
+      </div>
+      <p class="t-caption v29-sc-err" id="v29-sc-err" hidden></p>
+      <button type="button" class="btn btn-primary btn-block" data-act="v29-sc-salva">Mettila qui</button>
+    </details>
   </div>
 </div>`);
+const V29_DUR_SC = [15, 30, 60, 90, 120];
+// spazi liberi di un giorno tra «da» e «a» (minuti), uniti gli occupati
+function v29Buchi(d, da, a, salta) {
+  const occ = v29Occupato(d, salta).map(([x, y]) => [Math.max(x, da), Math.min(y, a)]).filter(([x, y]) => y > x).sort((p, q) => p[0] - q[0]);
+  const buchi = []; let t = da;
+  occ.forEach(([x, y]) => { if (x > t) buchi.push([t, x]); t = Math.max(t, y); });
+  if (a > t) buchi.push([t, a]);
+  return buchi;
+}
+const v29Hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+function v29GiorniScelta(e) {
+  const oggi = parseISODate(oggiLocale()), giorni = [];
+  let d = piuGiorni(parseISODate(e.giorno), -1), n = 0;
+  while (n < V29.GIORNI_PRIMA && d >= oggi) { if (d.getDay() !== 0 && d.getDay() !== 6) { giorni.unshift(toISODate(d)); n++; } d = piuGiorni(d, -1); }
+  giorni.push(e.giorno);   // anche la mattina stessa, prima dell'appuntamento
+  return giorni;
+}
+function v29Interni(e) { return (e.interni || []).filter(m => !MIE_EMAIL.has(m)); }
+function v29LinkCalendar(e, s) {
+  const f = (iso, hm) => iso.replace(/-/g, '') + 'T' + hm.replace(':', '') + '00';
+  const p = new URLSearchParams({ text: `Preparare: ${e.titolo}`, details: `Per l'appuntamento «${e.titolo}», ${v29GiornoBreve(e.giorno)} ${e.ora}.`, ctz: 'Europe/Rome' });
+  if (s && s.data) p.set('dates', `${f(s.data, s.ora)}/${f(s.data, oraFine(s.ora, s.durata))}`);
+  const chi = v29Interni(e);
+  if (chi.length) p.set('add', chi.join(','));
+  if (e.calId && e.calId.includes('@')) p.set('authuser', e.calId);
+  return 'https://calendar.google.com/calendar/r/eventedit?' + p.toString();
+}
+function v29DisegnaScegli() {
+  const e = eventoPerId(ui.v29Sc), dur = ui.v29ScDur;
+  if (!e) return;
+  const ora = new Date(), oraMin = ora.getHours() * 60 + ora.getMinutes();
+  const giorni = v29GiorniScelta(e).map(iso => {
+    const d = parseISODate(iso), oggi = iso === oggiLocale();
+    let da = V29.DALLE, a = V29.ALLE;
+    if (oggi) da = Math.max(da, Math.ceil((oraMin + 15) / V29.PASSO) * V29.PASSO);
+    if (iso === e.giorno) a = Math.min(a, minDi(e.ora));
+    const righe = [];
+    eventiDelGiorno(d).filter(x => !eGiornata(x) && x.ora).forEach(x => righe.push({ t: minDi(x.ora), html: `<li class="v29-g-evt${x.id === e.id ? ' v29-g-questo' : ''}"><span class="mono">${escHtml(x.ora)}${x.fine ? '–' + escHtml(x.fine) : ''}</span><span>${escHtml(x.titolo)}${x.id === e.id ? ' · <b>da preparare</b>' : v24ConAltri(x) ? ' <i class="ti ti-users" aria-label="con altri"></i>' : ''}</span></li>` }));
+    righeGiornoData(d).filter(r => r.ora && !r.fatto).forEach(r => righe.push({ t: minDi(r.ora), html: `<li class="v29-g-cosa"><span class="mono">${escHtml(r.ora)}–${escHtml(oraFine(r.ora, r.durata || BP_DURATA_DEFAULT))}</span><span>${escHtml(r.c.title)}</span></li>` }));
+    if (da < a) v29Buchi(d, da, a).forEach(([x, y]) => {
+      if (y - x < dur) return;
+      const inizi = []; for (let t = x; t + dur <= y && inizi.length < 6; t += 30) inizi.push(t);
+      righe.push({ t: x, html: `<li class="v29-g-libero"><span class="mono">${v29Hm(x)}–${v29Hm(y)}</span><span><span class="v29-g-lt">libero</span><span class="v29-g-inizi">${inizi.map(t => `<button type="button" class="chip" data-act="v29-sc-qui" data-d="${iso}" data-o="${v29Hm(t)}">${v29Hm(t)}</button>`).join('')}</span></span></li>` });
+    });
+    righe.sort((p, q) => p.t - q.t);
+    const vuoto = !righe.some(r => /v29-g-libero/.test(r.html));
+    return `<section class="v29-g"><h4 class="v29-g-h">${escHtml(v29GiornoBreve(iso))}${iso === e.giorno ? ' · il giorno dell\'appuntamento' : oggi ? ' · oggi' : ''}${vuoto ? ` <span class="v29-g-pieno">nessuno spazio da ${escHtml(v29Durata(dur))}</span>` : ''}</h4><ul class="v29-g-lista">${righe.map(r => r.html).join('') || '<li class="v29-g-cosa"><span></span><span>niente in agenda</span></li>'}</ul></section>`;
+  });
+  const prima = v29TrovaSlot(e, dur);
+  $('v29-sc-corpo').innerHTML = `<div class="v29-sc-dur" role="group" aria-label="Quanto ti serve">${V29_DUR_SC.map(m => `<button type="button" class="chip" data-act="v29-sc-dur" data-m="${m}" aria-pressed="${m === dur}">${v29Durata(m)}</button>`).join('')}</div>
+    <p class="t-caption muted v29-sc-guida">Tocca l'ora di inizio in uno spazio libero.</p>
+    <div class="v29-giorni">${giorni.join('')}</div>
+    <a class="btn btn-secondary btn-block v29-sc-cal" href="${esc(v29LinkCalendar(e, prima.data ? prima : null))}" target="_blank" rel="noopener"><i class="ti ti-users"></i>Serve qualcuno? Apri in Calendar</a>
+    <p class="t-caption muted">Calendar ti fa vedere quando sono liberi i colleghi${v29Interni(e).length ? ` (${escHtml(v29Interni(e).map(v24Nome).join(', '))} già invitati)` : ''}. Quello che crei lì è un appuntamento normale.</p>`;
+}
 function v29ApriScegli(id) {
   const e = eventoPerId(id);
   if (!e) return;
-  const mem = v29Memoria(e), m = ui.v29Scelta[id] || (mem && mem.minuti) || 30, s = v29TrovaSlot(e, m);
+  const mem = v29Memoria(e);
   ui.v29Sc = id;
+  ui.v29ScDur = ui.v29Scelta[id] || (mem && mem.minuti) || 30;
   $('v29-sc-evt').textContent = `${e.titolo} · ${v29GiornoBreve(e.giorno)} ${e.ora}`;
+  const s = v29TrovaSlot(e, ui.v29ScDur), ieri = toISODate(piuGiorni(parseISODate(e.giorno), -1));
   $('v29-sc-data').min = oggiLocale(); $('v29-sc-data').max = e.giorno;
-  const ieri = toISODate(piuGiorni(parseISODate(e.giorno), -1));
   $('v29-sc-data').value = s.data || (ieri < oggiLocale() ? oggiLocale() : ieri);
   $('v29-sc-ora').value = s.ora || '09:00';
-  $('v29-sc-dur').value = String(m);
   $('v29-sc-err').hidden = true;
+  document.querySelector('#v29Overlay .v29-sc-altro').open = false;
+  v29DisegnaScegli();
   $('v29Overlay').classList.add('open');
 }
-function v29SalvaScegli() {
-  const e = eventoPerId(ui.v29Sc);
-  const err = t => { $('v29-sc-err').textContent = t; $('v29-sc-err').hidden = false; };
+function v29MettiQui(data, ora) {
+  const e = eventoPerId(ui.v29Sc), durata = ui.v29ScDur;
+  const err = t => { const x = $('v29-sc-err'); x.textContent = t; x.hidden = false; document.querySelector('#v29Overlay .v29-sc-altro').open = true; };
   if (!e) { closeModal('v29Overlay'); return; }
-  const data = $('v29-sc-data').value, ora = $('v29-sc-ora').value, durata = parseInt($('v29-sc-dur').value, 10);
   if (!data) return err('Scegli il giorno');
   if (!ora) return err('Scegli l\'ora');
   if (data < oggiLocale()) return err('Il giorno è già passato');
@@ -19392,6 +19472,9 @@ function v29SalvaScegli() {
   ui.v29Scelta[e.id] = durata;
   v29Crea(e, { data, ora, durata });
 }
+function v29SalvaScegli() { v29MettiQui($('v29-sc-data').value, $('v29-sc-ora').value); }
+AZIONI['v29-sc-dur'] = el => { ui.v29ScDur = +el.dataset.m; v29DisegnaScegli(); };
+AZIONI['v29-sc-qui'] = el => v29MettiQui(el.dataset.d, el.dataset.o);
 
 // --- l'appuntamento si sposta o sparisce ---
 let _v29Ultimo = 0, _v29InCorso = false;
