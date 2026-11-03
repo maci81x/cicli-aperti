@@ -875,3 +875,11 @@ Dai disegni della sezione 9 del canvas «versione snella», approvati da Roby il
 - **Oggi · «Adesso tocca a…»**: una riga che si apre col tocco (`ui.v26RitmoAperto`), la X la chiude per oggi, Impostazioni → Oggi la spegne (`localStorage.v26_ritmo_off`). Mattina = «Prima di iniziare · 10 minuti». La sera il tasto è **«Chiudi la giornata»** (`v26cgOverlay`): spunta, per le non fatte Domani / Scegli giorno / Lascia stare, «Aggiungi le cose arrivate oggi» (apre il campo veloce), «Fatto · stampa il foglio di domani».
 - **Impostazioni**: «Togli» su persone (chiede a chi passare le deleghe aperte) e aree (chiede dove spostare le cose aperte); tolta la riga «Assegna l'area con Claude» (la sezione la propone già l'app).
 - **Test**: `tests/` (banco di prova con Supabase e Calendar finti, vedi `tests/README.md`).
+
+## Dopo una «Subito»: due passi (v27, 3/11/2026)
+La domanda unica «Cosa l'ha generata? Evitiamo che si ripeta» mescolava causa e rimedio: Roby ha risposto «ho risposto alla mail» e l'app ne ha fatto una cosa Importante senza contesto.
+Ora, quando segni fatta una Subito (al massimo una volta al giorno per area, come prima):
+1. **Perché è diventata urgente?** → la risposta resta come nota sulla cosa fatta («Perché è diventata urgente: …»). Non crea niente. «Salta» chiude.
+2. **Puoi fare qualcosa perché non ricapiti?** → solo questa diventa una cosa Importante, con nota «Nasce da: «…» (Subito, fatta il g/m)» + il motivo. «No, va bene così» chiude.
+   Se la risposta sembra una cosa già fatta («ho…», «abbiamo…», «risposto…») l'app avvisa una volta prima di crearla.
+In Dettagli il riquadro rosa «Nasce da una cosa urgente» mostra da dove viene (anche per quelle create con la versione vecchia).
