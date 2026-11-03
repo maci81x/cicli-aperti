@@ -883,3 +883,14 @@ Ora, quando segni fatta una Subito (al massimo una volta al giorno per area, com
 2. **Puoi fare qualcosa perché non ricapiti?** → solo questa diventa una cosa Importante, con nota «Nasce da: «…» (Subito, fatta il g/m)» + il motivo. «No, va bene così» chiude.
    Se la risposta sembra una cosa già fatta («ho…», «abbiamo…», «risposto…») l'app avvisa una volta prima di crearla.
 In Dettagli il riquadro rosa «Nasce da una cosa urgente» mostra da dove viene (anche per quelle create con la versione vecchia).
+
+## Lavoro o personale, e la dettatura (v28, 3/11/2026)
+«Fissare appuntamento per farsi i capelli prima della cresima» e «Comprare Comprare vestito cresima mia» erano finite in Lavoro.
+Causa: l'app impara le parole dalle cose salvate; «appuntamento» e «settimana» stanno quasi solo nelle cose di lavoro (la maggioranza), e «cresima» era stata imparata da cose indovinate male: la parola imparata batteva la lista fissa (dove «cresima» è Personale).
+Ora:
+- parole generiche (appuntamento, settimana, fissare, prenotare, comprare, prima, dopo, giorno, mese…) non contano;
+- la lista fissa batte le parole imparate solo dalle cose salvate; le tue correzioni (tocco sull'etichetta) e le persone continuano a vincere su tutto;
+- lista: «cresima/comunione» pesano di più; aggiunti capelli, estetista, massaggi, fisioterapia, ottico, vestiti, battesimo, matrimonio, festa, «cena con»; «mia» minuscola dopo cresima/vestito/scuola… = Mia;
+- nell'anteprima c'è sempre la scelta **Lavoro | Personale** (due bottoni, quello scelto pieno);
+- dettatura: niente parole ripetute («Comprare Comprare»), minuscola a metà frase («… capelli Nella» → «nella», i nomi restano), «virgola» → «,», «punto a capo» / «nuova riga» → nuova cosa.
+Prova sulle 195 cose vere: le 2 sbagliate ora vanno in Personale, nessun'altra cambia.

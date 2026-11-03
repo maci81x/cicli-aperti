@@ -1969,6 +1969,13 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v27-origine p { margin: 0; }
 .v27-origine-testa { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .v27-origine-cosa { font-weight: 600; line-height: 1.35; }
+/* v28 · Lavoro | Personale sempre visibile nell'anteprima */
+.v28-ctx { display: inline-flex; gap: 0; }
+.v28-ctx .v28-ctx-b { border-radius: 0; background: var(--surface); color: var(--text-2); font-weight: var(--fw-regular); }
+.v28-ctx .v28-ctx-b:first-child { border-radius: var(--r-full) 0 0 var(--r-full); }
+.v28-ctx .v28-ctx-b + .v28-ctx-b { border-left-width: 0; border-radius: 0 var(--r-full) var(--r-full) 0; }
+.v28-ctx .v28-ctx-b[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: var(--fw-strong); }
+.v28-ctx .v28-ctx-b[aria-pressed="true"] .ti { color: var(--bg); }
 </style>
 </head>
 <body>
@@ -8873,7 +8880,7 @@ function dettatura(campoId, micId) {
     rec.onresult = e => {
       let t = '';
       for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      campo.value = base + t;
+      campo.value = v28UnisciDettatura(base, t);
       campo.dispatchEvent(new Event('input', { bubbles: true }));
       ultimaVoce = Date.now();
       attendi();
@@ -15466,11 +15473,12 @@ function indovinaContesto(testo, opz = {}) {
   const imp = imparatoCtx(), corr = correzioniCtx(), parole = unici(paroleCtx(testo));
   // 1. quello che hai già scritto: correzioni, persone, parole imparate
   const decise = new Map();   // parola → 'misto' | ctx
+  const daTe = new Set();     // v28 · parole decise da te (correzioni) o da una persona: queste battono la lista
   parole.forEach(w => {
     const c = corr[w];
-    if (c && c.p !== c.l) { metti(c.p > c.l ? CTX_P : CTX_L, 3, w); decise.set(w, c.p > c.l ? CTX_P : CTX_L); return; }
+    if (c && c.p !== c.l) { metti(c.p > c.l ? CTX_P : CTX_L, 3, w); decise.set(w, c.p > c.l ? CTX_P : CTX_L); daTe.add(w); return; }
     const p = imp.persone.get(w);
-    if (p) { metti(p.ctx, p.peso, p.nome); decise.set(w, p.ctx); return; }
+    if (p) { metti(p.ctx, p.peso, p.nome); decise.set(w, p.ctx); daTe.add(w); return; }
     const x = imp.conta.get(w);
     if (!x) return;
     if (mistaCtx(x)) { decise.set(w, 'misto'); if (x.nome && !x.minuscola && x.p + x.l >= CTX_IMP.SUPPORTO_VETO) veto = true; return; }   // un nome o progetto usato in tutti e due: niente «sicuro»
@@ -15494,7 +15502,13 @@ function indovinaContesto(testo, opz = {}) {
       metti(ctx, peso, et);
       return;
     }
-    if (dette.some(d => d === 'misto' || d !== ctx)) return;   // impara: vince quello che fai tu
+    if (ws.some(w => daTe.has(w) && decise.get(w) !== ctx)) return;   // l'hai corretta tu: vince la tua scelta
+    if (dette.some(d => d === 'misto')) return;
+    if (dette.some(d => d !== ctx)) {   // v28 · imparata solo dalle cose salvate (spesso indovinate in automatico): vince la lista
+      for (let k = contributi.length - 1; k >= 0; k--) if (contributi[k].appreso && ws.includes(contributi[k].w)) contributi.splice(k, 1);
+      metti(ctx, peso, et);
+      return;
+    }
     if (dette.length) {   // stesso verso: si tiene il più forte, non si somma
       const ap = contributi.find(c => c.appreso && ws.includes(c.w));
       if (ap && Math.abs(ap.v) >= peso) return;
@@ -15557,7 +15571,7 @@ function htmlVoceSn(v, i, dove, sola) {
     <div class="sn-tit"><button type="button" class="sn-tipo q${v.q}" data-act="sn-tipo" data-dove="${dove}" data-i="${i}" aria-label="Tipo: ${TIPI[v.q].label}. Tocca per cambiare" data-tip="${TIPI[v.q].label} · tocca per cambiare"><span aria-hidden="true"></span></button>
       <span class="sn-titolo">${escHtml(v.title)}</span>${passi}</div>
     <div class="sn-chips">
-      <button type="button" class="sn-chip sn-ctx" data-ctx="${v.ctx}" data-act="sn-ctx" data-dove="${dove}" data-i="${i}" aria-label="${nomeCtx(v.ctx)}: tocca per spostarla in ${nomeCtx(altroCtx(v.ctx))}"><i class="ti ${SN.ICO_CTX[v.ctx]}" aria-hidden="true"></i>${ctxEt}</button>
+      <span class="v28-ctx" role="group" aria-label="Lavoro o personale">${[CTX_L, CTX_P].map(k => `<button type="button" class="sn-chip sn-ctx v28-ctx-b" data-ctx="${k}" data-to="${k}" data-act="sn-ctx" data-dove="${dove}" data-i="${i}" aria-pressed="${v.ctx === k}"><i class="ti ${SN.ICO_CTX[k]}" aria-hidden="true"></i>${v.ctx === k ? ctxEt : nomeCtx(k)}</button>`).join('')}</span>
       ${motivo && sola ? `<span class="sn-motivo">${escHtml(g.motivo)}</span>` : ''}
       <button type="button" class="sn-chip sn-quando${quando ? '' : ' vuoto'}" data-act="sn-quando" data-dove="${dove}" data-i="${i}" aria-expanded="${aperta}"${quando ? '' : ' aria-label="Scegli quando, il tipo e altro"'}><i class="ti ${v.q === 3 ? 'ti-user-share' : quando ? 'ti-calendar-event' : 'ti-calendar-plus'}" aria-hidden="true"></i>${quando ? escHtml(quando) : 'quando?'}</button>
       ${segnaleVoce(v, i, dove)}
@@ -15611,6 +15625,7 @@ Object.assign(AZIONI, {
   'sn-ctx': el => {
     const dove = el.dataset.dove, i = +el.dataset.i, v = vociDi(dove)[i];
     if (!v) return;
+    if (el.dataset.to && el.dataset.to === v.ctx) return;   // v28 · già scelto
     const st = statoDi(dove), nuovo = altroCtx(v.ctx), mod = { ...(st.ctxMod || {}), [v.testo]: nuovo };
     if (dove === 'cattura') ui.cattura = { ...ui.cattura, ctxMod: mod }; else ui.rapido = { ...ui.rapido, ctxMod: mod };
     ridisegnaSn(dove);
@@ -17570,7 +17585,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-03 v27';
+const VERSIONE_APP = '2026-11-03 v28';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19016,6 +19031,56 @@ apriDettaglio = function (id) {
     <p class="t-caption muted">Questa cosa serve a evitare che ricapiti.</p></div>`);
   return r;
 };
+
+// ══════════════════════════════════════════════════════════════
+// v28 · 3/11 · LAVORO O PERSONALE, E LA DETTATURA
+// «Fissare appuntamento per farsi i capelli prima della cresima» era finita in Lavoro:
+// parole come «appuntamento», «settimana» le aveva imparate dalle cose di lavoro (che sono la maggioranza)
+// e «cresima» da cose indovinate male in passato. Ora:
+//  - le parole generiche non contano più; la lista fissa batte le parole imparate solo dalle cose salvate
+//    (le tue correzioni con l'etichetta continuano a vincere su tutto);
+//  - nell'anteprima c'è sempre la scelta Lavoro | Personale, ben visibile;
+//  - la dettatura toglie le parole ripetute («Comprare Comprare»), la maiuscola a metà frase e capisce «virgola».
+// ══════════════════════════════════════════════════════════════
+'appuntamento appuntamenti settimana settimane fissare prenotare prenotazione comprare prendere farsi farmi prima dopo giorno giorni mese mesi ricordarsi ricordare controllare vedere mettere portare'
+  .split(' ').forEach(w => CTX_AMBIGUE.add(w));
+_ctxImp.chiave = '';   // ricalcola le parole imparate senza le generiche
+(() => {
+  const i = CTX_PAROLE.findIndex(([re]) => re.source.includes('cresima'));
+  if (i >= 0) CTX_PAROLE[i] = [CTX_PAROLE[i][0], CTX_P, 4];
+})();
+CTX_PAROLE.push(
+  [/\bcapelli\b|\btaglio dei capelli\b|\bestetista\b|\bmanicure\b|\bmassaggi\w*\b|\bfisioterapi\w*\b|\bottico\b|\bocchiali\b/, CTX_P, 3],
+  [/\bvestit[oi]\b|\bscarpe\b|\bcamici[ae]\b|\bcappotto\b|\bgiacca\b/, CTX_P, 2],
+  [/\bbattesimo\b|\bmatrimonio\b|\bfunerale\b|\bfesta\b|\bcena con\b/, CTX_P, 3]
+);
+// «Mia» dettata minuscola: «la cresima di mia», «vestito cresima mia»
+const _segnaleMiaV28 = segnaleMia;
+segnaleMia = function (testo) {
+  if (_segnaleMiaV28(testo)) return true;
+  return /\b(?:cresima|comunione|compleanno|festa|pallavolo|scuola|verifica|interrogazione|vestito|regalo|recita|maestra|pediatra|dentista)\s+(?:di\s+|della\s+|per\s+)?mia\b/.test(testoCtx(testo));
+};
+
+// Dettatura: unisce il pezzo nuovo a quello già scritto, pulito
+const V28_PICCOLE = new Set('il lo la i gli le un uno una di a da in con su per tra fra e o ma che nel nella nello nei negli nelle al alla allo ai agli alle del della dello dei degli delle dal dalla dai sul sulla poi entro prima dopo quando se non anche'.split(' '));
+function v28PulisciDettato(t) {
+  return String(t || '')
+    .replace(/\s*\bpunto e virgola\b\s*/gi, '; ')
+    .replace(/\s*\bvirgola\b\s*/gi, ', ')
+    .replace(/\s*\b(?:punto a capo|nuova riga)\b\s*/gi, '\n')
+    .replace(/(?<!\p{L})(\p{L}{3,})(?:\s+\1)+(?!\p{L})/giu, '$1')   // «Comprare Comprare» → «Comprare»
+    .replace(/[ \t]+([,;])/g, '$1').replace(/([,;])(?=\S)/g, '$1 ').replace(/[ \t]{2,}/g, ' ')
+    .replace(/,\s*$/, '');
+}
+function v28UnisciDettatura(base, t) {
+  let pezzo = String(t || '');
+  const b = String(base || '');
+  if (b.trim() && !/[.!?\n]\s*$/.test(b)) {
+    const m = pezzo.match(/^\s*(\p{Lu})(\p{Ll}*)/u);
+    if (m && V28_PICCOLE.has((m[1] + m[2]).toLowerCase())) pezzo = pezzo.replace(/^\s*\p{Lu}/u, x => x.toLowerCase());   // «… farsi i capelli Nella settimana» → «nella»
+  }
+  return v28PulisciDettato(b + pezzo);
+}
 </script>
 </body>
 </html>
