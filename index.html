@@ -17625,7 +17625,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-03 v29.1';
+const VERSIONE_APP = '2026-11-03 v29.2';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19381,7 +19381,7 @@ document.body.insertAdjacentHTML('beforeend', `
     <div id="v29-sc-corpo"></div>
     <details class="v29-sc-altro"><summary>Un altro giorno o un'altra ora</summary>
       <div class="v29-sc-campi">
-        <label class="field-label" for="v29-sc-data">Giorno</label><input type="date" class="input" id="v29-sc-data">
+        <label class="field-label" for="v29-sc-data">Giorno</label><select class="input" id="v29-sc-data"></select>
         <label class="field-label" for="v29-sc-ora">Ora</label><input type="time" class="input" id="v29-sc-ora" step="900">
       </div>
       <p class="t-caption v29-sc-err" id="v29-sc-err" hidden></p>
@@ -19403,8 +19403,7 @@ function v29GiorniScelta(e) {
   const oggi = parseISODate(oggiLocale()), giorni = [];
   let d = piuGiorni(parseISODate(e.giorno), -1), n = 0;
   while (n < V29.GIORNI_PRIMA && d >= oggi) { if (d.getDay() !== 0 && d.getDay() !== 6) { giorni.unshift(toISODate(d)); n++; } d = piuGiorni(d, -1); }
-  giorni.push(e.giorno);   // anche la mattina stessa, prima dell'appuntamento
-  return giorni;
+  return giorni;   // v29.2 · solo i giorni PRIMA dell'appuntamento (né il giorno stesso né dopo)
 }
 function v29Interni(e) { return (e.interni || []).filter(m => !MIE_EMAIL.has(m)); }
 function v29LinkCalendar(e, s) {
@@ -19452,8 +19451,11 @@ function v29ApriScegli(id) {
   ui.v29ScDur = ui.v29Scelta[id] || (mem && mem.minuti) || 30;
   $('v29-sc-evt').textContent = `${e.titolo} · ${v29GiornoBreve(e.giorno)} ${e.ora}`;
   const s = v29TrovaSlot(e, ui.v29ScDur), ieri = toISODate(piuGiorni(parseISODate(e.giorno), -1));
-  $('v29-sc-data').min = oggiLocale(); $('v29-sc-data').max = e.giorno;
-  $('v29-sc-data').value = s.data || (ieri < oggiLocale() ? oggiLocale() : ieri);
+  // v29.2 · a mano: solo i giorni da oggi al giorno prima dell'appuntamento (anche sabato e domenica)
+  const scelte = [];
+  for (let d = parseISODate(oggiLocale()); toISODate(d) < e.giorno; d = piuGiorni(d, 1)) scelte.push(toISODate(d));
+  $('v29-sc-data').innerHTML = scelte.length ? scelte.map(iso => `<option value="${iso}">${escHtml(v29GiornoBreve(iso))}</option>`).join('') : '<option value="">nessun giorno prima</option>';
+  $('v29-sc-data').value = s.data && scelte.includes(s.data) ? s.data : scelte.includes(ieri) ? ieri : (scelte[scelte.length - 1] || '');
   $('v29-sc-ora').value = s.ora || '09:00';
   $('v29-sc-err').hidden = true;
   document.querySelector('#v29Overlay .v29-sc-altro').open = false;
@@ -19467,6 +19469,7 @@ function v29MettiQui(data, ora) {
   if (!data) return err('Scegli il giorno');
   if (!ora) return err('Scegli l\'ora');
   if (data < oggiLocale()) return err('Il giorno è già passato');
+  if (data >= e.giorno) return err('Va preparato prima del giorno dell\'appuntamento');
   if (new Date(`${data}T${ora}:00`).getTime() + durata * 60000 > e.inizioMs) return err('Deve finire prima dell\'appuntamento');
   closeModal('v29Overlay');
   ui.v29Scelta[e.id] = durata;
