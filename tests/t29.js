@@ -40,21 +40,26 @@ const events = { 'r.macinai@sisoluzioniimpresa.it': [
   // Scegli tu: i giorni fino all'appuntamento, con appuntamenti e spazi liberi
   await page.click('.v29-prep [data-act="v29-scegli"][data-evt="prev"]'); await page.waitForTimeout(300);
   r = await page.evaluate(() => ({ giorni: [...document.querySelectorAll('#v29Overlay .v29-g-h')].map(x => x.textContent), dur: (document.querySelector('#v29Overlay [data-act="v29-sc-dur"][aria-pressed="true"]') || {}).textContent, cal: (document.querySelector('#v29Overlay .v29-sc-cal') || {}).href || '' }));
-  a(r.giorni.length === 2 && /mar 3\/11/.test(r.giorni[0]) && /mer 4\/11.*nessuno spazio da 2h/.test(r.giorni[1]) && r.dur === '2h', 'Scegli tu, solo i giorni prima: ' + JSON.stringify(r.giorni) + ' ' + r.dur);
+  a(r.giorni.length === 3 && /mar 3\/11/.test(r.giorni[0]) && /mer 4\/11.*nessuno spazio da 2h/.test(r.giorni[1]) && /gio 5\/11 · il giorno dell'appuntamento/.test(r.giorni[2]) && r.dur === '2h', 'Scegli tu, fino al giorno stesso: ' + JSON.stringify(r.giorni) + ' ' + r.dur);
   a(/calendar\.google\.com\/calendar\/r\/eventedit\?/.test(r.cal) && /text=Preparare/.test(r.cal) && /dates=20261103T091500%2F20261103T111500/.test(r.cal), 'link Calendar: ' + r.cal.slice(0, 160));
   r = await page.evaluate(() => [...document.querySelectorAll('#v29Overlay .v29-g')].map(g => [...g.querySelectorAll('li')].map(li => li.innerText.replace(/\s+/g, ' ').trim()).join(' / ')));
-  a(/Corso tutto il giorno/.test(r[1]) && r.length === 2, 'appuntamenti nei giorni: ' + JSON.stringify(r).slice(0, 300));
+  a(/Corso tutto il giorno/.test(r[1]) && /Rossi – presentazione · da preparare/.test(r[2]) && !/11:00–/.test(r[2].split('Rossi')[1] || ''), 'appuntamenti nei giorni, il giorno stesso solo prima: ' + JSON.stringify(r).slice(0, 300));
   await page.screenshot({ path: (process.env.OUT || '/tmp') + '/v29_scegli.png' });
   await page.click('#v29Overlay [data-act="v29-sc-dur"][data-m="30"]'); await page.waitForTimeout(200);
-  r = await page.evaluate(() => [...document.querySelectorAll('#v29Overlay [data-act="v29-sc-qui"]')].map(b => b.dataset.d));
-  a(r.length && r.every(d => d === '2026-11-03'), 'si tocca solo prima del giorno dell\'appuntamento: ' + [...new Set(r)].join());
+  r = await page.evaluate(() => [...document.querySelectorAll('#v29Overlay [data-act="v29-sc-qui"][data-d="2026-11-05"]')].map(b => b.dataset.o));
+  a(r.join() === '08:00,08:30,09:00,09:30', 'il giorno stesso solo prima delle 10: ' + r.join());
   // a mano: dopo l'appuntamento no
   await page.click('#v29Overlay .v29-sc-altro summary');
   r = await page.evaluate(() => [...$('v29-sc-data').options].map(o => o.value));
-  a(r.join() === '2026-11-03,2026-11-04', 'a mano: solo i giorni prima ' + r.join());
+  a(r.join() === '2026-11-03,2026-11-04,2026-11-05', 'a mano: fino al giorno stesso ' + r.join());
+  await page.selectOption('#v29-sc-data', '2026-11-05'); await page.fill('#v29-sc-ora', '10:30'); await page.click('[data-act="v29-sc-salva"]'); await page.waitForTimeout(200);
+  a(await page.evaluate(() => !$('v29-sc-err').hidden && /prima dell/.test($('v29-sc-err').textContent)), 'il giorno stesso ma dopo l\'inizio: no');
   await page.click('#v29Overlay [data-act="v29-sc-qui"][data-d="2026-11-03"][data-o="09:45"]'); await page.waitForTimeout(1500);
   c = db.tabelle.cicli.find(x => /^Preparare: Rossi/.test(x.title));
   a(c && c.scheduled_date === '2026-11-03' && c.scheduled_time === '09:45' && c.durata_minuti === 30, 'tocco su 9:45 oggi: ' + JSON.stringify(c && [c.scheduled_date, c.scheduled_time, c.durata_minuti]));
+  // tutti i giorni prima pieni → il giorno stesso, prima dell'appuntamento
+  r = await page.evaluate(() => { const base = eventoPerId('prev'); const oggi = { ...base, giorno: '2026-11-03', ora: '17:00', inizioMs: new Date('2026-11-03T17:00:00+01:00').getTime() }; const s = v29TrovaSlot(oggi, 60); const no = v29TrovaSlot({ ...oggi, ora: '09:30', inizioMs: new Date('2026-11-03T09:30:00+01:00').getTime() }, 60); return [s.data, s.ora, !!s.stesso, no.data]; });
+  a(r[0] === '2026-11-03' && r[1] >= '09:15' && r[1] <= '16:00' && r[2] && r[3] === null, 'giorni prima esauriti → il giorno stesso prima dell\'inizio, mai dopo: ' + JSON.stringify(r));
   // Sopralluogo: Niente
   await page.click('.v29-prep [data-act="v29-min"][data-evt="cant"][data-m="0"]'); await page.waitForTimeout(600);
   a(db.tabelle.prep_appuntamenti.some(x => x.chiave === 'evt:cant' && x.stato === 'niente') && await page.evaluate(() => !document.querySelector('.v29-prep')), 'Niente: salvato, riquadro sparito');

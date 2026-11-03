@@ -17625,7 +17625,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-03 v29.2';
+const VERSIONE_APP = '2026-11-03 v29.3';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19212,11 +19212,11 @@ function v29Occupato(d, salta) {
   righeGiornoData(d).forEach(r => { if (r.ora && !r.fatto && (!salta || r.c.id !== salta)) occ.push([minDi(r.ora), minDi(r.ora) + (r.durata || BP_DURATA_DEFAULT)]); });
   return occ;
 }
-function v29Spazio(d, minuti, salta) {
-  const occ = v29Occupato(d, salta), oggi = toISODate(d) === oggiLocale();
+function v29Spazio(d, minuti, salta, fine) {
+  const occ = v29Occupato(d, salta), oggi = toISODate(d) === oggiLocale(), alle = Math.min(V29.ALLE, fine || V29.ALLE);
   let t = V29.DALLE;
   if (oggi) { const n = new Date(), m = n.getHours() * 60 + n.getMinutes() + 15; t = Math.max(t, Math.ceil(m / V29.PASSO) * V29.PASSO); }
-  for (; t + minuti <= V29.ALLE; t += V29.PASSO) if (!occ.some(([a, b]) => t < b && a < t + minuti)) return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  for (; t + minuti <= alle; t += V29.PASSO) if (!occ.some(([a, b]) => t < b && a < t + minuti)) return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
   return null;
 }
 function v29TrovaSlot(e, minuti, salta) {
@@ -19231,6 +19231,12 @@ function v29TrovaSlot(e, minuti, salta) {
       pieni.push(toISODate(d));
     }
     d = piuGiorni(d, -1);
+  }
+  // v29.3 · ultima possibilità: il giorno stesso, prima dell'appuntamento
+  const stesso = parseISODate(e.giorno);
+  if (stesso >= oggi && stesso.getDay() !== 0 && stesso.getDay() !== 6) {
+    const ora = v29Spazio(stesso, minuti, salta, minDi(e.ora));
+    if (ora) return { data: e.giorno, ora, durata: minuti, completo: true, pieni, stesso: true };
   }
   return { data: null, pieni };
 }
@@ -19253,9 +19259,9 @@ function v29Blocco() {
       const s = ui.v29Slot[e.id] && ui.v29Slot[e.id].durata === scelta ? ui.v29Slot[e.id] : v29TrovaSlot(e, scelta);
       const proposta = ui.v29Scelta[e.id] === undefined && mem ? `<p class="v29-mem">Ti propongo <b>${v29Etich(scelta)}</b>, ${mem.da === 'serie' ? 'come le altre volte' : 'come con questo cliente'}.</p>` : '';
       sotto = s.data
-        ? `${proposta}<p class="v29-slot"><i class="ti ti-calendar-check" aria-hidden="true"></i><span><b>${escHtml(v29SlotTesto(s))}</b> è libero${s.pieni.length ? ` (${s.pieni.map(v29GiornoBreve).join(', ')} ${s.pieni.length === 1 ? 'è pieno' : 'sono pieni'})` : ''}: la metto lì, anche su Google Calendar.</span></p>
+        ? `${proposta}<p class="v29-slot"><i class="ti ti-calendar-check" aria-hidden="true"></i><span><b>${escHtml(v29SlotTesto(s))}</b> è libero${s.stesso ? ' (il giorno stesso, prima dell\'appuntamento)' : ''}${s.pieni.length ? ` (${s.pieni.map(v29GiornoBreve).join(', ')} ${s.pieni.length === 1 ? 'è pieno' : 'sono pieni'})` : ''}: la metto lì, anche su Google Calendar.</span></p>
            <div class="v29-ok"><button type="button" class="btn btn-primary btn-sm" data-act="v29-ok" data-evt="${esc(e.id)}"${occupato ? ' disabled' : ''}>Va bene</button><button type="button" class="btn btn-secondary btn-sm" data-act="v29-scegli" data-evt="${esc(e.id)}">Scegli tu</button></div>`
-        : `${proposta}<p class="v29-slot v29-pieno"><i class="ti ti-calendar-x" aria-hidden="true"></i><span>Non trovo ${v29Durata(scelta)} liber${scelta >= 60 ? 'e' : 'i'} dalle 8 alle 18 nei ${V29.GIORNI_PRIMA} giorni lavorativi prima.</span></p>
+        : `${proposta}<p class="v29-slot v29-pieno"><i class="ti ti-calendar-x" aria-hidden="true"></i><span>Non trovo ${v29Durata(scelta)} liber${scelta >= 60 ? 'e' : 'i'} dalle 8 alle 18 nei ${V29.GIORNI_PRIMA} giorni lavorativi prima, né il giorno stesso prima dell'appuntamento.</span></p>
            <div class="v29-ok"><button type="button" class="btn btn-primary btn-sm" data-act="v29-scegli" data-evt="${esc(e.id)}">Scegli tu</button></div>`;
     }
     const motivo = v29Motivo(e);
@@ -19403,7 +19409,8 @@ function v29GiorniScelta(e) {
   const oggi = parseISODate(oggiLocale()), giorni = [];
   let d = piuGiorni(parseISODate(e.giorno), -1), n = 0;
   while (n < V29.GIORNI_PRIMA && d >= oggi) { if (d.getDay() !== 0 && d.getDay() !== 6) { giorni.unshift(toISODate(d)); n++; } d = piuGiorni(d, -1); }
-  return giorni;   // v29.2 · solo i giorni PRIMA dell'appuntamento (né il giorno stesso né dopo)
+  giorni.push(e.giorno);   // v29.3 · anche il giorno stesso, solo prima dell'appuntamento; mai dopo
+  return giorni;
 }
 function v29Interni(e) { return (e.interni || []).filter(m => !MIE_EMAIL.has(m)); }
 function v29LinkCalendar(e, s) {
@@ -19453,7 +19460,7 @@ function v29ApriScegli(id) {
   const s = v29TrovaSlot(e, ui.v29ScDur), ieri = toISODate(piuGiorni(parseISODate(e.giorno), -1));
   // v29.2 · a mano: solo i giorni da oggi al giorno prima dell'appuntamento (anche sabato e domenica)
   const scelte = [];
-  for (let d = parseISODate(oggiLocale()); toISODate(d) < e.giorno; d = piuGiorni(d, 1)) scelte.push(toISODate(d));
+  for (let d = parseISODate(oggiLocale()); toISODate(d) <= e.giorno; d = piuGiorni(d, 1)) scelte.push(toISODate(d));   // fino al giorno stesso compreso
   $('v29-sc-data').innerHTML = scelte.length ? scelte.map(iso => `<option value="${iso}">${escHtml(v29GiornoBreve(iso))}</option>`).join('') : '<option value="">nessun giorno prima</option>';
   $('v29-sc-data').value = s.data && scelte.includes(s.data) ? s.data : scelte.includes(ieri) ? ieri : (scelte[scelte.length - 1] || '');
   $('v29-sc-ora').value = s.ora || '09:00';
@@ -19469,7 +19476,7 @@ function v29MettiQui(data, ora) {
   if (!data) return err('Scegli il giorno');
   if (!ora) return err('Scegli l\'ora');
   if (data < oggiLocale()) return err('Il giorno è già passato');
-  if (data >= e.giorno) return err('Va preparato prima del giorno dell\'appuntamento');
+  if (data > e.giorno) return err('Va preparato entro il giorno dell\'appuntamento, non dopo');
   if (new Date(`${data}T${ora}:00`).getTime() + durata * 60000 > e.inizioMs) return err('Deve finire prima dell\'appuntamento');
   closeModal('v29Overlay');
   ui.v29Scelta[e.id] = durata;
