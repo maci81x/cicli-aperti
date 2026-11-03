@@ -894,3 +894,12 @@ Ora:
 - nell'anteprima c'è sempre la scelta **Lavoro | Personale** (due bottoni, quello scelto pieno);
 - dettatura: niente parole ripetute («Comprare Comprare»), minuscola a metà frase («… capelli Nella» → «nella», i nomi restano), «virgola» → «,», «punto a capo» / «nuova riga» → nuova cosa.
 Prova sulle 195 cose vere: le 2 sbagliate ora vanno in Personale, nessun'altra cambia.
+
+## Il tempo per preparare gli appuntamenti (v29, 3/11/2026 · idea di Leo)
+Gli appuntamenti entrano in calendario da soli (inviti, mail): la domanda si fa dopo, appena apri l'app.
+- In cima a Oggi: «N appuntamenti da preparare?» = appuntamenti con altri, con orario, da domani a 14 giorni, con **invitati esterni a SSI** (non @sisoluzioniimpresa.it) o con parole come preventivo, offerta, presentazione, riunione periodica, sopralluogo, incontro conoscitivo, colloquio, docenza, audit, contratto. Esclusi: coach, eventi dell'app, routine, figlie, quelli già decisi.
+- Scelte: Niente · 15' · 30' · 1h · 2h. Finché non rispondi resta una proposta (niente viene creato da solo).
+- Dove: primo spazio libero **dalle 8 alle 18**, il giorno lavorativo prima; se è pieno il giorno prima ancora, fino a **5 giorni lavorativi** (mai nel passato). Contano appuntamenti e cose con l'ora. «Scegli tu»: giorno, ora, durata (deve finire prima dell'appuntamento).
+- «Va bene»: una cosa «Preparare: <appuntamento> (gio 12/11 10:00)» nel giorno e all'ora trovati (rossa se l'appuntamento è «Non si sposta») + blocco su Google Calendar («9 - Preparare: …»).
+- Memoria (tabella `prep_appuntamenti`): `evt:<id>` la scelta; `serie:<id>` per gli appuntamenti che si ripetono («Niente» = non chiede più); `dom:<dominio>` per il cliente (propone lo stesso tempo, da confermare).
+- Se l'appuntamento si sposta, la preparazione si sposta con lui (cosa e blocco). Se sparisce dal calendario, nel riquadro: «non è più in calendario: la tolgo?».
