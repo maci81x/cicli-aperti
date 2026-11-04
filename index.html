@@ -17629,7 +17629,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-04 v30.1';
+const VERSIONE_APP = '2026-11-04 v30.2';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -18266,7 +18266,7 @@ autoCategoria = async function (title, note) {
 // · Oggi: «Adesso tocca a…» in una riga (si apre col tocco, si spegne da Impostazioni); la sera «Chiudi la giornata»
 // · Impostazioni: «Togli» su persone e aree; via «Assegna l'area con Claude»
 // ══════════════════════════════════════════════════════════════
-const V26 = { RITMO_OFF: 'v26_ritmo_off', FISSI_LS: 'eventi_fissi', OB_LS: 'obiettivi_settimana', SENZA_ORA: 'in giornata', MAX_OB: 5 };
+const V26 = { RITMO_OFF: 'v26_ritmo_off', FISSI_LS: 'eventi_fissi', OB_LS: 'obiettivi_settimana', SENZA_ORA: 'senza orario', MAX_OB: 5 };
 const v26Esc = s => escHtml(String(s == null ? '' : s));
 
 // --- «in giornata» al posto di «tutto il giorno» ---
