@@ -11,7 +11,8 @@ const events = { 'r.macinai@sisoluzioniimpresa.it': [
   ev('verdi', 'chiamare Verdi', '05', '09:00', '09:15'),
   ev('idr1', 'chiedere preventivo idraulico', '03', '11:00', '11:15'),
   ev('idr2', 'chiedere preventivo idraulico', '06', '11:00', '11:15'),
-  ev('lucia', 'scrivere a Lucia Parigi', '03', '12:00', '12:15')
+  ev('lucia', 'scrivere a Lucia Parigi', '03', '12:00', '12:15'),
+  ev('cena', 'Cena a La Bottega dell\'Abate (orario da chiedere) [da confermare]', '02', '20:00', '22:00')
 ], 'maci81x@gmail.com': [] };
 const ora = new Date(ORA).toISOString();
 const seed = { cicli: [{ id: 'c-lucia', title: 'Scrivere a Lucia Parigi', q: 2, ctx: 'lavoro', cat: 'management', done: false, created_at: ora, updated_at: ora, persone_menzionate: [] }] };
@@ -24,6 +25,7 @@ const seed = { cicli: [{ id: 'c-lucia', title: 'Scrivere a Lucia Parigi', q: 2, 
   const anita = db.tabelle.cicli.find(c => /Anita/.test(c.title));
   a(anita && anita.da_rivedere === true && /\[cal:anita\]/.test(anita.note) && !anita.scheduled_date, 'Anita (2/11) è in Da pianificare, da rivedere: ' + JSON.stringify(anita && [anita.da_rivedere, anita.note]));
   a(db.tabelle.cicli.filter(c => /Anita/.test(c.title)).length === 1, 'una sola volta');
+  a(!db.tabelle.cicli.some(c => /Bottega/.test(c.title)), 'una cena con «(orario da chiedere)» è un appuntamento, non una cosa');
   // di nuovo: non la ricrea (anche se le scelte locali si perdono, es. altro dispositivo)
   await page.evaluate(() => { localStorage.removeItem(LS5.CICLI_CAL); return cercaCicliInCalendario(); }); await page.waitForTimeout(600);
   a(db.tabelle.cicli.filter(c => /Anita/.test(c.title)).length === 1, 'altro dispositivo: non la duplica');

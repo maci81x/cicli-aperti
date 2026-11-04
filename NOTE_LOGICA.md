@@ -914,3 +914,4 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - per quelli passati il foglio dà **Già fatta · Mettila tra le cose da fare · Lascia stare**. In «Chiudi la giornata» c'è la riga «N promemoria da guardare».
 - passata la finestra senza una scelta: diventa una cosa in **Da pianificare** con l'etichetta **«da rivedere»** (`cicli.da_rivedere`, nota con `[cal:<id>]` per non duplicarla da un altro dispositivo). In Da pianificare stanno in cima e c'è il filtro «Da rivedere N». Appena la tocchi (sposti, cambi, pianifichi) l'etichetta sparisce.
 - le serie (ogni giorno da più di un mese, o con le parole) restano come prima.
+- (v30.1) la parola deve essere l'azione: quella tra parentesi o tra quadre non conta («Cena a La Bottega dell'Abate (orario da chiedere)» è un appuntamento). La cosa creata per sbaglio il 4/11 è stata eliminata (eliminato_at).

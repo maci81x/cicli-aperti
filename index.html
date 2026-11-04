@@ -17629,7 +17629,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-04 v30';
+const VERSIONE_APP = '2026-11-04 v30.1';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19561,6 +19561,8 @@ function v30Riprogrammata(e) {
   return null;
 }
 const v30Marca = k => `[${V30.MARK}${k}]`;
+// la parola deve essere l'azione, non stare tra parentesi: «Cena a La Bottega (orario da chiedere)» è un appuntamento (4/11)
+const v30Parola = t => PAROLE_CICLO.test(normTitolo(String(t || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')));
 async function v30InDaPianificare(k, e) {
   if (state.cicli.some(c => (c.note || '').includes(v30Marca(k)))) return false;   // già fatta su un altro dispositivo
   const ctx = e.cal === 'privato' ? 'personale' : indovinaContesto(e.titolo, { ctx: 'lavoro', cal: e.cal }).ctx;
@@ -19594,7 +19596,7 @@ cercaCicliInCalendario = async function () {
       if (new Set(lista.map(x => x.giorno)).size >= 3 && quotidianaDaPiuDi30(await eventoMaster(e.calId, e.serie))) out.push({ k, e, perche: 'ogni giorno' });
       continue;
     }
-    if (!PAROLE_CICLO.test(normTitolo(e.titolo))) continue;
+    if (!v30Parola(e.titolo)) continue;
     const f = v30Finestra(e);
     if (f === 'presto') continue;
     const gia = v30Riprogrammata(e);
