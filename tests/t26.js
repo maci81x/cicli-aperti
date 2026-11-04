@@ -86,11 +86,9 @@ const seed = {
   a(/Obiettivi della settimana:\n- Vendere 20\.000 € \(fatto\)\n- 10 clienti nuovi \(fatto\)/.test(r), 'mail a Leo con gli obiettivi');
   // Oggi: ritmo in una riga, sera = Chiudi la giornata
   await page.evaluate(() => { ui.tab = 'oggi'; render(); }); await page.waitForTimeout(300);
-  r = await page.evaluate(() => { const s = document.querySelector('#view .v26-ritmo'); return s && { t: s.innerText.replace(/\s+/g, ' '), aperto: s.classList.contains('aperto'), btn: (s.querySelector('.btn-primary') || {}).dataset.act }; });
-  a(r && !r.aperto && /Sera: 2 minuti/.test(r.t) && r.btn === 'v26-chiudi-giornata' && !/Spunta quello/.test(r.t), 'ritmo chiuso in una riga, sera → Chiudi la giornata ' + JSON.stringify(r));
-  await page.click('#view .v26-ritmo-testa'); await page.waitForTimeout(200);
-  a(await page.evaluate(() => /Spunta quello/.test(document.querySelector('#view .v26-ritmo').innerText)), 'tocco: si apre la spiegazione');
-  await page.click('#view .v26-ritmo .btn-primary'); await page.waitForTimeout(500);
+  r = await page.evaluate(() => { const s = document.querySelector('#view .v31-adesso .v31-ad-ritmo'); return s && { t: s.innerText.replace(/\s+/g, ' '), btn: (s.querySelector('.btn[data-act]:not(.btn-icon)') || {}).dataset.act, primo: document.querySelector('#view .vh').nextElementSibling.className }; });
+  a(r && /Sera: 2 minuti/.test(r.t) && r.btn === 'v26-chiudi-giornata' && /Spunta quello/.test(r.t) && r.primo === 'v31-adesso', 'v31: «Adesso» in cima, dentro il ritmo della sera → Chiudi la giornata ' + JSON.stringify(r));
+  await page.click('#view .v31-ad-ritmo .btn[data-act="v26-chiudi-giornata"]'); await page.waitForTimeout(500);
   r = await page.evaluate(() => ({ open: $('v26cgOverlay').classList.contains('open'), voci: [...document.querySelectorAll('#v26cg-corpo .v26-cg-voce')].map(v => (v.classList.contains('rosso') ? '!' : '') + v.querySelector('.v26-cg-tit').textContent.slice(0, 12)) }));
   a(r.open && r.voci.length === 3 && r.voci[0].startsWith('!'), 'Chiudi la giornata: le cose di oggi, rosse prima ' + JSON.stringify(r.voci));
   await page.click('#v26cg-corpo [data-act="v26-cg-fatta"][data-id="c1"]'); await page.waitForTimeout(800);
@@ -125,7 +123,7 @@ const seed = {
 
   // ---------- telefono, mattina ----------
   ({ browser, page, logs, db } = await apriApp({ mobile: true, seed, events, ora: '2026-11-03T07:30:00+01:00', attesa: 3000 }));
-  r = await page.evaluate(() => { const s = document.querySelector('#view .v26-ritmo'); return s && s.innerText.replace(/\s+/g, ' '); });
+  r = await page.evaluate(() => { const s = document.querySelector('#view .v31-ad-ritmo'); return s && s.innerText.replace(/\s+/g, ' '); });
   a(/Prima di iniziare · 10 minuti/.test(r) && /Stampa il foglio di oggi/.test(r), 'mattina: «Prima di iniziare · 10 minuti» ' + r);
   await page.screenshot({ path: (process.env.OUT || '/tmp') + '/v26_oggi_tel.png' });
   await page.evaluate(() => { ui.tab = 'pianifica'; ui.sub = null; ui.pian = 'settimana'; render(); }); await page.waitForTimeout(400);

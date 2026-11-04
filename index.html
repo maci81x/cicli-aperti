@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Cicli Aperti</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0F766E">
+<meta name="theme-color" content="#F4EFE4">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -17,7 +17,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <script>
 // Tema prima del primo disegno: scelta salvata, altrimenti quella del sistema.
@@ -2020,6 +2020,121 @@ button.sn-r { width: 100%; cursor: pointer; }
 .tag-v30 { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 700; flex: none; }
 .tag-v30 .ti { font-size: 13px; }
 .v30-chip[aria-pressed="true"] { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+
+/* ══════════════════════════════════════════════════════════════
+   v31 · 04/11 — «Carta di precisione»
+   di giorno un'agenda di carta con le penne, nel riquadro «Adesso» uno strumento di bordo.
+   Ogni colore è una penna e ogni penna ha un solo significato:
+   inchiostro = testo e azioni · rosso = Subito / scade · verde = Importante / tempo libero ·
+   blu = obiettivi · viola = appuntamenti · evidenziatore = dove sei.
+   ══════════════════════════════════════════════════════════════ */
+html:root, html[data-theme="light"] {
+  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --bg: #F4EFE4; --surface: #FFFCF5; --surface-2: #EDE6D7; --surface-3: #FFFCF5;
+  --border: #E3DAC7; --border-strong: #8A8270;
+  --text: #1C1B18; --text-2: #55503F; --text-3: #6B6553;
+  --done-title: #6B6553; --done-meta: #6B6553;
+  --primary: #1C1B18; --primary-deep: #000000; --primary-ink: #1C1B18; --primary-soft: #FAEFC3; --on-primary: #F4EFE4;
+  --q1: #B3261E; --q1-mark: #B3261E; --q1-soft: #F6E1DB;
+  --q2: #1E5E4E; --q2-mark: #1E5E4E; --q2-soft: #DCEAE3;
+  --q3: #3F6E7A; --q3-mark: #3F6E7A; --q3-soft: #E1ECEE;
+  --q4: #6B6553; --q4-mark: #8A8270; --q4-soft: #EDE6D7;
+  --evt: #5E4B8B; --evt-mark: #5E4B8B; --evt-soft: #EEEAF5; --v24-tratto: #B9AED3;
+  --pensa: #FAEFC3; --pensa-bordo: #D9B43A; --pensa-ink: #5E4A00;
+  --danger: #B3261E; --danger-soft: #F6E1DB;
+  --warn: #8A5A00; --warn-soft: #F7EBCF;
+  --inverse-bg: #1C1B18; --inverse-text: #F4EFE4; --inverse-accent: #8FE3C8;
+  --scrim: rgba(28, 27, 24, .42);
+  --ring: #1C1B18;
+  --shadow-1: 0 1px 0 rgba(28, 27, 24, .04);
+  --shadow-2: 0 1px 0 rgba(28, 27, 24, .04), 0 6px 16px rgba(60, 48, 20, .08);
+  --shadow-3: 0 18px 44px rgba(40, 32, 12, .18), 0 2px 6px rgba(40, 32, 12, .06);
+  --v26-ob-bg: #E4E8F6; --v26-ob-bordo: #B5C0E6; --v26-ob-ink: #2343A6;
+  --v31-notte: #151410; --v31-notte-2: #211F19; --v31-notte-3: #2E2B23; --v31-luce: #8FE3C8; --v31-su-notte: #F3EEE3; --v31-su-notte-2: #B9B2A2;
+  --v31-hl: #F1CE4A;
+}
+html:root[data-theme="dark"] {
+  --bg: #12110E; --surface: #1B1A16; --surface-2: #24221C; --surface-3: #2E2B23;
+  --border: #2C2A23; --border-strong: #8D8676;
+  --text: #F1ECE1; --text-2: #BDB5A4; --text-3: #A39B8A;
+  --done-title: #BDB5A4; --done-meta: #A39B8A;
+  --primary: #F1ECE1; --primary-deep: #BDB5A4; --primary-ink: #F1ECE1; --primary-soft: #3A3217; --on-primary: #12110E;
+  --q1: #FF8A7A; --q1-mark: #FF8A7A; --q1-soft: #3A1F1A;
+  --q2: #8FE3C8; --q2-mark: #8FE3C8; --q2-soft: #173129;
+  --q3: #9CCAD6; --q3-mark: #9CCAD6; --q3-soft: #182A2F;
+  --q4: #A39B8A; --q4-mark: #8D8676; --q4-soft: #24221C;
+  --evt: #B9A8E6; --evt-mark: #B9A8E6; --evt-soft: #262035; --v24-tratto: #5B4F7E;
+  --pensa: #3A3217; --pensa-bordo: #7A6420; --pensa-ink: #F2D675;
+  --danger: #FF8A7A; --danger-soft: #3A1F1A;
+  --warn: #F2C46A; --warn-soft: #3A2C10;
+  --inverse-bg: #F1ECE1; --inverse-text: #12110E; --inverse-accent: #1E5E4E;
+  --scrim: rgba(0, 0, 0, .6);
+  --ring: #8FE3C8;
+  --shadow-1: 0 0 0 1px #2C2A23;
+  --shadow-2: 0 0 0 1px #2C2A23, 0 6px 16px rgba(0, 0, 0, .4);
+  --shadow-3: 0 0 0 1px #2C2A23, 0 20px 48px rgba(0, 0, 0, .55);
+  --v26-ob-bg: #1D2440; --v26-ob-bordo: #34407A; --v26-ob-ink: #9DB2FF;
+  --v31-hl: #E9C64A;
+}
+html:root[data-contrast="alto"] { --border: #8A8270; --border-strong: #55503F; --text-2: #3A362B; --text-3: #47423A; --done-meta: #47423A; }
+html:root[data-theme="dark"][data-contrast="alto"] { --border: #6B6553; --border-strong: #BDB5A4; --text-2: #E2DBCC; --text-3: #CFC7B6; --done-meta: #CFC7B6; }
+
+/* titoli a penna: serif solo per i titoli, il resto resta da leggere */
+.logo { font-family: var(--font-serif); font-weight: 650; letter-spacing: -.02em; font-size: 19px; }
+.logo-side { font-size: 16px; line-height: 1.05; text-align: center; white-space: normal; }
+.logo span { color: var(--text-2); font-style: italic; font-weight: 500; }
+.vh h1 { font-family: var(--font-serif); font-weight: 700; letter-spacing: -.02em; font-optical-sizing: auto; }
+.t-title, .sheet-head h3, .modal h3 { font-family: var(--font-serif); font-weight: 650; letter-spacing: -.01em; }
+.list-head { font-family: var(--font-serif); font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; color: var(--text); }
+.list-head .mono, .list-head small { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; color: var(--text-2); }
+.check-box { border-radius: 6px; border: 1.8px solid var(--text); }
+.btn-primary { box-shadow: 0 2px 0 var(--primary-deep); }
+.btn-primary:active { transform: translateY(2px); }
+.nav button[aria-current="page"] .nav-ico, .side-btn[aria-current="page"] .nav-ico { background: var(--primary-soft); }
+.oggi-coach:empty { display: none; }
+.v12-head span:first-child { text-transform: none; letter-spacing: -.01em; font-size: 18px; }
+::selection { background: var(--v31-hl); color: #1C1B18; }
+
+/* --- il riquadro «Adesso» --- */
+.v31-adesso { position: relative; overflow: hidden; margin-bottom: var(--sp-3); padding: var(--sp-4); border-radius: 18px; background: var(--v31-notte); color: var(--v31-su-notte); }
+html[data-theme="dark"] .v31-adesso { background: var(--v31-notte-2); border: 1px solid var(--v31-notte-3); }
+.v31-ad-testa { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); }
+.v31-ad-k { margin: 0; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--v31-luce); }
+.v31-ad-t { margin: 4px 0 0; font-family: var(--font-serif); font-size: 21px; line-height: 1.2; font-weight: 600; overflow-wrap: anywhere; }
+.v31-ad-c { flex: none; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; line-height: 1.1; color: var(--v31-luce); }
+.v31-ad-c small { display: block; font-size: 10.5px; letter-spacing: .1em; text-align: right; color: var(--v31-su-notte-2); }
+.v31-tacche { position: relative; height: 8px; margin-top: var(--sp-3); border-radius: 2px; background-image: repeating-linear-gradient(to right, var(--v31-notte-3) 0, var(--v31-notte-3) 1px, transparent 1px, transparent 12px); }
+html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradient(to right, #3D3A30 0, #3D3A30 1px, transparent 1px, transparent 12px); }
+.v31-tacche span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--v31-luce); opacity: .55; }
+.v31-ad-poi { margin: 10px 0 0; font-size: 13px; line-height: 1.45; color: var(--v31-su-notte-2); }
+.v31-ad-poi b { color: var(--v31-su-notte); font-weight: 650; }
+.v31-ad-ritmo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--v31-notte-3); }
+.v31-ad-ritmo > span { flex: 1 1 100%; min-width: 0; font-size: 13px; line-height: 1.4; color: var(--v31-su-notte-2); }
+.v31-ad-ritmo .btn:not(.btn-icon) { flex: 1 1 auto; }
+@media (min-width: 720px) { .v31-ad-ritmo > span { flex: 1 1 0; } .v31-ad-ritmo .btn:not(.btn-icon) { flex: none; } }
+.v31-ad-ritmo > span b { display: block; color: var(--v31-su-notte); font-size: 14px; }
+.v31-ad-ritmo .btn { min-height: 40px; padding: 0 14px; font-size: 14px; background: var(--v31-luce); color: #10241D; box-shadow: none; }
+.v31-ad-ritmo .btn-icon { min-height: 40px; width: 40px; padding: 0; background: transparent; color: var(--v31-su-notte-2); }
+.v31-adesso :focus-visible { outline: 2px solid var(--v31-luce); outline-offset: 2px; }
+
+/* --- la giornata 8–18 --- */
+.v31-giornata { margin-bottom: var(--sp-3); padding: var(--sp-3) 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.v31-g-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; }
+.v31-g-h > span:first-child { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+.v31-g-h .mono { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.v31-g-h .mono b { color: var(--q2); font-weight: 500; }
+.v31-g-barra { position: relative; height: 10px; margin-top: var(--sp-2); border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.v31-g-barra i { position: absolute; top: 0; bottom: 0; background: var(--text); }
+.v31-g-barra u { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--q1); text-decoration: none; }
+.v31-g-assi { display: flex; justify-content: space-between; margin-top: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); }
+
+/* --- obiettivi: un rigo in penna blu --- */
+.v31-ob { display: flex; align-items: center; gap: var(--sp-3); width: 100%; min-height: 56px; margin-bottom: var(--sp-3); padding: var(--sp-3) 14px; border: 1px solid var(--v26-ob-bordo); border-radius: 14px; background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.v31-ob > i:first-child { font-size: 22px; color: var(--v26-ob-ink); }
+.v31-ob span { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); }
+.v31-ob span b { display: block; font-size: 14.5px; color: var(--v26-ob-ink); }
+.v31-ob > i:last-child { color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -2029,8 +2144,8 @@ button.sn-r { width: 100%; cursor: pointer; }
   <aside class="side" aria-label="Sezioni">
     <div class="logo logo-side">CICLI <span>APERTI</span></div>
     <button type="button" class="side-btn" data-tab="oggi" data-tip="Mattina 10 minuti · sera 2 minuti"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
-    <button type="button" class="side-btn" data-tab="pianifica" data-tip="Venerdì: prepara, stampa, manda a Leo"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Settimana</button>
-    <button type="button" class="side-btn" data-tab="tutto" data-tip="L'armadio: tutto quello che hai aperto, per sezione"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Cicli</span></button>
+    <button type="button" class="side-btn" data-tab="pianifica" data-tip="Venerdì: prepara, stampa, manda a Leo"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
+    <button type="button" class="side-btn" data-tab="tutto" data-tip="Tutte le cose aperte, per sezione"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Tutte</span></button>
     <button type="button" class="side-btn" data-tab="altro" data-tip="Impostazioni, guida, cose fatte"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
   </aside>
 
@@ -2068,8 +2183,8 @@ button.sn-r { width: 100%; cursor: pointer; }
   <!-- BARRA IN BASSO (telefono) -->
   <nav class="nav tabbar" aria-label="Sezioni">
     <button type="button" data-tab="oggi"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
-    <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Settimana</button>
-    <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Cicli</span></button>
+    <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
+    <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Tutte</span></button>
     <button type="button" data-tab="altro"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
   </nav>
 </div>
@@ -6003,7 +6118,7 @@ function applyTheme() {
   const btn = $('themeBtn');
   if (btn) btn.innerHTML = `<i class="ti ${t === 'dark' ? 'ti-sun' : 'ti-moon'}"></i>`;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'dark' ? '#0D1312' : '#0F766E');
+  if (meta) meta.setAttribute('content', t === 'dark' ? '#12110E' : '#F4EFE4');
 }
 function toggleTheme() {
   const t = temaCorrente() === 'dark' ? 'light' : 'dark';
@@ -9060,7 +9175,7 @@ function applicaAspetto() {
   if (lsLeggi(LS3.CONTRASTO) === 'alto') document.documentElement.setAttribute('data-contrast', 'alto');
   else document.documentElement.removeAttribute('data-contrast');
   document.body.classList.toggle('semplice', modoSemplice());
-  document.querySelectorAll('.l-tutto').forEach(e => { e.textContent = modoSemplice() ? 'Cose' : 'Cicli'; });
+  document.querySelectorAll('.l-tutto').forEach(e => { e.textContent = modoSemplice() ? 'Cose' : 'Tutte'; });
 }
 function impostaSemplice(on) {
   lsScrivi(LS3.SEMPLICE, on ? '1' : null);
@@ -17629,7 +17744,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-04 v30.2';
+const VERSIONE_APP = '2026-11-04 v31';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19674,6 +19789,145 @@ patchCiclo = function (id, patch) {
   if (c && c.da_rivedere && patch && !('da_rivedere' in patch)) patch = { ...patch, da_rivedere: false };
   return _patchCicloV30.call(this, id, patch);
 };
+
+// ══════════════════════════════════════════════════════════════
+// v31 · 04/11 — «Carta di precisione» (fase 1) e via la scheda del coach
+// · «Per il coach» non c'è più né in Oggi né in Pianifica: mandare il piano a Leo è una cosa
+//   ricorrente come le altre (venerdì pomeriggio). Il bottone «Invia al coach» resta.
+// · Oggi si apre col riquadro «Adesso»: cosa c'è ora e fino a quando, il conto alla rovescia,
+//   cosa viene dopo e il primo spazio libero; sotto, «Adesso tocca a…» (mattina, sera).
+//   Poi la giornata dalle 8 alle 18 (pieno/libero) e gli obiettivi della settimana.
+// · Menu: Settimana → Pianifica, Cicli → Tutte.
+// ══════════════════════════════════════════════════════════════
+cardCoach = () => '';
+v22RigaCoach = () => '';
+
+const V31 = { DALLE: 8 * 60, ALLE: 18 * 60, BUCO_MIN: 15 };
+const v31Hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const v31Conto = m => m >= 60 ? `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}` : `${m}'`;
+const v31Durata = m => m >= 60 ? (m % 60 ? `${Math.floor(m / 60)}h ${m % 60}'` : `${m / 60}h`) : `${m}'`;
+const v31Ora = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+
+// gli impegni di un giorno: appuntamenti con l'ora + cose in programma a un'ora precisa (non fatte)
+function v31Impegni(d) {
+  const lista = eventiDelGiorno(d).filter(e => e.ora && !eGiornata(e)).map(e => {
+    const a = minDi(e.ora), b = e.fine && minDi(e.fine) > a ? minDi(e.fine) : a + (e.minuti || 60);
+    return { a, b, t: e.titolo || '(senza titolo)' };
+  });
+  righeGiornoData(d).forEach(r => {
+    if (!r.ora || r.fatto || !r.c) return;
+    const a = minDi(r.ora);
+    if (lista.some(x => x.a === a)) return;   // già nel calendario (la cosa pianificata ha il suo evento)
+    lista.push({ a, b: a + (r.durata || BP_DURATA_DEFAULT), t: r.c.title });
+  });
+  return lista.sort((p, q) => p.a - q.a || q.b - p.b);
+}
+// minuti occupati dalle 8 alle 18 (le sovrapposizioni contano una volta)
+function v31Pieni(imp) {
+  const tagli = imp.map(x => [Math.max(x.a, V31.DALLE), Math.min(x.b, V31.ALLE)]).filter(([a, b]) => b > a).sort((p, q) => p[0] - q[0]);
+  const uniti = [];
+  tagli.forEach(([a, b]) => { const u = uniti[uniti.length - 1]; if (u && a <= u[1]) u[1] = Math.max(u[1], b); else uniti.push([a, b]); });
+  return uniti;
+}
+function v31PrimoBuco(uniti, da) {
+  let t = Math.max(da, V31.DALLE);
+  for (const [a, b] of uniti) {
+    if (b <= t) continue;
+    if (a - t >= V31.BUCO_MIN) return [t, a];
+    t = Math.max(t, b);
+  }
+  return V31.ALLE - t >= V31.BUCO_MIN ? [t, V31.ALLE] : null;
+}
+
+function v31Ritmo() {
+  if (!v26RitmoAcceso()) return '';
+  const m = v25Momento();
+  if (!m || sessionStorage.getItem(V25.RITMO_CHIUSO) === m.k + toISODate(new Date())) return '';
+  const btn = m.act === 'v21-stampa-oggi' ? `<button type="button" class="btn" data-act="v21-stampa-giorno" data-i="${giornoIdxDi(oggiData())}" data-oggi="1"><i class="ti ti-printer"></i>${escHtml(m.btn)}</button>`
+    : m.act === 'tab-tutto' ? `<button type="button" class="btn" data-tab="tutto">${escHtml(m.btn)}</button>`
+    : m.act ? `<button type="button" class="btn" data-act="${m.act}">${escHtml(m.btn)}</button>` : '';
+  return `<div class="v31-ad-ritmo"><span><b>${escHtml(m.t)}</b>${escHtml(m.s || '')}</span>${btn}<button type="button" class="btn btn-icon" data-act="v25-ritmo-chiudi" data-k="${m.k}" aria-label="Chiudi per oggi"><i class="ti ti-x"></i></button></div>`;
+}
+
+function v31Adesso() {
+  const d = oggiData(), nm = v31Ora(), imp = v31Impegni(d), uniti = v31Pieni(imp);
+  const ora = imp.filter(x => x.a <= nm && nm < x.b).sort((p, q) => q.a - p.a)[0];
+  const dopo = imp.find(x => x.a > nm && x !== ora);
+  let k, t, conto = '', perc = null, poi = '';
+  if (ora) {
+    k = `Adesso · fino alle ${v31Hm(ora.b)}`;
+    t = ora.t;
+    conto = `${v31Conto(ora.b - nm)}<small>MANCANO</small>`;
+    perc = Math.max(2, Math.min(100, Math.round((nm - ora.a) / Math.max(1, ora.b - ora.a) * 100)));
+    const buco = v31PrimoBuco(uniti, ora.b);
+    const pezzi = [];
+    if (dopo) pezzi.push(`Poi <b>${v31Hm(dopo.a)} ${escHtml(dopo.t)}</b>`);
+    if (buco) pezzi.push(`libero <b>${v31Hm(buco[0])}–${v31Hm(buco[1])}</b>`);
+    poi = pezzi.join(' · ');
+  } else if (dopo && dopo.a < 24 * 60) {
+    k = 'Adesso · tempo libero';
+    t = `Libero fino alle ${v31Hm(dopo.a)}`;
+    conto = `${v31Conto(dopo.a - nm)}<small>MANCANO</small>`;
+    poi = `Poi <b>${v31Hm(dopo.a)} ${escHtml(dopo.t)}</b>`;
+  } else {
+    k = 'Adesso';
+    t = nm < V31.ALLE ? 'Niente appuntamenti per il resto della giornata' : 'La giornata di lavoro è finita';
+  }
+  return `<section class="v31-adesso" aria-label="Adesso">
+    <div class="v31-ad-testa"><div><p class="v31-ad-k">${escHtml(k)}</p><p class="v31-ad-t">${escHtml(t)}</p></div>${conto ? `<span class="v31-ad-c">${conto}</span>` : ''}</div>
+    ${perc !== null ? `<div class="v31-tacche" role="img" aria-label="Passato il ${perc}%"><span style="width:${perc}%"></span></div>` : ''}
+    ${poi ? `<p class="v31-ad-poi">${poi}</p>` : ''}
+    ${v31Ritmo()}</section>`;
+}
+
+function v31Giornata() {
+  const d = oggiData(), g = d.getDay();
+  if (g === 0 || g === 6) return '';
+  const uniti = v31Pieni(v31Impegni(d)), tot = V31.ALLE - V31.DALLE;
+  const pieni = uniti.reduce((s, [a, b]) => s + b - a, 0), nm = v31Ora();
+  const pc = m => ((m - V31.DALLE) / tot * 100).toFixed(2);
+  const barre = uniti.map(([a, b]) => `<i style="left:${pc(a)}%;width:${((b - a) / tot * 100).toFixed(2)}%"></i>`).join('');
+  const segno = nm > V31.DALLE && nm < V31.ALLE ? `<u style="left:${pc(nm)}%"></u>` : '';
+  return `<section class="v31-giornata" aria-label="La giornata dalle 8 alle 18">
+    <div class="v31-g-h"><span>La giornata</span><span class="mono">impegni ${pieni ? v31Durata(pieni) : '0'} · <b>libere ${v31Durata(tot - pieni)}</b></span></div>
+    <div class="v31-g-barra" aria-hidden="true">${barre}${segno}</div>
+    <div class="v31-g-assi" aria-hidden="true"><span>8</span><span>10</span><span>12</span><span>14</span><span>16</span><span>18</span></div></section>`;
+}
+
+function v31Obiettivi() {
+  if (!state.obiettiviDb && state.obiettiviDb !== undefined) return '';
+  const c = bpSettimanaCorrente(), voci = v26ObDi(c.week, c.year), fatti = voci.filter(v => v.fatto).length;
+  const corrente = eSettimanaCorrente();
+  const act = !voci.length && corrente ? 'data-act="v26-ob-modifica"' : 'data-tab="pianifica"';
+  const sotto = voci.length ? `${fatti} di ${voci.length} fatti` : 'ancora da scrivere · bastano 2 minuti';
+  return `<button type="button" class="v31-ob" ${act}><i class="ti ti-target-arrow" aria-hidden="true"></i><span><b>Obiettivi della settimana</b>${sotto}</span><i class="ti ti-chevron-right" aria-hidden="true"></i></button>`;
+}
+
+// «Adesso» prende il posto del vecchio riquadro «Adesso tocca a…» e ne porta dentro il suggerimento
+v25RitmoCard = function () { return v31Adesso() + v31Giornata() + v31Obiettivi(); };
+const _vistaOggiV31 = vistaOggi;
+vistaOggi = function () {
+  let h = _vistaOggiV31.apply(this, arguments);
+  try {
+    if (modoSemplice()) return h;
+    const tpl = document.createElement('template'); tpl.innerHTML = h;
+    const f = tpl.content, vh = f.querySelector('.vh');
+    const pezzi = ['.v31-adesso', '.v31-giornata', '.v31-ob'].map(s => f.querySelector(s)).filter(Boolean);
+    if (vh && pezzi.length) { let dopo = vh; pezzi.forEach(p => { dopo.after(p); dopo = p; }); }
+    const box = document.createElement('div'); box.appendChild(f); h = box.innerHTML;
+  } catch (e) { console.warn('[v31] oggi:', e.message); }
+  return h;
+};
+// ogni minuto: si aggiornano solo «Adesso» e la giornata (niente ridisegno completo)
+setInterval(() => {
+  try {
+    if (ui.tab !== 'oggi' || document.hidden) return;
+    const a = document.querySelector('.v31-adesso'), g = document.querySelector('.v31-giornata');
+    if (a && !a.contains(document.activeElement)) a.outerHTML = v31Adesso();
+    if (g) g.outerHTML = v31Giornata() || '<span hidden></span>';
+  } catch (e) { console.warn('[v31] minuto:', e.message); }
+}, 60000);
+
 </script>
 </body>
 </html>

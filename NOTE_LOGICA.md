@@ -915,3 +915,11 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - passata la finestra senza una scelta: diventa una cosa in **Da pianificare** con l'etichetta **«da rivedere»** (`cicli.da_rivedere`, nota con `[cal:<id>]` per non duplicarla da un altro dispositivo). In Da pianificare stanno in cima e c'è il filtro «Da rivedere N». Appena la tocchi (sposti, cambi, pianifichi) l'etichetta sparisce.
 - le serie (ogni giorno da più di un mese, o con le parole) restano come prima.
 - (v30.1) la parola deve essere l'azione: quella tra parentesi o tra quadre non conta («Cena a La Bottega dell'Abate (orario da chiedere)» è un appuntamento). La cosa creata per sbaglio il 4/11 è stata eliminata (eliminato_at).
+
+## v31 · 04/11 — «Carta di precisione», fase 1
+- **Via la scheda «Per il coach»** (Oggi e Pianifica): mandare il piano a Leo è una cosa ricorrente come le altre («Mandare a Leo il piano della settimana», venerdì pomeriggio). Il bottone «Invia al coach» resta.
+- **Sistema grafico**: carta #F4EFE4, foglio #FFFCF5, inchiostro #1C1B18. Ogni colore è una penna con un solo significato: rosso = Subito/scade, verde = Importante/tempo libero, blu = obiettivi, viola = appuntamenti, evidenziatore = dove sei. Sera: #12110E. Caratteri: Fraunces (titoli), Instrument Sans (testo), JetBrains Mono (numeri e ore).
+- **Riquadro «Adesso»** in cima a Oggi: l'impegno in corso e fino a quando (o «tempo libero fino alle…»), il conto alla rovescia, una barra a tacche con quanto ne è passato, «Poi …» e il primo spazio libero di almeno 15 minuti. Gli impegni sono gli appuntamenti con l'ora + le cose di oggi a un'ora precisa non fatte (se l'ora coincide con un appuntamento contano una volta). Dentro c'è «Adesso tocca a…» (mattina: stampa; sera: Chiudi la giornata). Si aggiorna da solo ogni minuto.
+- **La giornata 8–18** (solo lun–ven): ore occupate e libere, le sovrapposizioni contano una volta; segno rosso = adesso.
+- **Obiettivi della settimana**: un rigo in penna blu; se non ci sono si scrivono da lì, altrimenti porta a Pianifica.
+- **Menu**: Settimana → Pianifica, Cicli → Tutte.
