@@ -2247,6 +2247,34 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
   .v33-due { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); align-items: start; }
   .v33-due > div > .list-head:first-child { margin-top: var(--sp-2); }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   v34 · 05/11 — i colori del giorno (canvas, sezione 15, versione A)
+   appuntamenti tuoi = viola chiaro · con altri = viola pieno · spazi liberi = verde tratteggiato
+   Subito = casella rosa con bordo rosso (ovunque) · Importante = foglio bianco
+   ══════════════════════════════════════════════════════════════ */
+html:root { --v34-sub-bg: #F6E1DB; --v34-sub-bordo: #D9776E; --v34-sub-ink: #5A1410; --v34-io: #EEEAF5; --v34-io-ink: #5E4B8B; --v34-altri: #5E4B8B; --v34-altri-ink: #FFFFFF; --v34-altri-2: #E4DEF3; --v34-lib: #EEF6F2; --v34-lib-bordo: #9CC9B8; --v34-lib-ink: #1E5E4E; }
+html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; --v34-sub-ink: #FFD9D3; --v34-io: #262035; --v34-io-ink: #C9BCEB; --v34-altri: #6C5AA0; --v34-altri-ink: #FFFFFF; --v34-altri-2: #E4DEF3; --v34-lib: #14281F; --v34-lib-bordo: #2F6B57; --v34-lib-ink: #8FE3C8; }
+/* Subito: tutta la casella */
+.item.p-q1:not(.is-done) .item-row { background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
+.item.p-q1:not(.is-done) .item-title { color: var(--v34-sub-ink); font-weight: 600; }
+.item.p-q1:not(.is-done) .check-box { background: var(--surface); }
+.item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid var(--v34-sub-bordo); }
+.board .item.p-q1:not(.is-done) { outline: 1.5px solid var(--v34-sub-bordo); outline-offset: -1.5px; }
+/* appuntamenti */
+.evt-riga.evt-app.v24-mio, .board .evt-riga.v24-mio { background: var(--v34-io); border: 0; box-shadow: none; }
+.evt-riga.evt-app.v24-mio .evt-cerchio { border-color: var(--v34-io-ink); }
+.evt-riga.evt-app.v24-mio .item-meta .mono, .evt-riga.evt-app.v24-mio .v24-chi { color: var(--v34-io-ink); }
+.evt-riga.evt-app.v24-altri, .board .evt-riga.v24-altri { background: var(--v34-altri); box-shadow: none; }
+.evt-riga.evt-app.v24-altri .item-title { color: var(--v34-altri-ink); }
+.evt-riga.evt-app.v24-altri .item-meta, .evt-riga.evt-app.v24-altri .item-meta *, .evt-riga.evt-app.v24-altri .v24-chi, .evt-riga.evt-app.v24-altri .evt-ico, .evt-riga.evt-app.v24-altri .evt-ico .ti { color: var(--v34-altri-2) !important; }
+.evt-riga.evt-app.v24-altri .evt-cerchio { border-color: var(--v34-altri-ink); }
+.evt-riga.evt-app.v24-altri .v18-cestino { color: var(--v34-altri-2); }
+.board .evt-riga.v24-mio, .board .evt-riga.v24-altri { margin: 4px; border-radius: var(--r-sm); }
+.group > .evt-riga + .evt-riga { border-top: 2px solid var(--surface); }
+/* spazi liberi */
+.spazio-riga, .board .spazio-riga { background: var(--v34-lib); border: 1.5px dashed var(--v34-lib-bordo); }
+.spazio-riga .item-title, .spazio-riga .evt-ico, .spazio-riga .evt-ico .ti { color: var(--v34-lib-ink); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -17856,7 +17884,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v33.1';
+const VERSIONE_APP = '2026-11-05 v34';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });

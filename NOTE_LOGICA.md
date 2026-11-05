@@ -938,3 +938,10 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **Pianifica:** titolo, settimana, cose e ore, Futuro e azioni su una riga; Settimana/Giorno/Mese scendono accanto agli obiettivi, che diventano una riga sottile. I giorni senza niente con l'ora (solo spazi liberi o cose di tutto il giorno) sono più stretti; nelle colonne i titoli arrivano a 4 righe.
 - **Tutte (Lista):** i gruppi su due colonne; ogni gruppo va nella colonna più corta (per Tipo: Subito a sinistra, Importante a destra).
 - v32.3: «Obiettivi della settimana» di nuovo tutto blu sul computer.
+
+## v34 · 05/11 — i colori del giorno (canvas, sezione 15, versione A, scelta di Roby)
+- **Subito:** tutta la casella rosa con il bordo rosso e il titolo in grassetto rosso scuro, **ovunque** (Oggi, Pianifica, Giorno, Tutte, telefono e computer). Sostituisce lo sfondo neutro di v32.
+- **Appuntamenti:** solo tuoi = casella viola chiaro; con altre persone = viola pieno con testo bianco.
+- **Spazi liberi:** casella verde chiaro tratteggiata, scritta in verde.
+- **Importante e le altre cose:** restano su foglio bianco con la casella da spuntare.
+- Tema scuro: stessi significati, toni scuri (rosa → bordeaux, viola chiaro → viola scuro, verde → verde bosco).

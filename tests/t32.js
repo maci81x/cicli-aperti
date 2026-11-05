@@ -25,7 +25,7 @@ const OUT = process.env.OUT || '/tmp';
   a(r.coppia, 'giornata e obiettivi affiancati');
   a(!r.ritmo, 'di giorno niente «Aggiungi una cosa» dentro Adesso');
   a(r.chip === 'Tutto' && r.seg === 'none', '«Tutto ▾» al posto dei tre bottoni');
-  a(r.bg === 'rgb(255, 252, 245)', 'Subito senza sfondo rosso ' + r.bg);
+  a(r.bg === 'rgb(246, 225, 219)', 'v34: Subito con la casella rosa ' + r.bg);
   await page.screenshot({ path: OUT + '/v32_oggi.png' });
   // Tutto ▾
   await page.click('.v32-ctx-btn'); await page.waitForTimeout(150);
