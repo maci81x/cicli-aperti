@@ -930,4 +930,5 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **Oggi**: di giorno (9:30–17:30) dentro «Adesso» non c'è più «Giornata sul foglio · Aggiungi una cosa»; mattina e sera restano su una riga. La giornata e gli obiettivi stanno affiancati. «Da rispondere» su una riga. «Prima di tutto» senza riquadro dentro un riquadro, con il conto delle Subito nell'intestazione. Nella routine, gli appuntamenti del calendario già finiti stanno in «Già passate · N», chiusa.
 - **Elenchi**: le Subito non hanno più lo sfondo rosso (resta il segno rosso); sul telefono i titoli arrivano a 3 righe.
 - **Errori sistemati**: in Pianifica il titolo non è più coperto da Settimana/Giorno/Mese; «Piano in bozza» non si taglia; le intestazioni come «La giornata» non vanno più a capo.
+- v32.1: in «Adesso» il «poi» e il «libero» sono in ordine di ora (prima lo spazio libero se viene prima).
 - Tutto questo vale solo sul telefono (sotto 768 px) e non in modalità semplice.

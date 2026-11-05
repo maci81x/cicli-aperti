@@ -17818,7 +17818,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v32';
+const VERSIONE_APP = '2026-11-05 v32.1';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19935,9 +19935,9 @@ function v31Adesso() {
     perc = Math.max(2, Math.min(100, Math.round((nm - ora.a) / Math.max(1, ora.b - ora.a) * 100)));
     const buco = v31PrimoBuco(uniti, ora.b);
     const pezzi = [];
-    if (dopo) pezzi.push(`Poi <b>${v31Hm(dopo.a)} ${escHtml(dopo.t)}</b>`);
-    if (buco) pezzi.push(`libero <b>${v31Hm(buco[0])}–${v31Hm(buco[1])}</b>`);
-    poi = pezzi.join(' · ');
+    if (dopo) pezzi.push([dopo.a, `poi <b>${v31Hm(dopo.a)} ${escHtml(dopo.t)}</b>`]);
+    if (buco) pezzi.push([buco[0], `libero <b>${v31Hm(buco[0])}–${v31Hm(buco[1])}</b>`]);
+    poi = pezzi.sort((p, q) => p[0] - q[0]).map(x => x[1]).join(' · ').replace(/^./, c => c.toUpperCase());   // in ordine di ora
   } else if (dopo && dopo.a < 24 * 60) {
     k = 'Adesso · tempo libero';
     t = `Libero fino alle ${v31Hm(dopo.a)}`;
