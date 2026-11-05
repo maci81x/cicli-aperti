@@ -2241,7 +2241,7 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
   .v26-testa .v26-obiettivi .v26-ob-h { flex: none; margin: 0; }
   .v26-testa .v26-obiettivi .v26-ob-lista { display: flex; flex-wrap: wrap; gap: 2px var(--sp-4); margin: 0; }
   .v26-testa .v26-obiettivi .v26-ob-vuoto { width: auto; margin: 0 0 0 auto; min-height: 36px; }
-  .board .item-title { -webkit-line-clamp: 4; }
+  .board .item-title, .cols.board .evt-riga .item-title { -webkit-line-clamp: 4; }
   /* Tutte: due colonne */
   #view:has(.v33-due) { max-width: 1440px; }
   .v33-due { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); align-items: start; }
@@ -17856,7 +17856,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v33';
+const VERSIONE_APP = '2026-11-05 v33.1';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
