@@ -17884,7 +17884,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v34';
+const VERSIONE_APP = '2026-11-05 v35';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -18916,7 +18916,7 @@ function v26DisegnaFoglio(doc, dati, n, tot) {
   const voce = (x, rosa) => {
     const ev = x.tipo === 'evento', c = ev ? null : x.r.c, fatto = !ev && x.r.fatto;
     const titolo = T(ev ? `${x.e.coach ? 'Coach: ' : ''}${x.e.titolo}` : c.title);
-    const sotto = ev ? (v26EventoFisso(x.e) ? 'non si sposta · ' : '') + (typeof v24ConChi === 'function' && typeof v24ConAltri === 'function' ? (v24ConAltri(x.e) ? v24ConChi(x.e) : 'tempo tuo') : '')
+    const sotto = ev ? (x.sovrap ? `si sovrappone a «${x.sovrap}» · ` : '') + (v26EventoFisso(x.e) ? 'non si sposta · ' : '') + (typeof v24ConChi === 'function' && typeof v24ConAltri === 'function' ? (v24ConAltri(x.e) ? v24ConChi(x.e) : 'tempo tuo') : '')
       : [c.inderogabile && state.inderoColOk ? 'non si sposta' : computeEffectiveQ(c) === 1 ? 'Subito' : '', (String(c.note || '').split(/\r?\n/).find(s => s.trim() && !/^📧/.test(s)) || '').trim()].filter(Boolean).join(' · ');
     doc.setFont('helvetica', rosa || ev ? 'bold' : 'normal'); doc.setFontSize(9.5);
     const righeT = doc.splitTextToSize(titolo, L_TIT).slice(0, 3);
@@ -18935,7 +18935,7 @@ function v26DisegnaFoglio(doc, dati, n, tot) {
     if (fatto) { doc.line(X_SEGNO + .5, y + 2.2, X_SEGNO + 1.3, y + 3.2); doc.line(X_SEGNO + 1.3, y + 3.2, X_SEGNO + 2.6, y + 1.1); }
     doc.setFont('helvetica', rosa || ev ? 'bold' : 'normal'); doc.setFontSize(9.5); doc.setTextColor(20, 32, 29);
     righeT.forEach((t, i) => doc.text(t, X_TIT, y + 3.4 + i * 4.3));
-    if (righeS.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(...(rosa ? [92, 42, 38] : GRIGIO)); doc.text(righeS[0], X_TIT, y + 3.4 + righeT.length * 4.3 - .6); }
+    if (righeS.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(...(rosa ? [92, 42, 38] : x.sovrap ? ROSSO : GRIGIO)); doc.text(righeS[0], X_TIT, y + 3.4 + righeT.length * 4.3 - .6); }
     if (!rosa) { doc.setDrawColor(229, 229, 229); doc.setLineWidth(.2); doc.line(LX, y + h - .4, LX + LW, y + h - .4); }
     y += h + (rosa ? .5 : 0);
   };
@@ -18964,7 +18964,35 @@ function v26DisegnaFoglio(doc, dati, n, tot) {
   }
   if (dati.fissi.length) { titoloSez('Non si sposta', 'in rosso: non si sposta', ROSSO); dati.fissi.forEach(x => voce(x, true)); y += 5; }
   if (dati.cose.length) { titoloSez('Da fare'); dati.cose.forEach(x => voce(x, false)); y += 5; }
-  if (dati.appuntamenti.length) { titoloSez('Appuntamenti'); dati.appuntamenti.forEach(x => voce(x, false)); y += 5; }
+  // v35 · appuntamenti ora per ora: le ore libere restano righe vuote per scriverci quello che entra
+  {
+    const conOra = dati.appuntamenti.filter(x => x.e.ora && !eGiornata(x.e)), senza = dati.appuntamenti.filter(x => !x.e.ora || eGiornata(x.e));
+    const ini = x => minDi(x.e.ora), fin = x => x.e.fine && minDi(x.e.fine) > ini(x) ? minDi(x.e.fine) : ini(x) + (x.e.minuti || 60);
+    const tutti = [...conOra, ...dati.fissi.filter(x => x.tipo === 'evento' && x.e.ora && !eGiornata(x.e))];
+    conOra.forEach(x => { const o = tutti.find(z => z !== x && z.e.id !== x.e.id && ini(z) < fin(x) && ini(x) < fin(z)); if (o) x.sovrap = o.e.titolo; });
+    const altrove = [...dati.fissi, ...dati.cose].map(x => x.tipo === 'evento'
+        ? (x.e.ora && !eGiornata(x.e) ? { a: minDi(x.e.ora), b: x.e.fine && minDi(x.e.fine) > minDi(x.e.ora) ? minDi(x.e.fine) : minDi(x.e.ora) + (x.e.minuti || 60), ora: x.e.ora, t: x.e.titolo } : null)
+        : (x.r.ora && !x.r.fatto ? { a: minDi(x.r.ora), b: minDi(x.r.ora) + (x.r.durata || BP_DURATA_DEFAULT), ora: x.r.ora, t: x.r.c.title } : null)).filter(Boolean);
+    titoloSez('Appuntamenti, ora per ora', 'nelle ore vuote scrivi quello che entra');
+    senza.forEach(x => voce(x, false));
+    const h0 = Math.min(8, ...conOra.map(x => Math.floor(ini(x) / 60))), h1 = Math.max(19, ...conOra.map(x => Math.ceil(fin(x) / 60)));
+    for (let h = h0; h < h1; h++) {
+      const qui = conOra.filter(x => Math.floor(ini(x) / 60) === h);
+      if (qui.length) { qui.forEach(x => voce(x, false)); y += 1.5; continue; }
+      const incorso = conOra.find(x => ini(x) < h * 60 && fin(x) >= (h + 1) * 60);
+      // le cose a un'ora precisa e gli appuntamenti che non si spostano sono stampati sopra: qui solo un richiamo, così l'ora non sembra libera
+      const sopra = altrove.filter(z => Math.floor(z.a / 60) === h || (z.a < h * 60 && z.b >= (h + 1) * 60));
+      const testo = incorso ? `in corso: ${incorso.e.titolo} (fino alle ${incorso.e.fine || ''})` : sopra.length ? sopra.map(z => `${z.ora} ${z.t}`).join(' · ') + ' (sopra)' : '';
+      const alto = testo ? 5.5 : 8.5;
+      spazio(alto);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.2); doc.setTextColor(...GRIGIO);
+      doc.text(`${String(h).padStart(2, '0')}:00`, X_ORA, y + 3.4);
+      if (testo) { doc.setFontSize(7.6); doc.text(doc.splitTextToSize(T(testo), L_TIT)[0], X_TIT, y + 3.4); }
+      doc.setDrawColor(229, 229, 229); doc.setLineWidth(.2); doc.line(LX, y + alto - .4, LX + LW, y + alto - .4);
+      y += alto;
+    }
+    y += 5;
+  }
   // arrivate oggi: righe vuote
   spazio(34);
   titoloSez('Arrivate oggi', 'scrivile qui, stasera le metti nell\'app');

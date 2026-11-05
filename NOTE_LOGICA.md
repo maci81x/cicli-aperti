@@ -945,3 +945,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **Spazi liberi:** casella verde chiaro tratteggiata, scritta in verde.
 - **Importante e le altre cose:** restano su foglio bianco con la casella da spuntare.
 - Tema scuro: stessi significati, toni scuri (rosa → bordeaux, viola chiaro → viola scuro, verde → verde bosco).
+
+## v35 · 05/11 — il foglio del giorno: appuntamenti ora per ora
+- Nel foglio stampato la sezione «Appuntamenti» diventa «Appuntamenti, ora per ora»: una riga per ogni ora dalle 8 alle 19 (o prima/dopo se ci sono appuntamenti). Le ore libere restano righe vuote (8,5 mm) per scriverci quello che entra durante la giornata.
+- Un'ora tutta occupata da un appuntamento iniziato prima è una riga sottile grigia «in corso: …, fino alle …». Se nell'ora c'è una cosa a un'ora precisa o un appuntamento che «non si sposta» (stampati sopra), la riga lo richiama in grigio «(sopra)», così l'ora non sembra libera.
+- Due appuntamenti che si sovrappongono sono segnalati in rosso su tutti e due: «si sovrappone a «…»».
+- Prima la cosa non era segnalata: es. venerdì 6/11 «Con Marcello» e «Prepara il Business Plan» sono tutti e due 16:45–18:30.
