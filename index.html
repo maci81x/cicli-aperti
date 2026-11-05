@@ -2146,6 +2146,7 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
 .list-head > span:last-child { min-width: 0; text-align: right; }
 .v32-pill { display: none; }
 .v31-ad-ritmo > span small { font-size: inherit; }
+.v31-ob span b .v32-lungo { color: inherit; font-size: inherit; }
 .v32-top-tit, .v32-ctx-btn, .v32-tel-n { display: none; }
 @media (max-width: 767px) {
   .item-title { -webkit-line-clamp: 3; }
@@ -17819,7 +17820,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v32.2';
+const VERSIONE_APP = '2026-11-05 v32.3';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
