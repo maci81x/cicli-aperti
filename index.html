@@ -2135,6 +2135,80 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
 .v31-ob span { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); }
 .v31-ob span b { display: block; font-size: 14.5px; color: var(--v26-ob-ink); }
 .v31-ob > i:last-child { color: var(--text-3); }
+
+/* ══════════════════════════════════════════════════════════════
+   v32 · 05/11 — il telefono: più spazio, meno scorrere
+   ══════════════════════════════════════════════════════════════ */
+/* elenchi più leggeri: le Subito non hanno più lo sfondo rosso, basta il segno rosso */
+.item.p-q1:not(.is-done) .item-row { background: var(--surface); }
+/* le intestazioni non vanno più a capo («La giornata») */
+.list-head > span:first-child { flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-head > span:last-child { min-width: 0; text-align: right; }
+.v32-pill { display: none; }
+.v31-ad-ritmo > span small { font-size: inherit; }
+.v32-top-tit, .v32-ctx-btn, .v32-tel-n { display: none; }
+@media (max-width: 767px) {
+  .item-title { -webkit-line-clamp: 3; }
+  /* Pianifica: il titolo sopra, i bottoni Settimana · Giorno · Mese sotto, larghi */
+  .v22-vh { flex-wrap: wrap; align-items: center; }
+  .v22-vh .v22-seg { flex: 1 1 100%; width: 100%; grid-auto-columns: 1fr; }
+  /* «Piano in bozza» intero */
+  .v22-piano { flex-wrap: wrap; }
+  .v22-piano .v22-testo { flex: 1 1 auto; min-width: 0; white-space: normal; overflow: visible; }
+  /* Adesso più corto */
+  .v31-adesso { padding: 13px 14px; }
+  .v31-ad-t { font-size: 19px; }
+  .v31-ad-ritmo > span { flex: 1 1 0; }
+  .v31-ad-ritmo > span small { display: none; }
+  .v31-ad-ritmo .btn:not(.btn-icon) { flex: none; }
+  /* la giornata e gli obiettivi affiancati */
+  .v32-coppia { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: var(--sp-3); }
+  .v32-coppia > * { margin-bottom: 0 !important; min-width: 0; }
+  .v32-coppia .v31-giornata { padding: 10px 12px; }
+  .v32-coppia .v31-g-h { display: block; }
+  .v32-coppia .v31-g-h > span:first-child { font-size: 10px; }
+  .v32-coppia .v31-g-h .mono { display: block; margin-top: 2px; font-size: 12.5px; }
+  .v32-coppia .v32-imp, .v32-coppia .v31-g-assi, .v32-coppia .v32-lungo, .v32-coppia .v31-ob > i:last-child { display: none; }
+  .v32-coppia .v31-g-barra { height: 6px; margin-top: 6px; }
+  .v32-coppia .v31-ob { min-height: 0; height: 100%; padding: 10px 12px; gap: var(--sp-2); }
+  .v32-coppia .v31-ob > i:first-child { font-size: 20px; }
+  .v32-coppia .v31-ob span b { font-size: 13.5px; }
+  .v32-coppia .v31-ob span { font-size: 12px; }
+  /* «Da rispondere» su una riga */
+  .v23-t { flex-wrap: nowrap; }
+  .v23-nomi { flex: 1 1 auto; }
+  /* «Prima di tutto»: niente riquadro dentro un riquadro */
+  .v12-prima .v12-card.v12-rosso { padding: 0; border: 0; background: transparent; gap: var(--sp-2); }
+  .v12-prima .v12-card.v12-rosso > .v12-testa { display: none; }
+  .v12-head .mono .v32-tel-n { display: inline !important; color: var(--text-2); font: inherit; letter-spacing: 0; text-transform: none; }
+  .v12-head .mono .v32-pc-n { display: none; }
+  /* la routine già passata resta chiusa */
+  .v32-passate > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-4); cursor: pointer; list-style: none; color: var(--text-2); font-size: var(--fs-label); font-weight: 600; border-bottom: 1px solid var(--border); }
+  .v32-passate > summary::-webkit-details-marker { display: none; }
+  .v32-passate[open] > summary .ti { transform: rotate(90deg); }
+
+  /* più spazio: il campo «Cosa hai in testa?» si apre dal microfono o dal + al centro del menu */
+  body:not(.semplice) .cattura { display: none; }
+  body:not(.semplice).v32-cat .cattura { display: flex; position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + 10px + env(safe-area-inset-bottom)); z-index: 61; padding: var(--sp-3); border-radius: 16px 16px 0 0; box-shadow: var(--shadow-3); }
+  .v32-scrim { position: fixed; inset: 0; z-index: 60; background: var(--scrim); }
+  body:not(.semplice) .tabbar { grid-template-columns: 1fr 1fr 112px 1fr 1fr; }
+  body:not(.semplice) .v32-pill { display: flex; align-items: center; justify-content: center; }
+  .v32-pill > span { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--primary); }
+  .v32-pill button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--on-primary); font-size: 21px; cursor: pointer; }
+  .v32-pill button.v32-piu { background: var(--on-primary); color: var(--primary); font-size: 23px; }
+  .v32-pill button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  /* la barra in alto: Tutto ▾ al posto dei tre bottoni, e si riduce mentre scorri */
+  body:not(.semplice) .top { position: relative; transition: padding var(--t-base) var(--ease-out); }
+  body:not(.semplice) .top-ctx { display: none; }
+  body:not(.semplice) .top.v32-ctx-aperto .top-ctx { display: grid; grid-auto-flow: row; position: absolute; right: var(--sp-4); top: calc(100% - 4px); z-index: 70; min-width: 168px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-3); }
+  body:not(.semplice) .top.v32-ctx-aperto .top-ctx button { justify-content: flex-start; text-align: left; font-size: 15px; padding: 0 var(--sp-3); }
+  body:not(.semplice) .v32-ctx-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px 0 14px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  body.v32-giu:not(.semplice) .top { padding-top: calc(4px + env(safe-area-inset-top)); padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+  body.v32-giu:not(.semplice) .logo-top { display: none; }
+  body.v32-giu:not(.semplice) .v32-top-tit { display: block; font-family: var(--font-serif); font-size: 17px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .v32-top-tit small { font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: .06em; color: var(--text-2); }
+  body.v32-giu:not(.semplice) .v32-ctx-btn { min-height: 36px; }
+}
 </style>
 </head>
 <body>
@@ -17744,7 +17818,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-04 v31';
+const VERSIONE_APP = '2026-11-05 v32';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19928,6 +20002,122 @@ setInterval(() => {
   } catch (e) { console.warn('[v31] minuto:', e.message); }
 }, 60000);
 
+
+// ══════════════════════════════════════════════════════════════
+// v32 · 05/11 — il telefono: più spazio, meno scorrere (approvato sul canvas, sezione 13)
+// · Oggi: «Adesso» più corto (di giorno niente «Aggiungi una cosa», c'è già il + in basso),
+//   la giornata e gli obiettivi affiancati, «Da rispondere» su una riga, «Prima di tutto» senza
+//   riquadro dentro un riquadro, la routine già passata chiusa.
+// · Subito senza sfondo rosso, titoli su 3 righe.
+// · Barra in alto: «Tutto ▾» apre la scelta; scorrendo si riduce al titolo della vista.
+// · «Cosa hai in testa?» si apre dal microfono o dal + al centro del menu.
+// · Pianifica: il titolo non è più coperto dai bottoni; «Piano in bozza» intero.
+// ══════════════════════════════════════════════════════════════
+const v32Tel = () => window.matchMedia('(max-width: 767px)').matches && !modoSemplice();
+
+v31Ritmo = (function (orig) {
+  return function () { const m = v25Momento(); if (m && m.k === 'giorno') return ''; return orig.apply(this, arguments).replace(/(<\/b>)([^<]+)(<\/span>)/, '$1<small>$2</small>$3'); };
+})(v31Ritmo);
+v31Giornata = (function (orig) {
+  return function () { return orig.apply(this, arguments).replace(/<span class="mono">impegni ([^·]+)· /, '<span class="mono"><span class="v32-imp">impegni $1· </span>'); };
+})(v31Giornata);
+v31Obiettivi = (function (orig) {
+  return function () {
+    return orig.apply(this, arguments)
+      .replace('<b>Obiettivi della settimana</b>', '<b>Obiettivi<span class="v32-lungo"> della settimana</span></b>')
+      .replace('ancora da scrivere · bastano 2 minuti', '<span class="v32-lungo">ancora </span>da scrivere · <span class="v32-lungo">bastano </span>2 minuti');
+  };
+})(v31Obiettivi);
+
+const _vistaOggiV32 = vistaOggi;
+vistaOggi = function () {
+  let h = _vistaOggiV32.apply(this, arguments);
+  try {
+    const tpl = document.createElement('template'); tpl.innerHTML = h;
+    const f = tpl.content, g = f.querySelector('.v31-giornata'), ob = f.querySelector('.v31-ob');
+    if (g && ob && g.nextElementSibling === ob) { const c = document.createElement('div'); c.className = 'v32-coppia'; g.before(c); c.append(g, ob); }
+    // routine: quelle del calendario già passate stanno in una riga chiusa
+    const acc = f.querySelector('.acc-head[data-k="routine"]');
+    const corpo = acc && acc.parentElement.querySelector('.acc-body');
+    const nm = v31Ora(), finiti = new Set(routineDelGiorno(oggiData()).filter(e => e.ora && minDi(e.fine || e.ora) <= nm).map(e => String(e.id)));
+    const passate = corpo ? [...corpo.querySelectorAll(':scope > .evt-riga[data-evt-id]')].filter(x => finiti.has(x.dataset.evtId)) : [];
+    if (passate.length) {
+      const d = document.createElement('details'); d.className = 'v32-passate';
+      d.innerHTML = `<summary><i class="ti ti-chevron-right" aria-hidden="true"></i>Già passate · <span class="mono">${passate.length}</span></summary>`;
+      passate[0].before(d); passate.forEach(p => d.appendChild(p));
+    }
+    // «Prima di tutto»: sul telefono il conto delle Subito va nell'intestazione (il riquadro interno non c'è più)
+    const rosso = f.querySelector('.v12-prima .v12-card.v12-rosso .v12-testa p'), testa = f.querySelector('.v12-prima .v12-head .mono');
+    if (rosso && testa) testa.innerHTML = `<span class="v32-tel-n">${escHtml(rosso.textContent.trim())}</span><span class="v32-pc-n">${testa.innerHTML}</span>`;
+    const box = document.createElement('div'); box.appendChild(f); h = box.innerHTML;
+  } catch (e) { console.warn('[v32] oggi:', e.message); }
+  return h;
+};
+
+// --- «Cosa hai in testa?» dal centro del menu ---
+function v32ApriCattura(conMic) {
+  document.body.classList.add('v32-cat');
+  if (!$('v32Scrim')) { document.body.insertAdjacentHTML('beforeend', '<div class="v32-scrim" id="v32Scrim" hidden></div>'); $('v32Scrim').addEventListener('click', v32ChiudiCattura); }
+  $('v32Scrim').hidden = false;
+  const t = $('cattura-testo'), mic = $('cattura-mic');
+  if (conMic && mic && !mic.hidden) mic.click(); else setTimeout(() => t && t.focus(), 30);
+}
+function v32ChiudiCattura() {
+  document.body.classList.remove('v32-cat');
+  if ($('v32Scrim')) $('v32Scrim').hidden = true;
+  const mic = $('cattura-mic');
+  if (mic && mic.getAttribute('aria-pressed') === 'true' && typeof fermaDettatura === 'function') fermaDettatura();
+}
+(function v32Menu() {
+  const nav = document.querySelector('.tabbar'), dopo = nav && nav.querySelector('[data-tab="pianifica"]');
+  if (!nav || !dopo || nav.querySelector('.v32-pill')) return;
+  dopo.insertAdjacentHTML('afterend', `<div class="v32-pill"><span><button type="button" class="v32-mic" aria-label="Detta una cosa"><i class="ti ti-microphone"></i></button><button type="button" class="v32-piu" aria-label="Aggiungi una cosa"><i class="ti ti-plus"></i></button></span></div>`);
+  nav.querySelector('.v32-mic').addEventListener('click', () => v32ApriCattura(true));
+  nav.querySelector('.v32-piu').addEventListener('click', () => v32ApriCattura(false));
+  const micVero = $('cattura-mic');
+  const allinea = () => { const m = nav.querySelector('.v32-mic'); if (m) m.hidden = !micVero || micVero.hidden; };
+  allinea(); if (micVero) new MutationObserver(allinea).observe(micVero, { attributes: true, attributeFilter: ['hidden'] });
+  $('cattura-testo').addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('v32-cat')) { e.preventDefault(); v32ChiudiCattura(); } });
+})();
+salvaCattura = (function (orig) {
+  return async function () {
+    const r = await orig.apply(this, arguments);
+    if (document.body.classList.contains('v32-cat') && !$('cattura-testo').value.trim()) v32ChiudiCattura();
+    return r;
+  };
+})(salvaCattura);
+
+// --- la barra in alto: «Tutto ▾» e il titolo quando scorri ---
+const V32_CTX = { tutto: 'Tutto', lavoro: 'Lavoro', personale: 'Personale' };
+(function v32Testa() {
+  const top = document.querySelector('.top'), seg = top && top.querySelector('.top-ctx');
+  if (!top || !seg || top.querySelector('.v32-ctx-btn')) return;
+  top.querySelector('.logo-top').insertAdjacentHTML('afterend', '<span class="v32-top-tit" aria-hidden="true"></span>');
+  seg.insertAdjacentHTML('beforebegin', '<button type="button" class="v32-ctx-btn" aria-haspopup="true" aria-expanded="false"><span>Tutto</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>');
+  const btn = top.querySelector('.v32-ctx-btn');
+  const chiudi = () => { top.classList.remove('v32-ctx-aperto'); btn.setAttribute('aria-expanded', 'false'); };
+  btn.addEventListener('click', e => { e.stopPropagation(); const ap = !top.classList.contains('v32-ctx-aperto'); top.classList.toggle('v32-ctx-aperto', ap); btn.setAttribute('aria-expanded', String(ap)); });
+  document.addEventListener('click', e => { if (!btn.contains(e.target)) setTimeout(chiudi, 0); });
+  const main = $('main');
+  if (main) main.addEventListener('scroll', () => { document.body.classList.toggle('v32-giu', v32Tel() && main.scrollTop > 56); }, { passive: true });
+})();
+function v32AggiornaTesta() {
+  const btn = document.querySelector('.v32-ctx-btn'), seg = document.querySelector('.top-ctx');
+  if (btn) { btn.querySelector('span').textContent = V32_CTX[state.filtro] || 'Tutto'; btn.style.visibility = seg ? seg.style.visibility : ''; }
+  const tit = document.querySelector('.v32-top-tit'), h1 = document.querySelector('#view .vh h1');
+  if (tit) {
+    const t = h1 ? [...h1.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim() : '';
+    const d = new Date(), gg = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'][d.getDay()], mm = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'][d.getMonth()];
+    tit.innerHTML = escHtml(t) + (ui.tab === 'oggi' ? ` <small>· ${gg} ${d.getDate()} ${mm}</small>` : '');
+  }
+}
+const _disegnaV32 = disegna;
+disegna = function () {
+  const r = _disegnaV32.apply(this, arguments);
+  try { v32AggiornaTesta(); const main = $('main'); document.body.classList.toggle('v32-giu', v32Tel() && !!main && main.scrollTop > 56); } catch (e) { console.warn('[v32] testa:', e.message); }
+  return r;
+};
+v32AggiornaTesta();
 </script>
 </body>
 </html>

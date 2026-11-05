@@ -16,7 +16,7 @@ const OUT = process.env.OUT || '/tmp';
     return { primo: document.querySelector('#view .vh').nextElementSibling.className, k: ad && ad.querySelector('.v31-ad-k').textContent, t: ad && ad.querySelector('.v31-ad-t').textContent,
       c: ad && ad.querySelector('.v31-ad-c').textContent, poi: ad && ad.querySelector('.v31-ad-poi').textContent, g: g && g.querySelector('.mono').textContent,
       barre: g && g.querySelectorAll('.v31-g-barra i').length, ob: !!document.querySelector('#view .v31-ob'),
-      coach: !!document.querySelector('#view .oggi-coach *'), nav: [...document.querySelectorAll('.tabbar button')].map(b => b.textContent.trim()) };
+      coach: !!document.querySelector('#view .oggi-coach *'), nav: [...document.querySelectorAll('.tabbar button[data-tab]')].map(b => b.textContent.trim()) };
   });
   a(r.primo === 'v31-adesso', 'Adesso subito sotto il titolo');
   a(r.k === 'Adesso · fino alle 11:30' && r.t === 'Riunione soci' && r.c.startsWith('1:50'), 'in corso: fino alle 11:30, mancano 1:50 ' + JSON.stringify([r.k, r.t, r.c]));

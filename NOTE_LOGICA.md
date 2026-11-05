@@ -923,3 +923,11 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **La giornata 8–18** (solo lun–ven): ore occupate e libere, le sovrapposizioni contano una volta; segno rosso = adesso.
 - **Obiettivi della settimana**: un rigo in penna blu; se non ci sono si scrivono da lì, altrimenti porta a Pianifica.
 - **Menu**: Settimana → Pianifica, Cicli → Tutte.
+
+## v32 · 05/11 — il telefono: più spazio, meno scorrere (canvas, sezione 13)
+- **Menu**: al centro microfono e + (al posto del campo fisso «Cosa hai in testa?»). Il + apre il campo sopra il menu, pronto per scrivere; il microfono lo apre e comincia a dettare. Dopo «Aggiungi» o toccando fuori si chiude; Esc lo chiude.
+- **Barra in alto**: «Tutto ▾» apre la scelta Tutto/Lavoro/Personale. Scorrendo, la barra si riduce al titolo della vista (in Oggi con la data).
+- **Oggi**: di giorno (9:30–17:30) dentro «Adesso» non c'è più «Giornata sul foglio · Aggiungi una cosa»; mattina e sera restano su una riga. La giornata e gli obiettivi stanno affiancati. «Da rispondere» su una riga. «Prima di tutto» senza riquadro dentro un riquadro, con il conto delle Subito nell'intestazione. Nella routine, gli appuntamenti del calendario già finiti stanno in «Già passate · N», chiusa.
+- **Elenchi**: le Subito non hanno più lo sfondo rosso (resta il segno rosso); sul telefono i titoli arrivano a 3 righe.
+- **Errori sistemati**: in Pianifica il titolo non è più coperto da Settimana/Giorno/Mese; «Piano in bozza» non si taglia; le intestazioni come «La giornata» non vanno più a capo.
+- Tutto questo vale solo sul telefono (sotto 768 px) e non in modalità semplice.
