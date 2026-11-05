@@ -2151,7 +2151,8 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
   .item-title { -webkit-line-clamp: 3; }
   /* Pianifica: il titolo sopra, i bottoni Settimana · Giorno · Mese sotto, larghi */
   .v22-vh { flex-wrap: wrap; align-items: center; }
-  .v22-vh .v22-seg { flex: 1 1 100%; width: 100%; grid-auto-columns: 1fr; }
+  .v22-vh .v22-seg { flex: 1 1 100%; width: 100%; grid-auto-columns: 1fr; order: 9; }
+  .v22-vh > :not(.v22-seg):last-child { margin-left: auto; }
   /* «Piano in bozza» intero */
   .v22-piano { flex-wrap: wrap; }
   .v22-piano .v22-testo { flex: 1 1 auto; min-width: 0; white-space: normal; overflow: visible; }
@@ -17818,7 +17819,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v32.1';
+const VERSIONE_APP = '2026-11-05 v32.2';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
