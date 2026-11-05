@@ -932,3 +932,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **Errori sistemati**: in Pianifica il titolo non è più coperto da Settimana/Giorno/Mese; «Piano in bozza» non si taglia; le intestazioni come «La giornata» non vanno più a capo.
 - v32.1: in «Adesso» il «poi» e il «libero» sono in ordine di ora (prima lo spazio libero se viene prima).
 - Tutto questo vale solo sul telefono (sotto 768 px) e non in modalità semplice.
+
+## v33 · 05/11 — il computer: usare tutta la larghezza (canvas, sezione 14)
+- **Oggi da 1280 px in su: tre colonne.** Sinistra: titolo, «Adesso», la giornata 8–18, gli appuntamenti di oggi. Centro: «Prima di tutto» e il resto delle cose (Senza ora, In scadenza…). Destra: «Da rispondere», obiettivi, «In settimana, senza giorno» (nuovo in Oggi: le cose del piano senza giorno), routine, «Quando hai tempo». Sotto 1280 px resta una colonna. «Da rispondere» resta anche in «Prima di tutto» (come prima).
+- **Pianifica:** titolo, settimana, cose e ore, Futuro e azioni su una riga; Settimana/Giorno/Mese scendono accanto agli obiettivi, che diventano una riga sottile. I giorni senza niente con l'ora (solo spazi liberi o cose di tutto il giorno) sono più stretti; nelle colonne i titoli arrivano a 4 righe.
+- **Tutte (Lista):** i gruppi su due colonne; ogni gruppo va nella colonna più corta (per Tipo: Subito a sinistra, Importante a destra).
+- v32.3: «Obiettivi della settimana» di nuovo tutto blu sul computer.
