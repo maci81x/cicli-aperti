@@ -8200,6 +8200,7 @@ function creaPdfSettimana(opz = {}) {
     y += 3.5 * s; doc.setLineWidth(.4); doc.line(M, y, W - M, y); doc.setLineWidth(.2);
     y += 5 * s;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(70); doc.text('APPUNTI · NUOVE COSE EMERSE', COL_R_X, y); doc.setTextColor(0);
+    const v38ObY = y - 4 * s;   // v38 · qui, in alto a destra, va il riquadro degli obiettivi (disegnato alla fine, sopra le righe)
     y += 4.5 * s;
 
     // riquadro giallo: le cose senza giorno (nella giornata stampata va in fondo: «Da pianificare»)
@@ -8240,6 +8241,30 @@ function creaPdfSettimana(opz = {}) {
     while (y + RIGA < LIMITE - 6) { punteggiata(COL_R_X, y, COL_R_W); y += RIGA; }
     // piè di pagina su ogni foglio: Stampato il … · Inviato a …
     const oggi = new Date(), inv = inviatoIl(state.week, state.year);
+    // v38 · obiettivi della settimana in alto a destra (come nel foglio del giorno); «Appunti» scende sotto
+    {
+      doc.setPage(1);
+      const obV = v26ObDi(state.week, state.year), rh = 6.6 * s, nRighe = Math.max(V26.MAX_OB, obV.length), bh = 9 * s + rh * nRighe;
+      const bx = COL_R_X - 1.5 * s, bw = COL_R_W + 1.5 * s;
+      doc.setFillColor(228, 232, 246); doc.setDrawColor(181, 192, 230); doc.setLineWidth(.3); doc.roundedRect(bx, v38ObY, bw, bh, 1.5, 1.5, 'FD');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(35, 67, 166);
+      doc.text(pdfTxt('Obiettivi della settimana'), bx + 3, v38ObY + 5.6 * s);
+      if (obV.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.text(`${obV.filter(v => v.fatto).length}/${obV.length}`, bx + bw - 3, v38ObY + 5.6 * s, { align: 'right' }); }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(20, 20, 20);
+      for (let i = 0; i < nRighe; i++) {
+        const yy = v38ObY + 9 * s + rh * (i + 1) - 1.8, v = obV[i];
+        doc.setDrawColor(181, 192, 230); doc.setLineWidth(.2); doc.line(bx + 3, yy + 1.5, bx + bw - 3, yy + 1.5);
+        doc.setDrawColor(35, 67, 166); doc.rect(bx + 3, yy - 2.8, 2.8, 2.8);
+        if (v) {
+          if (v.fatto) { doc.setDrawColor(20, 20, 20); doc.line(bx + 3.5, yy - 1.4, bx + 4.4, yy - .4); doc.line(bx + 4.4, yy - .4, bx + 5.6, yy - 2.4); }
+          doc.text(doc.splitTextToSize(pdfTxt(v.testo), bw - 11)[0], bx + 7.5, yy);
+        }
+      }
+      const yl = v38ObY + bh + 5.5 * s;
+      doc.setFillColor(255, 255, 255); doc.rect(bx, yl - 3.6 * s, bw, 5.2 * s, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(70); doc.text('APPUNTI · NUOVE COSE EMERSE', COL_R_X, yl); doc.setTextColor(0);
+      doc.setDrawColor(0); doc.setLineWidth(.2);
+    }
     const piede = pdfTxt(unGiorno ? `Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()} alle ${String(oggi.getHours()).padStart(2, '0')}:${String(oggi.getMinutes()).padStart(2, '0')}` : `Stampato il ${oggi.getDate()}/${oggi.getMonth() + 1}/${oggi.getFullYear()}  ·  Inviato a ${emailCoach()}${inv ? ' il ' + inv : ' ________'}`);
     for (let pg = 1; pg <= doc.getNumberOfPages(); pg++) {
       doc.setPage(pg);
@@ -17887,7 +17912,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-06 v37';
+const VERSIONE_APP = '2026-11-06 v38';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });

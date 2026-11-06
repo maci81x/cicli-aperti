@@ -963,3 +963,6 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - **Ovunque (telefono compreso):** nel menu «···» della riga c'è «Rimetti in Da pianificare», solo per le cose che hanno un giorno, una data o sono nel piano.
 - Cosa fa: toglie la riga dal piano della settimana, la data pianificata, il giorno fisso e l'eccezione della settimana; se l'app aveva messo un blocco in agenda per quella cosa, lo toglie. «Annulla» nel messaggio la rimette com'era.
 - Le cose che si ripetono non si rimettono da qui: si cambia la ripetizione dal dettaglio.
+
+## v38 · 06/11 — il riepilogo della settimana (foglio per Leo) con gli obiettivi
+- Nel PDF «Il riepilogo della settimana» (Business Plan Settimanale) in alto a destra c'è il riquadro blu «Obiettivi della settimana», come nel foglio del giorno: le voci scritte in app con la loro casella (spuntata se fatte) e il conto N/M; se non ce ne sono, 5 righe vuote da scrivere a penna. «Appunti · nuove cose emerse» scende sotto il riquadro.
