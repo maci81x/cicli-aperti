@@ -957,3 +957,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Le spuntate hanno la stellina nella scheda «Oggi: … da chiudere» (si può accendere o spegnere anche dopo, senza limite) e nella testa della scheda c'è il conto «porti a casa N · M fatte».
 - Le cose senza spunta restano nel piano del giorno come prima: non si spostano.
 - Quando chiudi tutte quelle segnate: «Hai chiuso tutto quello che volevi portare a casa oggi. Il resto è bonus.»
+
+## v37 · 06/11 — rimettere una cosa in «Da pianificare»
+- **Pianifica sul computer:** si trascina una cosa da un giorno o da «In settimana» sulla colonna «Da pianificare» (prima la colonna non accettava il rilascio).
+- **Ovunque (telefono compreso):** nel menu «···» della riga c'è «Rimetti in Da pianificare», solo per le cose che hanno un giorno, una data o sono nel piano.
+- Cosa fa: toglie la riga dal piano della settimana, la data pianificata, il giorno fisso e l'eccezione della settimana; se l'app aveva messo un blocco in agenda per quella cosa, lo toglie. «Annulla» nel messaggio la rimette com'era.
+- Le cose che si ripetono non si rimettono da qui: si cambia la ripetizione dal dettaglio.
