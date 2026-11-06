@@ -2894,7 +2894,7 @@ html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; 
     <div class="sheet-head">
       <div class="sheet-head-txt">
         <h3 class="t-title" id="focus-titolo">Cosa porti a casa oggi?</h3>
-        <p class="t-label muted" id="focus-sub">Scegline fino a 3</p>
+        <p class="t-label muted" id="focus-sub">Togli la spunta a quello che oggi non porti a casa</p>
       </div>
       <button type="button" class="btn btn-icon" onclick="closeModal('focusOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
     </div>
@@ -6435,7 +6435,7 @@ function riga(r, opz) {
   const sep = '<span class="sep">·</span>';
   const titolo = (o.evidenzia ? evidenzia(c.title, o.evidenzia) : escHtml(c.title)) + (!fatto && !o.routine && eRapida(c, r.item) ? RAPIDA_CHIP : '');
   const stella = o.stellaDi ? o.stellaDi(r) : null;   // 'on' | 'off' | null (righe fuori dal piano)
-  const btnStella = stella ? `<button type="button" class="btn btn-icon stella" data-act="stella" aria-pressed="${stella === 'on'}" aria-label="${stella === 'on' ? 'Togli dalle tue 3' : 'Metti tra le tue 3'}" data-tip="${stella === 'on' ? 'Togli dalle tue 3' : 'Metti tra le tue 3'}"><i class="ti ${stella === 'on' ? 'ti-star-filled' : 'ti-star'}"></i></button>` : '';
+  const btnStella = stella ? `<button type="button" class="btn btn-icon stella" data-act="stella" aria-pressed="${stella === 'on'}" aria-label="${stella === 'on' ? 'Oggi non la porto a casa' : 'Oggi la porto a casa'}" data-tip="${stella === 'on' ? 'Oggi non la porto a casa' : 'Oggi la porto a casa'}"><i class="ti ${stella === 'on' ? 'ti-star-filled' : 'ti-star'}"></i></button>` : '';
   const data = o.data ? ` data-data="${o.data}"` : '';
   const azioni = o.senzaAzioni ? '' : `<div class="swipe-actions" aria-hidden="true">
       <button type="button" class="a-fatto" data-act="q-fatto" tabindex="-1"><i class="ti ti-check"></i>Fatto</button>
@@ -8878,7 +8878,7 @@ function rapideDiOggi(righe, focusIds) {
 // ══════════════════════════════════════════════════════════════
 // v3 · LE TUE 3 (in_focus sulle righe del piano di oggi)
 // ══════════════════════════════════════════════════════════════
-const FOCUS_MAX = 3;
+const FOCUS_MAX = 99;   // v36 · nessun limite: «Cosa porti a casa oggi?» è un promemoria, si spunta o si toglie quello che si vuole
 function righePianoOggi() {
   if (!eSettimanaCorrente()) return [];
   return righeGiorno(giornoKeyDi(oggiData())).filter(r => r.item);
@@ -8903,14 +8903,14 @@ function controllaMattino() {
   if (lsLeggi(LS3.FOCUS) === oggiLocale()) return;
   if (!$('onb').hidden || document.querySelector('.modal-overlay.open')) return;
   const righe = righePianoOggi().filter(r => !r.fatto);
-  if (righe.length <= FOCUS_MAX || righe.some(r => r.item.in_focus)) return;
+  if (!righe.length || righe.some(r => r.item.in_focus)) return;   // v36 · ogni mattina, anche con poche cose
   lsScrivi(LS3.FOCUS, oggiLocale());
   apriFocus();
 }
 function apriFocus() {
   const righe = righePianoOggi().filter(r => !r.fatto);
   const segnate = righe.filter(r => r.item.in_focus);
-  const base = segnate.length ? segnate : righe.filter(r => computeEffectiveQ(r.c) === 1);   // le Subito pre-spuntate
+  const base = segnate.length ? segnate : righe;   // v36 · tutte spuntate: togli quelle che oggi non porti a casa
   ui.focusScelta = new Set(base.slice(0, FOCUS_MAX).map(r => r.item.id));
   disegnaFocus();
   $('focusOverlay').classList.add('open');
@@ -8918,7 +8918,7 @@ function apriFocus() {
 function disegnaFocus() {
   const righe = righePianoOggi().filter(r => !r.fatto);
   const pieno = ui.focusScelta.size >= FOCUS_MAX;
-  $('focus-sub').textContent = `Scegline fino a 3 · ${ui.focusScelta.size} di ${FOCUS_MAX}`;
+  $('focus-sub').textContent = `Togli la spunta a quello che oggi non porti a casa · ${ui.focusScelta.size} di ${righe.length}`;
   $('focus-lista').innerHTML = righe.map(r => {
     const sel = ui.focusScelta.has(r.item.id);
     return `<label class="bp-pick${sel ? ' sel' : ''}"><input type="checkbox" data-act="focus-scelta" data-item="${r.item.id}"${sel ? ' checked' : ''}${!sel && pieno ? ' disabled' : ''}>
@@ -8937,7 +8937,7 @@ async function confermaFocus() {
     await scriviFocus(ui.focusScelta, tutti);
     closeModal('focusOverlay');
     render();
-    showToast(ui.focusScelta.size ? `Le tue ${ui.focusScelta.size} di oggi sono in cima` : 'Nessuna scelta: vedi tutto il piano di oggi', 'success');
+    showToast(ui.focusScelta.size ? `Oggi porti a casa ${ui.focusScelta.size === 1 ? '1 cosa' : ui.focusScelta.size + ' cose'}: hanno la stellina` : 'Nessuna spunta: vedi tutto il piano di oggi', 'success');
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 // La stellina: entra o esce dalle 3. Se le 3 erano «tutte, perché poche», la scelta diventa esplicita.
@@ -9891,7 +9891,7 @@ azioneFatto = async function (id) {
   const prima = focusAperte();
   await _azioneFattoBase(id);
   const dopo = focusAperte();
-  if (prima.tot && prima.aperte > 0 && dopo.aperte === 0) setTimeout(() => showToast('Le tue 3 sono fatte. Il resto è bonus.', 'success', {}), 600);
+  if (prima.tot && prima.aperte > 0 && dopo.aperte === 0) setTimeout(() => showToast('Hai chiuso tutto quello che volevi portare a casa oggi. Il resto è bonus.', 'success', {}), 600);
 };
 // v4: chiudere una cosa bloccata in agenda aggiorna l'evento; l'ultimo passo fatto chiede di chiudere la cosa intera.
 const _azioneFattoV3 = azioneFatto;
@@ -17043,8 +17043,11 @@ function primaDiTutto() {
     const titolo = lista.length
       ? (late.length && late.length === lista.length ? `${tutteMattina ? 'Stamattina' : 'Oggi'}: ${plurale(late.length, 'cosa non fatta', 'cose non fatte')}` : `Oggi: ${plurale(lista.length, 'cosa da chiudere', 'cose da chiudere')}`)
       : `${plurale(nInd, 'cosa rimasta', 'cose rimaste')} indietro`;
-    const sotto = lista.length ? [late.length ? `${late.length} in ritardo` : '', subito.length ? `${subito.length} Subito` : ''].filter(Boolean).join(' · ') : 'dai giorni scorsi: decidi quando le fai';
-    const opz = { data: iso };
+    // v36 · «Cosa porti a casa oggi?»: la stellina sulle righe del piano e il conto nella testa della scheda
+    const segnateOggi = righe.filter(r => r.item && r.item.in_focus), focusIds = focusDiOggi(righe);
+    const casa = state.focusColOk && segnateOggi.length ? `porti a casa ${segnateOggi.length} · ${segnateOggi.filter(r => r.fatto).length} fatte` : '';
+    const sotto = lista.length ? [late.length ? `${late.length} in ritardo` : '', subito.length ? `${subito.length} Subito` : '', casa].filter(Boolean).join(' · ') : 'dai giorni scorsi: decidi quando le fai';
+    const opz = { data: iso, stellaDi: r => r.item && state.focusColOk ? (focusIds.has(r.c.id) ? 'on' : 'off') : null };
     let corpo = lista.length ? `<div class="group v12-righe">${lista.map(r => riga(r, opz)).join('')}</div>` : '';
     if (nInd) {
       const vecchia = ind.sciolte[0] ? ` · la più vecchia dal ${fmtGgMm(ind.sciolte[0].pianificato_data)}` : '';
@@ -17884,7 +17887,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-05 v35';
+const VERSIONE_APP = '2026-11-06 v36';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });

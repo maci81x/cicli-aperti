@@ -951,3 +951,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Un'ora tutta occupata da un appuntamento iniziato prima è una riga sottile grigia «in corso: …, fino alle …». Se nell'ora c'è una cosa a un'ora precisa o un appuntamento che «non si sposta» (stampati sopra), la riga lo richiama in grigio «(sopra)», così l'ora non sembra libera.
 - Due appuntamenti che si sovrappongono sono segnalati in rosso su tutti e due: «si sovrappone a «…»».
 - Prima la cosa non era segnalata: es. venerdì 6/11 «Con Marcello» e «Prepara il Business Plan» sono tutti e due 16:45–18:30.
+
+## v36 · 06/11 — «Cosa porti a casa oggi?» come promemoria (scelta di Roby)
+- Niente più limite di 3: si apre ogni mattina (prima apertura di Oggi, se il piano di oggi ha cose aperte e nessuna è ancora segnata) con **tutte** le cose del piano di oggi spuntate; si toglie la spunta a quello che oggi non si porta a casa. Se le cose sono 10, restano 10.
+- Le spuntate hanno la stellina nella scheda «Oggi: … da chiudere» (si può accendere o spegnere anche dopo, senza limite) e nella testa della scheda c'è il conto «porti a casa N · M fatte».
+- Le cose senza spunta restano nel piano del giorno come prima: non si spostano.
+- Quando chiudi tutte quelle segnate: «Hai chiuso tutto quello che volevi portare a casa oggi. Il resto è bonus.»
