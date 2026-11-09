@@ -2275,6 +2275,10 @@ html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; 
 /* spazi liberi */
 .spazio-riga, .board .spazio-riga { background: var(--v34-lib); border: 1.5px dashed var(--v34-lib-bordo); }
 .spazio-riga .item-title, .spazio-riga .evt-ico, .spazio-riga .evt-ico .ti { color: var(--v34-lib-ink); font-weight: 600; }
+
+/* v39 · la lente «Cerca» in alto sul telefono */
+.v39-cerca { display: none; }
+@media (max-width: 767px) { .v39-cerca { display: inline-grid; margin-left: auto; } .top .v39-cerca + .v32-ctx-btn { margin-left: 0; } }
 </style>
 </head>
 <body>
@@ -17912,7 +17916,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-06 v38';
+const VERSIONE_APP = '2026-11-10 v39';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20225,7 +20229,7 @@ const V32_CTX = { tutto: 'Tutto', lavoro: 'Lavoro', personale: 'Personale' };
 })();
 function v32AggiornaTesta() {
   const btn = document.querySelector('.v32-ctx-btn'), seg = document.querySelector('.top-ctx');
-  if (btn) { btn.querySelector('span').textContent = V32_CTX[state.filtro] || 'Tutto'; btn.style.visibility = seg ? seg.style.visibility : ''; }
+  if (btn) { btn.querySelector('span').textContent = V32_CTX[state.filtro] || 'Tutto'; btn.style.display = seg && seg.style.visibility === 'hidden' ? 'none' : ''; }
   const tit = document.querySelector('.v32-top-tit'), h1 = document.querySelector('#view .vh h1');
   if (tit) {
     const t = h1 ? [...h1.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim() : '';
@@ -20408,6 +20412,27 @@ window.addEventListener('drop', e => {
   z.classList.remove('drag-over');
   v37RimettiDaPianificare(id);
 }, true);
+
+// ══════════════════════════════════════════════════════════════
+// v39 · 10/11 — sul telefono la lente «Cerca» in alto, in ogni pagina
+// (sul computer la ricerca c'è già nella barra in alto). Tocca la lente: si apre Tutte con il campo Cerca pronto.
+// ══════════════════════════════════════════════════════════════
+(function v39Lente() {
+  const top = document.querySelector('.top');
+  if (!top || top.querySelector('.v39-cerca')) return;
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'btn btn-icon v39-cerca'; b.setAttribute('aria-label', 'Cerca tra le cose');
+  b.innerHTML = '<i class="ti ti-search" aria-hidden="true"></i>';
+  b.addEventListener('click', () => {
+    if (window.innerWidth >= 768) { focusRicerca(); return; }
+    ui.tutto = 'lista';   // l'armadio non ha il campo Cerca: si apre la lista
+    if (ui.tab !== 'tutto' || ui.sub) vai('tutto', { tutto: 'lista' }); else render();
+    const fuoco = () => { const m = $('searchInputM'); if (m && document.activeElement !== m) { m.focus(); m.select(); } };
+    fuoco(); requestAnimationFrame(fuoco); setTimeout(fuoco, 250);
+  });
+  const dove = top.querySelector('.v32-ctx-btn') || top.querySelector('.top-ctx');
+  if (dove) dove.before(b); else top.appendChild(b);
+})();
 </script>
 </body>
 </html>

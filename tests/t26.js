@@ -36,7 +36,7 @@ const seed = {
     pdfAct: !!document.querySelector('#view [data-act="v26-stampa-scegli"]'),
     col: (() => { const z = [...document.querySelectorAll('#view .board section.bcol')].find(s => /Mar/.test(s.getAttribute('aria-label') || '')); if (!z) return null; return [...z.querySelectorAll('.bzona > *')].map(x => x.classList.contains('fascia-h') ? '#' + x.textContent.trim() : (x.classList.contains('v26-fisso') ? '!' : '') + ((x.querySelector('.item-title') || {}).textContent || '').trim().slice(0, 18)); })()
   }));
-  a(/^2026-11-0[3-9] v[23][0-9]/.test(r.v), 'versione ' + r.v);
+  a(/^2026-1[12]-[0-3][0-9] v[2-9][0-9]/.test(r.v), 'versione ' + r.v);
   a(r.seg.join() === 'settimana,giorno,mese', 'Settimana · Giorno · Mese ' + r.seg.join());
   a(/Obiettivi della settimana/.test(r.ob) && /Vendere 20\.000/.test(r.ob) && /1\/2/.test(r.ob), 'obiettivi in alto: ' + r.ob.replace(/\n/g, ' | '));
   a(r.pdfAct, 'la stampante della settimana sceglie i giorni');

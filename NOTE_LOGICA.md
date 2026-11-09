@@ -966,3 +966,7 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 
 ## v38 · 06/11 — il riepilogo della settimana (foglio per Leo) con gli obiettivi
 - Nel PDF «Il riepilogo della settimana» (Business Plan Settimanale) in alto a destra c'è il riquadro blu «Obiettivi della settimana», come nel foglio del giorno: le voci scritte in app con la loro casella (spuntata se fatte) e il conto N/M; se non ce ne sono, 5 righe vuote da scrivere a penna. «Appunti · nuove cose emerse» scende sotto il riquadro.
+
+## v39 · 10/11 — la lente «Cerca» sul telefono
+- Sul telefono in alto a destra c'è la lente, in ogni pagina (Oggi, Pianifica, Tutte, Altro). Toccandola si apre Tutte in Lista con il campo Cerca già attivo: scrivi e la lista si filtra. Sul computer non serve: il campo Cerca c'è già nella barra in alto in ogni pagina.
+- Il bottone «Tutto ▾» nelle pagine dove non serve (Pianifica, Altro) ora sparisce del tutto invece di lasciare lo spazio vuoto.
