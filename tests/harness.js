@@ -129,7 +129,7 @@ function makeCal(events) {
   return { state, handle };
 }
 
-const SEED_BASE = { cicli: [], persone: [], categorie: [], battle_plan: [], battle_plan_items: [], eventi_fatti: [], eventi_nascosti: [], eventi_tipo: [], macro_aree: [], mete: [], non_doppioni: [], user_tokens: [] };
+const SEED_BASE = { cicli: [], persone: [], categorie: [], battle_plan: [], battle_plan_items: [], eventi_fatti: [], cal_scelte: [], eventi_nascosti: [], eventi_tipo: [], macro_aree: [], mete: [], non_doppioni: [], user_tokens: [] };
 
 async function apriApp(opts = {}) {
   const browser = await chromium.launch();

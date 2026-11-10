@@ -978,3 +978,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Nascosto nei giorni passati e nei piani in sola lettura. Test: tests/t40.js.
 - (v40.1) Sul computer le righe del riquadro si trascinano dentro la giornata (tutta la colonna della giornata prende il rilascio): stesso effetto del tasto calendario+.
 - (v40.2) Roby: «si apre troppo in orizzontale» e «se li scorro mi fa scorrere tutta la pagina». La vista Giorno è larga al massimo 1240px; la colonna destra resta ferma mentre scorri; l'elenco «Da mettere in giornata» scorre da solo (overscroll contenuto), alto quanto lo spazio fino in fondo allo schermo (v40Altezza, anche al resize). Niente più «Mostra tutte»: ci sono tutte nell'elenco. Test: tests/t40b.js.
+
+## v41 · 10/11 — «mi ritrovo cose che ho già chiuso»
+- Causa 1: le risposte ai promemoria del calendario (Già fatta, Lascia stare, È un appuntamento, già trasformato) stavano solo nel browser (localStorage `cal_cicli_scelte`). Ora anche nel database, tabella `cal_scelte` (chiave = id evento o serie): ogni dispositivo le legge prima di guardare il calendario e le salva dopo ogni scelta. Mai due giri insieme.
+- Causa 2: un promemoria spuntato come fatto nell'app (eventi_fatti) non diventa più una cosa «da rivedere».
+- Causa 3: una scheda rimasta aperta non rileggeva i dati se la diretta cadeva. Ora rilegge cose, piano e spunte quando torna in primo piano, al focus e quando torna la rete (al massimo ogni 20 secondi, non mentre scrivi o con un foglio aperto). In diretta ora arrivano anche battle_plan, battle_plan_items, agenda_override, eventi_fatti, cal_scelte (aggiunte alla publication supabase_realtime).
+- Test: tests/t41.js.
