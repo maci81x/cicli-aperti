@@ -984,3 +984,11 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Causa 2: un promemoria spuntato come fatto nell'app (eventi_fatti) non diventa più una cosa «da rivedere».
 - Causa 3: una scheda rimasta aperta non rileggeva i dati se la diretta cadeva. Ora rilegge cose, piano e spunte quando torna in primo piano, al focus e quando torna la rete (al massimo ogni 20 secondi, non mentre scrivi o con un foglio aperto). In diretta ora arrivano anche battle_plan, battle_plan_items, agenda_override, eventi_fatti, cal_scelte (aggiunte alla publication supabase_realtime).
 - Test: tests/t41.js.
+
+## v42 · 10/11 — gli spunti approvati da Roby («procedi»)
+- Un promemoria del calendario passato senza risposta non diventa più da solo una cosa «da rivedere»: resta una domanda (Già fatta / Mettila tra le cose da fare / Lascia stare) nel banner di Oggi («N promemoria passati: li hai fatti?») e in «Chiudi la giornata». Quelli più vecchi della settimana scorsa non vengono più letti e quindi spariscono senza creare niente.
+- Chiudendo una cosa nata da un promemoria ([cal:id] nella nota) l'app toglie anche l'evento dal calendario (Privato o Lavoro, dalla nota), solo se è tuo, senza invitati e non è una serie; sendUpdates=none; resta nel Cestino di Google Calendar 30 giorni.
+- «Chiudi la giornata» · 4 «Già fatte?»: cose aperte molto simili (stesso motore dei doppioni, livelli uguale/molto) a cose chiuse negli ultimi 7 giorni. «È già fatta» la chiude; «Sono diverse» salva la coppia in non_doppioni e non la ripropone.
+- In alto «Aggiornato alle hh:mm» (sul telefono solo quando è vecchio): arancione «Dati di N min fa · aggiorna» oltre 5 minuti; tocca per rileggere.
+- La lettura di WhatsApp (attività programmata) non mette più le cose da fare sul calendario: vanno solo in Cicli Aperti; sul calendario solo appuntamenti.
+- Test: t42.js; aggiornati t30 e t41 (niente più trasformazione automatica).

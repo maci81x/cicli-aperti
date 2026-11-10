@@ -20,13 +20,13 @@ const seed = { cicli: [base('c1', 'Cosa aperta altrove')], cal_scelte: [{ chiave
   const titoli = db.tabelle.cicli.map(c => c.title);
   a(!titoli.some(t => /Anita/.test(t)), 'decisa altrove: non si ricrea ' + JSON.stringify(titoli));
   a(!titoli.some(t => /Lisa/.test(t)) && r.scelte.lisa === 'fatta', 'spuntata nell\'app: non diventa una cosa ' + JSON.stringify(r.scelte));
-  a(titoli.filter(t => /Rossi/.test(t)).length === 1, 'mai decisa: una sola cosa da rivedere');
-  a(r.chiedi.join() === 'verdi', 'ieri: si chiede ' + JSON.stringify(r.chiedi));
+  a(!titoli.some(t => /Rossi/.test(t)), 'v42: mai decisa: resta una domanda, nessuna cosa');
+  a(r.chiedi.join() === 'rossi,verdi', 'si chiedono rossi (scaduta) e verdi (ieri) ' + JSON.stringify(r.chiedi));
   const sc = Object.fromEntries(db.tabelle.cal_scelte.map(x => [x.chiave, x.scelta]));
-  a(sc.anita === 'fatta' && sc.lisa === 'fatta' && sc.rossi === 'scaduta', 'le scelte sono nel database ' + JSON.stringify(sc));
+  a(sc.anita === 'fatta' && sc.lisa === 'fatta' && !sc.rossi, 'le scelte sono nel database ' + JSON.stringify(sc));
   // due giri insieme non creano doppioni
   await page.evaluate(() => { localStorage.removeItem(LS5.CICLI_CAL); return Promise.all([cercaCicliInCalendario(), cercaCicliInCalendario()]); }); await page.waitForTimeout(600);
-  a(db.tabelle.cicli.filter(c => /Rossi/.test(c.title)).length === 1, 'browser svuotato + due giri: ancora una sola');
+  a(!db.tabelle.cicli.some(c => /Rossi/.test(c.title)), 'browser svuotato + due giri: nessuna cosa');
   // «Già fatta» va nel database
   await page.evaluate(() => sceltaCalCiclo('verdi', 'fatta')); await page.waitForTimeout(500);
   a(db.tabelle.cal_scelte.some(x => x.chiave === 'verdi' && x.scelta === 'fatta'), '«Già fatta» salvata nel database');
