@@ -2279,6 +2279,26 @@ html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; 
 /* v39 · la lente «Cerca» in alto sul telefono */
 .v39-cerca { display: none; }
 @media (max-width: 767px) { .v39-cerca { display: inline-grid; margin-left: auto; } .top .v39-cerca + .v32-ctx-btn { margin-left: 0; } }
+
+/* v40 · Pianifica › Giorno: Subito e Importanti da mettere in giornata */
+.v40-dametti { display: grid; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); }
+.v40-dametti > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.v40-dametti > header b { font-size: var(--fs-label); }
+.v40-dametti > header small { color: var(--ink-3, #6b6b6b); font-size: var(--fs-caption); }
+.v40-gr { display: grid; gap: 4px; }
+.v40-gr-h { display: flex; justify-content: space-between; font-size: var(--fs-caption); font-weight: var(--fw-strong); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.v40-gr-h.q1 { color: var(--q1); } .v40-gr-h.q2 { color: var(--q2); }
+.v40-riga { display: flex; align-items: stretch; gap: 6px; border-radius: var(--r-sm, 8px); border: 1px solid transparent; }
+.v40-riga.q1 { background: var(--v34-sub-bg, var(--q1-soft)); border-color: var(--v34-sub-bordo, var(--q1-mark)); }
+.v40-riga.q2 { background: var(--q2-soft); border-color: color-mix(in srgb, var(--q2-mark) 35%, transparent); }
+.v40-apri { flex: 1; min-width: 0; display: grid; gap: 1px; padding: 6px 8px; text-align: left; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
+.v40-apri .t { font-size: var(--fs-label); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.v40-apri .m { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); display: flex; gap: 6px; flex-wrap: wrap; }
+.v40-apri .m .tardi { color: var(--q1); font-weight: var(--fw-strong); }
+.v40-metti { flex: none; display: grid; place-items: center; min-width: 40px; padding: 0 8px; border: 0; border-left: 1px solid rgba(0,0,0,.08); background: none; color: inherit; cursor: pointer; border-radius: 0 var(--r-sm, 8px) var(--r-sm, 8px) 0; font-size: 18px; }
+.v40-metti:hover, .v40-metti:focus-visible { background: rgba(0,0,0,.06); }
+.v40-altre { justify-self: start; background: none; border: 0; padding: 2px 0; color: var(--ink-2, #444); font: inherit; font-size: var(--fs-caption); text-decoration: underline; cursor: pointer; }
+.v40-vuoto { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); }
 </style>
 </head>
 <body>
@@ -17916,7 +17936,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-10 v39';
+const VERSIONE_APP = '2026-11-10 v40';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20433,6 +20453,57 @@ window.addEventListener('drop', e => {
   const dove = top.querySelector('.v32-ctx-btn') || top.querySelector('.top-ctx');
   if (dove) dove.before(b); else top.appendChild(b);
 })();
+
+// ══════════════════════════════════════════════════════════════
+// v40 · 10/11 — Pianifica › Giorno: a destra (sul telefono sotto la giornata) le Subito e le Importanti
+// ancora da mettere in un giorno, per pianificare la giornata senza tornare alla Settimana.
+// Fonte: le cose senza giorno né piano (con o senza scadenza), quelle «In settimana, senza giorno»
+// e le rimaste indietro. Il «+» la mette in questo giorno (come trascinarla sulla colonna del giorno).
+// ══════════════════════════════════════════════════════════════
+function v40Candidate() {
+  const visti = new Set(), out = [];
+  const add = (c, da) => { if (!c || visti.has(c.id) || !isAttivo(c) || isGiornaliero(c) || !vedi(c.ctx)) return;
+    const q = computeEffectiveQ(c); if (q !== 1 && q !== 2) return; visti.add(c.id); out.push({ c, q, da }); };
+  try { rimasteVisibili().forEach(({ item, plan }) => { const d = carryData(item, plan); add(ciclo(item.ciclo_id), d ? 'rimasta da ' + d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric' }) : 'rimasta indietro'); }); } catch (_) {}
+  righeGiorno('settimana').filter(r => !r.fatto).forEach(r => add(r.c, 'in settimana'));
+  senzaGiornoNePiano().forEach(c => add(c, ''));
+  const ord = (a, b) => a.q - b.q || String(a.c.due_date || '9999').localeCompare(String(b.c.due_date || '9999')) || String(a.c.created_at || '').localeCompare(String(b.c.created_at || ''));
+  return out.sort(ord);
+}
+function v40Box(d) {
+  if (giornoPassato(d) || opzRighe(d).solaLettura) return '';
+  const lista = v40Candidate(), MAX = 6;
+  const gruppo = (q, nome) => {
+    const v = lista.filter(x => x.q === q); if (!v.length) return '';
+    const tutte = ui.v40Tutte && ui.v40Tutte[q], vis = tutte ? v : v.slice(0, MAX);
+    const righe = vis.map(({ c, da }) => {
+      const meta = [c.due_date ? scadenzaHtml(c) : '', da ? `<span class="${da.startsWith('rimasta') ? 'tardi' : ''}">${v26Esc(da)}</span>` : ''].filter(Boolean).join('');
+      return `<div class="v40-riga q${q}"><button type="button" class="v40-apri" data-act="v40-apri" data-id="${c.id}"><span class="t">${v26Esc(c.title)}</span>${meta ? `<span class="m">${meta}</span>` : ''}</button>`
+        + `<button type="button" class="v40-metti" data-act="v40-metti" data-id="${c.id}" aria-label="Metti in questo giorno: ${v26Esc(c.title)}" data-tip="Metti in questo giorno"><i class="ti ti-calendar-plus" aria-hidden="true"></i></button></div>`;
+    }).join('');
+    const altre = v.length > MAX ? `<button type="button" class="v40-altre" data-act="v40-tutte" data-v="${q}">${tutte ? 'Mostra meno' : `Mostra tutte (${v.length})`}</button>` : '';
+    return `<div class="v40-gr"><div class="v40-gr-h q${q}"><span>${nome}</span><span class="mono">${v.length}</span></div>${righe}${altre}</div>`;
+  };
+  const corpo = gruppo(1, 'Subito') + gruppo(2, 'Importanti');
+  return `<section class="v40-dametti" aria-label="Subito e Importanti da mettere in un giorno">
+    <header><b>Da mettere in giornata</b><small>senza giorno</small></header>
+    ${corpo || '<p class="v40-vuoto">Nessuna Subito o Importante senza giorno.</p>'}</section>`;
+}
+AZIONI['v40-metti'] = el => { const g = GIORNI[Math.max(0, Math.min(6, ui.giorno || 0))]; bordoSposta(el.dataset.id, g.key); };
+AZIONI['v40-apri'] = el => apriDettaglio(el.dataset.id);
+AZIONI['v40-tutte'] = el => { ui.v40Tutte = ui.v40Tutte || {}; ui.v40Tutte[el.dataset.v] = !ui.v40Tutte[el.dataset.v]; render(); };
+{
+  const _vgV40 = v26VistaGiorno;
+  v26VistaGiorno = function () {
+    const h = _vgV40.apply(this, arguments);
+    try {
+      const box = v40Box(dataDelGiorno(Math.max(0, Math.min(6, ui.giorno || 0))));
+      if (!box) return h;
+      const k = h.indexOf('<section class="v26-insett">') >= 0 ? '<section class="v26-insett">' : '<button type="button" class="riga-link v26-g-altre"';
+      return h.includes(k) ? h.replace(k, box + k) : h;
+    } catch (e) { console.warn('[v40] Giorno:', e.message); return h; }
+  };
+}
 </script>
 </body>
 </html>

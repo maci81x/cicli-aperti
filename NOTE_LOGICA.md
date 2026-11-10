@@ -970,3 +970,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 ## v39 · 10/11 — la lente «Cerca» sul telefono
 - Sul telefono in alto a destra c'è la lente, in ogni pagina (Oggi, Pianifica, Tutte, Altro). Toccandola si apre Tutte in Lista con il campo Cerca già attivo: scrivi e la lista si filtra. Sul computer non serve: il campo Cerca c'è già nella barra in alto in ogni pagina.
 - Il bottone «Tutto ▾» nelle pagine dove non serve (Pianifica, Altro) ora sparisce del tutto invece di lasciare lo spazio vuoto.
+
+## v40 · 10/11 — Pianifica › Giorno: «Da mettere in giornata»
+- Nella vista Giorno, nella colonna a destra (sul telefono sotto la giornata), un riquadro con le **Subito** e le **Importanti** che non hanno ancora un giorno: senza giorno né piano (con o senza scadenza), «In settimana, senza giorno», rimaste indietro.
+- Tipo effettivo (`computeEffectiveQ`): un'Importante con scadenza vicina sale tra le Subito. Ordine: scadenza più vicina, poi più vecchia. Massimo 6 per gruppo, poi «Mostra tutte».
+- Il tasto calendario+ la mette in quel giorno (`bordoSposta`, come trascinarla sulla colonna del giorno); il titolo apre il dettaglio.
+- Nascosto nei giorni passati e nei piani in sola lettura. Test: tests/t40.js.
