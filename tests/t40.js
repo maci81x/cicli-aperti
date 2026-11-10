@@ -33,3 +33,16 @@ const seed = { cicli: [
     await browser.close();
   }
 })();
+// v40.1 · trascinamento dal riquadro
+(async () => {
+  await new Promise(r => setTimeout(r, 30000));
+  const { browser, page, logs } = await apriApp({ viewport: { width: 1440, height: 900 }, ora: '2026-11-10T09:00:00+01:00', seed, attesa: 3500 });
+  await page.evaluate(() => { document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open')); ui.pian = 'giorno'; ui.giorno = 3; vai('pianifica'); });
+  await page.waitForTimeout(500);
+  await page.dragAndDrop('.v40-riga[data-id="s1"]', '.v26-g-main');
+  await page.waitForTimeout(1200);
+  const r = await page.evaluate(() => ({ data: ciclo('s1').pianificato_data, giorno: [...document.querySelectorAll('.v26-g-main .item-title')].map(x => x.innerText), box: [...document.querySelectorAll('.v40-apri .t')].map(x => x.innerText) }));
+  a(r.data === '2026-11-12' && r.giorno.some(t => /Arillo/.test(t)) && !r.box.includes('Chiamare Arillo'), 'trascinata in giovedì ' + JSON.stringify(r));
+  { const e = errori(logs); a(!e.length, 'drag console ' + JSON.stringify(e.slice(0, 3))); }
+  await browser.close();
+})();

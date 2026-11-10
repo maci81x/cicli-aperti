@@ -2299,6 +2299,25 @@ html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; 
 .v40-metti:hover, .v40-metti:focus-visible { background: rgba(0,0,0,.06); }
 .v40-altre { justify-self: start; background: none; border: 0; padding: 2px 0; color: var(--ink-2, #444); font: inherit; font-size: var(--fs-caption); text-decoration: underline; cursor: pointer; }
 .v40-vuoto { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); }
+
+/* v40.1 · trascinare dal riquadro dentro la giornata */
+.v40-riga[draggable="true"] { cursor: grab; }
+.v40-riga.dragging { opacity: .45; }
+.v26-g-main.v40-sopra { outline: 2px dashed var(--q2-mark); outline-offset: 6px; border-radius: var(--r-md); background: color-mix(in srgb, var(--q2-soft) 45%, transparent); }
+
+/* v40.2 · Giorno più compatto: pagina larga al massimo 1240px, colonna destra fissa mentre scorri,
+   «Da mettere in giornata» scorre da solo (la pagina resta ferma) */
+#view.largo.v40g { max-width: 1240px; }
+.v40-dametti { gap: var(--sp-2); min-height: 0; }
+.v40-scroll { display: grid; gap: var(--sp-2); overflow-y: auto; overscroll-behavior: contain; max-height: 55vh; margin: 0 calc(-1 * var(--sp-3)); padding: 0 var(--sp-3) var(--sp-2); scrollbar-width: thin; }
+.v40-gr-h { position: sticky; top: 0; z-index: 1; background: var(--surface); padding: 4px 0; margin-top: 0; }
+.v40-riga { min-height: 40px; }
+.v40-apri { padding: 5px 8px; }
+.v40-apri .t { -webkit-line-clamp: 2; }
+@media (min-width: 901px) {
+  .v26-g-grid { grid-template-columns: minmax(0, 1fr) 360px; gap: var(--sp-5); }
+  .v26-g-lato { position: sticky; top: var(--sp-4); }
+}
 </style>
 </head>
 <body>
@@ -17936,7 +17955,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-10 v40';
+const VERSIONE_APP = '2026-11-10 v40.2';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20472,22 +20491,21 @@ function v40Candidate() {
 }
 function v40Box(d) {
   if (giornoPassato(d) || opzRighe(d).solaLettura) return '';
-  const lista = v40Candidate(), MAX = 6;
+  const lista = v40Candidate();
   const gruppo = (q, nome) => {
     const v = lista.filter(x => x.q === q); if (!v.length) return '';
-    const tutte = ui.v40Tutte && ui.v40Tutte[q], vis = tutte ? v : v.slice(0, MAX);
+    const vis = v;
     const righe = vis.map(({ c, da }) => {
       const meta = [c.due_date ? scadenzaHtml(c) : '', da ? `<span class="${da.startsWith('rimasta') ? 'tardi' : ''}">${v26Esc(da)}</span>` : ''].filter(Boolean).join('');
-      return `<div class="v40-riga q${q}"><button type="button" class="v40-apri" data-act="v40-apri" data-id="${c.id}"><span class="t">${v26Esc(c.title)}</span>${meta ? `<span class="m">${meta}</span>` : ''}</button>`
+      return `<div class="v40-riga q${q}" draggable="true" data-id="${c.id}"><button type="button" class="v40-apri" data-act="v40-apri" data-id="${c.id}"><span class="t">${v26Esc(c.title)}</span>${meta ? `<span class="m">${meta}</span>` : ''}</button>`
         + `<button type="button" class="v40-metti" data-act="v40-metti" data-id="${c.id}" aria-label="Metti in questo giorno: ${v26Esc(c.title)}" data-tip="Metti in questo giorno"><i class="ti ti-calendar-plus" aria-hidden="true"></i></button></div>`;
     }).join('');
-    const altre = v.length > MAX ? `<button type="button" class="v40-altre" data-act="v40-tutte" data-v="${q}">${tutte ? 'Mostra meno' : `Mostra tutte (${v.length})`}</button>` : '';
-    return `<div class="v40-gr"><div class="v40-gr-h q${q}"><span>${nome}</span><span class="mono">${v.length}</span></div>${righe}${altre}</div>`;
+    return `<div class="v40-gr"><div class="v40-gr-h q${q}"><span>${nome}</span><span class="mono">${v.length}</span></div>${righe}</div>`;
   };
   const corpo = gruppo(1, 'Subito') + gruppo(2, 'Importanti');
   return `<section class="v40-dametti" aria-label="Subito e Importanti da mettere in un giorno">
     <header><b>Da mettere in giornata</b><small>senza giorno</small></header>
-    ${corpo || '<p class="v40-vuoto">Nessuna Subito o Importante senza giorno.</p>'}</section>`;
+    ${corpo ? `<div class="v40-scroll">${corpo}</div>` : '<p class="v40-vuoto">Nessuna Subito o Importante senza giorno.</p>'}</section>`;
 }
 AZIONI['v40-metti'] = el => { const g = GIORNI[Math.max(0, Math.min(6, ui.giorno || 0))]; bordoSposta(el.dataset.id, g.key); };
 AZIONI['v40-apri'] = el => apriDettaglio(el.dataset.id);
@@ -20504,6 +20522,47 @@ AZIONI['v40-tutte'] = el => { ui.v40Tutte = ui.v40Tutte || {}; ui.v40Tutte[el.da
     } catch (e) { console.warn('[v40] Giorno:', e.message); return h; }
   };
 }
+
+// v40.1 · 10/11 — sul computer le righe del riquadro si trascinano dentro la giornata (= tasto calendario+)
+{
+  let v40Drag = null;
+  const zona = t => t && t.closest && t.closest('.v26-g-main');
+  const pulisci = () => { document.querySelectorAll('.v26-g-main.v40-sopra').forEach(x => x.classList.remove('v40-sopra')); document.querySelectorAll('.v40-riga.dragging').forEach(x => x.classList.remove('dragging')); };
+  document.addEventListener('dragstart', e => {
+    const r = e.target.closest && e.target.closest('.v40-riga[draggable="true"]');
+    if (!r) return;
+    v40Drag = r.dataset.id;
+    try { e.dataTransfer.setData('text/plain', 'v40:' + v40Drag); e.dataTransfer.effectAllowed = 'move'; } catch (_) {}
+    r.classList.add('dragging');
+    rimandaRender(true);
+  });
+  document.addEventListener('dragover', e => { if (!v40Drag) return; const z = zona(e.target); pulisci(); document.querySelectorAll('.v40-riga[data-id="' + v40Drag + '"]').forEach(x => x.classList.add('dragging')); if (!z) return; e.preventDefault(); z.classList.add('v40-sopra'); });
+  document.addEventListener('drop', e => {
+    if (!v40Drag) return;
+    const id = v40Drag, z = zona(e.target); v40Drag = null; pulisci(); rimandaRender(false);
+    if (!z) return;
+    e.preventDefault(); e.stopPropagation();
+    bordoSposta(id, GIORNI[Math.max(0, Math.min(6, ui.giorno || 0))].key);
+  }, true);
+  document.addEventListener('dragend', () => { if (!v40Drag) return; v40Drag = null; pulisci(); rimandaRender(false); });
+}
+
+// v40.2 · la vista Giorno non si allarga oltre 1240px
+{
+  const _dV402 = disegna;
+  disegna = function () { _dV402.apply(this, arguments); const v = $('view'); if (v) v.classList.toggle('v40g', ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno'); v40Altezza(); };
+}
+// l'elenco finisce sempre dentro lo schermo: altezza = spazio fino in fondo, meno quello che c'è sotto (In settimana, Stampa)
+function v40Altezza() {
+  const sc = document.querySelector('.v40-scroll'); if (!sc) return;
+  if (window.innerWidth < 901) { sc.style.maxHeight = ''; return; }
+  sc.style.maxHeight = 'none';
+  const box = sc.closest('.v40-dametti'), lato = sc.closest('.v26-g-lato');
+  const sotto = lato ? [...lato.children].filter(x => box && (box.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING)).reduce((t, x) => t + x.getBoundingClientRect().height + 12, 0) : 0;
+  const top = Math.max(sc.getBoundingClientRect().top, 0);
+  sc.style.maxHeight = Math.max(200, Math.floor(window.innerHeight - top - sotto - 16 - 12)) + 'px';
+}
+window.addEventListener('resize', () => requestAnimationFrame(v40Altezza));
 </script>
 </body>
 </html>

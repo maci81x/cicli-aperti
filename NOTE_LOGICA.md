@@ -976,3 +976,5 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Tipo effettivo (`computeEffectiveQ`): un'Importante con scadenza vicina sale tra le Subito. Ordine: scadenza più vicina, poi più vecchia. Massimo 6 per gruppo, poi «Mostra tutte».
 - Il tasto calendario+ la mette in quel giorno (`bordoSposta`, come trascinarla sulla colonna del giorno); il titolo apre il dettaglio.
 - Nascosto nei giorni passati e nei piani in sola lettura. Test: tests/t40.js.
+- (v40.1) Sul computer le righe del riquadro si trascinano dentro la giornata (tutta la colonna della giornata prende il rilascio): stesso effetto del tasto calendario+.
+- (v40.2) Roby: «si apre troppo in orizzontale» e «se li scorro mi fa scorrere tutta la pagina». La vista Giorno è larga al massimo 1240px; la colonna destra resta ferma mentre scorri; l'elenco «Da mettere in giornata» scorre da solo (overscroll contenuto), alto quanto lo spazio fino in fondo allo schermo (v40Altezza, anche al resize). Niente più «Mostra tutte»: ci sono tutte nell'elenco. Test: tests/t40b.js.
