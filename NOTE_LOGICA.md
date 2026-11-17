@@ -1011,3 +1011,12 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Roby: «se ho impostato un'attività subito in un giorno e non l'ho chiusa, automaticamente torna nell'elenco».
 - Oggi: le Subito con pianificato_data passata e non fatte sono nella lista «Oggi: N cose da chiudere» (non più nel «rimaste indietro» chiuso), con «rimasta da gio 12/11». Le altre rimaste indietro (non Subito) restano dove erano.
 - Pianifica › Da pianificare: in cima «Subito rimaste indietro · N», trascinabili in un giorno nuovo. Vista Giorno: anche nel riquadro «Da mettere in giornata». Le Subito future restano nel loro giorno. Test: tests/t45.js.
+
+## v46 · 17/11 — rifiniture (i 7 punti della revisione) e l'elenco che non torna in cima
+- Etichetta della posta («Da fare», «Report»…) neutra: il blu è delle Importanti. «libere Nh» della giornata in salvia.
+- Pianifica: una Subito rimasta indietro, nella colonna del suo giorno passato, resta solo come traccia sbiadita «ora in Da pianificare»; la riga vera è in cima a Da pianificare.
+- Coach nella colonna «Il metodo»: righe da una linea, bottoni piccoli.
+- Telefono, Pianifica › Settimana: scorrendo resta in alto la barra con ‹ settimana › e la fila dei giorni (si tocca il giorno e si torna su quel giorno). Sul telefono si scorre dentro #main.
+- Roby: «quando spunto una casella in fondo o a metà, l'elenco riparte dall'inizio». Ogni disegno annota la posizione di tutti gli elenchi che scorrono (Da pianificare, colonne, riquadri, lavagna in orizzontale, #main, pagina) e la rimette dopo (v46Annota/v46Rimetti attorno a disegna).
+- Contrasti verificati (WCAG): tutti ≥ 4,5:1 in chiaro e in scuro. Tutte le prove (23 file) passano; aggiornata t32 al velo rosso.
+- Canvas: tavola «Versione finale · Carta e salvia» nella sezione 16.

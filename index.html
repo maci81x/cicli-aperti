@@ -2123,7 +2123,7 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
 .v31-g-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; }
 .v31-g-h > span:first-child { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
 .v31-g-h .mono { font-size: 12px; color: var(--text-2); white-space: nowrap; }
-.v31-g-h .mono b { color: var(--q2); font-weight: 500; }
+.v31-g-h .mono b { color: var(--primary); font-weight: 500; }
 .v31-g-barra { position: relative; height: 10px; margin-top: var(--sp-2); border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .v31-g-barra i { position: absolute; top: 0; bottom: 0; background: var(--text); }
 .v31-g-barra u { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--q1); text-decoration: none; }
@@ -2443,6 +2443,21 @@ html:root .item.p-q2:not(.is-done) .item-row::before { content: ""; position: ab
 html:root .v40-riga.q1 { background: var(--q1-soft); border-color: color-mix(in srgb, var(--q1-mark) 30%, var(--border)); }
 
 .fascia-h.v45-h { color: var(--q1); }
+
+/* v46 · rifiniture: l'etichetta della posta neutra (il blu è delle Importanti), traccia delle Subito nel giorno passato, Coach compatto */
+html:root .tag-posta { background: var(--surface-2); color: var(--text-2); }
+html:root .item.v46-traccia { opacity: .55; }
+html:root .item.v46-traccia .item-row { background: transparent; }
+.v43-metodo .v12-ico { width: 28px; height: 28px; font-size: 15px; }
+.v43-metodo .v12-coach { gap: 4px; }
+.v43-metodo .v12-coach li { grid-template-columns: 8px minmax(0, 1fr) auto; min-height: 32px; }
+.v43-metodo .v12-coach li div span { display: none; }
+.v43-metodo .v12-coach li .btn { min-height: 28px; height: 28px; padding: 0 10px; font-size: 12px; gap: 4px; }
+.v43-metodo .v12-coach li .btn .ti { font-size: 14px; }
+.v43-metodo .v12-card .btn-block { min-height: 34px; height: 34px; font-size: 13px; }
+
+#v44-testa .v46-days .day { min-height: 44px; padding: 2px 0; }
+#v44-testa .v46-days .day small, #v44-testa .v46-days .day .dot { display: none; }
 </style>
 </head>
 <body>
@@ -18080,7 +18095,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-17 v45';
+const VERSIONE_APP = '2026-11-17 v46';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20886,6 +20901,7 @@ function v44Barra() {
 function v44Aggiorna() {
   V44.raf = 0;
   const bar = v44Barra();
+  if (ui.tab === 'pianifica' && window.innerWidth < 768) { v46BarraTel(bar); return; }
   const scorri = document.querySelector('#view .board-scorri'), cols = scorri && scorri.querySelector('.cols.board');
   if (!cols || ui.tab !== 'pianifica' || window.innerWidth < 768) { bar.classList.remove('su'); return; }
   const top = document.querySelector('.top');
@@ -20928,7 +20944,9 @@ document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('#v44-testa [data-act]');
   if (!b || !AZIONI[b.dataset.act]) return;
   e.preventDefault(); e.stopPropagation();
-  AZIONI[b.dataset.act](b, b.dataset.id, b.dataset, e);
+  const act = b.dataset.act;
+  AZIONI[act](b, b.dataset.id, b.dataset, e);
+  if (act === 'giorno' || act === 'v21-passati') setTimeout(() => { const d = document.querySelector('#view .days'); if (d) d.scrollIntoView({ block: 'start' }); }, 80);
   setTimeout(v44Chiedi, 400);
 }, true);
 // trascinare sul nome del giorno (window in cattura: prima del rilascio della lavagna, che azzera il trascinamento)
@@ -20971,7 +20989,10 @@ const v45Da = c => 'rimasta da ' + parseISODate(c.pianificato_data).toLocaleDate
   riga = function (r, opz) {
     let h = _rigaV45.apply(this, arguments);
     const c = r && r.c;
-    if (c && !r.fatto && c.pianificato_data && c.pianificato_data < oggiLocale() && computeEffectiveQ(c) === 1 && !/rimasta da/.test(h))
+    const indietro = c && !r.fatto && c.pianificato_data && c.pianificato_data < oggiLocale() && computeEffectiveQ(c) === 1 && ripetizioneDi(c) === 'nessuna';
+    if (indietro && opz && opz.passato && opz.data === c.pianificato_data)   // v46: nel suo giorno passato resta solo una traccia
+      h = h.replace(/class="item /, 'class="item v46-traccia ').replace(/<span class="ritardo">in ritardo<\/span>/, '<span class="ritardo">ora in Da pianificare</span>');
+    else if (indietro && !/rimasta da/.test(h))
       h = h.replace(/(<span class="item-meta"[^>]*>)/, `$1<span class="ritardo">${v45Da(c)}</span><span class="sep">·</span>`);
     return h;
   };
@@ -20990,6 +21011,70 @@ const v45Da = c => 'rimasta da ' + parseISODate(c.pianificato_data).toLocaleDate
     const extra = v45SubitoIndietro().filter(c => !visti.has(c.id)).map(c => ({ c, q: 1, da: v45Da(c) }));
     return [...extra, ...out];
   };
+}
+
+// ══════════════════════════════════════════════════════════════
+// v46 · 17/11 — «quando spunto una casella in fondo o a metà, l'elenco riparte dall'inizio»
+// Ogni ridisegno ricostruisce la pagina e gli elenchi che scorrono da soli (Da pianificare, le colonne dei giorni,
+// «Da mettere in giornata», la lavagna in orizzontale) tornavano in cima. Ora prima del disegno si annota dove
+// eri in ognuno e dopo si rimette lì; anche la pagina resta dov'era.
+// ══════════════════════════════════════════════════════════════
+function v46Chiave(el) {
+  if (el.id) return '#' + el.id;
+  if (el.dataset && el.dataset.zona) return '[data-zona="' + el.dataset.zona + '"]';
+  const cls = [...el.classList].filter(c => !/^(drag|sopra|aperto|on|su)$/.test(c)).slice(0, 2);
+  if (!cls.length) return null;
+  const sel = el.tagName.toLowerCase() + '.' + cls.map(c => CSS.escape(c)).join('.');
+  const tutti = [...document.querySelectorAll('#view ' + sel)];
+  return sel + '|' + tutti.indexOf(el);
+}
+function v46Annota() {
+  const view = $('view'); if (!view) return null;
+  const pos = [];
+  view.querySelectorAll('*').forEach(el => {
+    if (el.scrollTop > 0 || el.scrollLeft > 0) { const k = v46Chiave(el); if (k) pos.push([k, el.scrollTop, el.scrollLeft]); }
+  });
+  const m = document.getElementById('main');
+  return { tab: ui.tab, pian: ui.pian, pos, main: m ? m.scrollTop : 0, win: window.scrollY, view: view.scrollTop, scroller: document.scrollingElement ? document.scrollingElement.scrollTop : 0 };
+}
+function v46Rimetti(a) {
+  if (!a || a.tab !== ui.tab || a.pian !== ui.pian) return;
+  a.pos.forEach(([k, t, l]) => {
+    let el = null;
+    if (k.includes('|')) { const [sel, i] = k.split('|'); el = document.querySelectorAll('#view ' + sel)[+i]; }
+    else el = document.querySelector('#view ' + k);
+    if (el) { if (t) el.scrollTop = t; if (l) el.scrollLeft = l; }
+  });
+  const view = $('view'), m = document.getElementById('main');
+  if (m && a.main && Math.abs(m.scrollTop - a.main) > 2) m.scrollTop = a.main;
+  if (view && a.view && view.scrollTop !== a.view) view.scrollTop = a.view;
+  if (a.win && Math.abs(window.scrollY - a.win) > 2) window.scrollTo(0, a.win);
+}
+{
+  const _disegnaV46 = disegna;
+  disegna = function () {
+    const a = v46Annota();
+    const r = _disegnaV46.apply(this, arguments);
+    if (a) { v46Rimetti(a); requestAnimationFrame(() => v46Rimetti(a)); }
+    return r;
+  };
+}
+
+// v46 · sul telefono, in Pianifica › Settimana: scorrendo resta in alto la settimana (‹ ›) con la fila dei giorni
+function v46BarraTel(bar) {
+  const days = document.querySelector('#view .days');
+  if (!days || ui.sub || ui.pian !== 'settimana') { bar.classList.remove('su'); return; }
+  const top = document.querySelector('.top'), tb = top ? top.getBoundingClientRect() : null;
+  const pos = top ? getComputedStyle(top).position : 'static';
+  const limite = tb && tb.bottom > 0 && pos !== 'static' && pos !== 'relative' ? tb.bottom : 0;
+  if (days.getBoundingClientRect().bottom > limite + 4) { bar.classList.remove('su'); return; }
+  const da = getWeekStart(state.week, state.year), a = new Date(da); a.setDate(a.getDate() + 6);
+  bar.style.top = Math.round(limite) + 'px'; bar.style.left = '0px'; bar.style.width = '100%';
+  bar.innerHTML = `<div class="v44-riga1" style="padding:6px 12px 2px"><button type="button" class="btn btn-icon" data-act="sett" data-dir="-1" aria-label="Settimana prima"><i class="ti ti-chevron-left"></i></button>
+    <b style="flex:1;text-align:center">${eSettimanaCorrente() ? 'Questa settimana' : 'Settimana ' + state.week} <span class="mono" style="font-weight:500;font-size:12px">${fmtGgMm(toISODate(da))} – ${fmtGgMm(toISODate(a))}</span></b>
+    <button type="button" class="btn btn-icon" data-act="sett" data-dir="1" aria-label="Settimana dopo"><i class="ti ti-chevron-right"></i></button></div>
+    <div class="days v46-days" style="${days.getAttribute('style') || ''};padding:0 12px 6px">${days.innerHTML}</div>`;
+  bar.classList.add('su'); bar.removeAttribute('aria-hidden');
 }
 </script>
 </body>
