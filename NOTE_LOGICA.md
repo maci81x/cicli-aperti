@@ -999,3 +999,7 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Niente più caselle rosa piene: Subito = segno terracotta corto a sinistra della riga; Da rispondere e le schede di Prima di tutto bianche, il colore solo nell'icona; appuntamenti con altri chiari (prugna tenue + striscia), non più blocchi viola pieni; etichetta Personale neutra (il viola era degli appuntamenti).
 - Computer (tre colonne): Coach e «Settimana senza piano» passano a sinistra sotto la giornata come «Il metodo · da fare»; al centro resta solo «Oggi: N cose da chiudere» a tutta larghezza.
 - La stampa (PDF) non cambia. Test: tests/t43.js.
+
+## v44 · 17/11 — Pianifica: la settimana e i giorni restano in vista scorrendo
+- Roby: «se scorro, possa comunque vedere il giorno o scegliere se spostare la settimana». Sul computer, quando le intestazioni delle colonne escono dallo schermo, compare in alto una barra fissa: ‹ Settimana N gg/mm – gg/mm › (le stesse azioni della pagina) e i nomi dei giorni allineati alle colonne (seguono anche lo scorrimento orizzontale).
+- Si può trascinare una cosa o un appuntamento sul nome del giorno nella barra (stesso effetto del rilascio sulla colonna; «Da pianificare» = rimettila da pianificare). Test: tests/t44.js.
