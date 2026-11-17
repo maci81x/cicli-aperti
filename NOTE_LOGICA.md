@@ -1003,3 +1003,11 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 ## v44 · 17/11 — Pianifica: la settimana e i giorni restano in vista scorrendo
 - Roby: «se scorro, possa comunque vedere il giorno o scegliere se spostare la settimana». Sul computer, quando le intestazioni delle colonne escono dallo schermo, compare in alto una barra fissa: ‹ Settimana N gg/mm – gg/mm › (le stesse azioni della pagina) e i nomi dei giorni allineati alle colonne (seguono anche lo scorrimento orizzontale).
 - Si può trascinare una cosa o un appuntamento sul nome del giorno nella barra (stesso effetto del rilascio sulla colonna; «Da pianificare» = rimettila da pianificare). Test: tests/t44.js.
+
+## v44.1 · 17/11 — colori di Subito e Importante (scelti da Roby)
+- Subito: rosso acceso #D92D20 (testo #B42318) con un velo rosso chiaro #FDEEEC su tutta la riga e il segno corto a sinistra. Importante: blu #2563EB, segno corto blu a sinistra. Obiettivi: blu scuro #1E3A8A. Delega: ocra #A16207. Tema scuro allineato.
+
+## v45 · 17/11 — una Subito messa in un giorno e non chiusa non sparisce
+- Roby: «se ho impostato un'attività subito in un giorno e non l'ho chiusa, automaticamente torna nell'elenco».
+- Oggi: le Subito con pianificato_data passata e non fatte sono nella lista «Oggi: N cose da chiudere» (non più nel «rimaste indietro» chiuso), con «rimasta da gio 12/11». Le altre rimaste indietro (non Subito) restano dove erano.
+- Pianifica › Da pianificare: in cima «Subito rimaste indietro · N», trascinabili in un giorno nuovo. Vista Giorno: anche nel riquadro «Da mettere in giornata». Le Subito future restano nel loro giorno. Test: tests/t45.js.

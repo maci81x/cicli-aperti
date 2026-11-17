@@ -2419,6 +2419,30 @@ html:root .tag-pers { background: var(--surface-2); color: var(--text-2); font-w
 #v44-testa .v44-g.oggi { border-color: var(--primary); color: var(--primary-ink); }
 #v44-testa .v44-g .mono { font-weight: 500; color: var(--text-2); font-size: 12px; }
 #v44-testa .v44-g.sopra { background: var(--primary-soft); border-color: var(--primary); border-style: dashed; }
+
+/* v44.1 · Roby: Subito rosso acceso con un velo rosso sulla riga; Importante blu; obiettivi blu scuro; Delega ocra */
+html:root, html[data-theme="light"] {
+  --q1: #B42318; --q1-mark: #D92D20; --q1-soft: #FDEEEC;
+  --q2: #1D4ED8; --q2-mark: #2563EB; --q2-soft: #EBF1FE;
+  --q3: #8A5A00; --q3-mark: #A16207; --q3-soft: #FBF1DC;
+  --danger: #B42318; --danger-soft: #FDEEEC;
+  --v26-ob-bg: #EEF0F8; --v26-ob-bordo: #C7CCE6; --v26-ob-ink: #1E3A8A;
+}
+html:root[data-theme="dark"] {
+  --q1: #FF8A80; --q1-mark: #F97066; --q1-soft: #3A1C1A;
+  --q2: #93B4FF; --q2-mark: #7EA6FF; --q2-soft: #1B2744;
+  --q3: #E9B949; --q3-mark: #E9B949; --q3-soft: #33270F;
+  --danger: #FF8A80; --danger-soft: #3A1C1A;
+  --v26-ob-bg: #1A2038; --v26-ob-bordo: #2E3A66; --v26-ob-ink: #B4C6FF;
+}
+html:root .item.p-q1:not(.is-done) .item-row { background: var(--q1-soft); }
+html:root .item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid color-mix(in srgb, var(--q1-mark) 22%, var(--border)); }
+html:root .item.p-q1:not(.is-done) .check-box { border-color: var(--q1-mark); }
+html:root .item.p-q2:not(.is-done) .item-row { position: relative; }
+html:root .item.p-q2:not(.is-done) .item-row::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--q2-mark); }
+html:root .v40-riga.q1 { background: var(--q1-soft); border-color: color-mix(in srgb, var(--q1-mark) 30%, var(--border)); }
+
+.fascia-h.v45-h { color: var(--q1); }
 </style>
 </head>
 <body>
@@ -17187,7 +17211,7 @@ function cicliIndietro() {
   const oggi = oggiLocale();
   const daPiano = new Set(rimasteVisibili().map(x => x.item.ciclo_id));
   const sciolte = state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c)
-    && c.pianificato_data && c.pianificato_data < oggi && !daPiano.has(c.id));
+    && c.pianificato_data && c.pianificato_data < oggi && !daPiano.has(c.id) && computeEffectiveQ(c) !== 1);   // v45: le Subito rimaste indietro stanno nella lista principale
   return { daPiano: daPiano.size, sciolte: sciolte.sort((a, b) => a.pianificato_data.localeCompare(b.pianificato_data)) };
 }
 function cardV12(cls, ico, titolo, sotto, corpo, aria) {
@@ -17203,7 +17227,7 @@ function primaDiTutto() {
   const subito = righe.filter(r => !r.fatto && computeEffectiveQ(r.c) === 1 && !late.includes(r));
   // 28/10 · le Subito senza giorno: vanno fatte oggi anche se non hanno una data
   const nelGiorno = new Set(righe.map(r => r.c.id));
-  state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c) && !c.pianificato_data && !nelGiorno.has(c.id) && computeEffectiveQ(c) === 1)
+  state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c) && (!c.pianificato_data || c.pianificato_data < iso) && !nelGiorno.has(c.id) && computeEffectiveQ(c) === 1)
     .forEach(c => subito.push({ c, item: null, fascia: 'mattina', conFascia: false, haFascia: false, ora: oraDi(c), durata: c.durata_minuti || null, fatto: false }));
   const lista = [...late.filter(r => computeEffectiveQ(r.c) === 1), ...late.filter(r => computeEffectiveQ(r.c) !== 1), ...subito];
   const ind = cicliIndietro(), nInd = ind.daPiano + ind.sciolte.length;
@@ -18056,7 +18080,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-17 v44';
+const VERSIONE_APP = '2026-11-17 v45';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20927,6 +20951,46 @@ window.addEventListener('drop', e => {
 }, true);
 // mentre si trascina la barra resta: si ricalcola con il mouse
 document.addEventListener('drag', () => v44Chiedi());
+
+// ══════════════════════════════════════════════════════════════
+// v45 · 17/11 — «se ho messo una Subito in un giorno e non l'ho chiusa, deve tornare nell'elenco»
+// · Oggi: le Subito con il giorno passato e non fatte stanno nella lista «Oggi: N cose da chiudere»
+//   (non più nascoste in «rimaste indietro»), con scritto da che giorno.
+// · Pianifica › Da pianificare e il riquadro «Da mettere in giornata» della vista Giorno: in cima
+//   le Subito rimaste indietro, pronte da trascinare in un giorno nuovo.
+// ══════════════════════════════════════════════════════════════
+function v45SubitoIndietro() {
+  const oggi = oggiLocale();
+  return state.cicli.filter(c => vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c)
+    && c.pianificato_data && c.pianificato_data < oggi && computeEffectiveQ(c) === 1 && ripetizioneDi(c) === 'nessuna')
+    .sort((a, b) => a.pianificato_data.localeCompare(b.pianificato_data));
+}
+const v45Da = c => 'rimasta da ' + parseISODate(c.pianificato_data).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'numeric' });
+{
+  const _rigaV45 = riga;
+  riga = function (r, opz) {
+    let h = _rigaV45.apply(this, arguments);
+    const c = r && r.c;
+    if (c && !r.fatto && c.pianificato_data && c.pianificato_data < oggiLocale() && computeEffectiveQ(c) === 1 && !/rimasta da/.test(h))
+      h = h.replace(/(<span class="item-meta"[^>]*>)/, `$1<span class="ritardo">${v45Da(c)}</span><span class="sep">·</span>`);
+    return h;
+  };
+  const _listaV45 = htmlDaPianificareLista;
+  htmlDaPianificareLista = function () {
+    const h = _listaV45.apply(this, arguments);
+    const q = (ui.dp.q || '').trim().toLowerCase();
+    const l = v45SubitoIndietro().filter(c => (!q || String(c.title || '').toLowerCase().includes(q)) && (!ui.dp.tipo || ui.dp.tipo === 1));
+    if (!l.length) return h;
+    const righe = l.map(c => riga({ c, fatto: false }, { trascina: true, data: oggiLocale() })).join('');
+    return `<div class="fascia-h v45-h">Subito rimaste indietro · ${l.length}</div>${righe}${/col-vuota/.test(h) ? '' : '<div class="fascia-h">Da pianificare</div>' + h}`;
+  };
+  const _candV45 = v40Candidate;
+  v40Candidate = function () {
+    const out = _candV45.apply(this, arguments), visti = new Set(out.map(x => x.c.id));
+    const extra = v45SubitoIndietro().filter(c => !visti.has(c.id)).map(c => ({ c, q: 1, da: v45Da(c) }));
+    return [...extra, ...out];
+  };
+}
 </script>
 </body>
 </html>

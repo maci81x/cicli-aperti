@@ -27,7 +27,7 @@ const seed = { cicli: [...titoli.map((t, i) => base('s' + i, t, i < 3 ? { fonte:
       return { bgSub: sub && getComputedStyle(sub).backgroundColor, metodo: metodo ? [...metodo.querySelectorAll('.v12-card h3')].map(x => x.innerText) : null,
         larghezzaCentro: centro ? Math.round(centro.getBoundingClientRect().width) : 0, bg: getComputedStyle(document.body).backgroundColor };
     });
-    a(r.bgSub === 'rgba(0, 0, 0, 0)', tag + ': Subito senza riquadro rosa ' + r.bgSub);
+    a(r.bgSub === 'rgb(253, 238, 236)', tag + ': Subito con il velo rosso ' + r.bgSub);
     if (!vp.mobile) a(r.metodo && r.metodo.length >= 1 && r.larghezzaCentro > 600, 'computer: metodo a sinistra, cose da chiudere larghe ' + JSON.stringify(r));
     await page.screenshot({ path: (process.env.OUT || '/tmp') + `/v43_${tag}.png`, fullPage: !vp.mobile });
     await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; }); await page.waitForTimeout(300);
