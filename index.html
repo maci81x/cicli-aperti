@@ -2328,6 +2328,85 @@ html:root[data-theme="dark"] .v42-agg.vecchio { color: #FFD08A; background: #3A2
 .v42-dopp { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); }
 .v42-dopp p { margin: 0; font-size: var(--fs-label); line-height: 1.35; }
 .v42-dopp small { color: var(--text-3, #7a7a7a); }
+
+/* ══ v43 · 17/11 — «Carta e salvia»: mix delle tavolozze A e C (canvas, sezione 16). Meno colore, più ordine.
+   Un colore = un significato: inchiostro per il testo, salvia per le azioni, terracotta solo per Subito,
+   prugna per gli appuntamenti, blu per gli obiettivi. Niente più caselle rosa piene. ══ */
+html:root, html[data-theme="light"] {
+  --bg: #F6F4EF; --surface: #FFFFFF; --surface-2: #F0EDE6; --surface-3: #FFFFFF;
+  --border: #E7E2D7; --border-strong: #9A9486;
+  --text: #1B1A17; --text-2: #5C574D; --text-3: #6B665B; --done-title: #6B665B; --done-meta: #6B665B;
+  --primary: #2F6B57; --primary-deep: #234F41; --primary-ink: #2F6B57; --primary-soft: #E6F0EB; --on-primary: #FFFFFF;
+  --q1: #A8431F; --q1-mark: #C2552D; --q1-soft: #FAEDE6;
+  --q2: #2F6B57; --q2-mark: #2F6B57; --q2-soft: #E6F0EB;
+  --q3: #3E5C76; --q3-mark: #3E5C76; --q3-soft: #E6EDF3;
+  --q4: #6B665B; --q4-mark: #9A9486; --q4-soft: #F0EDE6;
+  --evt: #55548A; --evt-mark: #5B5A8E; --evt-soft: #EFEFF7; --v24-tratto: #B9B8D8;
+  --pensa: #F7F2E2; --pensa-bordo: #DCCB8E; --pensa-ink: #5E4A00;
+  --danger: #A8431F; --danger-soft: #FAEDE6; --warn: #8A5A00; --warn-soft: #F7EED6;
+  --inverse-bg: #1D2A24; --inverse-text: #EEF2EE; --inverse-accent: #A7E3C5;
+  --ring: #2F6B57;
+  --shadow-1: 0 1px 2px rgba(27, 26, 23, .05);
+  --shadow-2: 0 1px 2px rgba(27, 26, 23, .05), 0 6px 18px rgba(27, 26, 23, .06);
+  --v26-ob-bg: #EDF1FD; --v26-ob-bordo: #CAD5F7; --v26-ob-ink: #2F55D4;
+  --v31-notte: #1D2A24; --v31-notte-2: #26352E; --v31-notte-3: #344A40; --v31-luce: #A7E3C5; --v31-su-notte: #EEF2EE; --v31-su-notte-2: #B5C4BB;
+  --v31-hl: #E9D27A;
+  --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
+  --v34-io: #FFFFFF; --v34-io-ink: #55548A; --v34-altri: #EFEFF7; --v34-altri-ink: #1B1A17; --v34-altri-2: #55548A;
+  --v34-lib: #F1F6F2; --v34-lib-bordo: #A9CBB9; --v34-lib-ink: #2F6B57;
+}
+html:root[data-theme="dark"] {
+  --bg: #121513; --surface: #1A1E1B; --surface-2: #232823; --surface-3: #2D332E;
+  --border: #2D332E; --border-strong: #8C968E;
+  --text: #EEF1EC; --text-2: #B9C1BA; --text-3: #A0A9A1; --done-title: #B9C1BA; --done-meta: #A0A9A1;
+  --primary: #7FC8A9; --primary-deep: #5FAE8D; --primary-ink: #9ADBBF; --primary-soft: #1C3229; --on-primary: #0E1A15;
+  --q1: #F0936F; --q1-mark: #F0936F; --q1-soft: #3A2219;
+  --q2: #7FC8A9; --q2-mark: #7FC8A9; --q2-soft: #1C3229;
+  --q3: #9DB8CF; --q3-mark: #9DB8CF; --q3-soft: #1B2731;
+  --evt: #B9B6E8; --evt-mark: #B9B6E8; --evt-soft: #25243A; --v24-tratto: #55548A;
+  --pensa: #2C2714; --pensa-bordo: #6F6226; --pensa-ink: #EAD78F;
+  --danger: #F0936F; --danger-soft: #3A2219;
+  --inverse-bg: #EEF1EC; --inverse-text: #1D2A24; --inverse-accent: #2F6B57; --ring: #9ADBBF;
+  --v26-ob-bg: #1B2340; --v26-ob-bordo: #2F3D6E; --v26-ob-ink: #A9BBFF;
+  --v31-notte: #0E1411; --v31-notte-2: #18211C; --v31-notte-3: #26332C;
+  --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
+  --v34-io: var(--surface); --v34-io-ink: #B9B6E8; --v34-altri: #25243A; --v34-altri-ink: #EEF1EC; --v34-altri-2: #B9B6E8;
+  --v34-lib: #152420; --v34-lib-bordo: #2F5A4A; --v34-lib-ink: #9ADBBF;
+}
+/* Subito: un segno terracotta a sinistra, niente riquadro rosa */
+html:root .item.p-q1:not(.is-done) .item-row { background: transparent; box-shadow: none; position: relative; }
+html:root .item.p-q1:not(.is-done) .item-row::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--q1-mark); }
+html:root .item.p-q1:not(.is-done) .check-box { border-color: var(--border-strong); }
+.v33-sx .v43-metodo { margin-top: var(--sp-4); }
+html:root .item.p-q1:not(.is-done) .item-title { color: var(--text); font-weight: 600; }
+html:root .item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid var(--border); }
+html:root .board .item.p-q1:not(.is-done) { outline: 0; }
+html:root .v40-riga.q1 { background: var(--surface); border-color: var(--border); box-shadow: inset 3px 0 0 var(--q1-mark); }
+html:root .v40-riga.q2 { background: var(--surface); border-color: var(--border); box-shadow: inset 3px 0 0 var(--q2-mark); }
+/* Da rispondere: riquadro bianco, il colore solo nell'icona */
+html:root .v23-posta { background: var(--surface); border: 1px solid var(--border); border-left-width: 1px; }
+/* Prima di tutto: riquadri bianchi, il colore solo nell'icona */
+html:root .v12-card.v12-rosso, html:root .v12-card.v12-arancio, html:root .v12-card.v12-viola { border-color: var(--border); }
+html:root .v12-card.v12-urgente { border-width: 1px; box-shadow: inset 3px 0 0 var(--q1-mark); }
+html:root .v12-arancio .v12-ico { background: var(--q1-soft); color: var(--q1); }
+html:root .v12-viola .v12-ico { background: var(--v26-ob-bg); color: var(--v26-ob-ink); }
+/* Appuntamenti: chiari, con la striscia; quelli con altri un filo più pieni */
+html:root .evt-riga.evt-app.v24-altri, html:root .board .evt-riga.v24-altri { background: var(--v34-altri); box-shadow: inset 3px 0 0 var(--evt-mark); }
+html:root .evt-riga.evt-app.v24-altri .item-title { color: var(--text); font-weight: 600; }
+html:root .evt-riga.evt-app.v24-altri .item-meta, html:root .evt-riga.evt-app.v24-altri .item-meta *, html:root .evt-riga.evt-app.v24-altri .v24-chi, html:root .evt-riga.evt-app.v24-altri .evt-ico, html:root .evt-riga.evt-app.v24-altri .evt-ico .ti { color: var(--text-2) !important; }
+html:root .evt-riga.evt-app.v24-altri .item-meta .mono { color: var(--evt) !important; font-weight: 700; }
+html:root .evt-riga.evt-app.v24-altri .evt-cerchio { border-color: var(--evt-mark); }
+html:root .evt-riga.evt-app.v24-altri .v18-cestino { color: var(--text-2); }
+html:root .evt-riga.evt-app.v24-mio, html:root .board .evt-riga.v24-mio { background: var(--surface); box-shadow: inset 3px 0 0 var(--v24-tratto); }
+/* computer: il metodo a sinistra, le cose da chiudere al centro larghe */
+.v43-metodo { display: flex; flex-direction: column; gap: var(--sp-3); }
+.v43-metodo .v12-card { padding: var(--sp-3) var(--sp-4); gap: var(--sp-2); }
+.v43-metodo .v12-card h3 { font-size: var(--fs-label); }
+.v43-metodo .v12-card p { font-size: var(--fs-caption); }
+.v43-metodo .v12-coach li { font-size: var(--fs-caption); }
+html:root .v12-head span:first-child { color: var(--text); }
+html:root .tag-pers { background: var(--surface-2); color: var(--text-2); font-weight: 700; }
+.v33-centro .v12-griglia.v43-sola { grid-template-columns: minmax(0, 1fr); }
 </style>
 </head>
 <body>
@@ -17965,7 +18044,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-10 v42';
+const VERSIONE_APP = '2026-11-17 v43';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20724,6 +20803,36 @@ function v42Etichetta() {
 AZIONI['v42-rileggi'] = async () => { V41.ultimo = 0; showToast('Rileggo i dati…', 'info'); await v41Rinfresca('a mano'); };
 setInterval(() => { if (document.visibilityState === 'visible') v42Etichetta(); }, 30000);
 v42Etichetta();
+
+// ══════════════════════════════════════════════════════════════
+// v43 · 17/11 — sul computer (tre colonne) Coach e «Settimana senza piano» vanno a sinistra, sotto la giornata,
+// come «Il metodo · da fare»; al centro resta solo «Oggi: N cose da chiudere», a tutta larghezza.
+// ══════════════════════════════════════════════════════════════
+{
+  const _vistaOggiV43 = vistaOggi;
+  vistaOggi = function () {
+    let h = _vistaOggiV43.apply(this, arguments);
+    if (!/v33-tre/.test(h)) return h;
+    try {
+      const tpl = document.createElement('template'); tpl.innerHTML = h;
+      const f = tpl.content, sx = f.querySelector('.v33-sx'), gr = f.querySelector('.v33-centro .v12-griglia');
+      if (!sx || !gr) return h;
+      const altre = [...gr.children].filter(x => x.classList.contains('v12-card') && !x.classList.contains('v12-rosso'));
+      if (!altre.length) return h;
+      const box = document.createElement('section');
+      box.className = 'v43-metodo'; box.setAttribute('aria-label', 'Il metodo: da fare');
+      box.innerHTML = `<p class="list-head"><span>Il metodo · da fare</span><span class="mono">${altre.length}</span></p>`;
+      altre.forEach(x => box.appendChild(x));
+      sx.appendChild(box);
+      gr.classList.add('v43-sola');
+      const head = f.querySelector('.v33-centro .v12-head');
+      if (head && !gr.children.length) head.remove();
+      else if (head) head.remove();   // il titolo lo dà già la scheda «Oggi: N cose da chiudere»
+      const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
+    } catch (e) { console.warn('[v43] oggi:', e.message); }
+    return h;
+  };
+}
 </script>
 </body>
 </html>

@@ -992,3 +992,10 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - In alto «Aggiornato alle hh:mm» (sul telefono solo quando è vecchio): arancione «Dati di N min fa · aggiorna» oltre 5 minuti; tocca per rileggere.
 - La lettura di WhatsApp (attività programmata) non mette più le cose da fare sul calendario: vanno solo in Cicli Aperti; sul calendario solo appuntamenti.
 - Test: t42.js; aggiornati t30 e t41 (niente più trasformazione automatica).
+
+## v43 · 17/11 — «Carta e salvia» (mix delle tavolozze A e C, canvas sezione 16) e Oggi più ordinato
+- Roby: «non mi piacciono i colori», la lista rossa di Oggi troppo stretta, «Settimana 47» non ha senso così lunga. Scelto sul canvas: mix tra A (carta e inchiostro) e C (salvia e terracotta), su tutta l'app.
+- Colori (token in html:root, chiaro e scuro): sfondo carta #F6F4EF, riquadri bianchi, testo inchiostro #1B1A17; azioni/bottoni salvia #2F6B57; Subito terracotta #C2552D (solo come segno); appuntamenti prugna #5B5A8E; obiettivi blu #2F55D4; Adesso verde notte #1D2A24 con luce menta.
+- Niente più caselle rosa piene: Subito = segno terracotta corto a sinistra della riga; Da rispondere e le schede di Prima di tutto bianche, il colore solo nell'icona; appuntamenti con altri chiari (prugna tenue + striscia), non più blocchi viola pieni; etichetta Personale neutra (il viola era degli appuntamenti).
+- Computer (tre colonne): Coach e «Settimana senza piano» passano a sinistra sotto la giornata come «Il metodo · da fare»; al centro resta solo «Oggi: N cose da chiudere» a tutta larghezza.
+- La stampa (PDF) non cambia. Test: tests/t43.js.
