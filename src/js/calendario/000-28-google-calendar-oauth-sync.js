@@ -281,14 +281,6 @@ async function syncCicloToGcal(ciclo) {
   }
 }
 
-async function retryFailedSyncs() {
-  if (!isGcalTokenValid()) return;
-  const failed = state.cicli.filter(c => c.sync_status === 'failed' && !c.done);
-  for (const c of failed.slice(0, 5)) {
-    await syncCicloToGcal(c);
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
 
 
 
@@ -301,15 +293,4 @@ function disconnectGcal() {
   showToast('Google Calendar disconnesso', 'info');
 }
 
-async function batchSyncAll() {
-  const toSync = state.cicli.filter(c => !c.done && c.scheduled_date);
-  showToast(`Sincronizzo ${toSync.length} cose...`, 'info');
-  let ok = 0;
-  for (const c of toSync) {
-    await syncCicloToGcal(c).then(() => ok++).catch(() => {});
-    await new Promise(r => setTimeout(r, 200));
-  }
-  showToast(`${ok}/${toSync.length} cose sincronizzate`, 'success');
-  closeModal('gcalOverlay');
-}
 

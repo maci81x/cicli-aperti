@@ -4,17 +4,7 @@
 let _agendaDragId  = null;   // ciclo in trascinamento
 
 
-// Data del giorno `idx` (0=lunedì) nella settimana selezionata
-function agendaDayDate(idx) {
-  const start = getWeekStart(state.week, state.year);
-  const d = new Date(start);
-  d.setDate(start.getDate() + idx);
-  return d;
-}
 
-function isSameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
 
 // Override attivo per un ciclo nella settimana corrente (o null)
@@ -119,15 +109,7 @@ function haPianificazione(c) {
   return !!agendaOverrideFor(c.id);
 }
 
-// Cicli aperti del contesto corrente, con i filtri di sidebar applicati
-function agendaBaseCicli() {
-  return applyFilters(state.cicli.filter(c => vedi(c.ctx) && isAttivo(c)));
-}
 
-// I rituali giornalieri hanno un blocco dedicato: escludili dalla griglia
-// settimanale, altrimenti comparirebbero 7 volte.
-function agendaPianificati()   { return agendaBaseCicli().filter(c => !isGiornaliero(c) && agendaSlotFor(c).giorno); }
-function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianificazione(c)); }
 
 // «Da sistemare»: una sola definizione per la colonna Da pianificare, Da piazzare, Riordina e la card del coach.
 // Aperta (non fatta, non parcheggiata), senza giorno, senza data (né scadenza né data pianificata), fuori dal piano della settimana.
@@ -216,20 +198,6 @@ async function moveCicloInAgenda(cicloId, giorno, fascia) {
 // ── VISTA PARCHEGGIO ──
 
 // ── AZIONI PARCHEGGIO ──
-async function parcheggiaCiclo(cicloId) {
-  if (!state.parcheggioColsOk) { showToast('Migration parcheggio non applicata', 'error'); return; }
-  const now = new Date().toISOString();
-  try {
-    const { error } = await db.from('cicli')
-      .update({ parcheggiato: true, parcheggiato_at: now, updated_at: now })
-      .eq('id', cicloId);
-    if (error) throw error;
-    state.cicli = state.cicli.map(c =>
-      c.id === cicloId ? { ...c, parcheggiato: true, parcheggiato_at: now } : c);
-      render();
-    showToast('Messo in parcheggio ', 'success');
-  } catch (err) { showToast('Errore: ' + err.message, 'error'); }
-}
 
 async function riattivaCiclo(cicloId) {
   const now = new Date().toISOString();

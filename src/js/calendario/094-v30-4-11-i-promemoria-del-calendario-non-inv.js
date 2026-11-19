@@ -22,17 +22,8 @@ function v30Riprogrammata(e) {
   if (migliore(e.titolo, cose, ['uguale', 'molto'], c => c.title)) return 'gia-tra-le-cose';
   return null;
 }
-const v30Marca = k => `[${V30.MARK}${k}]`;
 // la parola deve essere l'azione, non stare tra parentesi: «Cena a La Bottega (orario da chiedere)» è un appuntamento (4/11)
 const v30Parola = t => PAROLE_CICLO.test(normTitolo(String(t || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')));
-async function v30InDaPianificare(k, e) {
-  if (state.cicli.some(c => (c.note || '').includes(v30Marca(k)))) return false;   // già fatta su un altro dispositivo
-  const ctx = e.cal === 'privato' ? 'personale' : indovinaContesto(e.titolo, { ctx: 'lavoro', cal: e.cal }).ctx;
-  const nota = `Promemoria del calendario ${e.cal === 'privato' ? 'Privato' : 'Lavoro'} del ${v29GiornoBreve(e.giorno)}${e.ora ? ' alle ' + e.ora : ''}, mai deciso: è ancora da fare? ${v30Marca(k)}`;
-  const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: nota, da_rivedere: true });
-  if (c) state.cicli = [c, ...state.cicli];
-  return !!c;
-}
 cercaCicliInCalendario = async function () {
   if (!isGcalTokenValid()) return;
   const cur = bpSettimanaCorrente(), oggi = parseISODate(oggiLocale());
