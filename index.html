@@ -2602,6 +2602,37 @@ html:root .board .bzona > .spazio-riga .item-title { font-size: 12.5px; font-wei
 html:root .board .bzona > .spazio-riga .evt-ico { width: 18px; height: 18px; font-size: 14px; }
 html:root[data-theme="dark"] .board .bzona > .item.p-q1 { border-color: #8C3B33 !important; }
 html:root[data-theme="dark"] .board .bzona > .spazio-riga { border-color: #3E6B57 !important; }
+/* v50 · sfondo salvia chiarissimo (solo tema chiaro) */
+html:root:not([data-theme="dark"]) { --bg: #F1F4F2; --surface-2: #E8EDEA; }
+html:root:not([data-theme="dark"]) body, html:root:not([data-theme="dark"]) #main { background: var(--bg); }
+.v47-testa { background: var(--bg); }
+/* v50 · Oggi: ogni cosa è una scheda a sé, i tipi si distinguono */
+#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+#view.v50-oggi .v12-rosso .v12-righe { padding: 4px 12px 12px !important; }
+#view.v50-oggi .group:not(.giornata) > .item, #view.v50-oggi .v12-righe > .item { margin: 0 !important; border: 1px solid var(--border) !important; border-radius: 12px !important; background: var(--surface); box-shadow: 0 1px 2px rgba(27, 26, 23, .05); overflow: hidden; }
+#view.v50-oggi .group:not(.giornata) > .item + .item, #view.v50-oggi .v12-righe > .item + .item { border-top: 1px solid var(--border) !important; }
+#view.v50-oggi .group > .item.p-q1, #view.v50-oggi .v12-righe > .item.p-q1 { background: var(--q1-soft); border-color: #EFA9A0 !important; box-shadow: inset 4px 0 0 var(--q1-mark, #D92D20); }
+#view.v50-oggi .group > .item.p-q2, #view.v50-oggi .v12-righe > .item.p-q2 { border-color: #BFD0F7 !important; box-shadow: inset 4px 0 0 var(--q2-mark, #2563EB); }
+#view.v50-oggi .group > .item.p-q3, #view.v50-oggi .v12-righe > .item.p-q3 { border-color: #E6D2A6 !important; box-shadow: inset 4px 0 0 #A16207; }
+#view.v50-oggi .item.p-q1::before, #view.v50-oggi .item.p-q2::before { display: none !important; }
+#view.v50-oggi .group.giornata { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+#view.v50-oggi .group.giornata > .evt-riga { margin: 0 !important; border-radius: 12px !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q1, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q1 { border-color: #8C3B33 !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q2, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q2 { border-color: #2C3E6B !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q3, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q3 { border-color: #5A4520 !important; }
+html:root[data-theme="dark"] .board .bzona > .item.p-q2 { box-shadow: inset 3px 0 0 var(--q2-mark) !important; }
+/* v50 · Da controllare sul telefono; la riga aperta non ripete il titolo */
+.v49-ctl.v50-tel { margin: var(--sp-4) 0; }
+.v49-r-corpo .v29-h, .v49-r-corpo .v12-card > h3:first-child { display: none; }
+.v49-r-corpo .banner-piano > .ti:first-child, .v49-r-corpo .v12-card > .v12-ico { display: none; }
+/* v50 · accessibilità */
+.v48-g.we { opacity: 1; }
+.v48-g.we .v48-l, .v48-g.we .v48-n { color: var(--text-2); }
+.v50-sm-riga { display: flex; width: 100%; justify-content: center; min-height: 36px; margin: 0 0 8px; }
+html:root[data-theme="dark"] .v49-sm-btn, html:root[data-theme="dark"] .v49-oggi, html:root[data-theme="dark"] .v49-k, html:root[data-theme="dark"] .v49-da { color: #FF9A8C; border-color: #FF9A8C; }
+html:root[data-theme="dark"] .board .evt-riga.v24-altri { background: #4A4880 !important; border-color: #4A4880 !important; }
+#view .evt-riga .item-title[role="button"] { cursor: pointer; }
+#view .evt-riga .item-title[role="button"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -18239,7 +18270,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-19 v49.1';
+const VERSIONE_APP = '2026-11-19 v50';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -21438,7 +21469,7 @@ AZIONI['v48-giorno'] = el => v48MettiIn(_pfCicloId, el.dataset.iso);
 ui.v49 = null;
 document.body.insertAdjacentHTML('beforeend', `<div class="modal-overlay" id="v49Overlay" onclick="closeModalOnBg(event,'v49Overlay')">
   <div class="modal sheet v49-sm" role="dialog" aria-modal="true" aria-labelledby="v49-t"><div class="sheet-grab"></div><div id="v49-corpo"></div></div></div>`);
-const v49Lista = () => v47Indietro();
+function v49Lista() { return v47Indietro(); }
 function v49Da(c) {
   if (c.pianificato_data) return v45Da(c);
   try { const r = rimasteVisibili().find(x => x.item.ciclo_id === c.id); const d = r && carryData(r.item, r.plan); if (d) return 'rimasta da ' + d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'numeric' }); } catch (_) {}
@@ -21555,8 +21586,9 @@ document.addEventListener('keydown', e => {
 {
   const _listaV49 = htmlDaPianificareLista;
   htmlDaPianificareLista = function () {
-    return _listaV49.apply(this, arguments).replace('<span class="t-caption">trascinale in un giorno</span></summary>',
-      '<button type="button" class="v49-sm-btn" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i>Smaltisci</button></summary>');
+    const h = _listaV49.apply(this, arguments);
+    if (!/class="v47-indietro"/.test(h)) return h;
+    return '<button type="button" class="v49-sm-btn v50-sm-riga" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i>Smaltisci, una alla volta</button>' + h;
   };
 }
 // Oggi: sotto «Oggi: N cose da chiudere», il bottone per smaltire le rimaste indietro
@@ -21638,6 +21670,128 @@ function v49Orari() {
 {
   const _disegnaV49 = disegna;
   disegna = function () { const r = _disegnaV49.apply(this, arguments); try { v49Orari(); } catch (e) { console.warn('[v49] orari:', e.message); } return r; };
+}
+// ══════════════════════════════════════════════════════════════
+// v50 · 19/11 — sfondo salvia; in Oggi ogni cosa è una scheda a sé (Subito / Importante / Delega si distinguono);
+// «Da controllare» anche sul telefono; Delega da Smaltisci torna a Smaltisci
+// ══════════════════════════════════════════════════════════════
+{
+  const _disegnaV50 = disegna;
+  disegna = function () {
+    const r = _disegnaV50.apply(this, arguments);
+    const v = $('view'); if (v) v.classList.toggle('v50-oggi', ui.tab === 'oggi');
+    return r;
+  };
+}
+// Oggi sul telefono: un solo riquadro «Da controllare» sotto le cose da chiudere
+{
+  const _oggiV50 = vistaOggi;
+  vistaOggi = function () {
+    let h = _oggiV50.apply(this, arguments);
+    if (/v33-tre/.test(h) || /v49-ctl/.test(h)) return h;
+    try {
+      const tpl = document.createElement('template'); tpl.innerHTML = h;
+      const f = tpl.content, radice = f.querySelector('.v12-oggi') || f;
+      const testo = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
+      const righe = [];
+      radice.querySelectorAll('.v23-posta').forEach(el => { el.classList.add('v49-diretto'); righe.push(el.outerHTML); el.remove(); });
+      const blocchi = [...radice.querySelectorAll('.v29-prep, .banner-piano, .v12-griglia > .v12-card:not(.v12-rosso)')];
+      blocchi.forEach(el => {
+        const tEl = el.querySelector('.v29-t, b, h3, strong') || el.querySelector('p');
+        const t = testo(tEl) || 'Da guardare';
+        const sEl = [...el.querySelectorAll('.v29-s, .t-caption, p, small')].find(x => x !== tEl && !x.contains(tEl) && testo(x) && testo(x) !== t);
+        const ico = (el.querySelector('i.ti') || {}).className || 'ti ti-point';
+        const k = v49Chiave(t);
+        righe.push(`<details class="v49-r" data-v49="${esc(k)}"${ui.v49Aperti.has(k) ? ' open' : ''}><summary><i class="${esc(ico)}" aria-hidden="true"></i><span class="v49-r-t"><b>${escHtml(corta(t, 60))}</b>${sEl ? `<small>${escHtml(corta(testo(sEl), 70))}</small>` : ''}</span><i class="ti ti-chevron-down v49-r-v" aria-hidden="true"></i></summary><div class="v49-r-corpo">${el.outerHTML}</div></details>`);
+        el.remove();
+      });
+      if (!righe.length) return h;
+      const box = `<section class="v49-ctl v50-tel" aria-label="Da controllare"><p class="v49-ctl-h"><span>Da controllare</span><span class="mono">${righe.length}</span></p>${righe.join('')}</section>`;
+      const rosso = radice.querySelector('.v12-card.v12-rosso');
+      const dopo = rosso ? (rosso.closest('.v12-griglia') || rosso) : null;
+      if (dopo) dopo.insertAdjacentHTML('afterend', box); else radice.insertAdjacentHTML('beforeend', box);
+      const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
+    } catch (e) { console.warn('[v50] da controllare telefono:', e.message); }
+    return h;
+  };
+}
+// una riga aperta non ripete il titolo: il titolo della scheda interna si nasconde (resta per i lettori di schermo)
+// Smaltisci: Delega apre il suo foglio e, chiuso quello, si torna a Smaltisci
+{
+  const _listaV50 = v49Lista;
+  v49Lista = () => _listaV50().filter(c => !(ui.v49 && ui.v49.gestite && ui.v49.gestite.has(c.id)));
+  const _faiV50 = v49Fai;
+  v49Fai = async function (tipo, iso) {
+    if (tipo !== 'delega') return _faiV50.apply(this, arguments);
+    const s = ui.v49, c = s && v49Lista()[s.idx];
+    if (!c) return;
+    s.riprendi = { id: c.id, prima: { q: c.q, delega_persona_id: c.delega_persona_id || null, delega_controllo: c.delega_controllo || null, persone_menzionate: [...(c.persone_menzionate || [])] } };
+    closeModal('v49Overlay');
+    apriDelega(c.id);
+    if (!$('delegaOverlay') || !$('delegaOverlay').classList.contains('open')) v50Riprendi();
+  };
+  AZIONI['v49-delega'] = () => v49Fai('delega');
+}
+function v50Riprendi() {
+  const s = ui.v49, r = s && s.riprendi;
+  if (!r) return;
+  s.riprendi = null;
+  s.gestite = s.gestite || new Set();
+  const c = ciclo(r.id);
+  if (c && c.delega_persona_id && c.delega_persona_id !== r.prima.delega_persona_id) {
+    s.gestite.add(r.id); s.fatte++; s.storia.push({ tipo: 'delega', id: r.id, prima: r.prima });
+  }
+  v49Disegna();
+  $('v49Overlay').classList.add('open');
+}
+{
+  const o = $('delegaOverlay');
+  if (o) new MutationObserver(() => { if (!o.classList.contains('open') && ui.v49 && ui.v49.riprendi) setTimeout(v50Riprendi, 50); }).observe(o, { attributes: true, attributeFilter: ['class'] });
+  const _annV50 = v49Annulla;
+  v49Annulla = async function () {
+    const s = ui.v49, u = s && s.storia[s.storia.length - 1];
+    if (!u || u.tipo !== 'delega') return _annV50.apply(this, arguments);
+    s.storia.pop();
+    try { await patchCiclo(u.id, u.prima); s.gestite.delete(u.id); s.fatte = Math.max(0, s.fatte - 1); const i = v49Lista().findIndex(x => x.id === u.id); if (i >= 0) s.idx = i; render(); }
+    catch (e) { showToast('Non riesco ad annullare: ' + e.message, 'error'); }
+    v49Disegna();
+  };
+  AZIONI['v49-annulla'] = () => v49Annulla();
+}
+// Smaltisci: Esc chiude, e il fuoco resta dentro la finestra (tastiera)
+document.addEventListener('keydown', e => {
+  const o = $('v49Overlay');
+  if (!o || !o.classList.contains('open')) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeModal('v49Overlay'); return; }
+  if (e.key !== 'Tab') return;
+  const f = [...o.querySelectorAll('button:not([disabled]), [tabindex="0"]')].filter(x => x.offsetParent);
+  if (!f.length) return;
+  const primo = f[0], ultimo = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === primo) { e.preventDefault(); ultimo.focus(); }
+  else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primo.focus(); }
+  else if (!o.contains(document.activeElement)) { e.preventDefault(); primo.focus(); }
+});
+// v50 · accessibilità (axe, WCAG 2.1 AA)
+{ // il suggerimento vuoto non si annuncia
+  const t = $('tooltip');
+  if (t) { const agg = () => { const on = t.classList.contains('visible') && t.textContent.trim(); if (on) { t.setAttribute('role', 'tooltip'); t.removeAttribute('aria-hidden'); } else { t.removeAttribute('role'); t.setAttribute('aria-hidden', 'true'); } }; agg(); new MutationObserver(agg).observe(t, { attributes: true, attributeFilter: ['class'], childList: true }); }
+}
+// appuntamenti: niente bottoni dentro un bottone; si apre dal titolo (Invio o clic), la spunta e il cestino restano bottoni
+function v50Appuntamenti() {
+  document.querySelectorAll('#view .evt-riga[role="button"]').forEach(r => {
+    const t = r.querySelector('.item-title');
+    if (!t) return;
+    t.setAttribute('role', 'button'); t.setAttribute('tabindex', '0');
+    t.setAttribute('data-act', r.dataset.act || 'evt-apri');
+    if (r.dataset.evt) t.setAttribute('data-evt', r.dataset.evt);
+    if (r.dataset.evtId) t.setAttribute('data-evt-id', r.dataset.evtId);
+    if (r.getAttribute('aria-label')) t.setAttribute('aria-label', r.getAttribute('aria-label'));
+    r.removeAttribute('role'); r.removeAttribute('tabindex');
+  });
+}
+{
+  const _disegnaV50b = disegna;
+  disegna = function () { const r = _disegnaV50b.apply(this, arguments); try { v50Appuntamenti(); } catch (e) { console.warn('[v50] appuntamenti:', e.message); } return r; };
 }
 </script>
 </body>

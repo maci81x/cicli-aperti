@@ -59,7 +59,7 @@ const O = process.env.OUT || '/tmp';
   r = await page.evaluate(() => {
     const z = document.querySelector('.bzona[data-zona="giovedi"]'); const cs = z && getComputedStyle(z);
     const co = document.querySelector('.board .evt-riga.v24-altri'); const mio = document.querySelector('.board .evt-riga.v24-mio');
-    return { gap: cs && cs.rowGap, bg: cs && cs.backgroundColor, coBg: co && getComputedStyle(co).backgroundColor, coOre: co && (co.querySelector('.v49-ore') || {}).innerText, mioBg: mio && getComputedStyle(mio).backgroundColor, pill: (document.querySelector('.v47-pill') || {}).textContent, btn: !!document.querySelector('#v47-indietro .v49-sm-btn'), lib: (document.querySelector('.board .spazio-riga .item-title') || {}).innerText, sx: document.documentElement.scrollWidth <= window.innerWidth };
+    return { gap: cs && cs.rowGap, bg: cs && cs.backgroundColor, coBg: co && getComputedStyle(co).backgroundColor, coOre: co && (co.querySelector('.v49-ore') || {}).innerText, mioBg: mio && getComputedStyle(mio).backgroundColor, pill: (document.querySelector('.v47-pill') || {}).textContent, btn: !!document.querySelector('.v50-sm-riga'), lib: (document.querySelector('.board .spazio-riga .item-title') || {}).innerText, sx: document.documentElement.scrollWidth <= window.innerWidth };
   });
   a(r.gap === '8px' && /rgba\(0, 0, 0, 0\)|transparent/.test(r.bg), 'giorni: schede separate ' + JSON.stringify(r));
   a(r.coBg === 'rgb(91, 90, 142)' && /10:00\s*11:00/.test(r.coOre || ''), 'con altri: viola pieno, orario a sinistra ' + JSON.stringify(r));
