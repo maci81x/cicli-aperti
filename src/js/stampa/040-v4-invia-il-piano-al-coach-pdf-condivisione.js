@@ -46,16 +46,5 @@ async function inviaPiano() {
   fatto('PDF scaricato: allegalo all\'email');
 }
 function apriEmail(url) { window.location.href = url; }
-// Dal banner del venerdì: porta Pianifica sulla settimana dopo e apre l'invio.
-async function inviaPianoProssima() {
-  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
-  state.week = n.week; state.year = n.year;
-  localStorage.setItem(LS.WEEK, state.week);
-  ui.giorno = 0;
-  await reloadWeekData();
-  await caricaEventi(state.week, state.year);
-  vai('pianifica', { pian: 'settimana' });
-  setTimeout(apriInvia, 200);
-}
 
 // ══════════════════════════════════════════════════════════════

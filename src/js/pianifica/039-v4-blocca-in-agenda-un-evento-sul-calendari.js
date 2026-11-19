@@ -27,12 +27,6 @@ function slotBlocco(c) {
   return { data, ora, durata, completo: !!(data && ora && durata) };
 }
 const nonEsiste = e => /not found|deleted|404|410/i.test(String(e && e.message));
-function corpoEvento(c, slot) {
-  const inizio = new Date(`${slot.data}T${slot.ora}:00`), fine = new Date(inizio.getTime() + slot.durata * 60000);
-  return { summary: c.title, description: `Cicli Aperti · appuntamento con te stesso\n${APP_URL}#ciclo=${c.id}`,
-    start: { dateTime: `${slot.data}T${slot.ora}:00`, timeZone: 'Europe/Rome' },
-    end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' } };
-}
 // 27/10 · ogni cosa sul suo calendario: personali sul Privato (se si può scrivere), le altre su quello di scrittura
 function percorsoEventi(c) { return `/calendars/${encodeURIComponent(calDellaCosa(c))}/events`; }
 // Aggiorna l'evento esistente. false = su Google non c'è più (l'id viene tolto dalla cosa).
@@ -115,17 +109,5 @@ async function aggiornaBlocco(id) {
   } catch (e) { console.warn('[GCal] aggiorna blocco:', e.message); }
 }
 function allineaBlocchi() { bpItemsValidi().forEach(i => { if (bpCiclo(i).calendar_event_id) aggiornaBlocco(i.ciclo_id); }); }
-// Chiusa: se l'appuntamento era ancora da venire si toglie; se è passato resta, con la spunta nel titolo.
-async function chiudiBlocco(c) {
-  if (!c || !c.calendar_event_id || !isGcalTokenValid()) return;
-  try {
-    await ensureGcalCalendar();
-    if (!gcal.calendarId) return;
-    const slot = slotBlocco(c);
-    const futuro = slot.completo && new Date(`${slot.data}T${slot.ora}:00`) > new Date();
-    if (futuro) await togliBlocco(c, true);
-    else await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + c.title });
-  } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi blocco:', e.message); }
-}
 
 // ══════════════════════════════════════════════════════════════

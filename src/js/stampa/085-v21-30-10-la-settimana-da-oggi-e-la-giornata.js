@@ -123,29 +123,6 @@ function daPianificarePdf(z) {
 function v21GiornoVuoto(idx) {
   return !righeGiorno(GIORNI[idx].key).length && !eventiDelGiorno(dataDelGiorno(idx)).length;
 }
-async function stampaGiorno(idx, daOggi) {
-  if (daOggi && !eSettimanaCorrente()) {
-    const c = bpSettimanaCorrente();
-    state.week = c.week; state.year = c.year;
-    try { localStorage.setItem(LS.WEEK, state.week); } catch (_) {}
-    await reloadWeekData();
-    try { await caricaEventi(state.week, state.year); } catch (_) {}
-    render();
-    idx = giornoIdxDi(oggiData());
-  }
-  const pdf = creaPdfSettimana({ giorno: idx });
-  if (!pdf) return;
-  const { doc, nome } = pdf, vuoto = v21GiornoVuoto(idx);
-  const msg = vuoto ? 'Nessuna attività pianificata per questo giorno: nel foglio trovi le cose da pianificare' : 'Giornata pronta per la stampa';
-  try {
-    const url = URL.createObjectURL(doc.output('blob'));
-    const win = window.open(url, '_blank');
-    if (!win) doc.save(nome);
-    showToast(win ? msg : (vuoto ? msg : 'PDF della giornata scaricato'), vuoto ? 'warn' : 'success');
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  } catch (e) { doc.save(nome); showToast(vuoto ? msg : 'PDF della giornata scaricato', vuoto ? 'warn' : 'info'); }
-  window.__v21UltimaGiornata = { nome, vuoto, pagine: doc.getNumberOfPages() };
-}
 AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), el.dataset.oggi === '1'); };
 
 // ══════════════════════════════════════════════════════════════

@@ -568,19 +568,6 @@ v25Momento = function () {
   return m;
 };
 const v26RitmoAcceso = () => lsLeggi(V26.RITMO_OFF) !== '1';
-v25RitmoCard = function () {
-  if (!v26RitmoAcceso()) return '';
-  const m = v25Momento();
-  if (sessionStorage.getItem(V25.RITMO_CHIUSO) === m.k + toISODate(new Date())) return '';
-  const aperto = !!ui.v26RitmoAperto;
-  const btn = m.act === 'v21-stampa-oggi' ? `<button type="button" class="btn btn-primary btn-sm" data-act="v21-stampa-giorno" data-i="${giornoIdxDi(oggiData())}" data-oggi="1"><i class="ti ti-printer"></i>${m.btn}</button>`
-    : m.act === 'tab-tutto' ? `<button type="button" class="btn btn-primary btn-sm" data-tab="tutto"><i class="ti ti-layout-columns"></i>${m.btn}</button>`
-    : `<button type="button" class="btn btn-primary btn-sm" data-act="${m.act}">${m.btn}</button>`;
-  return `<section class="v25-ritmo v26-ritmo${aperto ? ' aperto' : ''}" aria-label="Adesso tocca a">
-    <button type="button" class="v26-ritmo-testa" data-act="v26-ritmo-apri" aria-expanded="${aperto}"><span class="ti-ico" aria-hidden="true"><i class="ti ${m.ico}"></i></span>
-      <span class="v25-testo"><b><span class="v26-ritmo-pre">Adesso tocca a…</span> ${escHtml(m.t)}</b>${aperto ? `<span class="v26-ritmo-s">${escHtml(m.s)}</span>` : ''}</span><i class="ti ti-chevron-${aperto ? 'up' : 'down'} v26-ritmo-chev" aria-hidden="true"></i></button>
-    ${btn}<button type="button" class="btn btn-icon" data-act="v25-ritmo-chiudi" data-k="${m.k}" aria-label="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
-};
 AZIONI['v26-ritmo-apri'] = () => { ui.v26RitmoAperto = !ui.v26RitmoAperto; render(); };
 AZIONI['v26-ritmo-onoff'] = () => { const ora = v26RitmoAcceso(); try { localStorage.setItem(V26.RITMO_OFF, ora ? '1' : '0'); } catch (_) {} render(); showToast(ora ? '«Adesso tocca a…» non si vede più in Oggi' : '«Adesso tocca a…» torna in Oggi', 'success'); };
 

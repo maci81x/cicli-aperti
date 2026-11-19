@@ -28,31 +28,5 @@ function corpoPromemoria(tipo) {
     start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: promemoria, extendedProperties: { private: { cicli_aperti: 'q2' } } } };
 }
-// forza = anche se la firma (giorno, ora, durata, calendario) non è cambiata
-async function sincronizzaPromemoria(tipo, forza) {
-  if (!isGcalTokenValid()) return null;
-  await ensureGcalCalendar();
-  if (!gcal.calendarId) return null;
-  const tutti = leggiJson(LS5.PROM, {}), salvato = tutti[tipo] || {};
-  const { firma, corpo } = corpoPromemoria(tipo);
-  if (!forza && salvato.id && salvato.firma === firma) return salvato.id;
-  try {
-    let id = salvato.id || null;
-    if (!id) {
-      const qs = new URLSearchParams({ privateExtendedProperty: `cicli_aperti=${tipo}`, maxResults: '5', showDeleted: 'false' });
-      const res = await gcalFetch(`${percorsoEventi()}?${qs}`, 'GET');
-      const trovato = ((res && res.items) || []).find(e => e.status !== 'cancelled');
-      id = trovato ? trovato.id : null;
-    }
-    if (id) {
-      try { await gcalFetch(`${percorsoEventi()}/${id}`, 'PATCH', corpo); }
-      catch (e) { if (!nonEsiste(e)) throw e; id = null; }
-    }
-    if (!id) { const ev = await gcalFetch(percorsoEventi(), 'POST', corpo); id = ev && ev.id; }
-    if (!id) return null;
-    scriviJson(LS5.PROM, { ...leggiJson(LS5.PROM, {}), [tipo]: { id, firma } });
-    return id;
-  } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
-}
 
 // ══════════════════════════════════════════════════════════════

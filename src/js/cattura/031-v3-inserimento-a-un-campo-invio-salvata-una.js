@@ -35,12 +35,6 @@ function rigaNuova(title, r, ctx) {
     q: r.subito ? 1 : 2, ctx, persone_menzionate: p ? [p.nome] : [], done: false, da_plaud: false, scheduled_date: giorno, scheduled_time: null,
     macro_area: null, execution_status: 'planned', sync_status: 'pending', settimana_anno: isoWeekStr(new Date(oggi)) };
 }
-async function salvaRapido() {
-  const righe = ($('rapido-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean);
-  if (!righe.length) { $('rapido-testo').focus(); return; }
-  fermaDettatura();
-  if (await aggiungiRighe(righe, { ...ui.rapido })) closeModal('rapidoOverlay');
-}
 // Una riga = una cosa. Restituisce le cose salvate (o null se il salvataggio non riesce).
 async function aggiungiRighe(righe, r) {
   const ctx = state.ctx;

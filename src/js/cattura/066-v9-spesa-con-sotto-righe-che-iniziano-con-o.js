@@ -125,7 +125,6 @@ const _disegnaRapidoV8 = disegnaRapido;
 disegnaRapido = function () { _disegnaRapidoV8(); disegnaAnteprima(); };
 const _apriRapidoV8 = apriRapido;
 apriRapido = function () { _apriRapidoV8(); ui.rapido = { ...ui.rapido, mod: {}, aperta: null }; disegnaAnteprima(); };
-function apriRapidoCon(testo) { apriRapido(); $('rapido-testo').value = testo; disegnaAnteprima(); }
 
 // ─── Salvataggio: senza data va in Tutto (non più oggi); con data e ora va in quel giorno ───
 async function creaPersona(nome) {
@@ -204,17 +203,6 @@ function disegnaAnteprimaCattura() {
 }
 AZIONI['cattura-modifica'] = () => { const t = $('cattura-testo').value; fermaDettatura(); $('cattura-testo').value = ''; allungaCattura(); disegnaAnteprimaCattura(); apriRapidoCon(t); };
 $('cattura-testo').addEventListener('input', disegnaAnteprimaCattura);
-salvaCattura = async function () {
-  const righe = righeCattura();
-  if (!righe.length) { apriRapido(); return; }
-  fermaDettatura();
-  const campo = $('cattura-testo');
-  campo.disabled = true;
-  const nuove = await aggiungiFrasi(vociDaRighe(righe, {}), {});
-  campo.disabled = false;
-  if (nuove) { campo.value = ''; allungaCattura(); disegnaAnteprimaCattura(); }
-  campo.focus();
-};
 
 // ─── ?nuova=<testo>: dopo l'accesso apre il «+» con il testo già interpretato (Comando Rapido «Cicli») ───
 const NUOVA_URL = { PARAM: 'nuova', MAX: 2000, ATTESA_MS: 15000, PASSO_MS: 200 };

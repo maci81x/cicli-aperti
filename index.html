@@ -3838,14 +3838,6 @@ db.channel('cicli-changes')
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
 
-function switchCtx(ctx) {
-  state.ctx = ctx;
-  state.filter_cat = null;
-  state.filter_persona = null;
-  localStorage.setItem(LS.CTX, ctx);
-  localStorage.setItem(LS.CAT_FILTER, '');
-  render();
-}
 
 
 
@@ -4807,25 +4799,6 @@ async function saveGcalTokenToDB() {
   } catch (e) { console.warn('[GCal] salvataggio token:', e.message); localStorage.setItem('gcal_da_salvare', '1'); }
 }
 
-async function ensureGcalCalendar() {
-  if (!isGcalTokenValid()) return;
-  if (gcal.calendarId) return;
-  try {
-    // Cerca calendario esistente
-    const listRes = await gcalFetch('/users/me/calendarList', 'GET');
-    const existing = listRes?.items?.find(c => c.summary === GCAL_CAL_NAME);
-    if (existing) {
-      gcal.calendarId = existing.id;
-    } else {
-      const created = await gcalFetch('/calendars', 'POST', { summary: GCAL_CAL_NAME, timeZone: 'Europe/Rome' });
-      gcal.calendarId = created.id;
-    }
-    localStorage.setItem('gcal_cal_id', gcal.calendarId);
-    await saveGcalTokenToDB();
-  } catch (e) {
-    console.warn('[GCal] ensureCalendar:', e.message);
-  }
-}
 
 async function gcalFetch(path, method, body) {
   if (!isGcalTokenValid()) { rinnovaGcalSilenzioso('richiesta a token scaduto'); return null; }
@@ -6792,32 +6765,6 @@ function htmlFasce(righe, opz) {
 // v2 · APPUNTAMENTI DI GOOGLE CALENDAR (sola lettura)
 // ══════════════════════════════════════════════════════════════
 const hhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-async function caricaEventi(week, year) {
-  const k = settKey(week, year);
-  if (!isGcalTokenValid() || ui.eventi[k]) return ui.eventi[k] || [];
-  ui.eventi[k] = [];   // segnaposto: non richiedere due volte
-  try {
-    const da = getWeekStart(week, year);
-    const a = new Date(da); a.setDate(a.getDate() + 7);
-    const qs = new URLSearchParams({ timeMin: da.toISOString(), timeMax: a.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });
-    const res = await gcalFetch('/calendars/primary/events?' + qs.toString(), 'GET');
-    ui.eventi[k] = ((res && res.items) || []).filter(e => e.status !== 'cancelled').map(e => {
-      const inizio = e.start.dateTime ? new Date(e.start.dateTime) : parseISODate(e.start.date);
-      const fine = e.end && e.end.dateTime ? new Date(e.end.dateTime) : null;
-      return { id: e.id, titolo: e.summary || '(senza titolo)', giorno: toISODate(inizio), ora: e.start.dateTime ? hhmm(inizio) : null,
-        fine: fine ? hhmm(fine) : null, minuti: fine ? Math.max(0, Math.round((fine - inizio) / 60000)) : 0 };
-    });
-    render();
-  } catch (e) {
-    delete ui.eventi[k];
-    console.warn('[GCal] lettura appuntamenti:', e.message);
-  }
-  return ui.eventi[k] || [];
-}
-function eventiDelGiorno(d) {
-  const w = isoWeekParts(d);
-  return (ui.eventi[settKey(w.week, w.year)] || []).filter(e => e.giorno === toISODate(d));
-}
 // 22/10 · un evento «di giornata» (tutto il giorno o di 12 ore o più) non occupa ore
 // e non dà avvisi di sovrapposizione
 const GIORNATA_EVENTO_MIN = 12 * 60;
@@ -7051,16 +6998,6 @@ async function azioneRiattiva(id) {
   showToast('Tornata tra le cose aperte', 'success', { annulla: () => patchCiclo(id, { parcheggiato: true, parcheggiato_at: new Date().toISOString() }) });
 }
 
-async function azioneElimina(id) {
-  const c = ciclo(id);
-  if (!c || !confirm(`Eliminare definitivamente «${c.title}»? Non si può annullare.`)) return;
-  try {
-    await removeCiclo(id);
-    state.cicli = state.cicli.filter(x => x.id !== id);
-    render();
-    showToast('Eliminata', 'info');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
-}
 
 // --- Ripeti ---
 function apriRipeti(id) {
@@ -7723,21 +7660,6 @@ function vistaAltro() {
     </div>`;
 }
 
-function vistaFatte() {
-  const lista = state.cicli.filter(c => c.done).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
-  const seg = [['cose', 'Cose'], ['settimane', 'Settimane']].map(([k, l]) =>
-    `<button type="button" data-act="fatte" data-v="${k}" aria-pressed="${ui.fatte === k}">${l}</button>`).join('');
-  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte${btnAiuto('fatte')}</h1></div></div><div class="seg" role="group" aria-label="Vista" style="margin-bottom:var(--sp-4)">${seg}</div>`;
-  if (ui.fatte === 'settimane') return h + fatteSettimane();
-  if (!lista.length) return h + vuoto('ti-circle-check', 'Ancora niente, inizia da Oggi', 'Ogni cosa che spunti finisce qui, così vedi quanta strada hai fatto.', `<button type="button" class="btn btn-primary btn-sm" data-tab="oggi">Vai a Oggi</button>`);
-  const mesi = new Map();
-  lista.forEach(c => { const d = new Date(c.updated_at || c.created_at); const k = d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }); if (!mesi.has(k)) mesi.set(k, []); mesi.get(k).push(c); });
-  mesi.forEach((items, k) => {
-    h += `<p class="list-head"><span style="text-transform:capitalize">${k}</span><span class="mono">${items.length}</span></p><div class="group">${items.map(c =>
-      riga({ c, fatto: true }, { senzaAzioni: true, lato: `<span class="t-caption">${fmtCorta(new Date(c.updated_at || c.created_at))}</span>` })).join('')}</div>`;
-  });
-  return h;
-}
 
 const MAPPA_PAROLE = [['Subito', 'Q1 · Crisi'], ['Importante', 'Q2 · Qualità'], ['Delega', 'Q3 · Inganno'], ['Lascia stare', 'Q4 · Spreco'], ['Cose aperte', 'Cicli aperti'],
   ['Tutto', 'Armadio'], ['Piano della settimana', 'Business Plan settimanale'], ['Chiudi la settimana', 'Review'], ['Da piazzare', 'Da pianificare'], ['Un giorno', 'Parcheggio'], ['Routine', 'Rituali'], ['Fatte', 'Storico']];
@@ -7954,13 +7876,6 @@ function bpwCambiaSettimana(dir) {
   apriWizard(w.week, w.year);
 }
 
-// Gli appuntamenti arrivano dopo: quando ci sono, ridisegna il riepilogo del wizard.
-function bpwConEventi(week, year) {
-  caricaEventi(week, year).then(() => {
-    if (!$('bpWizOverlay').classList.contains('open') || _bpwWeek !== week || _bpwYear !== year) return;
-    if (_bpwStep === 2) bpwRenderStep2(); else bpwRenderSummary();
-  });
-}
 function bpwMinutiAppuntamenti() {
   if (!_bpwWeek) return 0;
   return GIORNI.reduce((s, _, idx) => s + minutiOccupati(bpDataGiorno(_bpwWeek, _bpwYear, idx)), 0);
@@ -9344,12 +9259,6 @@ function rigaNuova(title, r, ctx) {
     q: r.subito ? 1 : 2, ctx, persone_menzionate: p ? [p.nome] : [], done: false, da_plaud: false, scheduled_date: giorno, scheduled_time: null,
     macro_area: null, execution_status: 'planned', sync_status: 'pending', settimana_anno: isoWeekStr(new Date(oggi)) };
 }
-async function salvaRapido() {
-  const righe = ($('rapido-testo').value || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean);
-  if (!righe.length) { $('rapido-testo').focus(); return; }
-  fermaDettatura();
-  if (await aggiungiRighe(righe, { ...ui.rapido })) closeModal('rapidoOverlay');
-}
 // Una riga = una cosa. Restituisce le cose salvate (o null se il salvataggio non riesce).
 async function aggiungiRighe(righe, r) {
   const ctx = state.ctx;
@@ -9479,10 +9388,6 @@ $('rapido-testo').addEventListener('keydown', e => {
 // v3 · VENERDÌ: È ORA DEL PIANO (giorno e ora in Impostazioni)
 // ══════════════════════════════════════════════════════════════
 ui.pianoProssima = null;   // { k, esiste } per la settimana dopo quella corrente
-function quandoPiano() {
-  const g = parseInt(lsLeggi(LS3.PIANO_GIORNO), 10);
-  return { giorno: g >= 0 && g <= 6 ? g : 4, ora: /^\d{2}:\d{2}$/.test(lsLeggi(LS3.PIANO_ORA) || '') ? lsLeggi(LS3.PIANO_ORA) : '14:00' };
-}
 // dal giorno e ora scelti fino a domenica sera
 function inFinestraPiano(adesso) {
   const { giorno, ora } = quandoPiano(), idx = giornoIdxDi(adesso);
@@ -9497,20 +9402,6 @@ async function caricaPianoProssima() {
   ui.pianoProssima = { k, esiste: true };   // finché non si sa, niente banner
   try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan }; render(); }
   catch (e) { ui.pianoProssima = null; }
-}
-// Due stati: senza piano per la settimana dopo → «Prepara»; con il piano ma non ancora inviato → «Invia il piano».
-function bannerPiano() {
-  if (!inFinestraPiano(new Date()) || lsLeggi(LS3.PIANO_CHIUSO) === oggiLocale()) return '';
-  caricaPianoProssima();
-  if (!ui.pianoProssima) return '';
-  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
-  const chiudi = `<button type="button" class="btn btn-icon" data-act="banner-chiudi" aria-label="Chiudi per oggi" data-tip="Chiudi per oggi"><i class="ti ti-x"></i></button>`;
-  if (!ui.pianoProssima.esiste) return `<section class="banner-piano" aria-label="Piano della settimana"><i class="ti ti-calendar-plus"></i>
-    <div><b>È ora del piano della settimana</b><div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="banner-piano">Prepara la settimana prossima</button></div></div>${chiudi}</section>`;
-  if (inviatoIl(n.week, n.year)) return '';
-  return `<section class="banner-piano" aria-label="Piano della settimana"><i class="ti ti-send"></i>
-    <div><b>Il piano della prossima settimana è pronto</b><div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="banner-invia">Invia il piano</button>
-      <button type="button" class="btn btn-secondary btn-sm" data-act="banner-piano">Modifica</button></div></div>${chiudi}</section>`;
 }
 function apriWizardProssima() {
   const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
@@ -9639,11 +9530,6 @@ function sequenzaGiorno(righe, d) {
   ].sort((a, b) => a.ora.localeCompare(b.ora) || peso[a.tipo] - peso[b.tipo]);
   return { conOra, senzaOra: righe.filter(r => !r.ora) };
 }
-function orarioEvento(e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : 'tutto il giorno'; }
-function rigaEvento(e) {
-  return `<div class="evt-riga"><span class="evt-ico" aria-hidden="true"><i class="ti ti-calendar-event"></i></span>
-    <span class="evt-main"><span class="item-title">${escHtml(e.titolo)}</span><span class="item-meta"><span class="mono">${orarioEvento(e)}</span><span class="sep">·</span><span>Google Calendar</span></span></span></div>`;
-}
 function oraFine(ora, min) { const [h, m] = ora.split(':').map(Number), t = h * 60 + m + min; return `${String(Math.floor(t / 60) % 24).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; }
 // Cuscinetto · 13:00 · 1h — in Oggi con [Urgenza arrivata] e [Riempi]
 function rigaCuscinetto(item, opz) {
@@ -9659,10 +9545,6 @@ function rigaCuscinetto(item, opz) {
 // v4 · CUSCINETTI: nel wizard, Riempi, Urgenza arrivata
 // ══════════════════════════════════════════════════════════════
 let _cuscN = 0;
-function bpwAggiungiCusc(giorno, quando, silenzioso) {
-  _bpwCusc.set('n' + (++_cuscN), { id: null, giorno, ora: quando === 'fine' ? CUSC.FINE : CUSC.META, durata: CUSC.DURATA });
-  if (!silenzioso) bpwRenderStep2();
-}
 function bpwCambiaCusc(k, patch) {
   const v = _bpwCusc.get(k);
   if (!v) return;
@@ -9906,12 +9788,6 @@ function slotBlocco(c) {
   return { data, ora, durata, completo: !!(data && ora && durata) };
 }
 const nonEsiste = e => /not found|deleted|404|410/i.test(String(e && e.message));
-function corpoEvento(c, slot) {
-  const inizio = new Date(`${slot.data}T${slot.ora}:00`), fine = new Date(inizio.getTime() + slot.durata * 60000);
-  return { summary: c.title, description: `Cicli Aperti · appuntamento con te stesso\n${APP_URL}#ciclo=${c.id}`,
-    start: { dateTime: `${slot.data}T${slot.ora}:00`, timeZone: 'Europe/Rome' },
-    end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' } };
-}
 // 27/10 · ogni cosa sul suo calendario: personali sul Privato (se si può scrivere), le altre su quello di scrittura
 function percorsoEventi(c) { return `/calendars/${encodeURIComponent(calDellaCosa(c))}/events`; }
 // Aggiorna l'evento esistente. false = su Google non c'è più (l'id viene tolto dalla cosa).
@@ -9994,18 +9870,6 @@ async function aggiornaBlocco(id) {
   } catch (e) { console.warn('[GCal] aggiorna blocco:', e.message); }
 }
 function allineaBlocchi() { bpItemsValidi().forEach(i => { if (bpCiclo(i).calendar_event_id) aggiornaBlocco(i.ciclo_id); }); }
-// Chiusa: se l'appuntamento era ancora da venire si toglie; se è passato resta, con la spunta nel titolo.
-async function chiudiBlocco(c) {
-  if (!c || !c.calendar_event_id || !isGcalTokenValid()) return;
-  try {
-    await ensureGcalCalendar();
-    if (!gcal.calendarId) return;
-    const slot = slotBlocco(c);
-    const futuro = slot.completo && new Date(`${slot.data}T${slot.ora}:00`) > new Date();
-    if (futuro) await togliBlocco(c, true);
-    else await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + c.title });
-  } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi blocco:', e.message); }
-}
 
 // ══════════════════════════════════════════════════════════════
 // v4 · INVIA IL PIANO AL COACH (PDF: condivisione su telefono, email altrove)
@@ -10056,17 +9920,6 @@ async function inviaPiano() {
   fatto('PDF scaricato: allegalo all\'email');
 }
 function apriEmail(url) { window.location.href = url; }
-// Dal banner del venerdì: porta Pianifica sulla settimana dopo e apre l'invio.
-async function inviaPianoProssima() {
-  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);
-  state.week = n.week; state.year = n.year;
-  localStorage.setItem(LS.WEEK, state.week);
-  ui.giorno = 0;
-  await reloadWeekData();
-  await caricaEventi(state.week, state.year);
-  vai('pianifica', { pian: 'settimana' });
-  setTimeout(apriInvia, 200);
-}
 
 // ══════════════════════════════════════════════════════════════
 // v4 · CHIUDI LA SETTIMANA: il perché, e cosa cambiare
@@ -10459,17 +10312,6 @@ async function leggiEventi(da, a, calendari) {
 }
 
 ui.eventiCarico = {};
-caricaEventi = function (week, year) {
-  const k = settKey(week, year);
-  if (!isGcalTokenValid()) return Promise.resolve(ui.eventi[k] || []);
-  if (ui.eventiCarico[k]) return ui.eventiCarico[k];
-  if (ui.eventi[k]) return Promise.resolve(ui.eventi[k]);
-  const da = getWeekStart(week, year), a = new Date(da); a.setDate(a.getDate() + 7);
-  ui.eventiCarico[k] = leggiEventi(da, a).then(lista => { ui.eventi[k] = lista; render(); return lista; })
-    .catch(e => { console.warn('[GCal] lettura appuntamenti:', e.message); return []; })
-    .finally(() => { delete ui.eventiCarico[k]; });
-  return ui.eventiCarico[k];
-};
 function eventiSettimanaDi(d) { const w = isoWeekParts(d); return ui.eventi[settKey(w.week, w.year)] || []; }
 // Gli appuntamenti del giorno, senza la routine del mattino (quella va in Routine)
 eventiDelGiorno = function (d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); };
@@ -10479,42 +10321,10 @@ function arcoRoutine(lista) {
   return { da: lista.map(e => e.ora).sort()[0], a: lista.map(e => e.fine || e.ora).sort().slice(-1)[0] };
 }
 
-rigaEvento = function (e) {
-  const nomeCal = (CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || 'Google Calendar';
-  const dati = [`<span class="mono">${orarioEvento(e)}</span>`, `<span>${nomeCal}</span>`];
-  const sovrapposto = coseSovrapposte(e);
-  const note = [
-    sovrapposto.length ? `<span class="evt-nota"><i class="ti ti-alert-triangle"></i><span>si sovrappone a ${escHtml(sovrapposto[0])}${sovrapposto.length > 1 ? ` e altre ${sovrapposto.length - 1}` : ''}</span></span>` : '',
-    e.orarioDiverso ? `<span class="evt-nota evt-diverso" data-tip="Nel titolo c'è ${e.oraTitolo}, l'evento è alle ${e.ora}"><i class="ti ti-clock-exclamation"></i><span>orario nel titolo diverso (${e.oraTitolo})</span></span>` : ''];
-  const sovr = note.join('');
-  const sposta = e.id && e.ora && !e.routine ? ` data-act="evt-sposta" data-evt="${esc(e.id)}" data-cal="${esc(e.calId || '')}" role="button" tabindex="0" aria-label="Sposta l'appuntamento ${esc(e.titolo)}"` : '';
-  return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}"${sposta}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}><span class="evt-ico" aria-hidden="true"><span class="evt-cerchio"></span></span>
-    <span class="evt-main"><span class="item-title">${e.coach ? '<span class="tag-coach">Coach</span>' : e.prepCoach ? '<span class="tag-coach tag-prep">Preparazione coach</span>' : ''}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
-};
 
 // Calendario di scrittura: prima per id (Impostazioni, predefinito il primo «Cicli Aperti — Battle Plan»),
 // poi per nome, e si crea solo se non ne esiste nessuno.
 const calScelto = () => (lsLeggi(LS5.CAL_SCRITTURA) || '').trim() || GCAL_CAL_PREFERITO;
-ensureGcalCalendar = async function () {
-  if (!isGcalTokenValid()) return;
-  const scelto = calScelto();
-  if (gcal.calendarId === scelto && ui.calVerificato) return;
-  try {
-    let id = null;
-    try { const c = await gcalFetch(`/calendars/${encodeURIComponent(scelto)}`, 'GET'); if (c && c.id) id = c.id; } catch (_) { id = null; }
-    if (!id) {
-      const lista = await gcalFetch('/users/me/calendarList', 'GET');
-      const esiste = ((lista && lista.items) || []).find(c => c.summary === GCAL_CAL_NAME);
-      if (esiste) id = esiste.id;
-      else { const creato = await gcalFetch('/calendars', 'POST', { summary: GCAL_CAL_NAME, timeZone: 'Europe/Rome' }); id = creato && creato.id; }
-    }
-    if (!id) return;
-    gcal.calendarId = id;
-    ui.calVerificato = true;
-    localStorage.setItem('gcal_cal_id', id);
-    await saveGcalTokenToDB();
-  } catch (e) { console.warn('[GCal] calendario di scrittura:', e.message); }
-};
 
 // ══════════════════════════════════════════════════════════════
 // v5 · CUSCINETTI NEGLI SPAZI LIBERI (non più a orario fisso)
@@ -10615,32 +10425,6 @@ function corpoPromemoria(tipo) {
     summary: 'Esercizio Q2', description: `Scegli le attività importanti dei prossimi 3 mesi e fissale in agenda.\n${APP_URL}`,
     start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: promemoria, extendedProperties: { private: { cicli_aperti: 'q2' } } } };
-}
-// forza = anche se la firma (giorno, ora, durata, calendario) non è cambiata
-async function sincronizzaPromemoria(tipo, forza) {
-  if (!isGcalTokenValid()) return null;
-  await ensureGcalCalendar();
-  if (!gcal.calendarId) return null;
-  const tutti = leggiJson(LS5.PROM, {}), salvato = tutti[tipo] || {};
-  const { firma, corpo } = corpoPromemoria(tipo);
-  if (!forza && salvato.id && salvato.firma === firma) return salvato.id;
-  try {
-    let id = salvato.id || null;
-    if (!id) {
-      const qs = new URLSearchParams({ privateExtendedProperty: `cicli_aperti=${tipo}`, maxResults: '5', showDeleted: 'false' });
-      const res = await gcalFetch(`${percorsoEventi()}?${qs}`, 'GET');
-      const trovato = ((res && res.items) || []).find(e => e.status !== 'cancelled');
-      id = trovato ? trovato.id : null;
-    }
-    if (id) {
-      try { await gcalFetch(`${percorsoEventi()}/${id}`, 'PATCH', corpo); }
-      catch (e) { if (!nonEsiste(e)) throw e; id = null; }
-    }
-    if (!id) { const ev = await gcalFetch(percorsoEventi(), 'POST', corpo); id = ev && ev.id; }
-    if (!id) return null;
-    scriviJson(LS5.PROM, { ...leggiJson(LS5.PROM, {}), [tipo]: { id, firma } });
-    return id;
-  } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -10851,8 +10635,6 @@ togliBlocco = async function (c, silenzioso) {
 };
 const _aggiornaBloccoV4 = aggiornaBlocco;
 aggiornaBlocco = id => bloccoEsterno(ciclo(id)) ? Promise.resolve() : _aggiornaBloccoV4(id);
-const _chiudiBloccoV4 = chiudiBlocco;
-chiudiBlocco = c => bloccoEsterno(c) ? Promise.resolve() : _chiudiBloccoV4(c);
 
 // ══════════════════════════════════════════════════════════════
 // v5 · DELEGA CHE TORNA INDIETRO
@@ -10885,19 +10667,6 @@ function chiediOrigineSubito(c) {
   $('subito-testo').value = '';
   $('subitoOverlay').classList.add('open');
   setTimeout(() => $('subito-testo').focus(), 150);
-}
-async function creaDaSubito() {
-  const s = ui.subito, t = ($('subito-testo').value || '').trim();
-  if (!s) return;
-  if (!t) { $('subito-testo').focus(); return; }
-  try {
-    const nuova = await upsertCiclo({ ...rigaNuova(t, { subito: false }, s.ctx), cat: s.cat || (s.ctx === 'personale' ? 'salute' : 'management'), macro_area: s.macro_area || null, note: `Per evitare che si ripeta: «${s.titolo}»` });
-    if (nuova) state.cicli = [nuova, ...state.cicli];
-    ui.subito = null;
-    closeModal('subitoOverlay');
-    render();
-    showToast('Aggiunta a Tutto · Importante', 'success', nuova ? { annulla: () => apriDettaglio(nuova.id), etichetta: 'Dettagli' } : undefined);
-  } catch (e) { showToast('Non aggiunta: ' + e.message, 'error'); }
 }
 const _azioneFattoV4 = azioneFatto;
 azioneFatto = async function (id) {
@@ -11125,27 +10894,6 @@ async function eventoMaster(calId, serie) {
 }
 const quotidianaDaPiuDi30 = m => !!m && (m.recurrence || []).some(r => /FREQ=DAILY/.test(r)) && !!m.start
   && (Date.now() - new Date(m.start.dateTime || m.start.date).getTime()) > 30 * 864e5;
-async function cercaCicliInCalendario() {
-  if (!isGcalTokenValid()) return;
-  const cur = bpSettimanaCorrente(), ev = await caricaEventi(cur.week, cur.year);
-  const scelte = leggiJson(LS5.CICLI_CAL, {});
-  const perSerie = new Map();
-  ev.forEach(e => {
-    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach || e.app || eventoCollegato(e)) return;   // gli eventi dell'app non sono «cicli nel calendario»
-    const k = e.serie || e.id;
-    if (scelte[k]) return;
-    perSerie.set(k, [...(perSerie.get(k) || []), e]);
-  });
-  const out = [];
-  for (const [k, lista] of perSerie) {
-    const e = lista[0];
-    if (PAROLE_CICLO.test(normTitolo(e.titolo))) { out.push({ k, e, perche: 'parola' }); continue; }
-    if (e.serie && new Set(lista.map(x => x.giorno)).size >= 3 && quotidianaDaPiuDi30(await eventoMaster(e.calId, e.serie))) out.push({ k, e, perche: 'ogni giorno' });
-  }
-  ui.calCicli = out;
-  render();
-  if ($('calCicliOverlay').classList.contains('open')) disegnaCalCicli();
-}
 function disegnaCalCicli() {
   const lista = ui.calCicli || [];
   $('calc-lista').innerHTML = lista.length ? lista.map(({ k, e, perche }) => `<div class="recon-riga"><b>${escHtml(e.titolo)}</b>
@@ -11652,17 +11400,6 @@ document.addEventListener('keydown', e => {
 
 // ─── 3. CAMPO FISSO DEL TELEFONO ─────────────────────────────
 function righeCattura() { return righeCampo($('cattura-testo').value); }   // 24/10 · con le righe vuote: chiudono un'intestazione («Mattina 26»)
-async function salvaCattura() {
-  const righe = righeCattura();
-  if (!righe.length) { apriRapido(); return; }       // campo vuoto: [+] apre il foglio con Subito / Oggi / Con…
-  fermaDettatura();
-  const campo = $('cattura-testo');
-  campo.disabled = true;
-  const nuove = await aggiungiRighe(righe, { subito: false, oggi: false, persona: null });
-  campo.disabled = false;
-  if (nuove) { campo.value = ''; allungaCattura(); }
-  campo.focus();
-}
 function allungaCattura() {
   const t = $('cattura-testo');
   t.style.height = 'auto';
@@ -12471,16 +12208,6 @@ function testoQuandoCoach() {
   return e ? `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> <span class="cc-nota">(${nota})</span>`
     : `Prossimo incontro: da fissare <span class="cc-nota">(${nota})</span>`;
 }
-function cardCoach() {
-  caricaCoach();
-  const voci = vociCoach(), fatte = voci.filter(v => v.ok).length;
-  const quando = testoQuandoCoach();
-  return `<section class="coach-card" aria-label="Per il coach">
-    <div class="cc-testa"><i class="ti ti-user-check" aria-hidden="true"></i><div><h2>Per il coach</h2><p>${quando}</p></div><span class="mono cc-n">${fatte}/${voci.length}</span></div>
-    <ul class="cc-lista">${voci.map(v => `<li class="${v.ok ? 'ok' : ''}"><span class="cc-check" aria-hidden="true">${v.ok ? SVG_SPUNTA : ''}</span>
-      <div><b>${v.l}</b><span>${escHtml(v.d)}</span></div><span class="sr-only">${v.ok ? 'fatto' : 'da fare'}</span>${v.az}</li>`).join('')}</ul>
-  </section>`;
-}
 // Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
 const _bannerCoachV5 = bannerCoach;
 bannerCoach = function () {
@@ -12559,20 +12286,6 @@ function salvaCacheEventi() {
     ui.eventiDaCache.add(k);
   });
 })();
-const _caricaEventiV6 = caricaEventi;
-caricaEventi = function (week, year) {
-  const k = settKey(week, year);
-  if (isGcalTokenValid() && ui.eventiDaCache.has(k) && !ui.eventiCarico[k]) {
-    // si rilegge da Google senza svuotare: fino alla risposta restano quelli della copia
-    const copia = ui.eventi[k];
-    delete ui.eventi[k];
-    const p = _caricaEventiV6(week, year);
-    if (!ui.eventi[k]) ui.eventi[k] = copia;
-    return p.then(lista => { if (ui.eventi[k] !== copia) { ui.eventiDaCache.delete(k); salvaCacheEventi(); } return lista; });
-  }
-  const p = _caricaEventiV6(week, year);
-  return Promise.resolve(p).then(lista => { if (settimaneDaTenere().includes(k) && isGcalTokenValid()) salvaCacheEventi(); return lista; });
-};
 // scollegando, la copia locale va via
 const _disconnectGcalV6 = disconnectGcal;
 disconnectGcal = function () { lsScrivi(GCAL_CACHE.LS, null); ui.eventi = {}; ui.eventiDaCache = new Set(); _disconnectGcalV6(); render(); };
@@ -12865,7 +12578,6 @@ const _disegnaRapidoV8 = disegnaRapido;
 disegnaRapido = function () { _disegnaRapidoV8(); disegnaAnteprima(); };
 const _apriRapidoV8 = apriRapido;
 apriRapido = function () { _apriRapidoV8(); ui.rapido = { ...ui.rapido, mod: {}, aperta: null }; disegnaAnteprima(); };
-function apriRapidoCon(testo) { apriRapido(); $('rapido-testo').value = testo; disegnaAnteprima(); }
 
 // ─── Salvataggio: senza data va in Tutto (non più oggi); con data e ora va in quel giorno ───
 async function creaPersona(nome) {
@@ -12944,17 +12656,6 @@ function disegnaAnteprimaCattura() {
 }
 AZIONI['cattura-modifica'] = () => { const t = $('cattura-testo').value; fermaDettatura(); $('cattura-testo').value = ''; allungaCattura(); disegnaAnteprimaCattura(); apriRapidoCon(t); };
 $('cattura-testo').addEventListener('input', disegnaAnteprimaCattura);
-salvaCattura = async function () {
-  const righe = righeCattura();
-  if (!righe.length) { apriRapido(); return; }
-  fermaDettatura();
-  const campo = $('cattura-testo');
-  campo.disabled = true;
-  const nuove = await aggiungiFrasi(vociDaRighe(righe, {}), {});
-  campo.disabled = false;
-  if (nuove) { campo.value = ''; allungaCattura(); disegnaAnteprimaCattura(); }
-  campo.focus();
-};
 
 // ─── ?nuova=<testo>: dopo l'accesso apre il «+» con il testo già interpretato (Comando Rapido «Cicli») ───
 const NUOVA_URL = { PARAM: 'nuova', MAX: 2000, ATTESA_MS: 15000, PASSO_MS: 200 };
@@ -13382,8 +13083,6 @@ async function caricaEventiFatti() {
   render();
 }
 
-// si spunta un appuntamento con un orario (non quelli di giornata, non la routine)
-function eventoSpuntabile(e) { return !!(e && e.id && !e.routine && !eGiornata(e)); }
 function eventoFatto(e) { return !!(e && e.id && (state.evtFatti || {})[e.id]); }
 function appuntamentiSpuntabili(d) { return typeof gcalEraCollegato === 'function' && gcalEraCollegato() ? eventiDelGiorno(d).filter(eventoSpuntabile) : []; }
 // Chiudi la settimana: le cose del piano più gli appuntamenti spuntabili di quella settimana
@@ -13452,35 +13151,6 @@ function apriFoglioEvento(id) {
   if (!eventoPerId(id)) return;
   $('evtOverlay').classList.add('open');
   disegnaFoglioEvento(id);
-}
-function disegnaFoglioEvento(id) {
-  const e = eventoPerId(id), corpo = $('evt-corpo');
-  if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
-  $('evt-titolo').textContent = e.titolo;
-  const spunta = eventoSpuntabile(e), fatto = spunta && eventoFatto(e);
-  const chi = e.orgIo ? '' : ` · lo organizza ${escHtml(e.org || 'un\'altra persona')}`;
-  const riga = (act, ico, testo, sotto) => `<button type="button" class="riga-link" data-act="${act}" data-evt="${esc(e.id)}"><i class="ti ${ico}"></i><span>${testo}${sotto ? `<small>${sotto}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>`;
-  corpo.innerHTML = `<p class="t-label muted evt-quando">${fmtGiornoLungo(parseISODate(e.giorno))} · <span class="mono">${orarioEvento(e)}</span> · calendario ${escHtml(nomeCalendario(e))}${chi}</p>
-    <div class="group">
-      ${spunta ? riga('evt-fatto', fatto ? 'ti-circle-check' : 'ti-circle', fatto ? 'Fatto' : 'Segna come fatto', fatto ? 'tocca per toglierlo' : 'solo nell\'app, non su Google') : ''}
-      <a class="riga-link" href="${esc(linkEvento(e))}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i><span>Apri in Google Calendar</span><span></span><i class="ti ti-chevron-right"></i></a>
-      ${riga('evt-foglio-sposta', 'ti-arrows-move', 'Sposta', e.ricorrente ? 'solo questa volta o anche le prossime' : '')}
-      ${riga('evt-in-elenco', 'ti-list-check', 'È una cosa da fare', 'mettila nell\'elenco')}
-    </div>`;
-}
-async function eventoInElenco(id) {
-  const e = eventoPerId(id);
-  if (!e) return;
-  const ctx = e.cal === 'privato' ? 'personale' : 'lavoro';
-  const gia = state.cicli.find(c => !c.done && normTitolo(c.title) === normTitolo(e.titolo));
-  if (gia) { closeModal('evtOverlay'); showToast('È già tra le cose da fare', 'info', { annulla: () => apriDettaglio(gia.id), etichetta: 'Dettagli' }); return; }
-  try {
-    const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: `Dal calendario ${nomeCalendario(e)}: «${e.titoloOrig || e.titolo}» del ${fmtGgMm(e.giorno)}` });
-    if (c) state.cicli = [c, ...state.cicli];
-    closeModal('evtOverlay');
-    render();
-    showToast('Messa tra le cose da fare, come Importante', 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Dettagli' } : undefined);
-  } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
 }
 AZIONI['evt-apri'] = el => apriFoglioEvento(el.dataset.evt);
 AZIONI['evt-fatto'] = el => segnaEvento(el.dataset.evt, !eventoFatto(eventoPerId(el.dataset.evt)));
@@ -13615,17 +13285,6 @@ aggiornaBlocco = async function (id) {
     await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', corpoAvviso(c, slot));
   } catch (e) { console.warn('[GCal] aggiorna avviso:', e.message); }
 };
-// chiusa: l'avviso si cancella sempre (il blocco di «Blocca in agenda» fa come prima)
-const _chiudiBloccoV9 = chiudiBlocco;
-chiudiBlocco = async function (c) {
-  if (!c || !c.calendar_event_id || !isGcalTokenValid()) return;
-  try {
-    await ensureGcalCalendar();
-    if (!gcal.calendarId) return;
-    if (eAvviso(await eventoDellApp(c))) { await togliBlocco(ciclo(c.id) || c, true); return; }
-  } catch (e) { console.warn('[GCal] chiudi avviso:', e.message); return; }
-  return _chiudiBloccoV9(c);
-};
 
 // Ogni spostamento passa da patchCiclo o upsertOverride: dopo un attimo l'evento si allinea (una volta sola)
 const _seguiTimer = new Map();
@@ -13686,23 +13345,7 @@ vociDaRighe = function (righe, r) {
   const no = (r && r.noAvviso) || [];
   return _vociDaRigheV9(righe, r).map(v => ({ ...v, avvisa: puoAvvisare(v) && !no.includes(v.testo) }));
 };
-const _disegnaAnteprimaV9 = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaV9();
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  document.querySelectorAll('#rapido-anteprima .rap-voce[data-i]').forEach(box => {
-    const v = voci[+box.dataset.i], h = spuntaAvviso(v, `data-avvisa="${box.dataset.i}"`);
-    if (h) box.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', h);
-  });
-};
 ui.catturaNoAvviso = false;
-const _disegnaAnteprimaCatturaV9 = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaV9();
-  const box = $('cattura-anteprima'), voci = vociDaRighe(righeCattura(), { noAvviso: [] }).filter(puoAvvisare);
-  if (!box || box.hidden || !voci.length) return;
-  box.insertAdjacentHTML('beforeend', `<label class="check rap-avvisa"><input type="checkbox" id="cattura-avvisa"${ui.catturaNoAvviso ? '' : ' checked'}><span>Avvisami ${voci.length === 1 ? 'alle ' + voci[0].ora : 'all\'ora detta'}</span></label>`);
-};
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'cattura-avvisa') { ui.catturaNoAvviso = !t.checked; return; }
@@ -13717,14 +13360,6 @@ $('rapido-testo').addEventListener('input', () => disegnaAnteprima());
 $('cattura-testo').addEventListener('input', () => disegnaAnteprimaCattura());
 const _apriRapidoV9 = apriRapido;
 apriRapido = function () { ui.rapido = { ...(ui.rapido || {}), noAvviso: [] }; _apriRapidoV9(); };
-// il campo del telefono: la sua spunta vale per tutte le righe con un'ora
-const _salvaCatturaV9 = salvaCattura;
-salvaCattura = async function () {
-  const no = ui.catturaNoAvviso;
-  ui._catturaNoAvviso = no;
-  try { return await _salvaCatturaV9.apply(this, arguments); }
-  finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; }
-};
 // dopo il salvataggio: un avviso per ogni cosa con giorno e ora e la spunta attiva
 const _aggiungiFrasiV9 = aggiungiFrasi;
 aggiungiFrasi = async function (voci, r) {
@@ -14403,26 +14038,6 @@ aggiungiFrasi = async function (voci, r) {
 };
 
 // ─── Il riepilogo prima di salvare: «c'è già» / «simile», e «Vedi anche» per i parenti ───
-const _disegnaAnteprimaDopp = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaDopp();
-  const box = $('rapido-anteprima');
-  if (!box || box.hidden) return;
-  vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido).forEach((v, i) => {
-    const m = trovaDoppione(v.title), voce = box.querySelector(`.rap-voce[data-i="${i}"]`);
-    if (!m || !voce) return;
-    if (forte(m.livello)) voce.querySelector('.rap-sintesi > span').insertAdjacentHTML('afterend', etichettaDopp(m));
-    else voce.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', suggerimentoParente(m));
-  });
-};
-const _disegnaAnteprimaCatturaDopp = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaDopp();
-  const box = $('cattura-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCattura(), {});
-  box.querySelectorAll('.ca-voci > span[class^="p-q"]').forEach((el, i) => { const m = voci[i] && trovaDoppione(voci[i].title); if (m && forte(m.livello)) el.insertAdjacentHTML('beforeend', ' ' + etichettaDopp(m)); });
-};
 
 // ─── Plaud: le cose che ci sono già partono senza spunta, con «c'è già» (si possono riattivare) ───
 const _preparaPlaudDopp = preparaPlaud;
@@ -14454,10 +14069,6 @@ eventoInElenco = async function (id) {
 // ─── Altro → Doppioni: i gruppi tra le cose aperte, «Unisci» e «Non sono doppioni» ───
 ui.doppTieni = {};
 const doppioniNo = () => leggiJson(DOPP.LS_NO, []);
-function gruppiAperti() {
-  const no = new Set(doppioniNo());
-  return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
-}
 const TIPO_GRUPPO = { uguali: 'Uguali', simili: 'Simili', 'da guardare': 'Da guardare' };
 function rigaDopp(c, k, tieni) {
   const passi = state.cicli.filter(p => p.parent_id === c.id && !p.done).length;
@@ -14489,31 +14100,6 @@ const campiUnione = () => ['note', 'done', 'chiuso_at', 'execution_status', 'per
 function notaUnione(c) {
   const date = [`creata il ${fmtGgMm(giornoIso(c.created_at))}`, c.pianificato_data ? `giorno ${fmtGgMm(c.pianificato_data)}` : '', c.due_date ? `scadenza ${fmtGgMm(c.due_date)}` : '', c.delega_controllo ? `controllo ${fmtGgMm(c.delega_controllo)}` : ''].filter(Boolean).join(', ');
   return `— Unita: «${c.title}» (${date})${c.note ? '\n' + c.note : ''}`;
-}
-async function unisciGruppo(k) {
-  const g = gruppiAperti().find(x => x.chiave === k);
-  if (!g) return;
-  const tieniId = g.cose.some(c => c.id === ui.doppTieni[k]) ? ui.doppTieni[k] : g.cose[0].id;
-  const tieni = ciclo(tieniId), altre = g.cose.map(c => ciclo(c.id)).filter(c => c && c.id !== tieniId && !c.done);
-  if (!tieni || !altre.length) return;
-  const ids = altre.map(c => c.id);
-  const passi = state.cicli.filter(p => ids.includes(p.parent_id));
-  const prima = [tieni, ...altre, ...passi].map(c => ({ id: c.id, campi: campi(c, campiUnione()) }));
-  let assegnazioni = [];
-  try {
-    const conDelega = altre.find(c => c.delega_persona_id);
-    await patchCiclo(tieni.id, { note: [tieni.note, ...altre.map(notaUnione)].filter(Boolean).join('\n\n'),
-      persone_menzionate: unici([...(tieni.persone_menzionate || []), ...altre.flatMap(c => c.persone_menzionate || [])]),
-      ...(state.delegaColsOk && !tieni.delega_persona_id && conDelega ? { delega_persona_id: conDelega.delega_persona_id, delega_controllo: conDelega.delega_controllo } : {}) });
-    for (const p of passi) await patchCiclo(p.id, { parent_id: tieni.id });
-    const { data: ass } = await db.from('assegnazioni').select('id,ciclo_id').in('ciclo_id', ids);
-    assegnazioni = ass || [];
-    if (assegnazioni.length) await db.from('assegnazioni').update({ ciclo_id: tieni.id }).in('id', assegnazioni.map(a => a.id));
-    const ora = new Date().toISOString();
-    for (const c of altre) await patchCiclo(c.id, { done: true, chiuso_at: ora, execution_status: 'done', note: `Unita a «${tieni.title}»${c.note ? '\n\n' + c.note : ''}` });
-  } catch (err) { showToast('Unione interrotta: ' + err.message, 'error'); render(); return; }
-  render();
-  showToast(`Unite in «${tieni.title}»`, 'success', { annulla: () => annullaUnione(prima, assegnazioni) });
 }
 async function annullaUnione(prima, assegnazioni) {
   try {
@@ -15449,38 +15035,6 @@ rigaDaVoce = async function (v, r, ctx) {
   const riga = await _rigaDaVocePr.apply(this, arguments);
   return v && v.cinque && state.ritualiColsOk ? { ...riga, durata_minuti: PRINC.BREVE_MIN } : riga;
 };
-const _disegnaAnteprimaPr = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaPr();
-  const box = $('rapido-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  box.querySelectorAll('.rap-voce[data-i]').forEach(el => {
-    const i = +el.dataset.i, v = voci[i];
-    if (!v) return;
-    const sintesi = el.querySelector('.rap-sintesi');
-    if (!sintesi) return;
-    let extra = '';
-    if (v.vaga) extra += `<p class="rap-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span></p>`;
-    if (v.q !== 3) extra += `<div class="rap-breve"><button type="button" class="chip" data-act="rap-cinque" data-i="${i}" aria-pressed="${!!v.cinque}"><i class="ti ti-clock-bolt"></i>5 min</button>
-      ${v.breve ? `<button type="button" class="btn btn-secondary btn-sm" data-act="rap-fallaora" data-i="${i}"><i class="ti ti-player-play"></i>Falla ora</button><span class="t-caption muted">Ci vogliono pochi minuti? Falla adesso.</span>` : ''}</div>`;
-    sintesi.insertAdjacentHTML('afterend', extra);
-  });
-};
-const _disegnaAnteprimaCatturaPr = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaPr();
-  const box = $('cattura-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCattura(), {});
-  const spans = box.querySelectorAll('.ca-voci > span[class^="p-q"]');
-  spans.forEach((el, i) => { if (voci[i] && voci[i].vaga) el.insertAdjacentHTML('beforeend', ' <span class="ca-vaga">· troppo generica: cosa, con chi, quanto?</span>'); });
-  if (voci.length === 1 && voci[0].breve) {
-    const mod = box.querySelector('[data-act="cattura-modifica"]');
-    const b = '<button type="button" class="btn btn-secondary btn-sm ca-falla" data-act="ca-fallaora"><i class="ti ti-player-play"></i>Falla ora</button>';
-    if (mod) mod.insertAdjacentHTML('beforebegin', b); else box.insertAdjacentHTML('beforeend', b);
-  }
-};
 AZIONI['rap-cinque'] = el => {
   const v = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido)[+el.dataset.i];
   if (!v) return;
@@ -15518,20 +15072,6 @@ salvaRapido = async function () {
   offriFallaOraDopo(voci, idsPrima);
   return r;
 };
-const _salvaCatturaPr = salvaCattura;
-salvaCattura = async function () {
-  const voci = vociDaRighe(righeCattura(), {});
-  const idsPrima = new Set(state.cicli.map(c => c.id));
-  const r = await _salvaCatturaPr.apply(this, arguments);
-  offriFallaOraDopo(voci, idsPrima);
-  return r;
-};
-function offriFallaOraDopo(voci, idsPrima) {
-  if (voci.length !== 1 || !voci[0].breve || ui.fallaOra) return;
-  const c = state.cicli.find(x => !idsPrima.has(x.id) && !x.parent_id && x.title === voci[0].title);
-  if (!c) return;
-  setTimeout(() => showToast('Ci vogliono pochi minuti?', 'info', { annulla: () => avviaFallaOra({ id: c.id, voce: voci[0] }), etichetta: 'Falla ora' }), 250);
-}
 
 // ─── Il timer di 5 minuti ───
 document.body.insertAdjacentHTML('beforeend', `<div class="falla-ora" id="fallaOra" role="region" aria-label="Falla ora" hidden></div>`);
@@ -16946,8 +16486,6 @@ eventiDelGiorno = function (d) { return _eventiDelGiornoV11(d).filter(e => !eNas
 const _routineDelGiornoV11 = routineDelGiorno;
 routineDelGiorno = function (d) { return _routineDelGiornoV11(d).filter(e => !eNascosto(e)); };
 function figlieDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && eFiglie(e) && !eNascosto(e)); }
-const _eventoSpuntabileV11 = eventoSpuntabile;
-eventoSpuntabile = function (e) { return _eventoSpuntabileV11(e) && !eFiglie(e) && !eNascosto(e); };
 
 // la riga di un impegno delle figlie: grigia, con l'etichetta
 function rigaFiglie(e) {
@@ -16965,24 +16503,6 @@ vistaOggi = function () {
 };
 
 // --- il foglio dell'appuntamento: nascondi / togli ---
-const _disegnaFoglioEventoV11 = disegnaFoglioEvento;
-disegnaFoglioEvento = function (id) {
-  _disegnaFoglioEventoV11(id);
-  const e = eventoPerId(id), corpo = $('evt-corpo');
-  if (!e || !corpo) return;
-  if (eFiglie(e)) {
-    const q = corpo.querySelector('.evt-quando');
-    if (q) q.insertAdjacentHTML('afterbegin', '<span class="tag-coach tag-figlie">Figlie</span>');
-  }
-  const riga = (act, ico, testo, sotto, cls) => `<button type="button" class="riga-link${cls ? ' ' + cls : ''}" data-act="${act}" data-evt="${esc(e.id)}"><i class="ti ${ico}"></i><span>${testo}${sotto ? `<small>${sotto}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>`;
-  const togli = e.orgIo && !(e.nomiInvitati || []).length
-    ? riga('evt-togli-cal', 'ti-trash', 'Toglilo dal calendario', 'sparisce anche da Google Calendar', 'riga-danger')
-    : '';
-  corpo.insertAdjacentHTML('beforeend', `<p class="list-head"><span>Non ti serve?</span></p><div class="group">
-    ${riga('evt-nascondi', 'ti-eye-off', 'Non è mio · nascondilo', 'solo nell\'app: il calendario resta com\'è')}
-    ${togli}</div>
-    ${!e.orgIo ? `<p class="t-caption muted">È un invito di ${escHtml(e.org || 'un\'altra persona')}: per rifiutarlo usa Google Calendar.</p>` : ''}`);
-};
 // la seconda domanda, nello stesso foglio
 function domandaFoglioEvento(id, tipo) {
   const e = eventoPerId(id), corpo = $('evt-corpo');
@@ -18300,29 +17820,6 @@ function daPianificarePdf(z) {
 function v21GiornoVuoto(idx) {
   return !righeGiorno(GIORNI[idx].key).length && !eventiDelGiorno(dataDelGiorno(idx)).length;
 }
-async function stampaGiorno(idx, daOggi) {
-  if (daOggi && !eSettimanaCorrente()) {
-    const c = bpSettimanaCorrente();
-    state.week = c.week; state.year = c.year;
-    try { localStorage.setItem(LS.WEEK, state.week); } catch (_) {}
-    await reloadWeekData();
-    try { await caricaEventi(state.week, state.year); } catch (_) {}
-    render();
-    idx = giornoIdxDi(oggiData());
-  }
-  const pdf = creaPdfSettimana({ giorno: idx });
-  if (!pdf) return;
-  const { doc, nome } = pdf, vuoto = v21GiornoVuoto(idx);
-  const msg = vuoto ? 'Nessuna attività pianificata per questo giorno: nel foglio trovi le cose da pianificare' : 'Giornata pronta per la stampa';
-  try {
-    const url = URL.createObjectURL(doc.output('blob'));
-    const win = window.open(url, '_blank');
-    if (!win) doc.save(nome);
-    showToast(win ? msg : (vuoto ? msg : 'PDF della giornata scaricato'), vuoto ? 'warn' : 'success');
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  } catch (e) { doc.save(nome); showToast(vuoto ? msg : 'PDF della giornata scaricato', vuoto ? 'warn' : 'info'); }
-  window.__v21UltimaGiornata = { nome, vuoto, pagine: doc.getNumberOfPages() };
-}
 AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), el.dataset.oggi === '1'); };
 
 // ══════════════════════════════════════════════════════════════
@@ -18334,14 +17831,6 @@ AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), e
 // ══════════════════════════════════════════════════════════════
 ui.v22Coach = false;
 AZIONI['v22-coach'] = () => { ui.v22Coach = !ui.v22Coach; render(); };
-function v22RigaCoach() {
-  try { caricaCoach(); } catch (_) {}
-  const voci = vociCoach(), mancano = voci.filter(v => !v.ok).length, e = coachEvento();
-  const d = e ? new Date(e.inizioMs) : null;
-  const quando = d ? `${d.toLocaleDateString('it-IT', { weekday: 'short' })} ${d.getDate()}/${d.getMonth() + 1}, <span class="mono">${e.ora}</span>` : 'incontro da fissare';
-  const stato = mancano ? `mancano ${mancano} su ${voci.length}` : 'tutto pronto';
-  return `<button type="button" class="v22-riga v22-coach${mancano ? '' : ' ok'}" data-act="v22-coach" aria-expanded="${ui.v22Coach}"><span class="v22-punto" aria-hidden="true"></span><span class="v22-testo"><b>Per il coach</b> · ${quando} · <span class="v22-stato">${stato}</span></span><span class="v22-apri">${ui.v22Coach ? 'Chiudi' : 'Apri'}<i class="ti ti-chevron-${ui.v22Coach ? 'up' : 'down'}" aria-hidden="true"></i></span></button>`;
-}
 // il coach: riga sottile al posto della card (la card resta sotto se aperta)
 function v22Coach(f, dopo) {
   const card = f.querySelector('section.coach-card');
@@ -18664,16 +18153,6 @@ function v25Momento(d = new Date()) {
   if (feriale && h < 9.5) return { k: 'mattina', ico: 'ti-sunrise', t: 'Mattina: 10 minuti', s: 'Controlla «Da rispondere» e la giornata, poi stampa il foglio e lavora sulla carta.', act: 'v21-stampa-oggi', btn: 'Stampa il foglio di oggi' };
   if (feriale && h < 17.5) return { k: 'giorno', ico: 'ti-file-pencil', t: 'Giornata sul foglio', s: 'Qui torna solo per aggiungere le cose nuove che arrivano.', act: 'nuovo', btn: 'Aggiungi una cosa' };
   return { k: 'sera', ico: 'ti-moon', t: 'Sera: 2 minuti', s: 'Spunta quello che hai fatto sul foglio e metti dentro le cose nuove.', act: 'v16-riporta', btn: 'Riporta il foglio' };
-}
-function v25RitmoCard() {
-  const m = v25Momento();
-  if (sessionStorage.getItem(V25.RITMO_CHIUSO) === m.k + toISODate(new Date())) return '';
-  const btn = m.act === 'v21-stampa-oggi' ? `<button type="button" class="btn btn-primary btn-sm" data-act="v21-stampa-giorno" data-i="${giornoIdxDi(oggiData())}" data-oggi="1"><i class="ti ti-printer"></i>${m.btn}</button>`
-    : m.act === 'tab-tutto' ? `<button type="button" class="btn btn-primary btn-sm" data-tab="tutto"><i class="ti ti-layout-columns"></i>${m.btn}</button>`
-    : `<button type="button" class="btn btn-primary btn-sm" data-act="${m.act}">${m.btn}</button>`;
-  return `<section class="v25-ritmo" aria-label="Adesso tocca a"><span class="ti-ico" aria-hidden="true"><i class="ti ${m.ico}"></i></span>
-    <span class="v25-testo"><b>Adesso tocca a… ${escHtml(m.t)}</b>${escHtml(m.s)}</span>${btn}
-    <button type="button" class="btn btn-icon" data-act="v25-ritmo-chiudi" data-k="${m.k}" aria-label="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
 }
 AZIONI['v25-ritmo-chiudi'] = el => { try { sessionStorage.setItem(V25.RITMO_CHIUSO, el.dataset.k + toISODate(new Date())); } catch (_) {} render(); };
 const _vistaOggiV25 = vistaOggi;
@@ -19353,19 +18832,6 @@ v25Momento = function () {
   return m;
 };
 const v26RitmoAcceso = () => lsLeggi(V26.RITMO_OFF) !== '1';
-v25RitmoCard = function () {
-  if (!v26RitmoAcceso()) return '';
-  const m = v25Momento();
-  if (sessionStorage.getItem(V25.RITMO_CHIUSO) === m.k + toISODate(new Date())) return '';
-  const aperto = !!ui.v26RitmoAperto;
-  const btn = m.act === 'v21-stampa-oggi' ? `<button type="button" class="btn btn-primary btn-sm" data-act="v21-stampa-giorno" data-i="${giornoIdxDi(oggiData())}" data-oggi="1"><i class="ti ti-printer"></i>${m.btn}</button>`
-    : m.act === 'tab-tutto' ? `<button type="button" class="btn btn-primary btn-sm" data-tab="tutto"><i class="ti ti-layout-columns"></i>${m.btn}</button>`
-    : `<button type="button" class="btn btn-primary btn-sm" data-act="${m.act}">${m.btn}</button>`;
-  return `<section class="v25-ritmo v26-ritmo${aperto ? ' aperto' : ''}" aria-label="Adesso tocca a">
-    <button type="button" class="v26-ritmo-testa" data-act="v26-ritmo-apri" aria-expanded="${aperto}"><span class="ti-ico" aria-hidden="true"><i class="ti ${m.ico}"></i></span>
-      <span class="v25-testo"><b><span class="v26-ritmo-pre">Adesso tocca a…</span> ${escHtml(m.t)}</b>${aperto ? `<span class="v26-ritmo-s">${escHtml(m.s)}</span>` : ''}</span><i class="ti ti-chevron-${aperto ? 'up' : 'down'} v26-ritmo-chev" aria-hidden="true"></i></button>
-    ${btn}<button type="button" class="btn btn-icon" data-act="v25-ritmo-chiudi" data-k="${m.k}" aria-label="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
-};
 AZIONI['v26-ritmo-apri'] = () => { ui.v26RitmoAperto = !ui.v26RitmoAperto; render(); };
 AZIONI['v26-ritmo-onoff'] = () => { const ora = v26RitmoAcceso(); try { localStorage.setItem(V26.RITMO_OFF, ora ? '1' : '0'); } catch (_) {} render(); showToast(ora ? '«Adesso tocca a…» non si vede più in Oggi' : '«Adesso tocca a…» torna in Oggi', 'success'); };
 

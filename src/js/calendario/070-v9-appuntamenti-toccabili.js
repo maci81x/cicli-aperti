@@ -34,8 +34,6 @@ async function caricaEventiFatti() {
   render();
 }
 
-// si spunta un appuntamento con un orario (non quelli di giornata, non la routine)
-function eventoSpuntabile(e) { return !!(e && e.id && !e.routine && !eGiornata(e)); }
 function eventoFatto(e) { return !!(e && e.id && (state.evtFatti || {})[e.id]); }
 function appuntamentiSpuntabili(d) { return typeof gcalEraCollegato === 'function' && gcalEraCollegato() ? eventiDelGiorno(d).filter(eventoSpuntabile) : []; }
 // Chiudi la settimana: le cose del piano più gli appuntamenti spuntabili di quella settimana
@@ -104,35 +102,6 @@ function apriFoglioEvento(id) {
   if (!eventoPerId(id)) return;
   $('evtOverlay').classList.add('open');
   disegnaFoglioEvento(id);
-}
-function disegnaFoglioEvento(id) {
-  const e = eventoPerId(id), corpo = $('evt-corpo');
-  if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
-  $('evt-titolo').textContent = e.titolo;
-  const spunta = eventoSpuntabile(e), fatto = spunta && eventoFatto(e);
-  const chi = e.orgIo ? '' : ` · lo organizza ${escHtml(e.org || 'un\'altra persona')}`;
-  const riga = (act, ico, testo, sotto) => `<button type="button" class="riga-link" data-act="${act}" data-evt="${esc(e.id)}"><i class="ti ${ico}"></i><span>${testo}${sotto ? `<small>${sotto}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>`;
-  corpo.innerHTML = `<p class="t-label muted evt-quando">${fmtGiornoLungo(parseISODate(e.giorno))} · <span class="mono">${orarioEvento(e)}</span> · calendario ${escHtml(nomeCalendario(e))}${chi}</p>
-    <div class="group">
-      ${spunta ? riga('evt-fatto', fatto ? 'ti-circle-check' : 'ti-circle', fatto ? 'Fatto' : 'Segna come fatto', fatto ? 'tocca per toglierlo' : 'solo nell\'app, non su Google') : ''}
-      <a class="riga-link" href="${esc(linkEvento(e))}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i><span>Apri in Google Calendar</span><span></span><i class="ti ti-chevron-right"></i></a>
-      ${riga('evt-foglio-sposta', 'ti-arrows-move', 'Sposta', e.ricorrente ? 'solo questa volta o anche le prossime' : '')}
-      ${riga('evt-in-elenco', 'ti-list-check', 'È una cosa da fare', 'mettila nell\'elenco')}
-    </div>`;
-}
-async function eventoInElenco(id) {
-  const e = eventoPerId(id);
-  if (!e) return;
-  const ctx = e.cal === 'privato' ? 'personale' : 'lavoro';
-  const gia = state.cicli.find(c => !c.done && normTitolo(c.title) === normTitolo(e.titolo));
-  if (gia) { closeModal('evtOverlay'); showToast('È già tra le cose da fare', 'info', { annulla: () => apriDettaglio(gia.id), etichetta: 'Dettagli' }); return; }
-  try {
-    const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: `Dal calendario ${nomeCalendario(e)}: «${e.titoloOrig || e.titolo}» del ${fmtGgMm(e.giorno)}` });
-    if (c) state.cicli = [c, ...state.cicli];
-    closeModal('evtOverlay');
-    render();
-    showToast('Messa tra le cose da fare, come Importante', 'success', c ? { annulla: () => apriDettaglio(c.id), etichetta: 'Dettagli' } : undefined);
-  } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
 }
 AZIONI['evt-apri'] = el => apriFoglioEvento(el.dataset.evt);
 AZIONI['evt-fatto'] = el => segnaEvento(el.dataset.evt, !eventoFatto(eventoPerId(el.dataset.evt)));

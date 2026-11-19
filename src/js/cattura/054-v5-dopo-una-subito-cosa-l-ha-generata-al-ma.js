@@ -11,19 +11,6 @@ function chiediOrigineSubito(c) {
   $('subitoOverlay').classList.add('open');
   setTimeout(() => $('subito-testo').focus(), 150);
 }
-async function creaDaSubito() {
-  const s = ui.subito, t = ($('subito-testo').value || '').trim();
-  if (!s) return;
-  if (!t) { $('subito-testo').focus(); return; }
-  try {
-    const nuova = await upsertCiclo({ ...rigaNuova(t, { subito: false }, s.ctx), cat: s.cat || (s.ctx === 'personale' ? 'salute' : 'management'), macro_area: s.macro_area || null, note: `Per evitare che si ripeta: «${s.titolo}»` });
-    if (nuova) state.cicli = [nuova, ...state.cicli];
-    ui.subito = null;
-    closeModal('subitoOverlay');
-    render();
-    showToast('Aggiunta a Tutto · Importante', 'success', nuova ? { annulla: () => apriDettaglio(nuova.id), etichetta: 'Dettagli' } : undefined);
-  } catch (e) { showToast('Non aggiunta: ' + e.message, 'error'); }
-}
 const _azioneFattoV4 = azioneFatto;
 azioneFatto = async function (id) {
   const c = ciclo(id);

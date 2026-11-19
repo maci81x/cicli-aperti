@@ -16,16 +16,6 @@ function v25Momento(d = new Date()) {
   if (feriale && h < 17.5) return { k: 'giorno', ico: 'ti-file-pencil', t: 'Giornata sul foglio', s: 'Qui torna solo per aggiungere le cose nuove che arrivano.', act: 'nuovo', btn: 'Aggiungi una cosa' };
   return { k: 'sera', ico: 'ti-moon', t: 'Sera: 2 minuti', s: 'Spunta quello che hai fatto sul foglio e metti dentro le cose nuove.', act: 'v16-riporta', btn: 'Riporta il foglio' };
 }
-function v25RitmoCard() {
-  const m = v25Momento();
-  if (sessionStorage.getItem(V25.RITMO_CHIUSO) === m.k + toISODate(new Date())) return '';
-  const btn = m.act === 'v21-stampa-oggi' ? `<button type="button" class="btn btn-primary btn-sm" data-act="v21-stampa-giorno" data-i="${giornoIdxDi(oggiData())}" data-oggi="1"><i class="ti ti-printer"></i>${m.btn}</button>`
-    : m.act === 'tab-tutto' ? `<button type="button" class="btn btn-primary btn-sm" data-tab="tutto"><i class="ti ti-layout-columns"></i>${m.btn}</button>`
-    : `<button type="button" class="btn btn-primary btn-sm" data-act="${m.act}">${m.btn}</button>`;
-  return `<section class="v25-ritmo" aria-label="Adesso tocca a"><span class="ti-ico" aria-hidden="true"><i class="ti ${m.ico}"></i></span>
-    <span class="v25-testo"><b>Adesso tocca a… ${escHtml(m.t)}</b>${escHtml(m.s)}</span>${btn}
-    <button type="button" class="btn btn-icon" data-act="v25-ritmo-chiudi" data-k="${m.k}" aria-label="Chiudi per oggi"><i class="ti ti-x"></i></button></section>`;
-}
 AZIONI['v25-ritmo-chiudi'] = el => { try { sessionStorage.setItem(V25.RITMO_CHIUSO, el.dataset.k + toISODate(new Date())); } catch (_) {} render(); };
 const _vistaOggiV25 = vistaOggi;
 vistaOggi = function () {

@@ -10,27 +10,6 @@ async function eventoMaster(calId, serie) {
 }
 const quotidianaDaPiuDi30 = m => !!m && (m.recurrence || []).some(r => /FREQ=DAILY/.test(r)) && !!m.start
   && (Date.now() - new Date(m.start.dateTime || m.start.date).getTime()) > 30 * 864e5;
-async function cercaCicliInCalendario() {
-  if (!isGcalTokenValid()) return;
-  const cur = bpSettimanaCorrente(), ev = await caricaEventi(cur.week, cur.year);
-  const scelte = leggiJson(LS5.CICLI_CAL, {});
-  const perSerie = new Map();
-  ev.forEach(e => {
-    if (e.routine || !e.mio || e.invitati || e.coach || e.prepCoach || e.app || eventoCollegato(e)) return;   // gli eventi dell'app non sono «cicli nel calendario»
-    const k = e.serie || e.id;
-    if (scelte[k]) return;
-    perSerie.set(k, [...(perSerie.get(k) || []), e]);
-  });
-  const out = [];
-  for (const [k, lista] of perSerie) {
-    const e = lista[0];
-    if (PAROLE_CICLO.test(normTitolo(e.titolo))) { out.push({ k, e, perche: 'parola' }); continue; }
-    if (e.serie && new Set(lista.map(x => x.giorno)).size >= 3 && quotidianaDaPiuDi30(await eventoMaster(e.calId, e.serie))) out.push({ k, e, perche: 'ogni giorno' });
-  }
-  ui.calCicli = out;
-  render();
-  if ($('calCicliOverlay').classList.contains('open')) disegnaCalCicli();
-}
 function disegnaCalCicli() {
   const lista = ui.calCicli || [];
   $('calc-lista').innerHTML = lista.length ? lista.map(({ k, e, perche }) => `<div class="recon-riga"><b>${escHtml(e.titolo)}</b>

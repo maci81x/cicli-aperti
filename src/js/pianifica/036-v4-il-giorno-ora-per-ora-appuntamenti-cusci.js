@@ -19,11 +19,6 @@ function sequenzaGiorno(righe, d) {
   ].sort((a, b) => a.ora.localeCompare(b.ora) || peso[a.tipo] - peso[b.tipo]);
   return { conOra, senzaOra: righe.filter(r => !r.ora) };
 }
-function orarioEvento(e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : 'tutto il giorno'; }
-function rigaEvento(e) {
-  return `<div class="evt-riga"><span class="evt-ico" aria-hidden="true"><i class="ti ti-calendar-event"></i></span>
-    <span class="evt-main"><span class="item-title">${escHtml(e.titolo)}</span><span class="item-meta"><span class="mono">${orarioEvento(e)}</span><span class="sep">·</span><span>Google Calendar</span></span></span></div>`;
-}
 function oraFine(ora, min) { const [h, m] = ora.split(':').map(Number), t = h * 60 + m + min; return `${String(Math.floor(t / 60) % 24).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; }
 // Cuscinetto · 13:00 · 1h — in Oggi con [Urgenza arrivata] e [Riempi]
 function rigaCuscinetto(item, opz) {

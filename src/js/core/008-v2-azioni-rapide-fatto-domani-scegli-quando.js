@@ -199,16 +199,6 @@ async function azioneRiattiva(id) {
   showToast('Tornata tra le cose aperte', 'success', { annulla: () => patchCiclo(id, { parcheggiato: true, parcheggiato_at: new Date().toISOString() }) });
 }
 
-async function azioneElimina(id) {
-  const c = ciclo(id);
-  if (!c || !confirm(`Eliminare definitivamente «${c.title}»? Non si può annullare.`)) return;
-  try {
-    await removeCiclo(id);
-    state.cicli = state.cicli.filter(x => x.id !== id);
-    render();
-    showToast('Eliminata', 'info');
-  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
-}
 
 // --- Ripeti ---
 function apriRipeti(id) {

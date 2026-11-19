@@ -24,20 +24,6 @@ function salvaCacheEventi() {
     ui.eventiDaCache.add(k);
   });
 })();
-const _caricaEventiV6 = caricaEventi;
-caricaEventi = function (week, year) {
-  const k = settKey(week, year);
-  if (isGcalTokenValid() && ui.eventiDaCache.has(k) && !ui.eventiCarico[k]) {
-    // si rilegge da Google senza svuotare: fino alla risposta restano quelli della copia
-    const copia = ui.eventi[k];
-    delete ui.eventi[k];
-    const p = _caricaEventiV6(week, year);
-    if (!ui.eventi[k]) ui.eventi[k] = copia;
-    return p.then(lista => { if (ui.eventi[k] !== copia) { ui.eventiDaCache.delete(k); salvaCacheEventi(); } return lista; });
-  }
-  const p = _caricaEventiV6(week, year);
-  return Promise.resolve(p).then(lista => { if (settimaneDaTenere().includes(k) && isGcalTokenValid()) salvaCacheEventi(); return lista; });
-};
 // scollegando, la copia locale va via
 const _disconnectGcalV6 = disconnectGcal;
 disconnectGcal = function () { lsScrivi(GCAL_CACHE.LS, null); ui.eventi = {}; ui.eventiDaCache = new Set(); _disconnectGcalV6(); render(); };
