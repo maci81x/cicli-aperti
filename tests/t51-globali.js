@@ -38,8 +38,8 @@ function nomiDichiarati() {
   }
   const rif = JSON.parse(fs.readFileSync(RIF, 'utf8'));
   const tolti = rif.filter(x => !attuale.includes(x)), aggiunti = attuale.filter(x => !rif.includes(x));
-  a(!tolti.length, `nessun nome globale tolto o cambiato di tipo (${tolti.length}): ${tolti.slice(0, 20).join(', ')}`);
-  a(!aggiunti.length, `nessun nome globale nuovo (${aggiunti.length}): ${aggiunti.slice(0, 20).join(', ')}`);
+  a(!tolti.length, `nessun nome globale tolto o cambiato di tipo (${tolti.length}): ${tolti.join(', ')}`);
+  a(!aggiunti.length, `nessun nome globale nuovo (${aggiunti.length}): ${aggiunti.join(', ')}`);
   console.log(`nomi globali: ${attuale.length} (riferimento ${rif.length})`);
   { const e = errori(logs); a(!e.length, 'console pulita ' + JSON.stringify(e.slice(0, 3))); }
 })().catch(e => { console.log('FAIL errore', e.message); process.exitCode = 1; });
