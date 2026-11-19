@@ -1,0 +1,12 @@
+/* v44 · Pianifica (computer): scorrendo in giù restano in vista la settimana e i giorni; si può trascinare sul giorno */
+#v44-testa { position: fixed; z-index: 40; display: none; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-1); }
+#v44-testa.su { display: block; }
+#v44-testa .v44-riga1 { display: flex; align-items: center; gap: var(--sp-2); padding: 6px 0 4px; font-size: var(--fs-label); }
+#v44-testa .v44-riga1 b { font-family: var(--font-serif, inherit); font-size: 15px; }
+#v44-testa .v44-riga1 .btn-icon { width: 30px; height: 30px; min-height: 30px; }
+#v44-testa .v44-giorni { position: relative; height: 34px; overflow: hidden; }
+#v44-testa .v44-g { position: absolute; top: 2px; bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; }
+#v44-testa .v44-g.oggi { border-color: var(--primary); color: var(--primary-ink); }
+#v44-testa .v44-g .mono { font-weight: 500; color: var(--text-2); font-size: 12px; }
+#v44-testa .v44-g.sopra { background: var(--primary-soft); border-color: var(--primary); border-style: dashed; }
+

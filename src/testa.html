@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Cicli Aperti</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#F4EFE4">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cicli Aperti">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<script>
+// Tema prima del primo disegno: scelta salvata, altrimenti quella del sistema.
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('cicli_theme'); } catch (e) {}
+  if (t !== 'light' && t !== 'dark') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  // dimensione del testo (100 / 112 / 125 %) e contrasto alto: anche loro prima del primo disegno
+  var scala = null, contrasto = null;
+  try { scala = localStorage.getItem('testo_scala'); contrasto = localStorage.getItem('contrasto'); } catch (e) {}
+  if (scala === '112' || scala === '125') document.documentElement.style.fontSize = scala + '%';
+  if (contrasto === 'alto') document.documentElement.setAttribute('data-contrast', 'alto');
+})();
+// 24/10 · raccolta errori: gli ultimi 30 restano nel telefono (localStorage cicli_errori),
+// si copiano da Altro → Impostazioni → «Copia errori». Parte prima di tutto il resto.
+(function () {
+  var CHIAVE = 'cicli_errori', MAX = 30;
+  function salva(tipo, msg, dove) {
+    try {
+      var lista = JSON.parse(localStorage.getItem(CHIAVE) || '[]');
+      if (!Array.isArray(lista)) lista = [];
+      lista.push({ t: new Date().toISOString(), tipo: tipo, msg: String(msg || '').slice(0, 500), dove: String(dove || '').slice(0, 300),
+        schermo: (window.innerWidth || 0) + 'x' + (window.innerHeight || 0), ua: String(navigator.userAgent || '').slice(0, 160) });
+      localStorage.setItem(CHIAVE, JSON.stringify(lista.slice(-MAX)));
+    } catch (e) {}
+  }
+  window.__salvaErrore = salva;
+  window.addEventListener('error', function (e) {
+    try {
+      if (e && e.target && e.target !== window && (e.target.src || e.target.href)) { salva('risorsa', 'non caricata', e.target.src || e.target.href); return; }
+      salva('errore', e && e.message, (e && e.filename ? e.filename.split('/').pop() : '') + ':' + (e && e.lineno) + ':' + (e && e.colno) + (e && e.error && e.error.stack ? ' ' + String(e.error.stack).split('\n').slice(0, 3).join(' | ') : ''));
+    } catch (_) {}
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    try { var r = e && e.reason; salva('promessa', r && r.message ? r.message : String(r), r && r.stack ? String(r.stack).split('\n').slice(0, 3).join(' | ') : ''); } catch (_) {}
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>

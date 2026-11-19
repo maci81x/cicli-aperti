@@ -1,0 +1,4 @@
+/* v39 · la lente «Cerca» in alto sul telefono */
+.v39-cerca { display: none; }
+@media (max-width: 767px) { .v39-cerca { display: inline-grid; margin-left: auto; } .top .v39-cerca + .v32-ctx-btn { margin-left: 0; } }
+

@@ -1,0 +1,20 @@
+/* v18 · cestino negli appuntamenti */
+.evt-riga[data-evt] { position: relative; overflow: hidden; }
+.evt-riga[data-evt] > :not(.v18-cestino) { transform: translateX(var(--v18-dx, 0)); transition: transform .18s ease; }
+.evt-riga.v18-trascina > :not(.v18-cestino) { transition: none; }
+.evt-riga.v18-aperta > :not(.v18-cestino) { transform: translateX(-88px); }
+.v18-cestino { position: absolute; top: 0; right: 0; bottom: 0; width: 88px; display: grid; justify-items: center; align-content: center; gap: 2px; border: 0; background: var(--danger); color: var(--surface); font: inherit; font-size: 11px; line-height: 14px; font-weight: var(--fw-strong); cursor: pointer; transform: translateX(100%); transition: transform .18s ease; }
+.v18-cestino .ti { font-size: 20px; }
+.v18-cestino.v18-nascondi { background: var(--text-2); }
+.evt-riga.v18-aperta .v18-cestino { transform: none; }
+.evt-riga.v18-trascina .v18-cestino { transform: translateX(calc(100% + var(--v18-dx, 0px))); transition: none; }
+@media (hover: hover) and (pointer: fine) {
+  .v18-cestino { width: 36px; height: 36px; top: 50%; bottom: auto; right: 8px; margin-top: -18px; border-radius: 10px; background: var(--surface); color: var(--text-2); box-shadow: 0 0 0 1px var(--border); opacity: 0; transform: none; transition: opacity .12s ease; }
+  .v18-cestino span { display: none; }
+  .v18-cestino.v18-nascondi { background: var(--surface); }
+  .evt-riga[data-evt]:hover .v18-cestino, .v18-cestino:focus-visible { opacity: 1; }
+  .v18-cestino:hover { color: var(--danger, #c0392b); box-shadow: 0 0 0 1px currentColor; }
+  .evt-riga[data-evt] > :not(.v18-cestino) { transform: none; }
+}
+.v18-menu-cestino { color: var(--danger, #c0392b) !important; }
+

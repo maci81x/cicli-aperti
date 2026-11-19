@@ -62,7 +62,7 @@ Tetto indicativo: 200–400 righe per file, mai oltre 800.
 
 ## Lo script di build
 
-Già provato (vedi «Prova fatta»). Legge `src/ordine.txt` e concatena i file con un a-capo tra l'uno e l'altro: nient'altro, così l'uscita è prevedibile.
+Già provato (vedi «Prova fatta»). **Dal 19/11 il codice in vigore è [`build.js`](../build.js) in radice**: rispetto a quello qui sotto ogni pezzo finisce con un a-capo e si uniscono con `join('')`, le voci ripetute in `ordine.txt` danno errore e i file di `src/` non elencati danno un avviso. Legge `src/ordine.txt` e concatena i file con un a-capo tra l'uno e l'altro: nient'altro, così l'uscita è prevedibile.
 
 ```js
 #!/usr/bin/env node
@@ -111,7 +111,10 @@ try {
 2. Salvare l'impronta: `shasum -a 256 index.html` → `e8ef9bc5…`.
 3. `tools/mappa/` c'è già (commit del 19/11): `cd tools/mappa && npm i && npm run mappa` rigenera MAPPA.md.
 
-### Fase A — taglio meccanico per strato (sicura, ~1 ora)
+### Fase A — taglio meccanico per strato (sicura, ~1 ora) — ✅ fatta il 19/11/2026
+
+> Fatta: 47 file CSS + 115 JS in `src/`, `build.js`, hook `tools/hooks/pre-commit`; `index.html` identico (SHA-256 `e8ef9bc5…aa6b` prima e dopo). Design e review: [docs/egm/fase-a/](egm/fase-a/design_draft.md). Differenze dal testo qui sotto: ogni pezzo finisce con un a-capo e `build.js` li unisce senza separatori; avviso per i file di `src/` non elencati; l'hook controlla anche lo staging.
+
 Un taglio a ogni commento di versione (`// vNN ·` nel JS, `/* … vNN …` nel CSS): **115 file JS + 47 file CSS**, in `src/js/` e `src/css/` con nomi tipo `090-v26-il-metodo-di-leo.js`. `ordine.txt` li elenca nella sequenza di oggi.
 - **Verifica**: `node build.js && git diff --exit-code index.html` → nessuna differenza.
 - **Cosa si guadagna subito**: si apre il file della versione invece di cercare in 21.800 righe; la storia per versione è leggibile.
@@ -192,7 +195,7 @@ Nello scratchpad, senza toccare il repo: `index.html` (v50) tagliato in **47 fil
 
 | Fase | Tempo | Rischio |
 |---|---|---|
-| 0 + A | 1–2 ore | nullo (verifica byte per byte) |
+| 0 + A | 1–2 ore | nullo (verifica byte per byte) — ✅ fatta il 19/11 |
 | B | mezza giornata | nullo (verifica byte per byte) |
 | C | 1 giorno | basso |
 | D | 3–5 giorni, a pezzi | medio, coperto da test + schermate |

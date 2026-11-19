@@ -1,0 +1,10 @@
+/* v42 · «Aggiornato alle…» e controllo serale «Già fatta?» */
+.v42-agg { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 0; border-radius: var(--r-full); background: none; color: var(--text-3, #7a7a7a); font: inherit; font-size: var(--fs-caption); white-space: nowrap; cursor: pointer; }
+.v42-agg:hover { background: var(--surface-2); }
+.v42-agg.vecchio { color: #9A5B00; background: #FFF3DC; }
+html:root[data-theme="dark"] .v42-agg.vecchio { color: #FFD08A; background: #3A2A10; }
+@media (max-width: 767px) { .v42-agg { display: none; } .v42-agg.vecchio { display: inline-flex; } }
+.v42-dopp { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); }
+.v42-dopp p { margin: 0; font-size: var(--fs-label); line-height: 1.35; }
+.v42-dopp small { color: var(--text-3, #7a7a7a); }
+

@@ -1,0 +1,10 @@
+/* v27 · dopo una Subito: due passi, e in Dettagli da dove nasce */
+.v27-passo { margin: 0 0 2px; letter-spacing: .02em; }
+.v27-cosa { display: flex; align-items: flex-start; gap: 6px; margin: 4px 0 0; }
+.v27-cosa .ti, .v27-origine-testa .ti { color: var(--q1-mark); font-size: 17px; flex: none; margin-top: 1px; }
+.v27-motivo { margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); background: var(--surface); }
+.v27-avviso { margin: 6px 0 0; color: var(--q1-mark); }
+.v27-origine { display: grid; gap: 4px; margin: var(--sp-3) 0; background: var(--q1-soft); }
+.v27-origine p { margin: 0; }
+.v27-origine-testa { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.v27-origine-cosa { font-weight: 600; line-height: 1.35; }

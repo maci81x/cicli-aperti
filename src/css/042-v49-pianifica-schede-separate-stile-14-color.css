@@ -1,0 +1,20 @@
+/* v49 · Pianifica: schede separate (stile 14), colori della 15 */
+.board .bzona:not(#dp-lista) { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; overflow: visible !important; }
+.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item { margin: 0 !important; border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--surface); box-shadow: 0 1px 2px rgba(27, 26, 23, .05) !important; overflow: hidden; }
+.board .bzona > .item.p-q1 { background: var(--q1-soft); border-color: #F2B8B0 !important; }
+.board .bzona > .item.p-q2 { box-shadow: inset 3px 0 0 var(--q2-mark), 0 1px 2px rgba(27, 26, 23, .05) !important; }
+.board .bzona > .fascia-h { margin: 6px 2px 0; padding: 0; background: none !important; border: 0 !important; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+.board .bzona > .fascia-h:first-child { margin-top: 0; }
+html:root .board .evt-riga.evt-app { display: flex; align-items: flex-start; gap: 8px; }
+html:root .board .evt-riga.v24-altri { background: var(--evt-mark, #5B5A8E) !important; border-color: var(--evt-mark, #5B5A8E) !important; box-shadow: none !important; }
+html:root .board .evt-riga.v24-altri .item-title, html:root .board .evt-riga.v24-altri .item-meta, html:root .board .evt-riga.v24-altri .item-meta *, html:root .board .evt-riga.v24-altri .v24-chi, html:root .board .evt-riga.v24-altri .v24-chi *, html:root .board .evt-riga.v24-altri .v49-ore, html:root .board .evt-riga.v24-altri .v18-cestino { color: #fff !important; }
+html:root .board .evt-riga.v24-altri .evt-cerchio { border-color: rgba(255, 255, 255, .8) !important; }
+html:root .board .evt-riga.v24-mio { background: var(--evt-soft, #EFEFF7) !important; border-color: transparent !important; box-shadow: none !important; }
+html:root .board .evt-riga.v24-mio .v49-ore { color: var(--evt, #55548A); }
+.board .v49-ore { flex: none; width: 40px; padding-top: 2px; font-size: 11.5px; font-weight: 700; line-height: 1.35; }
+html:root .board .bzona > .spazio-riga { min-height: 0 !important; padding: 6px 10px !important; background: var(--primary-soft, #E3EFE9) !important; border: 1px dashed #9CC7B2 !important; box-shadow: none !important; color: var(--primary-ink, var(--primary)); }
+html:root .board .bzona > .spazio-riga .item-meta { display: none; }
+html:root .board .bzona > .spazio-riga .item-title { font-size: 12.5px; font-weight: 600; color: var(--primary-ink, var(--primary)); }
+html:root .board .bzona > .spazio-riga .evt-ico { width: 18px; height: 18px; font-size: 14px; }
+html:root[data-theme="dark"] .board .bzona > .item.p-q1 { border-color: #8C3B33 !important; }
+html:root[data-theme="dark"] .board .bzona > .spazio-riga { border-color: #3E6B57 !important; }

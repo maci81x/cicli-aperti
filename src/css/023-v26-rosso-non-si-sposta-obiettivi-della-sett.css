@@ -1,0 +1,65 @@
+/* v26 · rosso «Non si sposta», obiettivi della settimana, Pianifica → Giorno, Chiudi la giornata */
+.item.v26-fisso:not(.is-done) .item-row { background: var(--q1-soft); box-shadow: inset 3px 0 0 var(--q1-mark); }
+.evt-riga.v26-fisso, .evt-riga.evt-app.v26-fisso { background: var(--q1-soft); box-shadow: inset 3px 0 0 var(--q1-mark); border: 0; }
+.evt-riga.v26-fisso .evt-cerchio, .evt-riga.v26-fisso .evt-ico .ti { border-color: var(--q1-mark); color: var(--q1); }
+.evt-riga.v26-fisso .item-title { font-weight: var(--fw-strong); color: var(--text); }
+.v26-nota-fisso { color: var(--q1); font-weight: var(--fw-strong); display: inline-flex; align-items: center; gap: 4px; }
+.v26-nota-fisso .ti { font-size: 13px; }
+.fascia-h.v26-h-fisso { color: var(--q1); display: flex; align-items: center; gap: 4px; }
+.fascia-h.v26-h-fisso .ti { font-size: 14px; }
+.list-head.v26-lh-fisso { color: var(--q1); }
+.v26-riga-fisso { color: var(--q1); }
+.v26-testa { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: var(--sp-4); align-items: start; margin-bottom: var(--sp-3); }
+.v26-testa > .vh-board { margin-bottom: 0; }
+@media (max-width: 1280px) { .v26-testa { grid-template-columns: minmax(0, 1fr); } }
+.v26-obiettivi { padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--v26-ob-bg, #EEF5FF); border: 1.5px solid var(--v26-ob-bordo, #9EC3F5); color: var(--text); margin-bottom: var(--sp-3); }
+:root { --v26-ob-bg: #EEF5FF; --v26-ob-bordo: #9EC3F5; --v26-ob-ink: #1D4E89; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --v26-ob-bg: #16243A; --v26-ob-bordo: #2F4F7A; --v26-ob-ink: #9CC5F2; } }
+:root[data-theme="dark"] { --v26-ob-bg: #16243A; --v26-ob-bordo: #2F4F7A; --v26-ob-ink: #9CC5F2; }
+.v26-ob-h { display: flex; align-items: center; gap: var(--sp-2); }
+.v26-ob-h b { flex: 1; color: var(--v26-ob-ink); font-size: var(--fs-label); }
+.v26-ob-h .mono { color: var(--v26-ob-ink); font-size: var(--fs-caption); }
+.v26-ob-lista { list-style: none; margin: var(--sp-1) 0 0; padding: 0; display: grid; gap: 2px; }
+.v26-ob-voce { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 40px; padding: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
+.v26-ob-voce.fatto span:last-child { text-decoration: line-through; color: var(--text-3); }
+.v26-ob-check { flex: none; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--v26-ob-ink); display: grid; place-items: center; background: var(--surface); color: var(--v26-ob-ink); }
+.v26-ob-check .ti { font-size: 14px; }
+.v26-ob-voce:focus-visible, .v26-ob-vuoto:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+.v26-ob-vuoto { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; margin-top: var(--sp-1); padding: 0 var(--sp-2); border: 1.5px dashed var(--v26-ob-bordo); border-radius: var(--r-sm); background: transparent; color: var(--v26-ob-ink); font: inherit; font-size: var(--fs-label); font-weight: var(--fw-strong); cursor: pointer; }
+.v26-ob-campi { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0; }
+.v26-ob-campo { display: grid; gap: 4px; font-size: var(--fs-caption); font-weight: var(--fw-strong); color: var(--text-2); }
+.v26-ob-campo .input { font-size: 16px; }
+.v26-g-nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); }
+.v26-g-frecce { display: flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 2px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); }
+.v26-g-frecce b { padding: 0 var(--sp-1); font-size: var(--fs-label); white-space: nowrap; }
+.v26-g-chips { display: flex; gap: 2px; }
+.v26-chip-g { min-width: 44px; height: 44px; padding: 0 6px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-caption); cursor: pointer; }
+.v26-chip-g[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary-ink); font-weight: var(--fw-strong); }
+.v26-chip-g.oggi { box-shadow: inset 0 -2px 0 var(--primary); }
+.v26-chip-g:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.v26-g-stampa { margin-left: auto; }
+.v26-g-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-5); align-items: start; }
+@media (max-width: 900px) { .v26-g-grid { grid-template-columns: minmax(0, 1fr); } .v26-g-stampa { margin-left: 0; } .v26-g-chips { width: 100%; justify-content: space-between; } .v26-chip-g { flex: 1; min-width: 0; } }
+.v26-g-lato { display: flex; flex-direction: column; gap: var(--sp-3); }
+.v26-insett { padding: var(--sp-3); border-radius: var(--r-md); background: var(--pensa); border: 1px solid var(--pensa-bordo); font-size: var(--fs-label); line-height: var(--lh-label); }
+.v26-st-scelte { display: grid; gap: 2px; margin: var(--sp-3) 0; }
+.v26-st-scelte .riga-link[aria-checked="true"] { background: var(--primary-soft); }
+.v26-ritmo { flex-wrap: wrap; padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-1); min-height: 52px; }
+.v26-ritmo-testa { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-2) 0 0; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; border-radius: var(--r-sm); }
+.v26-ritmo-testa:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.v26-ritmo .v25-testo b { display: inline; }
+.v26-ritmo-pre { color: var(--text-2); font-weight: 500; }
+.v26-ritmo-s { display: block; margin-top: 2px; color: var(--text-2); }
+.v26-ritmo-chev { color: var(--text-3); font-size: 18px; }
+.v26-ritmo .ti-ico { width: 32px; height: 32px; font-size: 18px; }
+@media (max-width: 480px) { .v26-ritmo .v26-ritmo-testa { order: 1; flex: 1 1 0; } .v26-ritmo .btn-icon { order: 2; flex: none; } .v26-ritmo .btn-primary { order: 3; flex: 1 1 100%; } }
+.v26-cg-lista { display: grid; gap: var(--sp-1); margin-bottom: var(--sp-3); }
+.v26-cg-voce { padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); }
+.v26-cg-voce.rosso { background: var(--q1-soft); border-color: var(--q1-mark); }
+.v26-cg-voce.fatto { opacity: .7; }
+.v26-cg-spunta { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-label); text-align: left; cursor: pointer; }
+.v26-cg-voce.fatto .v26-cg-tit { text-decoration: line-through; }
+.v26-cg-spunta .v26-ob-check { border-color: var(--primary); color: var(--primary-ink); }
+.v26-cg-azioni { display: flex; flex-wrap: wrap; gap: var(--sp-1); padding-left: 28px; }
+.v26-cg-ob { margin-top: var(--sp-3); }
+.v26-area-togli { margin-left: auto; }

@@ -1,0 +1,12 @@
+/* v17 · collegate */
+.v17-coll { margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--surface-2); display: flex; flex-direction: column; gap: 2px; }
+.v17-testa { margin: 0 0 2px; display: flex; gap: 6px; align-items: center; font-size: var(--fs-caption); color: var(--text-2); font-weight: var(--fw-strong); }
+.v17-riga { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 36px; padding: 2px 4px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); font: inherit; font-size: var(--fs-label); text-align: left; cursor: pointer; }
+.v17-riga:hover { background: var(--surface); }
+.v17-riga span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v17-riga small { color: var(--text-2); font-size: var(--fs-caption); white-space: nowrap; }
+.v17-q1 { color: var(--danger); } .v17-q2 { color: var(--primary); } .v17-q3 { color: #2563EB; } .v17-q4 { color: var(--text-3, #7A8682); }
+.v17-fatta { color: var(--primary); } .v17-evt { color: var(--evt); }
+.v17-altre { margin: 2px 4px 0; font-size: var(--fs-caption); color: var(--text-2); }
+.v17-ca { display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--primary-ink); font: inherit; font-size: var(--fs-caption); font-weight: var(--fw-strong); }
+

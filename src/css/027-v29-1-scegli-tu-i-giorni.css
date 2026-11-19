@@ -1,0 +1,22 @@
+/* v29.1 · Scegli tu: i giorni */
+.v29-sc { max-height: 92vh; overflow: auto; }
+.v29-sc-dur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.v29-sc-guida { margin: 0 0 8px; }
+.v29-giorni { display: grid; gap: 12px; margin-bottom: 12px; }
+.v29-g-h { margin: 0 0 4px; font-size: var(--fs-label); font-weight: 800; }
+.v29-g-h::first-letter { text-transform: uppercase; }
+.v29-g-pieno { font-weight: 400; color: var(--text-2); }
+.v29-g-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.v29-g-lista li { display: grid; grid-template-columns: 96px 1fr; gap: 8px; align-items: start; padding: 6px 8px; border-radius: var(--r-sm); font-size: var(--fs-label); line-height: 1.35; }
+.v29-g-lista .mono { font-size: 12px; color: var(--text-2); padding-top: 2px; }
+.v29-g-evt { background: var(--surface-2); }
+.v29-g-evt .ti { font-size: 14px; color: var(--text-2); vertical-align: -2px; }
+.v29-g-questo { background: var(--q1-soft); }
+.v29-g-cosa { background: var(--surface-2); color: var(--text-2); }
+.v29-g-libero { background: var(--primary-soft); color: var(--primary-ink); }
+.v29-g-lt { display: block; font-weight: 700; margin-bottom: 4px; }
+.v29-g-inizi { display: flex; flex-wrap: wrap; gap: 6px; }
+.v29-sc-cal { margin: 4px 0 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.v29-sc-altro { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.v29-sc-altro summary { cursor: pointer; font-size: var(--fs-label); color: var(--text-2); min-height: 32px; }
+.v29-sc-altro .btn { margin-top: 8px; }

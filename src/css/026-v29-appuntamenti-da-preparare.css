@@ -1,0 +1,18 @@
+/* v29 · appuntamenti da preparare */
+.v29-prep { display: grid; gap: var(--sp-2); margin: 0 0 var(--sp-3); padding: var(--sp-3); border-radius: var(--r-lg, 16px); background: var(--surface); border: 1.5px solid var(--primary); }
+.v29-h { display: flex; align-items: center; gap: 10px; }
+.v29-ico { flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--primary-soft); color: var(--primary-ink); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.v29-t { margin: 0; font-weight: 800; font-size: var(--fs-body); }
+.v29-s, .v29-nota, .v29-perche, .v29-mem { margin: 0; font-size: var(--fs-caption); color: var(--text-2); line-height: 1.4; }
+.v29-voce { display: grid; gap: 6px; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); }
+.v29-voce.v29-attesa { border-style: dashed; }
+.v29-voce.v29-sparito { background: var(--q1-soft); }
+.v29-voce p { margin: 0; }
+.v29-quando { font-size: 12px; color: var(--text-2); }
+.v29-tit { font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.v29-min, .v29-ok { display: flex; flex-wrap: wrap; gap: 6px; }
+.v29-slot { display: flex; gap: 6px; align-items: flex-start; padding: 8px 10px; border-radius: var(--r-sm); background: var(--primary-soft); color: var(--primary-ink); font-size: var(--fs-label); line-height: 1.4; }
+.v29-slot .ti { font-size: 17px; margin-top: 1px; flex: none; }
+.v29-slot.v29-pieno { background: var(--q1-soft); color: var(--text); }
+.v29-sc-campi { display: grid; gap: 6px; }
+.v29-sc-err { color: var(--q1-mark); margin: 6px 0 0; }

@@ -1,0 +1,17 @@
+/* v49 · Oggi: Da controllare */
+.v49-ctl { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: var(--sp-3); }
+.v49-ctl-h { display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 14px 16px; font-family: var(--font-display, Georgia, serif); font-size: 19px; font-weight: 600; }
+.v49-ctl-h .mono { font-family: var(--font-mono, monospace); font-size: 12px; color: var(--text-2); font-weight: 400; }
+.v49-ctl > .v49-diretto { margin: 0 !important; border: 0 !important; border-top: 1px solid var(--border) !important; border-radius: 0 !important; box-shadow: none !important; width: 100%; background: var(--surface); }
+.v49-r { border-top: 1px solid var(--border); }
+.v49-r > summary { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; list-style: none; }
+.v49-r > summary::-webkit-details-marker { display: none; }
+.v49-r > summary:hover { background: var(--surface-2); }
+.v49-r > summary > .ti:first-child { font-size: 18px; width: 22px; text-align: center; color: var(--text-2); }
+.v49-r-t { flex: 1; min-width: 0; }
+.v49-r-t b { display: block; font-size: 14px; }
+.v49-r-t small { display: block; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v49-r-v { color: var(--text-3); transition: transform .15s; }
+.v49-r[open] .v49-r-v { transform: rotate(180deg); }
+.v49-r-corpo { padding: 0 12px 12px; }
+.v49-r-corpo > * { margin: 0 !important; }

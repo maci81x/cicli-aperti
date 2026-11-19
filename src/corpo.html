@@ -1,0 +1,863 @@
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- BARRA LATERALE (desktop) -->
+  <aside class="side" aria-label="Sezioni">
+    <div class="logo logo-side">CICLI <span>APERTI</span></div>
+    <button type="button" class="side-btn" data-tab="oggi" data-tip="Mattina 10 minuti · sera 2 minuti"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
+    <button type="button" class="side-btn" data-tab="pianifica" data-tip="Venerdì: prepara, stampa, manda a Leo"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
+    <button type="button" class="side-btn" data-tab="tutto" data-tip="Tutte le cose aperte, per sezione"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Tutte</span></button>
+    <button type="button" class="side-btn" data-tab="altro" data-tip="Impostazioni, guida, cose fatte"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
+  </aside>
+
+  <!-- INTESTAZIONE -->
+  <header class="top">
+    <div class="logo logo-top">CICLI <span>APERTI</span></div>
+    <div class="seg top-ctx" role="group" aria-label="Ambito">
+      <button type="button" id="ctx-tutto" data-act="ctx" data-ctx="tutto" aria-pressed="true">Tutto</button>
+      <button type="button" id="ctx-lavoro" data-act="ctx" data-ctx="lavoro" aria-pressed="false">Lavoro</button>
+      <button type="button" id="ctx-personale" data-act="ctx" data-ctx="personale" aria-pressed="false">Personale</button>
+    </div>
+    <label class="top-search">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="search" id="searchInput" name="q-nofill" placeholder="Cerca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Cerca tra le cose aperte">
+    </label>
+    <div class="top-actions">
+      <button type="button" class="btn btn-icon" id="themeBtn" data-act="tema" aria-label="Cambia tema" data-tip="Tema chiaro o scuro"><i class="ti ti-moon"></i></button>
+      <button type="button" class="btn btn-icon" id="gcalBtn" data-act="gcal" aria-label="Google Calendar" data-tip="Google Calendar"><i class="ti ti-calendar-event"></i><span class="gcal-dot" aria-hidden="true"></span></button>
+      <button type="button" class="btn btn-primary btn-sm top-add" data-act="nuovo" data-tip="Aggiungi (Cmd+K)"><i class="ti ti-plus"></i>Aggiungi</button>
+    </div>
+  </header>
+
+  <!-- CONTENUTO -->
+  <main id="main"><div id="view"></div></main>
+
+  <!-- CAMPO FISSO (telefono): una riga = una cosa, Importante senza data -->
+  <form class="cattura" id="cattura" autocomplete="off" aria-label="Aggiungi al volo">
+    <div class="cattura-anteprima" id="cattura-anteprima" aria-live="polite" hidden></div>
+    <label class="sr-only" for="cattura-testo">Cosa hai in testa?</label>
+    <textarea id="cattura-testo" rows="1" placeholder="Cosa hai in testa?" enterkeyhint="done" autocomplete="off" spellcheck="true"></textarea>
+    <button type="button" class="btn btn-icon cattura-mic" id="cattura-mic" data-act="cattura-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
+    <button type="submit" class="cattura-add" aria-label="Aggiungi a Tutto"><i class="ti ti-plus"></i></button>
+  </form>
+
+  <!-- BARRA IN BASSO (telefono) -->
+  <nav class="nav tabbar" aria-label="Sezioni">
+    <button type="button" data-tab="oggi"><span class="nav-ico"><i class="ti ti-sun"></i></span>Oggi</button>
+    <button type="button" data-tab="pianifica"><span class="nav-ico"><i class="ti ti-calendar-week"></i></span>Pianifica</button>
+    <button type="button" data-tab="tutto"><span class="nav-ico"><i class="ti ti-layout-columns"></i></span><span class="l-tutto">Tutte</span></button>
+    <button type="button" data-tab="altro"><span class="nav-ico"><i class="ti ti-dots"></i></span>Altro</button>
+  </nav>
+</div>
+
+<!-- ══════════ FOGLIO: NUOVA COSA / DETTAGLIO ══════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event,'modalOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="sheetTitle">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="sheetTitle">Cosa devi fare?</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('modalOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="sr-only" id="modalTitle"></div>
+
+    <input type="text" class="input" id="f-title" placeholder="Scrivilo come ti viene" autocomplete="off" aria-label="Titolo">
+
+    <div id="det-azioni" class="det-azioni" hidden></div>
+
+    <span class="field-label solo-completa">Che tipo di cosa è?</span>
+    <div class="quads q-picker solo-completa" role="group" aria-label="Tipo">
+      <button type="button" class="quad quad-1 q-pick-btn" data-q="1" onclick="selectQ(1)" data-tip="Q1 · Crisi: urgente e importante"><span class="quad-ico"><i class="ti ti-flame"></i></span><span><b>Subito</b><small>Va fatta oggi</small></span></button>
+      <button type="button" class="quad quad-2 q-pick-btn" data-q="2" onclick="selectQ(2)" data-tip="Q2 · Qualità: importante, non urgente"><span class="quad-ico"><i class="ti ti-target"></i></span><span><b>Importante</b><small>Scegli quando</small></span></button>
+      <button type="button" class="quad quad-3 q-pick-btn" data-q="3" onclick="selectQ(3)" data-tip="Q3 · Inganno: urgente, non importante"><span class="quad-ico"><i class="ti ti-user-share"></i></span><span><b>Delega</b><small>La fa un altro</small></span></button>
+      <button type="button" class="quad quad-4 q-pick-btn" data-q="4" onclick="selectQ(4)" data-tip="Q4 · Spreco: né urgente né importante"><span class="quad-ico"><i class="ti ti-wind"></i></span><span><b>Lascia stare</b><small>Può aspettare</small></span></button>
+    </div>
+
+    <div class="nudge q2-nudge" id="q2-nudge">
+      <p>Alle cose importanti va dato un giorno nei prossimi mesi, altrimenti le urgenze le mangiano.</p>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="pianificaProssimiMesi()"><i class="ti ti-calendar-plus"></i>Pianifica nei prossimi 3 mesi</button>
+    </div>
+
+    <div id="nuovo-quando">
+      <span class="field-label">Quando?</span>
+      <div class="chips chips-wrap" role="group" aria-label="Quando" data-scelta="quando">
+        <button type="button" class="chip" data-v="oggi" aria-pressed="false">Oggi</button>
+        <button type="button" class="chip" data-v="domani" aria-pressed="false">Domani</button>
+        <button type="button" class="chip" data-v="scegli" aria-pressed="false">Scegli quando</button>
+        <button type="button" class="chip" data-v="nessuna" aria-pressed="true">Da piazzare</button>
+      </div>
+    </div>
+
+    <div id="det-pianificazione" class="det-box" hidden></div>
+    <div id="det-passi" class="det-box det-passi" hidden></div>
+
+    <div class="sheet-cta">
+      <button type="button" class="btn-save" id="btn-save" onclick="salvaDalFoglio()">Aggiungi</button>
+      <button type="button" class="btn btn-ghost btn-sm btn-block" id="moreOptsBtn" onclick="toggleMoreOpts()" aria-expanded="false">Altre opzioni</button>
+    </div>
+
+    <div class="modal-more-opts" id="moreOptsSection">
+      <span class="field-label">Ambito</span>
+      <div class="seg ctx-picker" role="group" aria-label="Ambito">
+        <button type="button" class="ctx-pick-btn" id="cpk-lavoro" onclick="setModalCtx('lavoro')">Lavoro</button>
+        <button type="button" class="ctx-pick-btn" id="cpk-personale" onclick="setModalCtx('personale')">Personale</button>
+      </div>
+
+      <label class="field-label" for="f-note">Note</label>
+      <textarea class="input textarea" id="f-note" placeholder="Dettagli, riferimenti, cosa serve"></textarea>
+
+      <label class="field-label" for="f-durata-det">Quanto ci vuole?</label>
+      <select class="input" id="f-durata-det">
+        <option value="">Non lo so</option><option value="5">5 min</option><option value="15">15 min</option>
+        <option value="30">30 min</option><option value="60">1 ora</option><option value="120">2 ore</option><option value="240">Mezza giornata</option>
+      </select>
+
+      <div class="form-row solo-completa">
+        <div>
+          <label class="field-label" for="f-cat">Categoria</label>
+          <select class="input" id="f-cat"></select>
+        </div>
+        <div>
+          <label class="field-label" for="f-date">Scadenza</label>
+          <input type="date" class="input" id="f-date">
+        </div>
+      </div>
+
+      <label class="field-label solo-completa" for="f-macro-area">Area <small id="auto-cat-hint">se non la scegli, è quella della categoria</small></label>
+      <div class="auto-cat-wrap solo-completa">
+        <select class="input macro-area-select" id="f-macro-area">
+          <option value="">Dalla categoria</option>
+          <option>Management</option><option>Marketing</option><option>Vendite</option>
+          <option>Amministrazione</option><option>Produzione</option><option>Ricerca e sviluppo</option>
+          <option>Famiglia / cose personali</option><option>Formazione</option>
+        </select>
+        <div class="auto-cat-spin" id="auto-cat-spin"></div>
+      </div>
+
+      <span class="field-label">Con chi</span>
+      <div class="persona-chips-wrap">
+        <div class="persona-chips-box input" id="personaChipsBox" onclick="document.getElementById('personaChipInput').focus()">
+          <input type="text" class="pchip-input" id="personaChipInput" placeholder="Cerca o aggiungi una persona" autocomplete="off"
+            oninput="onPersonaChipInput(this.value)" onkeydown="onPersonaChipKey(event)" aria-label="Con chi">
+        </div>
+        <div class="persona-dd" id="personaDd" style="display:none"></div>
+      </div>
+
+      <div class="form-row" id="agenda-fields-row">
+        <div>
+          <label class="field-label" for="f-giorno-settimana">Giorno fisso</label>
+          <select class="input" id="f-giorno-settimana">
+            <option value="">Nessuno</option>
+            <option value="lunedi">Lunedì</option><option value="martedi">Martedì</option><option value="mercoledi">Mercoledì</option>
+            <option value="giovedi">Giovedì</option><option value="venerdi">Venerdì</option><option value="sabato">Sabato</option><option value="domenica">Domenica</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="f-fascia-oraria">Momento</label>
+          <select class="input" id="f-fascia-oraria">
+            <option value="">Qualsiasi</option>
+            <option value="mattina">Mattina</option><option value="pomeriggio">Pomeriggio</option><option value="sera">Sera</option>
+          </select>
+        </div>
+      </div>
+      <div id="agenda-fields-hint" hidden></div>
+
+      <div class="form-row">
+        <div>
+          <label class="field-label" for="f-scheduled-date">Data su Calendar</label>
+          <input type="date" class="input" id="f-scheduled-date" required>
+        </div>
+        <div>
+          <label class="field-label" for="f-scheduled-time">Ora</label>
+          <input type="time" class="input" id="f-scheduled-time">
+        </div>
+      </div>
+
+      <label class="field-label" for="f-week">Settimana di riferimento</label>
+      <input type="number" class="input" id="f-week" min="1" max="53" inputmode="numeric">
+
+      <div id="det-log" class="det-log" hidden></div>
+
+      <button type="button" class="btn btn-ghost btn-danger btn-sm btn-block" id="btn-delete" onclick="deleteCurrent()" style="display:none"><i class="ti ti-trash"></i>Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: SCEGLI QUANDO (modale Pianifica) ══════════ -->
+<div class="modal-overlay pianifica-overlay" id="pianificaOverlay" onclick="closeModalOnBg(event,'pianificaOverlay')">
+  <div class="modal sheet pianifica-modal" role="dialog" aria-labelledby="pf-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="pf-titolo">Scegli quando</h3>
+        <p class="t-label muted clamp1" id="pf-ciclo-title">—</p>
+      </div>
+      <button type="button" class="btn btn-icon pf-close" onclick="closePianificaModal()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="pf-field">
+      <span class="field-label">Quando</span>
+      <div class="chips chips-wrap">
+        <button type="button" class="chip pf-opt" data-quando="questa">Questa settimana</button>
+        <button type="button" class="chip pf-opt" data-quando="prossima">Prossima settimana</button>
+        <button type="button" class="chip pf-opt" data-quando="mese1">Tra 1 mese</button>
+        <button type="button" class="chip pf-opt" data-quando="mese3">Tra 3 mesi</button>
+        <button type="button" class="chip pf-opt" data-quando="specifica"><i class="ti ti-calendar-event"></i>Scegli data</button>
+      </div>
+      <input type="date" class="input pf-date" id="pf-data-specifica" style="display:none" aria-label="Data">
+    </div>
+
+    <div class="pf-field" id="pf-giornofascia-field">
+      <div class="form-row">
+        <div>
+          <label class="field-label" for="pf-giorno">Giorno</label>
+          <select class="input" id="pf-giorno">
+            <option value="lunedi">Lunedì</option><option value="martedi">Martedì</option><option value="mercoledi">Mercoledì</option>
+            <option value="giovedi">Giovedì</option><option value="venerdi">Venerdì</option><option value="sabato">Sabato</option><option value="domenica">Domenica</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="pf-fascia">Momento</label>
+          <select class="input" id="pf-fascia">
+            <option value="mattina">Mattina</option><option value="pomeriggio">Pomeriggio</option><option value="sera">Sera</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="pf-field">
+      <span class="field-label">Si ripete</span>
+      <div class="chips chips-wrap pf-grid-rip">
+        <button type="button" class="chip pf-opt" data-rip="nessuna">Mai</button>
+        <button type="button" class="chip pf-opt" data-rip="giornaliera">Giornaliera</button>
+        <button type="button" class="chip pf-opt" data-rip="settimanale">Settimanale</button>
+        <button type="button" class="chip pf-opt" data-rip="mensile">Mensile</button>
+        <button type="button" class="chip pf-opt" data-rip="trimestrale">Trimestrale</button>
+        <button type="button" class="chip pf-opt" data-rip="annuale">Annuale</button>
+      </div>
+    </div>
+
+    <div class="pf-field" id="pf-oradurata-field">
+      <span class="field-label">Ora e durata <small id="pf-oradurata-hint"></small></span>
+      <div class="form-row">
+        <input type="time" class="input" id="f-ora-inizio" aria-label="Ora">
+        <select class="input" id="f-durata" aria-label="Durata">
+          <option value="">Durata</option>
+          <option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option>
+          <option value="60">1 ora</option><option value="90">1h 30</option><option value="120">2 ore</option>
+          <option value="180">3 ore</option><option value="custom">Altra durata</option>
+        </select>
+      </div>
+      <input type="number" class="input pf-durata-custom" id="f-durata-custom" min="5" max="480" step="5" placeholder="Minuti (5–480)" style="display:none" aria-label="Durata in minuti">
+      <div class="pf-error" id="pf-error" style="display:none" role="alert"></div>
+    </div>
+
+    <div class="sheet-cta">
+      <button type="button" class="pf-btn-save" id="pf-save" onclick="confermaPianificazione()">Pianifica</button>
+      <button type="button" class="btn btn-ghost btn-sm btn-block pf-btn-cancel" onclick="closePianificaModal()">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: RIPETI ══════════ -->
+<div class="modal-overlay" id="ripetiOverlay" onclick="closeModalOnBg(event,'ripetiOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="rip-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="rip-titolo">Ogni quanto si ripete?</h3>
+        <p class="t-label muted clamp1" id="rip-ciclo">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('ripetiOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="chips chips-wrap" role="group" aria-label="Ripetizione" data-scelta="ripeti">
+      <button type="button" class="chip" data-v="nessuna" aria-pressed="true">Mai</button>
+      <button type="button" class="chip" data-v="giornaliera" aria-pressed="false">Giornaliera</button>
+      <button type="button" class="chip" data-v="settimanale" aria-pressed="false">Settimanale</button>
+      <button type="button" class="chip" data-v="mensile" aria-pressed="false">Mensile</button>
+      <button type="button" class="chip" data-v="trimestrale" aria-pressed="false">Trimestrale</button>
+      <button type="button" class="chip" data-v="annuale" aria-pressed="false">Annuale</button>
+    </div>
+    <div id="rip-oradurata" hidden>
+      <span class="field-label">Ora e durata</span>
+      <div class="form-row">
+        <input type="time" class="input" id="rip-ora" aria-label="Ora">
+        <select class="input" id="rip-durata" aria-label="Durata">
+          <option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option>
+          <option value="60">1 ora</option><option value="90">1h 30</option><option value="120">2 ore</option>
+        </select>
+      </div>
+    </div>
+    <div id="rip-quando" hidden>
+      <span class="field-label">Da quando · ora se vuoi</span>
+      <div class="form-row">
+        <input type="date" class="input" id="rip-data" aria-label="Il primo giorno">
+        <input type="time" class="input" id="rip-ora-cosa" aria-label="Ora (facoltativa)">
+      </div>
+    </div>
+    <div class="pf-error" id="rip-errore" hidden role="alert"></div>
+    <div class="sheet-cta">
+      <button type="button" class="btn btn-primary btn-block" data-act="ripeti-salva">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: FILTRI ══════════ -->
+<div class="modal-overlay" id="filtriOverlay" onclick="closeModalOnBg(event,'filtriOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="fil-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="fil-titolo">Filtri</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('filtriOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="filtri-body"></div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" data-act="filtri-azzera">Azzera</button>
+      <button type="button" class="btn btn-primary" id="filtri-ok" onclick="closeModal('filtriOverlay')">Mostra</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: CATEGORIA ══════════ -->
+<div class="modal-overlay" id="catOverlay" onclick="closeModalOnBg(event,'catOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="cat-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="cat-titolo">Nuova categoria</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('catOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="text" class="input" id="cat-nome" placeholder="Nome della categoria" autocomplete="off" aria-label="Nome">
+    <span class="field-label">Icona</span>
+    <div class="icon-pick" id="cat-icone" role="group" aria-label="Icona"></div>
+    <span class="field-label">Ambito</span>
+    <div class="seg" role="group" aria-label="Ambito" data-scelta="cat-ctx">
+      <button type="button" data-v="lavoro" aria-pressed="true">Lavoro</button>
+      <button type="button" data-v="personale" aria-pressed="false">Personale</button>
+    </div>
+    <div class="sheet-cta">
+      <button type="button" class="btn btn-primary btn-block" data-act="cat-salva">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: IMPORTA DA UNA REGISTRAZIONE (Plaud) ══════════ -->
+<div class="modal-overlay" id="plaudOverlay" onclick="closeModalOnBg(event,'plaudOverlay')">
+  <div class="modal sheet plaud-modal" role="dialog" aria-labelledby="plaud-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="plaud-titolo">Importa da una registrazione</h3>
+        <p class="t-label muted"><span class="step-indicator"><span class="step-dot active" id="plaud-dot-1"></span><span class="step-dot" id="plaud-dot-2"></span><span class="step-dot" id="plaud-dot-3"></span></span><span class="step-label" id="plaud-step-label">Incolla trascrizione</span></p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closePlaudModal()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="plaud-step-1">
+      <textarea class="input textarea" id="plaud-transcript" placeholder="Incolla qui il testo della registrazione" style="min-height:180px" aria-label="Trascrizione"></textarea>
+      <div class="pl-file"><label class="btn btn-secondary btn-sm" for="plaud-file"><i class="ti ti-file-text"></i>Apri un file .txt o .md</label><input type="file" id="plaud-file" class="sr-only" accept=".txt,.md,.markdown,text/plain,text/markdown"></div>
+      <p class="t-caption muted">Con il formato «RIUNIONE: … DA FARE IO: …» la leggo da sola, senza AI. Altrimenti la legge Claude.</p>
+      <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block btn-analyze" onclick="analyzePlaud()"><i class="ti ti-sparkles"></i>Trova le cose da fare</button></div>
+    </div>
+    <div id="plaud-step-2" style="display:none">
+      <div class="empty"><span class="empty-ico"><i class="ti ti-loader-2 gira"></i></span><h3 class="t-title">Sto leggendo la trascrizione</h3><p>Cerco impegni, promesse e cose rimaste aperte.</p></div>
+    </div>
+    <div id="plaud-step-3" style="display:none">
+      <p class="t-label muted plaud-summary">Trovate <b class="mono" id="plaud-count">0</b> cose. Togli la spunta a quelle che non vuoi.</p>
+      <div id="plaud-items" class="plaud-items"></div>
+      <div class="sheet-cta sheet-cta-row">
+        <button type="button" class="btn btn-ghost" onclick="setPlaudStep(1)">Indietro</button>
+        <button type="button" class="btn btn-primary btn-import" id="btn-import-plaud" onclick="importaRiunione()">Importa selezionati</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: CHIAVE API ══════════ -->
+<div class="modal-overlay" id="apikeyOverlay" onclick="closeModalOnBg(event,'apikeyOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="api-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="api-titolo">Chiave API di Claude</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('apikeyOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="t-label muted">Serve per leggere le registrazioni e assegnare le aree. Si crea su <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> e resta solo in questo browser.</p>
+    <label class="field-label" for="claude-key-input">Chiave (sk-ant-…)</label>
+    <input type="text" class="input campo-segreto" id="claude-key-input" name="chiave-api-nofill" placeholder="sk-ant-api03-…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" onclick="saveApiKey()">Salva la chiave</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: GOOGLE CALENDAR ══════════ -->
+<div class="modal-overlay" id="gcalOverlay" onclick="closeModalOnBg(event,'gcalOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="gcal-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="gcal-titolo">Google Calendar</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('gcalOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="gcal-modal-body"></div>
+    <div class="sheet-cta" id="gcal-modal-actions"></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: SPOSTA A UN'ALTRA DATA ══════════ -->
+<div class="modal-overlay" id="postponeOverlay" onclick="closeModalOnBg(event,'postponeOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="post-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="post-titolo">Sposta la data su Calendar</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('postponeOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="chips chips-wrap">
+      <button type="button" class="chip" onclick="doPostpone(1)">Domani</button>
+      <button type="button" class="chip" onclick="doPostpone(2)">Dopodomani</button>
+      <button type="button" class="chip" onclick="doPostpone(7)">Tra una settimana</button>
+    </div>
+    <div class="form-row" style="margin-top:var(--sp-4)">
+      <input type="date" class="input" id="postpone-custom-date" aria-label="Altra data">
+      <button type="button" class="btn btn-secondary" onclick="doPostponeCustom()">Sposta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PREPARA LA SETTIMANA (wizard: 1 scegli, 2 assegna ai giorni) ══════════ -->
+<div class="modal-overlay" id="bpWizOverlay">
+  <div class="modal sheet sheet-wide bp-wiz" role="dialog" aria-labelledby="bpw-title">
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="bpw-title">Prepara la settimana</h3>
+        <p class="t-label muted" id="bpw-sub">—</p>
+      </div>
+      <div class="bp-wiz-steps" aria-hidden="true"><span class="bp-wiz-step on" id="bpw-s1"></span><span class="bp-wiz-step" id="bpw-s2"></span><span class="bp-wiz-step" id="bpw-s3"></span></div>
+    </div>
+
+    <div class="bp-wiz-body" id="bpw-step1">
+      <div class="bp-wiz-left">
+        <div class="bp-wiz-tools">
+          <input type="text" class="input" id="bpw-search" placeholder="Cerca" autocomplete="off" oninput="bpwSetQuery(this.value)" aria-label="Cerca">
+          <select class="input" id="bpw-cat" onchange="bpwSetCat(this.value)" aria-label="Categoria"></select>
+        </div>
+        <div id="bpw-list"></div>
+      </div>
+      <div class="bp-wiz-right" id="bpw-summary"></div>
+    </div>
+
+    <div class="bp-wiz-body single" id="bpw-step2" style="display:none">
+      <div class="bp-assign-wrap">
+        <div class="bp-assign-pool">
+          <div class="bp-assign-pool-hd" id="bpw-pool-hd">Da assegnare</div>
+          <div id="bpw-pool"></div>
+        </div>
+        <div class="bp-assign-grid" id="bpw-days"></div>
+      </div>
+    </div>
+
+    <div class="sheet-cta sheet-cta-row bp-wiz-actions">
+      <button type="button" class="bp-btn" id="bpw-back" onclick="bpwBack()">Annulla</button>
+      <button type="button" class="bp-btn primary" id="bpw-next" onclick="bpwNext()">Avanti</button>
+    </div>
+  </div>
+</div>
+
+<!-- pannello giorno / momento / ora / durata -->
+<div class="bp-slot-panel" id="bpSlotPanel">
+  <div class="bp-slot-box sheet">
+    <h3 class="t-title bp-slot-title" id="bps-title">Assegna al giorno</h3>
+    <p class="t-label muted clamp1 bp-slot-sub" id="bps-sub">—</p>
+    <label class="field-label" for="bps-giorno">Giorno</label>
+    <select class="input" id="bps-giorno"></select>
+    <span class="field-label">Momento</span>
+    <div class="bp-slot-opts chips chips-wrap" id="bps-fasce"></div>
+    <span class="field-label">Ora e durata</span>
+    <div class="form-row">
+      <input type="time" class="input" id="bps-ora" aria-label="Ora">
+      <select class="input" id="bps-durata" aria-label="Durata">
+        <option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option>
+        <option value="60">1 ora</option><option value="90">1h 30</option><option value="120">2 ore</option>
+        <option value="180">3 ore</option><option value="240">4 ore</option>
+      </select>
+    </div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="bp-btn" onclick="bpSlotClose()">Annulla</button>
+      <button type="button" class="bp-btn primary" id="bps-ok" onclick="bpSlotConfirm()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CHIUDI LA SETTIMANA (review) ══════════ -->
+<div class="modal-overlay" id="bpRevOverlay" onclick="closeModalOnBg(event,'bpRevOverlay')">
+  <div class="modal sheet bp-rev" role="dialog" aria-labelledby="bprev-title">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="bprev-title">Chiudi la settimana</h3>
+        <p class="t-label muted" id="bprev-sub">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('bpRevOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="bp-rev-body" id="bprev-body"></div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" id="bprev-back" data-act="rev-indietro">Annulla</button>
+      <button type="button" class="btn btn-primary" id="bprev-ok" data-act="rev-avanti">Avanti</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ACCESSO (Supabase Auth: codice personale) ══════════ -->
+<div class="accesso" id="accesso" hidden role="dialog" aria-modal="true" aria-labelledby="accesso-titolo">
+  <form class="accesso-box" id="accesso-form" novalidate>
+    <div class="logo">CICLI <span>APERTI</span></div>
+    <span class="onb-ico" aria-hidden="true"><i class="ti ti-lock"></i></span>
+    <h2 id="accesso-titolo">Entra nelle tue cose</h2>
+    <p>Scrivi il tuo codice personale. Resti dentro finché non tocchi «Esci».</p>
+    <input type="text" name="username" autocomplete="username" hidden aria-hidden="true" tabindex="-1" id="accesso-utente">
+    <div class="accesso-campo">
+      <label class="t-label" for="accesso-codice">Il tuo codice</label>
+      <div class="accesso-pass">
+        <input class="input" id="accesso-codice" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button type="button" class="btn btn-icon accesso-occhio" data-act="accesso-occhio" aria-label="Mostra il codice" aria-pressed="false"><i class="ti ti-eye"></i></button>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block btn-grande" id="accesso-entra"><i class="ti ti-login-2"></i>Entra</button>
+    <p class="accesso-stato" id="accesso-stato" role="status" aria-live="polite"></p>
+    <p class="accesso-nota">Hai dimenticato il codice? Lo cambi da Supabase → Authentication → Users.</p>
+  </form>
+</div>
+
+<!-- ══════════ PRIMA APERTURA ══════════ -->
+<div class="onb" id="onb" hidden role="dialog" aria-label="Come funziona">
+  <button type="button" class="btn btn-ghost btn-sm onb-salta" data-act="onb-salta">Salta</button>
+  <div class="onb-track" id="onb-track">
+    <section class="onb-slide">
+      <span class="onb-ico"><i class="ti ti-stack-2"></i></span>
+      <h2 class="t-display">Scrivi tutto quello che hai in testa</h2>
+      <p>Ogni cosa rimasta aperta va qui dentro, così smetti di ricordartela.</p>
+      <span class="onb-dove"><i class="ti ti-stack-2"></i>Tutto</span>
+    </section>
+    <section class="onb-slide">
+      <span class="onb-ico"><i class="ti ti-calendar-week"></i></span>
+      <h2 class="t-display">Ogni settimana scegli cosa fare davvero</h2>
+      <p>Prendi poche cose e dai a ognuna un giorno.</p>
+      <span class="onb-dove"><i class="ti ti-calendar-week"></i>Pianifica</span>
+    </section>
+    <section class="onb-slide">
+      <span class="onb-ico"><i class="ti ti-sun"></i></span>
+      <h2 class="t-display">Ogni giorno fai solo quello</h2>
+      <p>Apri l'app, guardi la lista di oggi, spunti.</p>
+      <span class="onb-dove"><i class="ti ti-sun"></i>Oggi</span>
+    </section>
+    <section class="onb-slide">
+      <span class="onb-ico"><i class="ti ti-adjustments"></i></span>
+      <h2 class="t-display">Vuoi la versione semplice o completa?</h2>
+      <p>La semplice ha solo Oggi e le tue cose. Puoi cambiare quando vuoi da Impostazioni.</p>
+      <div class="onb-modo" role="group" aria-label="Versione" data-scelta="onb-modo">
+        <button type="button" class="chip" data-v="completa" aria-pressed="true">Completa</button>
+        <button type="button" class="chip" data-v="semplice" aria-pressed="false">Semplice</button>
+      </div>
+    </section>
+  </div>
+  <div class="onb-foot">
+    <div class="onb-dots" id="onb-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    <button type="button" class="btn btn-primary btn-block" id="onb-avanti" data-act="onb-avanti">Avanti</button>
+  </div>
+</div>
+
+<!-- ══════════ AIUTO DELLA SCHERMATA: foglio (telefono) e riquadro (desktop) ══════════ -->
+<div class="modal-overlay" id="aiutoOverlay" onclick="closeModalOnBg(event,'aiutoOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="aiuto-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <h3 class="t-title" id="aiuto-titolo">—</h3>
+      <button type="button" class="btn btn-icon" onclick="closeModal('aiutoOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="aiuto-testo" id="aiuto-testo"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-secondary btn-block" data-act="aiuto-guida"><i class="ti ti-book"></i>Guida completa</button></div>
+  </div>
+</div>
+<div class="pop" id="aiutoPop" hidden role="dialog" aria-label="Aiuto"></div>
+
+<!-- ══════════ TROVATE SUL CALENDARIO (riconciliazione con Google Calendar) ══════════ -->
+<div class="modal-overlay" id="reconOverlay" onclick="closeModalOnBg(event,'reconOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="recon-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="recon-titolo">Trovate sul calendario</h3>
+        <p class="t-label muted">Erano in calendario nei giorni scorsi. Le hai fatte?</p>
+      </div>
+      <button type="button" class="btn btn-icon" data-act="recon-dopo" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm btn-block" data-act="recon-tutte"><i class="ti ti-checks"></i>Segna tutte come fatte</button>
+    <div id="recon-lista" class="recon-lista"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-ghost btn-sm btn-block" data-act="recon-dopo">Chiedimelo dopo</button></div>
+  </div>
+</div>
+
+
+<!-- ══════════ FOGLIO: INSERIMENTO A UN CAMPO ══════════ -->
+<div class="modal-overlay" id="rapidoOverlay" onclick="closeModalOnBg(event,'rapidoOverlay')">
+  <div class="modal sheet sheet-narrow rapido" role="dialog" aria-label="Aggiungi">
+    <div class="sheet-grab"></div>
+    <div class="rapido-campo">
+      <textarea class="input" id="rapido-testo" rows="2" placeholder="Cosa hai in testa?" autocomplete="off" aria-label="Cosa hai in testa?" enterkeyhint="send"></textarea>
+      <button type="button" class="btn btn-icon rapido-mic" id="rapido-mic" data-act="rapido-mic" aria-label="Detta" aria-pressed="false" hidden><i class="ti ti-microphone"></i></button>
+    </div>
+    <div class="rap-anteprima" id="rapido-anteprima" aria-live="polite" hidden></div>
+    <p class="t-caption muted rapido-nota">Una riga, una cosa. Prova: «ricordami venerdì alle 10 di chiamare Rossi».</p>
+    <div class="chips" role="group" aria-label="Opzioni" id="rapido-chips"></div>
+    <div class="chips chips-wrap" id="rapido-persone" hidden></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="rapido-salva"><i class="ti ti-corner-down-left"></i>Invio</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: COSA PORTI A CASA OGGI (le tue 3) ══════════ -->
+<div class="modal-overlay" id="focusOverlay" onclick="closeModalOnBg(event,'focusOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="focus-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="focus-titolo">Cosa porti a casa oggi?</h3>
+        <p class="t-label muted" id="focus-sub">Togli la spunta a quello che oggi non porti a casa</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('focusOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="group" id="focus-lista"></div>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="focus-conferma">Conferma</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: DELEGA (a chi, quando controlli) ══════════ -->
+<div class="modal-overlay" id="delegaOverlay" onclick="closeModalOnBg(event,'delegaOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="delega-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="delega-titolo">A chi?</h3>
+        <p class="t-label muted clamp1" id="delega-cosa">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('delegaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="chips chips-wrap" id="delega-persone" role="group" aria-label="Persona"></div>
+    <div class="delega-nuova"><input type="text" class="input" id="delega-nuova" placeholder="Nuova persona" aria-label="Nuova persona" autocomplete="off">
+      <button type="button" class="btn btn-secondary btn-sm" data-act="delega-nuova">Aggiungi</button></div>
+    <span class="field-label">Quando controlli?</span>
+    <div class="chips chips-wrap" id="delega-quando" role="group" aria-label="Quando controlli"></div>
+    <input type="date" class="input" id="delega-data" aria-label="Data del controllo" hidden>
+    <p class="t-caption" id="delega-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="delega-salva">Delega</button></div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: RIEMPI IL CUSCINETTO ══════════ -->
+<div class="modal-overlay" id="riempiOverlay" onclick="closeModalOnBg(event,'riempiOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="riempi-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="riempi-titolo">Cosa ci metti?</h3>
+        <p class="t-label muted" id="riempi-sub">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('riempiOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="group" id="riempi-lista"></div>
+    <p class="t-caption muted riempi-nota">Prima le Subito, poi le Importanti senza data, poi le rapide. Solo quelle che ci stanno nel tempo.</p>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: CONFERMA (es. chiudere una cosa quando tutti i passi sono fatti) ══════════ -->
+<div class="modal-overlay" id="confermaOverlay" onclick="closeModalOnBg(event,'confermaOverlay')">
+  <div class="modal sheet sheet-narrow" role="alertdialog" aria-labelledby="conferma-titolo" aria-describedby="conferma-testo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><h3 class="t-title" id="conferma-titolo">—</h3></div>
+    <p class="t-label muted" id="conferma-testo"></p>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" data-act="conferma-no" id="conferma-no">Non ancora</button>
+      <button type="button" class="btn btn-primary" data-act="conferma-ok" id="conferma-ok">Sì</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: BLOCCA IN AGENDA (evento su Google Calendar) ══════════ -->
+<div class="modal-overlay" id="bloccaOverlay" onclick="closeModalOnBg(event,'bloccaOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="blocca-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="blocca-titolo">Blocca in agenda</h3>
+        <p class="t-label muted clamp1" id="blocca-cosa">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('bloccaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="t-label muted">Un appuntamento con te stesso nel calendario «Cicli Aperti — Battle Plan».</p>
+    <label class="field-label" for="blocca-data">Giorno</label>
+    <input type="date" class="input" id="blocca-data">
+    <div class="form-row">
+      <div><label class="field-label" for="blocca-ora">Ora</label><input type="time" class="input" id="blocca-ora"></div>
+      <div><label class="field-label" for="blocca-durata">Durata</label>
+        <select class="input" id="blocca-durata">
+          <option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option>
+          <option value="60">1 ora</option><option value="90">1h 30</option><option value="120">2 ore</option>
+          <option value="180">3 ore</option><option value="240">4 ore</option>
+        </select></div>
+    </div>
+    <p class="t-caption" id="blocca-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="blocca-salva"><i class="ti ti-calendar-plus"></i>Blocca</button></div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · IL PIANO È PRONTO (fine del wizard) ══════════ -->
+<div class="modal-overlay" id="prontoOverlay" onclick="closeModalOnBg(event,'prontoOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="pronto-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="pronto-titolo">Il piano è pronto</h3>
+        <p class="t-label muted" id="pronto-sub">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" data-act="pronto-chiudi" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="t-label muted">Stampalo e portalo con te: depenna quello che fai, scrivi quello che arriva. Poi mandane una copia al coach.</p>
+    <div class="pronto-bottoni">
+      <button type="button" class="btn btn-primary btn-block btn-grande" data-act="pronto-stampa"><i class="ti ti-printer"></i>Stampa il foglio</button>
+      <button type="button" class="btn btn-secondary btn-block btn-grande" data-act="pronto-invia"><i class="ti ti-send"></i>Invia al coach</button>
+    </div>
+    <p class="pronto-stato" id="pronto-stato" role="status"></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-ghost btn-block" data-act="pronto-chiudi">Fatto</button></div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · Q2 INDEROGABILE: la sposti davvero? ══════════ -->
+<div class="modal-overlay" id="proteggiOverlay" onclick="closeModalOnBg(event,'proteggiOverlay')">
+  <div class="modal sheet sheet-narrow" role="alertdialog" aria-labelledby="proteggi-titolo" aria-describedby="proteggi-cosa">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><span class="proteggi-ico" aria-hidden="true"><i class="ti ti-lock"></i></span><h3 class="t-title" id="proteggi-titolo">È un'attività importante bloccata. La sposti davvero?</h3></div>
+    <p class="t-label proteggi-cosa" id="proteggi-cosa">—</p>
+    <p class="t-caption muted">Le Importanti in agenda non si spostano, a meno che non stia andando a fuoco il capannone. Se la sposti, conta tra le «Q2 spostate» della settimana.</p>
+    <span class="rev-lbl">Perché?</span>
+    <div class="chips chips-wrap" id="proteggi-motivi" role="group" aria-label="Perché la sposti"></div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" data-act="proteggi-sposta">Sposta comunque</button>
+      <button type="button" class="btn btn-primary" data-act="proteggi-lascia">Lasciala</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · DOPO UNA SUBITO: cosa l'ha generata? ══════════ -->
+<div class="modal-overlay" id="subitoOverlay" onclick="closeModalOnBg(event,'subitoOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="subito-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="subito-titolo">Cosa l'ha generata? Evitiamo che si ripeta</h3>
+        <p class="t-label muted clamp1" id="subito-cosa">—</p>
+      </div>
+    </div>
+    <label class="field-label" for="subito-testo">Un'attività importante che la previene</label>
+    <input type="text" class="input" id="subito-testo" maxlength="160" autocomplete="off" enterkeyhint="done" placeholder="Scrivere la procedura per gli ordini urgenti">
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" data-act="subito-salta">Salta</button>
+      <button type="button" class="btn btn-primary" data-act="subito-crea">Crea attività importante</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · SVUOTA LA TESTA ══════════ -->
+<div class="modal-overlay" id="svuotaOverlay" onclick="closeModalOnBg(event,'svuotaOverlay')">
+  <div class="modal sheet sheet-wide svuota" role="dialog" aria-labelledby="svuota-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="svuota-titolo">Svuota la testa</h3>
+        <p class="t-label muted">Scrivi tutto, al resto pensi dopo</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('svuotaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="svuota-body"></div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" id="svuota-annulla" onclick="closeModal('svuotaOverlay')">Annulla</button>
+      <button type="button" class="btn btn-primary" id="svuota-ok" data-act="svuota-ok">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · ESERCIZIO Q2 ══════════ -->
+<div class="modal-overlay" id="q2Overlay" onclick="closeModalOnBg(event,'q2Overlay')">
+  <div class="modal sheet sheet-wide q2-foglio" role="dialog" aria-labelledby="q2-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="q2-titolo">Esercizio Q2</h3>
+        <p class="t-label muted">Esercizio Q2 · prossimi 3 mesi</p>
+      </div>
+      <div class="bp-wiz-steps" id="q2-passi" aria-hidden="true"></div>
+    </div>
+    <div id="q2-body"></div>
+    <div class="sheet-cta sheet-cta-row">
+      <button type="button" class="btn btn-ghost" id="q2-back" data-act="q2-indietro">Annulla</button>
+      <button type="button" class="btn btn-primary" id="q2-ok" data-act="q2-ok">Avanti</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ v5 · APPUNTAMENTI CHE SEMBRANO CICLI ══════════ -->
+<div class="modal-overlay" id="calCicliOverlay" onclick="closeModalOnBg(event,'calCicliOverlay')">
+  <div class="modal sheet" role="dialog" aria-labelledby="calc-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="calc-titolo">Questi sembrano cicli, non appuntamenti</h3>
+        <p class="t-label muted">Eventi creati da te, senza invitati: una telefonata, una mail, un promemoria che si ripete ogni giorno.</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('calCicliOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="recon-lista" id="calc-lista"></div>
+    <p class="t-caption muted">Dal calendario non tolgo niente se non lo scegli tu.</p>
+  </div>
+</div>
+
+<!-- ══════════ v5 · SPOSTA UNA CATEGORIA IN UN'ALTRA AREA ══════════ -->
+<div class="modal-overlay" id="areaOverlay" onclick="closeModalOnBg(event,'areaOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="area-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="area-titolo">In quale area?</h3>
+        <p class="t-label muted" id="area-sub">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('areaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="group" id="area-lista"></div>
+    <p class="t-caption muted riempi-nota">Le cose di questa categoria passano tutte nella nuova area.</p>
+  </div>
+</div>
+
+<!-- ══════════ FOGLIO: INVIA IL PIANO AL COACH ══════════ -->
+<div class="modal-overlay" id="inviaOverlay" onclick="closeModalOnBg(event,'inviaOverlay')">
+  <div class="modal sheet sheet-narrow" role="dialog" aria-labelledby="invia-titolo">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head">
+      <div class="sheet-head-txt">
+        <h3 class="t-title" id="invia-titolo">Invia il piano</h3>
+        <p class="t-label muted" id="invia-sub">—</p>
+      </div>
+      <button type="button" class="btn btn-icon" onclick="closeModal('inviaOverlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="bp-wiz-right" id="invia-riepilogo"></div>
+    <label class="field-label" for="invia-email">Email del coach</label>
+    <input type="email" class="input" id="invia-email" autocomplete="email" inputmode="email" placeholder="nome@esempio.it">
+    <p class="t-caption muted invia-nota" id="invia-nota"></p>
+    <p class="t-caption" id="invia-errore" role="alert" hidden></p>
+    <div class="sheet-cta"><button type="button" class="btn btn-primary btn-block" data-act="invia-ok" id="invia-ok"><i class="ti ti-send"></i>Invia</button></div>
+  </div>
+</div>
+
+<!-- menu delle azioni rapide (desktop) -->
+<div class="menu" id="rigaMenu" hidden role="menu"></div>
+
+<!-- TOOLTIP -->
+<div id="tooltip" role="tooltip"></div>
+
+<!-- TOAST -->
+<div id="toast-container" aria-live="polite"></div>
+
+<script>

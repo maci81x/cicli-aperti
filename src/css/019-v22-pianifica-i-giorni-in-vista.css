@@ -1,0 +1,33 @@
+/* v22 · Pianifica: i giorni in vista */
+.vh-board { flex-wrap: wrap; row-gap: var(--sp-2); }
+.v22-testa { order: 3; flex: 1 1 100%; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
+.v22-testa .bt-nav { min-height: 44px; padding: 0 var(--sp-1) 0 var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.v22-sett { font-size: var(--fs-label); color: var(--text); font-weight: var(--fw-strong); white-space: nowrap; }
+.v22-testa .bt-stat { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: 0; }
+.v22-testa .bt-azioni { flex-direction: row; align-items: center; margin-left: auto; }
+.v22-pdf { border: 1px solid var(--border); background: var(--surface); color: var(--primary-ink); }
+.board-piede .legenda { margin: 0 0 0 auto; }
+.v22-righe { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); }
+.v22-righe .v21-passati { margin: 0; }
+.v22-righe-tel { grid-template-columns: minmax(0, 1fr); margin-top: var(--sp-4); }
+.v22-riga { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 48px; box-sizing: border-box; padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; }
+.v22-coach { border-color: var(--evt-mark); cursor: pointer; }
+.v22-coach:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.v22-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--evt-mark); flex: none; }
+.v22-testo { flex: 1; min-width: 0; }
+.v22-stato { color: var(--evt); font-weight: var(--fw-strong); }
+.v22-coach.ok .v22-punto { background: var(--primary); }
+.v22-coach.ok .v22-stato { color: var(--primary-ink); }
+.v22-apri { display: inline-flex; align-items: center; gap: 4px; padding-right: var(--sp-1); color: var(--evt); font-weight: var(--fw-strong); white-space: nowrap; }
+.v22-piano .futuro-chip { flex: none; }
+.v22-vh { align-items: center; }
+.v22-weeknav { margin: var(--sp-2) 0; }
+.v22-weeknav .mid small { display: inline; margin-left: 6px; }
+.v22-vh > div:first-child { display: flex; align-items: center; min-width: 0; }
+.vh.v22-vh h1 { font-size: 30px; line-height: 36px; white-space: nowrap; }
+.v22-piano .v22-testo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v22-vh .v22-seg { margin: 0 0 0 auto; flex: none; }
+.v22-vh .v22-seg button { padding: 0 var(--sp-3); }
+.day.v22-passati { align-content: center; border: 1px dashed var(--border-strong); color: var(--text-2); font-weight: var(--fw-strong); }
+.day.v22-passati small { font-size: 11px; line-height: 14px; font-weight: var(--fw-strong); color: var(--text-3); }
+.day.v22-passati.indietro small { color: var(--danger, #B42318); }

@@ -1,0 +1,15 @@
+/* v50 · Oggi: ogni cosa è una scheda a sé, i tipi si distinguono */
+#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+#view.v50-oggi .v12-rosso .v12-righe { padding: 4px 12px 12px !important; }
+#view.v50-oggi .group:not(.giornata) > .item, #view.v50-oggi .v12-righe > .item { margin: 0 !important; border: 1px solid var(--border) !important; border-radius: 12px !important; background: var(--surface); box-shadow: 0 1px 2px rgba(27, 26, 23, .05); overflow: hidden; }
+#view.v50-oggi .group:not(.giornata) > .item + .item, #view.v50-oggi .v12-righe > .item + .item { border-top: 1px solid var(--border) !important; }
+#view.v50-oggi .group > .item.p-q1, #view.v50-oggi .v12-righe > .item.p-q1 { background: var(--q1-soft); border-color: #EFA9A0 !important; box-shadow: inset 4px 0 0 var(--q1-mark, #D92D20); }
+#view.v50-oggi .group > .item.p-q2, #view.v50-oggi .v12-righe > .item.p-q2 { border-color: #BFD0F7 !important; box-shadow: inset 4px 0 0 var(--q2-mark, #2563EB); }
+#view.v50-oggi .group > .item.p-q3, #view.v50-oggi .v12-righe > .item.p-q3 { border-color: #E6D2A6 !important; box-shadow: inset 4px 0 0 #A16207; }
+#view.v50-oggi .item.p-q1::before, #view.v50-oggi .item.p-q2::before { display: none !important; }
+#view.v50-oggi .group.giornata { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+#view.v50-oggi .group.giornata > .evt-riga { margin: 0 !important; border-radius: 12px !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q1, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q1 { border-color: #8C3B33 !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q2, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q2 { border-color: #2C3E6B !important; }
+html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q3, html:root[data-theme="dark"] #view.v50-oggi .v12-righe > .item.p-q3 { border-color: #5A4520 !important; }
+html:root[data-theme="dark"] .board .bzona > .item.p-q2 { box-shadow: inset 3px 0 0 var(--q2-mark) !important; }

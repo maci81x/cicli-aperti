@@ -1,0 +1,8 @@
+/* v50 · accessibilità */
+.v48-g.we { opacity: 1; }
+.v48-g.we .v48-l, .v48-g.we .v48-n { color: var(--text-2); }
+.v50-sm-riga { display: flex; width: 100%; justify-content: center; min-height: 36px; margin: 0 0 8px; }
+html:root[data-theme="dark"] .v49-sm-btn, html:root[data-theme="dark"] .v49-oggi, html:root[data-theme="dark"] .v49-k, html:root[data-theme="dark"] .v49-da { color: #FF9A8C; border-color: #FF9A8C; }
+html:root[data-theme="dark"] .board .evt-riga.v24-altri { background: #4A4880 !important; border-color: #4A4880 !important; }
+#view .evt-riga .item-title[role="button"] { cursor: pointer; }
+#view .evt-riga .item-title[role="button"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }

@@ -1,0 +1,24 @@
+#!/bin/sh
+# Blocca il commit se index.html non è quello che build.js ricostruisce da src/.
+# Si attiva una volta per copia del repo: git config core.hooksPath tools/hooks
+PERCORSI='^(index\.html$|src/|build\.js$)'
+
+git diff --cached --name-only | grep -qE "$PERCORSI" || exit 0
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: serve node per controllare index.html (node build.js --check), ma non lo trovo nel PATH." >&2
+  exit 1
+fi
+
+# disco e staging devono coincidere, così il controllo vale per quello che entra nel commit
+FUORI=$(git diff --name-only | grep -E "$PERCORSI")
+if [ -n "$FUORI" ]; then
+  echo "pre-commit: questi file hanno modifiche non in staging; mettile in staging anche loro, o annullale:" >&2
+  echo "$FUORI" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+if ! node build.js --check; then
+  echo "pre-commit: commit fermato. Se hai modificato index.html a mano, la modifica si vede con «git diff index.html»: rifalla nel file giusto di src/ e lancia «node build.js»." >&2
+  exit 1
+fi

@@ -1,0 +1,47 @@
+/* v12 · Oggi: prima di tutto, e i pensieri divisi */
+.v12-prima { margin: var(--sp-2) 0 var(--sp-4); }
+.v12-head span:first-child { color: var(--danger); letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-caption); }
+.v12-griglia { display: grid; gap: var(--sp-3); }
+@media (min-width: 1024px) { .v12-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v12-griglia > .v12-card:first-child { grid-column: 1 / -1; } }
+.v12-card { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); }
+.v12-card.v12-rosso { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+.v12-card.v12-arancio { border-color: color-mix(in srgb, #C2410C 35%, var(--border)); }
+.v12-card.v12-viola { border-color: color-mix(in srgb, var(--evt, #6D28D9) 30%, var(--border)); }
+.v12-card.v12-urgente { border-width: 2px; }
+.v12-testa { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.v12-testa h3 { margin: 0; font-size: var(--fs-body); font-weight: 800; line-height: 1.3; }
+.v12-testa p { margin: 2px 0 0; font-size: var(--fs-label); color: var(--text-2); line-height: 1.45; }
+.v12-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; }
+.v12-rosso .v12-ico { background: var(--danger-soft); color: var(--danger); }
+.v12-arancio .v12-ico { background: color-mix(in srgb, #C2410C 14%, var(--surface)); color: #9A3E0C; }
+[data-theme="dark"] .v12-arancio .v12-ico { color: #F9A27A; }
+.v12-viola .v12-ico { background: var(--evt-soft, #F3EEFD); color: var(--evt, #6D28D9); }
+.v12-righe { margin: 0; }
+.v12-indietro { border-radius: var(--r-md); background: var(--danger-soft); }
+.v12-indietro > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-3); cursor: pointer; list-style: none; color: var(--danger); font-size: var(--fs-label); font-weight: 700; }
+.v12-indietro > summary::-webkit-details-marker, .v12-tempo > summary::-webkit-details-marker { display: none; }
+.v12-indietro[open] > summary i, .v12-tempo[open] > summary i { transform: rotate(180deg); }
+.v12-indietro > .group, .v12-indietro > .riga-link { margin: 0 var(--sp-2) var(--sp-2); }
+.v12-coach { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-2); }
+.v12-coach li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: var(--sp-2); align-items: center; font-size: var(--fs-label); }
+.v12-coach li .v12-pallino { align-self: start; margin-top: 7px; }
+.v12-coach li div { display: flex; flex-direction: column; }
+.v12-coach li div span { color: var(--text-2); font-size: var(--fs-caption); }
+.v12-coach li.ok { color: var(--text-2); }
+.v12-coach li.ok b { font-weight: 500; }
+.v12-pallino { width: 8px; height: 8px; border-radius: 4px; background: var(--danger); }
+.v12-coach li.ok .v12-pallino { background: var(--primary); }
+.v12-libero { display: flex; gap: var(--sp-2); align-items: center; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-ink); font-weight: 700; }
+.v12-tempo { margin-top: var(--sp-5); border: 1px dashed var(--border-strong); border-radius: var(--r-lg); }
+.v12-tempo > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 52px; padding: var(--sp-2) var(--sp-4); cursor: pointer; list-style: none; }
+.v12-tempo > summary span { display: flex; flex-direction: column; min-width: 0; }
+.v12-tempo > summary small { color: var(--text-2); font-size: var(--fs-caption); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v12-tempo-corpo { display: flex; flex-direction: column; gap: var(--sp-3); padding: 0 var(--sp-3) var(--sp-3); }
+.v12-tempo-corpo .banner-piano { margin: 0; }
+.v12-oggi .giornata .evt-passato { display: none; }
+.v12-oggi.mostra-passati .giornata .evt-passato { display: grid; opacity: .6; }
+.v12-mostra { margin-left: 6px; padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--primary-ink); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
+.v12-unisci { align-self: flex-end; margin: 0 0 4px auto; display: block; min-height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
+.v12-capito { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); margin: 0 0 var(--sp-2); font-size: var(--fs-label); }
+.v12-capito span { color: var(--text-2); font-size: var(--fs-caption); }
+

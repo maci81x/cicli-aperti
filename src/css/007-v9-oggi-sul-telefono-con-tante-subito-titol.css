@@ -1,0 +1,2 @@
+/* v9 · Oggi sul telefono: con tante Subito, titoli su una riga finché non le apri tutte */
+.subito-corte .item-title { -webkit-line-clamp: 1; }

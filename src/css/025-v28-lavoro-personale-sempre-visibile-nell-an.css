@@ -1,0 +1,7 @@
+/* v28 · Lavoro | Personale sempre visibile nell'anteprima */
+.v28-ctx { display: inline-flex; gap: 0; }
+.v28-ctx .v28-ctx-b { border-radius: 0; background: var(--surface); color: var(--text-2); font-weight: var(--fw-regular); }
+.v28-ctx .v28-ctx-b:first-child { border-radius: var(--r-full) 0 0 var(--r-full); }
+.v28-ctx .v28-ctx-b + .v28-ctx-b { border-left-width: 0; border-radius: 0 var(--r-full) var(--r-full) 0; }
+.v28-ctx .v28-ctx-b[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: var(--fw-strong); }
+.v28-ctx .v28-ctx-b[aria-pressed="true"] .ti { color: var(--bg); }

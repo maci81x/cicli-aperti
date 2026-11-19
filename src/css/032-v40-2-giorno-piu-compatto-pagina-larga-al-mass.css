@@ -1,0 +1,14 @@
+/* v40.2 · Giorno più compatto: pagina larga al massimo 1240px, colonna destra fissa mentre scorri,
+   «Da mettere in giornata» scorre da solo (la pagina resta ferma) */
+#view.largo.v40g { max-width: 1240px; }
+.v40-dametti { gap: var(--sp-2); min-height: 0; }
+.v40-scroll { display: grid; gap: var(--sp-2); overflow-y: auto; overscroll-behavior: contain; max-height: 55vh; margin: 0 calc(-1 * var(--sp-3)); padding: 0 var(--sp-3) var(--sp-2); scrollbar-width: thin; }
+.v40-gr-h { position: sticky; top: 0; z-index: 1; background: var(--surface); padding: 4px 0; margin-top: 0; }
+.v40-riga { min-height: 40px; }
+.v40-apri { padding: 5px 8px; }
+.v40-apri .t { -webkit-line-clamp: 2; }
+@media (min-width: 901px) {
+  .v26-g-grid { grid-template-columns: minmax(0, 1fr) 360px; gap: var(--sp-5); }
+  .v26-g-lato { position: sticky; top: var(--sp-4); }
+}
+

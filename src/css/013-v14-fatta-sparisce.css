@@ -1,0 +1,7 @@
+/* v14 · fatta = sparisce */
+.toast-action-2 { margin-left: 2px; }
+.v14-cerca { display: flex; margin-bottom: var(--sp-3); }
+.v14-riapri { min-height: 32px; padding: 0 8px; font-size: var(--fs-caption); }
+.v14-fatte { margin-top: var(--sp-5); }
+.is-done .item-side { gap: 4px; }
+

@@ -1,0 +1,4 @@
+/* v50 · Da controllare sul telefono; la riga aperta non ripete il titolo */
+.v49-ctl.v50-tel { margin: var(--sp-4) 0; }
+.v49-r-corpo .v29-h, .v49-r-corpo .v12-card > h3:first-child { display: none; }
+.v49-r-corpo .banner-piano > .ti:first-child, .v49-r-corpo .v12-card > .v12-ico { display: none; }

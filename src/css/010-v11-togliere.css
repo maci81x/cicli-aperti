@@ -1,0 +1,8 @@
+/* v11 · togliere */
+.tag-coach.tag-figlie { color: var(--text-2); border-color: var(--border-strong); }
+.evt-riga.evt-figlie { background: var(--surface-2); }
+.evt-figlie .evt-ico, .evt-figlie .item-title { color: var(--text-2); }
+.riga-link.riga-danger, .riga-link.riga-danger i { color: var(--danger, #B42318); }
+.btn-danger-pieno { background: var(--danger, #B42318); color: #fff; border: 0; }
+.evt-quando .tag-figlie { margin-right: 6px; }
+

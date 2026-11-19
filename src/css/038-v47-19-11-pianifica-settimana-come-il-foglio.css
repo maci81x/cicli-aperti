@@ -1,0 +1,34 @@
+/* ══ v47 · 19/11 — Pianifica › Settimana come il foglio di Leo: in alto, fissi mentre scorri, il giallo «In settimana»
+   e il blu «Obiettivi» affiancati e le intestazioni dei giorni; sotto tutti i giorni in vista, senza scorrere di lato.
+   Le rimaste indietro in cima a «Da pianificare». ══ */
+.v47-testa { position: sticky; top: 0; z-index: 30; background: var(--bg); padding-bottom: var(--sp-2); }
+.v47-testa .v26-testa { margin-bottom: var(--sp-2); }
+.v47-alto { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: var(--sp-3); align-items: stretch; }
+.v47-alto .bcol-sett { display: flex; flex-direction: column; min-width: 0; padding: 10px 12px; border-radius: var(--r-md); background: var(--pensa); border: 1px solid var(--pensa-bordo); }
+.v47-alto .bcol-sett .bcol-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 0; margin: 0 0 4px; color: var(--pensa-ink); font-weight: 700; }
+.v47-alto .bcol-sett .bcol-sotto { display: none; }
+.v47-alto .bcol-sett .bzona { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 10px; max-height: 128px; overflow-y: auto; background: transparent; border: 0; box-shadow: none; min-height: 34px; overscroll-behavior: contain; }
+.v47-alto .bcol-sett .item { background: transparent; border: 0; }
+.v47-alto .bcol-sett .item-row { padding: 4px 6px; min-height: 0; }
+.v47-alto .bcol-sett .item-title { font-size: 13.5px; }
+.v47-alto .bcol-sett .col-vuota { grid-column: 1 / -1; padding: 6px 0; font-size: 12.5px; color: var(--pensa-ink); text-align: left; background: none; border: 0; }
+.v47-alto .bcol-sett .bzona.drag-over { outline: 2px dashed var(--pensa-ink); outline-offset: 2px; }
+.v47-alto .v26-obiettivi { margin: 0; height: 100%; }
+.v47-pill { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--q1-mark) 40%, var(--border)); background: var(--q1-soft); color: var(--q1); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.v47-on .board-scorri { overflow: visible; }
+.v47-on .cols.board { min-width: 0 !important; align-items: stretch; }
+.v47-on .cols.board > .bcol > .bcol-h { position: sticky; top: var(--v47-h, 0px); z-index: 20; background: var(--bg); padding-top: 6px; padding-bottom: 6px; box-shadow: 0 1px 0 var(--border); }
+.v47-on .cols.board > .bcol.bcol-dp .bzona { max-height: none; }
+.v47-indietro { margin: 0 0 6px; border: 1px solid color-mix(in srgb, var(--q1-mark) 30%, var(--border)); border-radius: var(--r-sm); background: var(--surface); overflow: hidden; }
+.v47-indietro > summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 10px; background: var(--q1-soft); color: var(--q1); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.v47-indietro > summary::-webkit-details-marker { display: none; }
+
+.v47-testa .vh-board { flex-wrap: nowrap; align-items: center; gap: var(--sp-3); }
+.v47-testa .vh-board > div:first-child { flex: none; }
+.v47-testa .v22-testa { order: 0; flex: 1 1 0; min-width: 0; flex-wrap: wrap !important; row-gap: 8px; }
+.v47-testa .vh-board { width: 100%; }
+.v47-testa .v22-testa .bt-azioni { margin-left: auto; }
+.v47-testa .v22-testa .seg { flex: none; }
+.v47-indietro > summary .t-caption { display: none; }
+/* appuntamenti come sul foglio: righe chiare, il colore solo sull'orario */
+html:root .board .evt-riga.v24-altri, html:root .board .evt-riga.v24-mio { background: var(--surface); }

@@ -1,0 +1,10 @@
+/* v21 · settimana da oggi, stampa del giorno */
+.v21-passati { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; padding: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); border: 1px dashed var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
+.v21-passati span { flex: 1; min-width: 0; }
+.v21-passati b { color: var(--primary-ink); font-weight: var(--fw-strong); white-space: nowrap; }
+.v21-passati:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.v21-hdx { display: inline-flex; align-items: center; gap: 4px; }
+.v21-stampa { width: 32px; min-width: 32px; height: 32px; min-height: 32px; }
+.v21-stampa .ti { font-size: 17px; }
+.vh .v21-stampa-oggi { width: var(--tap); min-width: var(--tap); height: var(--tap); min-height: var(--tap); }
+@media (max-width: 480px) { .v21-passati b { display: none; } .v21-passati span::after { content: ' · tocca per vedere'; color: var(--text-3); } .v21-passati[aria-expanded="true"] span::after { content: ' · tocca per chiudere'; } }

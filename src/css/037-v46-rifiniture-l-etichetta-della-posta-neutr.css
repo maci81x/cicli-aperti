@@ -1,0 +1,15 @@
+/* v46 · rifiniture: l'etichetta della posta neutra (il blu è delle Importanti), traccia delle Subito nel giorno passato, Coach compatto */
+html:root .tag-posta { background: var(--surface-2); color: var(--text-2); }
+html:root .item.v46-traccia { opacity: .55; }
+html:root .item.v46-traccia .item-row { background: transparent; }
+.v43-metodo .v12-ico { width: 28px; height: 28px; font-size: 15px; }
+.v43-metodo .v12-coach { gap: 4px; }
+.v43-metodo .v12-coach li { grid-template-columns: 8px minmax(0, 1fr) auto; min-height: 32px; }
+.v43-metodo .v12-coach li div span { display: none; }
+.v43-metodo .v12-coach li .btn { min-height: 28px; height: 28px; padding: 0 10px; font-size: 12px; gap: 4px; }
+.v43-metodo .v12-coach li .btn .ti { font-size: 14px; }
+.v43-metodo .v12-card .btn-block { min-height: 34px; height: 34px; font-size: 13px; }
+
+#v44-testa .v46-days .day { min-height: 44px; padding: 2px 0; }
+#v44-testa .v46-days .day small, #v44-testa .v46-days .day .dot { display: none; }
+

@@ -1,0 +1,13 @@
+/* v23 · Oggi: «Da rispondere (N)», le cose dalla posta che aspettano una risposta */
+.v23-posta { margin: 0 0 var(--sp-4); border: 1px solid var(--q1-mark); border-left-width: 4px; border-radius: var(--r-md); background: var(--q1-soft); overflow: hidden; }
+.v23-h { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 52px; box-sizing: border-box; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); border: 0; background: transparent; color: var(--q1); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
+.v23-h:focus-visible { outline: 2px solid var(--q1-mark); outline-offset: -2px; }
+.v23-h > .ti { flex: none; font-size: 20px; }
+.v23-t { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--sp-2); }
+.v23-t b { font-weight: var(--fw-strong); white-space: nowrap; }
+.v23-t .mono { font-weight: 500; }
+.v23-t .ritardo { white-space: nowrap; }
+.v23-nomi { flex: 1 1 100%; min-width: 0; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (min-width: 768px) { .v23-nomi { flex: 1 1 auto; } }
+.v23-righe { margin: 0; border-top: 1px solid var(--border); border-radius: 0; background: var(--surface); }
+.v23-righe .item:last-child { border-bottom: 0; }

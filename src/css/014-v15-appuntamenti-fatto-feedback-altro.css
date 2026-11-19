@@ -1,0 +1,10 @@
+/* v15 · appuntamenti: fatto, feedback, altro */
+.v15-fb { display: flex; gap: var(--sp-2); align-items: flex-start; margin: 0 0 var(--sp-3); padding: var(--sp-3); border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-ink); font-size: var(--fs-label); }
+.v15-scrivi { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.v15-scrivi-az { display: flex; justify-content: flex-end; gap: var(--sp-2); }
+.v15-altro { margin-top: var(--sp-3); }
+#evt-corpo .group + .group { margin-top: var(--sp-3); }
+.v15-altro > summary { min-height: 44px; display: flex; align-items: center; padding: 0 var(--sp-2); cursor: pointer; color: var(--text-2); font-weight: var(--fw-strong); font-size: var(--fs-label); }
+.v15-evt .item-main { display: flex; flex-direction: column; min-width: 0; padding: var(--sp-2) 0; }
+.v15-fb-riga { font-size: var(--fs-caption); color: var(--text-2); margin-top: 2px; }
+

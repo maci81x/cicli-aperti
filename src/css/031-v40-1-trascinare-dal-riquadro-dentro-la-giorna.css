@@ -1,0 +1,5 @@
+/* v40.1 · trascinare dal riquadro dentro la giornata */
+.v40-riga[draggable="true"] { cursor: grab; }
+.v40-riga.dragging { opacity: .45; }
+.v26-g-main.v40-sopra { outline: 2px dashed var(--q2-mark); outline-offset: 6px; border-radius: var(--r-md); background: color-mix(in srgb, var(--q2-soft) 45%, transparent); }
+

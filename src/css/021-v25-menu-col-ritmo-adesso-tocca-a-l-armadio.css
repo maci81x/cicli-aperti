@@ -1,0 +1,21 @@
+/* v25 · menu col ritmo, «Adesso tocca a…», l'armadio delle sezioni */
+.v25-ritmo { display: flex; align-items: center; gap: var(--sp-3); min-height: 56px; margin: 0 0 var(--sp-3); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--primary-soft, #DDF2EE); border: 1px solid var(--primary); color: var(--text); }
+.v25-ritmo .ti-ico { flex: none; width: 36px; height: 36px; border-radius: var(--r-full); display: grid; place-items: center; background: var(--surface); color: var(--primary-ink); font-size: 20px; }
+.v25-ritmo .v25-testo { flex: 1; min-width: 0; font-size: var(--fs-label); line-height: var(--lh-label); }
+.v25-ritmo .v25-testo b { display: block; color: var(--primary-ink); }
+.v25-ritmo .btn { flex: none; }
+@media (max-width: 480px) { .v25-ritmo { flex-wrap: wrap; } .v25-ritmo .btn { flex: 1 1 100%; justify-content: center; } }
+.armadio { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: var(--sp-3); overflow-x: auto; padding: 2px 2px var(--sp-3); scroll-snap-type: x proximity; }
+.armadio .acol { scroll-snap-align: start; display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.acol-h { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-2) var(--sp-1); font-size: var(--fs-label); font-weight: var(--fw-strong); color: var(--text); border-bottom: 2px solid var(--border-strong); }
+.acol-h .ti { color: var(--primary-ink); font-size: 18px; }
+.acol-h .mono { margin-left: auto; color: var(--text-3); font-weight: 500; }
+.acol.delega .acol-h .ti { color: var(--q3-mark); } .acol.delega .acol-h { border-color: var(--q3-mark); }
+.acol.smista .acol-h .ti { color: var(--q1-mark); } .acol.smista .acol-h { border-color: var(--q1-mark); }
+.acol .group { background: var(--surface); }
+.acol .item-title { -webkit-line-clamp: 3; }
+.acol .item-row { grid-template-columns: var(--tap) minmax(0, 1fr); }
+.acol .item-side .btn-icon { display: none; } .acol .item:hover .item-side .btn-icon, .acol .item:focus-within .item-side .btn-icon { display: inline-flex; }
+.acol .col-vuota { padding: var(--sp-4); border: 1.5px dashed var(--border); border-radius: var(--r-md); color: var(--text-3); font-size: var(--fs-caption); text-align: center; }
+.armadio-tel .acc { margin-bottom: var(--sp-2); }
+.v25-sezione-chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-caption); line-height: 18px; }

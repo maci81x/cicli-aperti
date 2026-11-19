@@ -1,0 +1,24 @@
+/* v8 · riepilogo della frase sotto il campo */
+.rap-anteprima { display: grid; gap: var(--sp-1); margin-top: var(--sp-2); }
+.rap-voce { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+.rap-sintesi { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-1) 0 var(--sp-3); font-size: var(--fs-label); color: var(--text); }
+.rap-sintesi > span { flex: 1; min-width: 0; }
+.rap-avvisa { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-3) 0 calc(var(--sp-3) + 24px); font-size: var(--fs-label); color: var(--text-2); cursor: pointer; }
+.rap-avvisa input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
+#cattura-anteprima .rap-avvisa { padding-left: var(--sp-2); }
+.rap-passi { margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
+.rap-voce.p-q1 .rap-sintesi > .ti { color: var(--q1); } .rap-voce.p-q2 .rap-sintesi > .ti { color: var(--q2); }
+.rap-voce.p-q3 .rap-sintesi > .ti { color: var(--q3); } .rap-voce.p-q4 .rap-sintesi > .ti { color: var(--text-3); }
+.rap-edit { display: grid; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); }
+.rap-edit .input { min-height: var(--tap); }
+.rap-edit-riga { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--sp-2); }
+.rap-edit-riga .input { width: 100%; }
+@media (max-width: 479px) { .rap-edit-riga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .rap-edit-riga select { grid-column: 1 / -1; } }
+.pl-tipo[data-q="1"] { color: var(--q1); border-color: var(--q1-mark); } .pl-tipo[data-q="2"] { color: var(--q2); border-color: var(--q2-mark); }
+.pl-tipo[data-q="3"] { color: var(--q3); border-color: var(--q3-mark); }
+.cattura { flex-wrap: wrap; }
+.cattura-anteprima { flex: 1 0 100%; display: flex; align-items: center; gap: var(--sp-2); padding: 0 0 var(--sp-1); font-size: var(--fs-caption); color: var(--text-2); }
+.ca-voci { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.ca-voci > span { display: flex; align-items: flex-start; gap: var(--sp-1); line-height: var(--lh-caption); }
+.ca-voci > span .ti { flex: none; margin-top: 1px; }
+.ca-voci .p-q1 .ti { color: var(--q1); } .ca-voci .p-q2 .ti { color: var(--q2); } .ca-voci .p-q3 .ti { color: var(--q3); }
