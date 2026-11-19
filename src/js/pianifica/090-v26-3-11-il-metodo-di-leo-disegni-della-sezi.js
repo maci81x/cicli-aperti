@@ -11,7 +11,7 @@ const V26 = { RITMO_OFF: 'v26_ritmo_off', FISSI_LS: 'eventi_fissi', OB_LS: 'obie
 const v26Esc = s => escHtml(String(s == null ? '' : s));
 
 // --- «in giornata» al posto di «tutto il giorno» ---
-orarioEvento = function (e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : V26.SENZA_ORA; };
+function orarioEvento(e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : V26.SENZA_ORA; }
 
 // --- appuntamenti che non si spostano ---
 state.evtFissi = new Set((() => { try { const v = JSON.parse(localStorage.getItem(V26.FISSI_LS) || '[]'); return Array.isArray(v) ? v : []; } catch (_) { return []; } })());
@@ -516,10 +516,10 @@ async function v26Stampa(date, opz = {}) {
   return { doc, nome };
 }
 // il tasto stampante di Oggi e dei giorni: il foglio nuovo
-stampaGiorno = async function (idx, daOggi) {
+async function stampaGiorno(idx, daOggi) {
   const d = daOggi ? oggiData() : dataDelGiorno(idx);
   return v26Stampa([new Date(d.getFullYear(), d.getMonth(), d.getDate())]);
-};
+}
 AZIONI['v26-stampa-giorni'] = el => { const d = parseISODate(el.dataset.v); if (d) v26Stampa([d]); };
 // la scelta: solo un giorno, da oggi a domenica, tutta la settimana (+ il riepilogo per il coach)
 function v26OverlayStampa() {

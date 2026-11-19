@@ -122,7 +122,7 @@ loadBattlePlan = async function () {
 };
 // la cosa e i suoi passi
 const conIPassi = id => [id, ...state.cicli.filter(c => c.parent_id === id).map(c => c.id)];
-azioneElimina = async function (id) {
+async function azioneElimina(id) {
   const c = ciclo(id);
   if (!c) return;
   if (!state.eliminatoColOk) {   // colonna non ancora creata: come prima, definitiva e con la domanda
@@ -154,7 +154,7 @@ azioneElimina = async function (id) {
     state.cicli = [...copie.map(x => ({ ...x, eliminato_at: null })), ...state.cicli.filter(x => !ids.includes(x.id))];
     await reloadWeekData();
   } });
-};
+}
 // il tasto c'è sempre: aperte, fatte, in Un giorno
 const _apriDettaglioV11 = apriDettaglio;
 apriDettaglio = function (id) {

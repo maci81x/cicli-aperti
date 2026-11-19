@@ -4,7 +4,7 @@
 // · «Non è mio» e «Cancella da Google Calendar» sotto «Altro»
 // ══════════════════════════════════════════════════════════════
 const multiGiorno = e => !!(e && e.tuttoIlGiorno && giorniEvento(e) > 1);
-eventoSpuntabile = function (e) { return !!(e && e.id && !e.routine && !multiGiorno(e) && !eFiglie(e) && !eNascosto(e)); };
+function eventoSpuntabile(e) { return !!(e && e.id && !e.routine && !multiGiorno(e) && !eFiglie(e) && !eNascosto(e)); }
 
 state.evtInfo = {};   // { id evento: { titolo, feedback, giorno, fatto_at } }
 async function caricaEventiInfo() {
@@ -60,7 +60,7 @@ async function chiudiConFeedback(id, testo) {
 
 // il foglio dell'appuntamento, rifatto
 ui.evtFb = null;
-disegnaFoglioEvento = function (id) {
+function disegnaFoglioEvento(id) {
   const e = eventoPerId(id), corpo = $('evt-corpo');
   if (!corpo) return;
   if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
@@ -93,7 +93,7 @@ disegnaFoglioEvento = function (id) {
       ${togli}</div>
       ${!e.orgIo ? `<p class="t-caption muted">È un invito di ${escHtml(e.org || 'un\'altra persona')}: per rifiutarlo usa Google Calendar.</p>` : ''}</details>`;
   if (ui.evtFb === e.id) setTimeout(() => { const t = $('evt-fb-testo'); if (t) t.focus(); }, 50);
-};
+}
 Object.assign(AZIONI, {
   'evt-fb': el => { ui.evtFb = el.dataset.evt; disegnaFoglioEvento(el.dataset.evt); },
   'evt-fb-annulla': el => { ui.evtFb = null; disegnaFoglioEvento(el.dataset.evt); },

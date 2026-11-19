@@ -6,8 +6,8 @@
 //   Poi la giornata dalle 8 alle 18 (pieno/libero) e gli obiettivi della settimana.
 // · Menu: Settimana → Pianifica, Cicli → Tutte.
 // ══════════════════════════════════════════════════════════════
-cardCoach = () => '';
-v22RigaCoach = () => '';
+function cardCoach() { return ''; }
+function v22RigaCoach() { return ''; }
 
 const V31 = { DALLE: 8 * 60, ALLE: 18 * 60, BUCO_MIN: 15 };
 const v31Hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -111,7 +111,7 @@ function v31Obiettivi() {
 }
 
 // «Adesso» prende il posto del vecchio riquadro «Adesso tocca a…» e ne porta dentro il suggerimento
-v25RitmoCard = function () { return v31Adesso() + v31Giornata() + v31Obiettivi(); };
+function v25RitmoCard() { return v31Adesso() + v31Giornata() + v31Obiettivi(); }
 const _vistaOggiV31 = vistaOggi;
 vistaOggi = function () {
   let h = _vistaOggiV31.apply(this, arguments);

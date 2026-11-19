@@ -308,7 +308,7 @@ document.addEventListener('input', e => {
   if (s) s.textContent = t.value;
 });
 // «Ci vogliono pochi minuti? Falla ora» dopo il salvataggio: non più (resta il chip nella riga)
-offriFallaOraDopo = function () {};
+function offriFallaOraDopo() {}
 // apre il foglio: contesto per riga azzerato; i doppioni guardano anche gli appuntamenti già letti
 const _apriRapidoSn = apriRapido;
 apriRapido = function () { _apriRapidoSn.apply(this, arguments); ui.rapido = { ...ui.rapido, ctxMod: {} }; disegnaAnteprima(); caricaEventiDopp().catch(() => {}); };
@@ -332,7 +332,7 @@ $('cattura').addEventListener('focusout', () => setTimeout(() => {
   const dentro = $('cattura').contains(document.activeElement);
   if (!dentro && !ui.cattura.subito && !ui.cattura.oggi) $('cattura-chips').hidden = true;
 }, 150));
-salvaCattura = async function () {
+async function salvaCattura() {
   const righe = righeCattura();
   if (!righe.length) { apriRapido(); return; }
   fermaDettatura();
@@ -344,7 +344,7 @@ salvaCattura = async function () {
   finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; campo.disabled = false; }
   if (nuove) { campo.value = ''; allungaCattura(); ui.cattura = { subito: false, oggi: false, mod: {}, ctxMod: {} }; aggiornaChipsCattura(); disegnaAnteprimaCattura(); }
   campo.focus();
-};
+}
 
 // ─── Salvare: subito, ognuna nel suo contesto; poi i doppioni e «Vai a Personale» ───
 const _showToastSn = showToast;
@@ -448,7 +448,7 @@ async function unisciInsieme(cose, tieniId) {
   for (const c of altre) await patchCiclo(c.id, { done: true, chiuso_at: ora, execution_status: 'done', note: `Unita a «${tieni.title}»${c.note ? '\n\n' + c.note : ''}` });
   return { tieni, prima, assegnazioni };
 }
-unisciGruppo = async function (k) {
+async function unisciGruppo(k) {
   const g = gruppiAperti().find(x => x.chiave === k);
   if (!g) return;
   const tieniId = g.cose.some(c => c.id === ui.doppTieni[k]) ? ui.doppTieni[k] : g.cose[0].id;
@@ -458,7 +458,7 @@ unisciGruppo = async function (k) {
     render();
     showToast(`Unite in «${r.tieni.title}»`, 'success', { annulla: () => annullaUnione(r.prima, r.assegnazioni) });
   } catch (err) { showToast('Unione interrotta: ' + err.message, 'error'); render(); }
-};
+}
 async function collegaAEvento(c, e) {
   const ora = e.ora || null;
   await patchCiclo(c.id, { scheduled_date: e.giorno, scheduled_time: ora, ...(ui.calEventColOk !== false ? { calendar_event_id: 'ext:' + e.id } : {}),

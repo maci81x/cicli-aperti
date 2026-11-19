@@ -10314,7 +10314,7 @@ async function leggiEventi(da, a, calendari) {
 ui.eventiCarico = {};
 function eventiSettimanaDi(d) { const w = isoWeekParts(d); return ui.eventi[settKey(w.week, w.year)] || []; }
 // Gli appuntamenti del giorno, senza la routine del mattino (quella va in Routine)
-eventiDelGiorno = function (d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); };
+function eventiDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); }
 function routineDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && e.routine); }
 function arcoRoutine(lista) {
   if (!lista.length) return null;
@@ -10356,7 +10356,7 @@ const occupatiWizard = giorno => [..._bpwSel.values()].filter(v => v.giorno === 
 const occupatiPiano = gk => righeGiorno(gk).filter(r => r.ora).map(r => [minDi(r.ora), minDi(r.ora) + (r.durata || BP_DURATA_DEFAULT)]);
 
 // «+ Cuscinetto a metà / fine giornata» e i cuscinetti automatici: nello spazio libero più lungo di quella mezza giornata.
-bpwAggiungiCusc = function (giorno, quando, auto) {
+function bpwAggiungiCusc(giorno, quando, auto) {
   const idx = GIORNI.findIndex(g => g.key === giorno);
   const posti = idx >= 0 && _bpwWeek ? postiCuscinetto(bpDataGiorno(_bpwWeek, _bpwYear, idx), occupatiWizard(giorno)) : [];
   const meta = minDi(GIORNATA.META);
@@ -10365,7 +10365,7 @@ bpwAggiungiCusc = function (giorno, quando, auto) {
   const v = posto || { ora: quando === 'fine' ? CUSC.FINE : CUSC.META, durata: CUSC.DURATA };
   _bpwCusc.set('n' + (++_cuscN), { id: null, giorno, ora: v.ora, durata: v.durata, auto: !!auto });
   if (!auto) bpwRenderStep2();
-};
+}
 // Quando arrivano gli appuntamenti, i cuscinetti automatici ancora da salvare si rimettono negli spazi veri.
 function bpwRipiazzaAuto() {
   [..._bpwCusc.entries()].filter(([, v]) => v.auto && !v.id).forEach(([k]) => _bpwCusc.delete(k));
@@ -10377,13 +10377,13 @@ openBpWizard = async function (week, year, presel) {
   ui.bpwAuto = [..._bpwCusc.values()].some(v => v.auto);
   bpwConEventi(week, year);
 };
-bpwConEventi = function (week, year) {
+function bpwConEventi(week, year) {
   caricaEventi(week, year).then(() => {
     if (!$('bpWizOverlay').classList.contains('open') || _bpwWeek !== week || _bpwYear !== year) return;
     if (ui.bpwAuto && isGcalTokenValid()) bpwRipiazzaAuto();
     if (_bpwStep === 3) bpwRenderStep2(); else bpwRenderSummary();
   });
-};
+}
 const giornataPiena = (d, extra) => !!state.cuscColOk && isGcalTokenValid() && !postiCuscinetto(d, extra).length;
 const _bpwBloccoGiornoV4 = bpwBloccoGiorno;
 bpwBloccoGiorno = function (k, idx) {
@@ -10412,10 +10412,10 @@ function prossimoGiorno(idx, ora) {   // la prossima data (da oggi) con quel gio
 // ══════════════════════════════════════════════════════════════
 // v5 · BANNER: è ora del Business Plan · incontro con il coach · esercizio Q2 · appuntamenti che sembrano cicli
 // ══════════════════════════════════════════════════════════════
-quandoPiano = function () {
+function quandoPiano() {
   const g = parseInt(lsLeggi(LS3.PIANO_GIORNO), 10), o = lsLeggi(LS3.PIANO_ORA) || '';
   return { giorno: g >= 0 && g <= 6 ? g : 4, ora: /^\d{2}:\d{2}$/.test(o) ? o : '16:45' };   // predefinito venerdì 16:45
-};
+}
 // Il prossimo incontro con il coach entro 48 ore (dagli appuntamenti già letti)
 function prossimoCoach() {
   const ora = Date.now(), limite = ora + COACH_ORE * 3600e3;
@@ -10432,7 +10432,7 @@ function bannerCoach() {
     <div><b>Hai l'incontro con il coach ${fmtGiorno(d)} alle ${e.ora} — invia il piano</b><p class="t-caption muted">Piano della settimana ${w.week}${stampatoIl(w.week, w.year) ? ' · stampato il ' + stampatoIl(w.week, w.year) : ''}</p>
       <div class="banner-azioni"><button type="button" class="btn btn-primary btn-sm" data-act="coach-invia"><i class="ti ti-send"></i>Invia al coach</button></div></div>${chiudiBanner}</section>`;
 }
-bannerPiano = function () {
+function bannerPiano() {
   if (lsLeggi(LS3.PIANO_CHIUSO) === oggiLocale()) return '';
   const coach = bannerCoach();
   if (coach) return coach;
@@ -10447,7 +10447,7 @@ bannerPiano = function () {
       <div class="banner-azioni"><button type="button" class="btn ${esiste ? 'btn-secondary' : 'btn-primary'} btn-sm" data-act="banner-piano">Prepara</button>
         <button type="button" class="btn ${esiste ? 'btn-primary' : 'btn-secondary'} btn-sm" data-act="banner-stampa"${esiste ? '' : ' disabled'}><i class="ti ti-printer"></i>Stampa il foglio</button>
         <button type="button" class="btn btn-secondary btn-sm" data-act="banner-invia"${esiste ? '' : ' disabled'}><i class="ti ti-send"></i>Invia al coach</button></div></div>${chiudiBanner}</section>`;
-};
+}
 // Porta Pianifica sulla settimana (w) e poi stampa o invia
 async function vaiSettimanaE(w, poi) {
   if (state.week !== w.week || state.year !== w.year) {
@@ -10461,7 +10461,7 @@ async function vaiSettimanaE(w, poi) {
   setTimeout(poi, 200);
 }
 const settProssima = () => { const cur = bpSettimanaCorrente(); return bpSettimanaSuccessiva(cur.week, cur.year); };
-inviaPianoProssima = () => vaiSettimanaE(settProssima(), apriInvia);
+function inviaPianoProssima() { return vaiSettimanaE(settProssima(), apriInvia); }
 async function inviaPianoCoach() {
   const w = ui.coachSett || bpSettimanaCorrente();
   try { const { plan } = await bpFetchPlan(w.week, w.year); if (!plan) { apriWizard(w.week, w.year); return; } } catch (_) {}
@@ -12611,12 +12611,12 @@ async function aggiungiFrasi(voci, r) {
     return nuove;
   } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
 }
-salvaRapido = async function () {
+async function salvaRapido() {
   const righe = righeCampo($('rapido-testo').value);
   if (!righe.length) { $('rapido-testo').focus(); return; }
   fermaDettatura();
   if (await aggiungiFrasi(vociDaRighe(righe, ui.rapido), { ...ui.rapido })) closeModal('rapidoOverlay');
-};
+}
 // campo fisso del telefono: stesso riepilogo, in breve; «Modifica» apre il foglio con il testo
 function disegnaAnteprimaCattura() {
   const box = $('cattura-anteprima');
@@ -13095,7 +13095,7 @@ async function segnaEvento(id, fatto) {
 }
 
 const nomeCalendario = e => (CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || 'Google Calendar';
-rigaEvento = function (e) {
+function rigaEvento(e) {
   const dati = [`<span class="mono">${orarioEvento(e)}</span>`, `<span>${nomeCalendario(e)}</span>`];
   const sovrapposto = coseSovrapposte(e);
   const sovr = [
@@ -13109,7 +13109,7 @@ rigaEvento = function (e) {
   const tag = e.coach ? '<span class="tag-coach">Coach</span>' : e.prepCoach ? '<span class="tag-coach tag-prep">Preparazione coach</span>' : '';
   return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}${fatto ? ' is-fatto' : ''}"${apri}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}>${segno}
     <span class="evt-main"><span class="item-title">${tag}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
-};
+}
 
 document.body.insertAdjacentHTML('beforeend', `
 <div class="modal-overlay" id="evtOverlay" onclick="closeModalOnBg(event,'evtOverlay')">
@@ -13482,7 +13482,7 @@ async function calendariScrivibili() {
   return ((lista && lista.items) || []).filter(c => CAL_SCRITTURA.RUOLI.includes(c.accessRole))
     .map(c => ({ id: c.id, nome: (CAL_LETTURA.find(x => x.id === c.id) || {}).nome || c.summaryOverride || c.summary || c.id }));
 }
-ensureGcalCalendar = async function () {
+async function ensureGcalCalendar() {
   if (!isGcalTokenValid()) return;
   const scelto = calScelto();
   if (gcal.calendarId === scelto && ui.calVerificato) return;
@@ -13497,7 +13497,7 @@ ensureGcalCalendar = async function () {
   ui.calVerificato = true;
   localStorage.setItem('gcal_cal_id', id);
   if (cambiato) await saveGcalTokenToDB();
-};
+}
 // un id vecchio (localStorage gcal_cal_id o user_tokens.google_calendar_id) che non è quello di scrittura → Lavoro, subito
 function normalizzaCalendario() {
   const giusto = calScelto();
@@ -13523,7 +13523,7 @@ function sceltaCalScrittura() {
 
 // Gli eventi dell'app: titolo «16.45 - titolo», popup all'ora e 10 minuti prima, link all'app, proprietà cicli_aperti
 const PROMEMORIA_EVENTO = { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }, { method: 'popup', minutes: 10 }] };
-corpoEvento = function (c, slot) {
+function corpoEvento(c, slot) {
   const durata = slot.durata || AVVISO.DURATA;
   const inizio = new Date(`${slot.data}T${slot.ora}:00`), fine = new Date(inizio.getTime() + durata * 60000);
   return { summary: titoloAvviso(slot.ora, c.title), description: `Cicli Aperti · appuntamento con te stesso\n${APP_URL}#ciclo=${c.id}`,
@@ -13531,7 +13531,7 @@ corpoEvento = function (c, slot) {
     end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     reminders: PROMEMORIA_EVENTO,
     extendedProperties: { private: { cicli_aperti: 'blocco', ciclo_id: c.id } } };
-};
+}
 // togli: un evento che non è dell'app non si cancella, si scollega soltanto
 const _togliBloccoV10 = togliBlocco;
 togliBlocco = async function (c, silenzioso) {
@@ -13543,7 +13543,7 @@ togliBlocco = async function (c, silenzioso) {
   }
 };
 // chiusa: avviso → cancellato; blocco futuro → cancellato; blocco passato → «✓» davanti al titolo. Solo eventi dell'app.
-chiudiBlocco = async function (c) {
+async function chiudiBlocco(c) {
   if (!c || !c.calendar_event_id || bloccoEsterno(c) || !isGcalTokenValid()) return;
   try {
     await ensureGcalCalendar();
@@ -13555,7 +13555,7 @@ chiudiBlocco = async function (c) {
     if (eAvviso(ev) || futuro) { await togliBlocco(ciclo(c.id) || c, true); return; }
     if (!/^✓ /.test(ev.summary || '')) await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + (ev.summary || c.title) });
   } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi:', e.message); }
-};
+}
 
 // In Oggi e nelle colonne: un evento dell'app collegato a una cosa non compare (si vede la cosa, con la sua ora)
 const collegatoACosa = e => !!(e && e.app && e.cicloId);
@@ -13600,7 +13600,7 @@ async function corpoPromemoriaV10(tipo) {
     start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: PROMEMORIA_EVENTO, extendedProperties: { private: { cicli_aperti: 'promemoria', promemoria: 'q2' } } } };
 }
-sincronizzaPromemoria = async function (tipo, forza) {
+async function sincronizzaPromemoria(tipo, forza) {
   if (!isGcalTokenValid()) return null;
   await ensureGcalCalendar();
   if (!gcal.calendarId) return null;
@@ -13624,7 +13624,7 @@ sincronizzaPromemoria = async function (tipo, forza) {
     scriviJson(LS5.PROM, { ...leggiJson(LS5.PROM, {}), [tipo]: { id, firma, cal: gcal.calendarId } });
     return id;
   } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
-};
+}
 
 // ══════════════════════════════════════════════════════════════
 // 22/10 sera · «È una cosa da fare» dal foglio di un appuntamento
@@ -13643,7 +13643,7 @@ const eventoDiSerie = e => !!(e && e.serie && e.serie !== e.id);
 const _eventiDelGiornoDalCal = eventiDelGiorno;
 eventiDelGiorno = function (d) { return _eventiDelGiornoDalCal(d).filter(e => !eventoCollegato(e)); };
 
-eventoInElenco = async function (id) {
+async function eventoInElenco(id) {
   const e = eventoPerId(id);
   if (!e) return;
   const gia = cosaDiEvento(e);
@@ -13661,7 +13661,7 @@ eventoInElenco = async function (id) {
     ui.evtNuova = { evtId: e.id, cicloId: c.id };
     disegnaDomandaEvento(e);
   } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
-};
+}
 function disegnaDomandaEvento(e) {
   const b = (v, cls, testo) => `<button type="button" class="btn ${cls} btn-block" data-act="evt-togli" data-v="${v}">${testo}</button>`;
   const quando = `${fmtGiornoLungo(parseISODate(e.giorno))}${e.ora ? ` alle <span class="mono">${e.ora}</span>` : ''}`;
@@ -14369,7 +14369,7 @@ function rileggiSettimana(week, year) {
   ui.eventiCarico[k] = p;
   return p;
 }
-caricaEventi = function (week, year) {
+function caricaEventi(week, year) {
   const k = settKey(week, year);
   if (!isGcalTokenValid()) return Promise.resolve(ui.eventi[k] || []);
   if (ui.eventiCarico[k]) return ui.eventiCarico[k];
@@ -14378,7 +14378,7 @@ caricaEventi = function (week, year) {
   const fallito = (ui.eventiTentati[k] || 0) > letto;
   if (fallito && Date.now() - ui.eventiTentati[k] < EVENTI_AGG.RIPROVA_MS) return Promise.resolve(ui.eventi[k] || []);
   return rileggiSettimana(week, year);
-};
+}
 function chiaveSett(k) { const m = /^(\d{4})-W(\d{2})$/.exec(k); return m ? { week: +m[2], year: +m[1] } : null; }
 function aggiornaEventiAperti(motivo) {
   if (!_appAvviata || !isGcalTokenValid() || document.visibilityState === 'hidden') return;
@@ -14511,10 +14511,10 @@ async function caricaNonDoppioni() {
   }
   scriviJson(DOPP.LS_NO, unici([...leggiJson(DOPP.LS_NO, []), ...state.nonDopp]));   // la copia locale resta allineata
 }
-gruppiAperti = function () {
+function gruppiAperti() {
   const no = new Set([...doppioniNo(), ...state.nonDopp]);
   return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
-};
+}
 AZIONI['dopp-no'] = async el => {
   const k = el.dataset.k;
   scriviJson(DOPP.LS_NO, unici([...doppioniNo(), k]));
@@ -15751,7 +15751,7 @@ document.addEventListener('input', e => {
   if (s) s.textContent = t.value;
 });
 // «Ci vogliono pochi minuti? Falla ora» dopo il salvataggio: non più (resta il chip nella riga)
-offriFallaOraDopo = function () {};
+function offriFallaOraDopo() {}
 // apre il foglio: contesto per riga azzerato; i doppioni guardano anche gli appuntamenti già letti
 const _apriRapidoSn = apriRapido;
 apriRapido = function () { _apriRapidoSn.apply(this, arguments); ui.rapido = { ...ui.rapido, ctxMod: {} }; disegnaAnteprima(); caricaEventiDopp().catch(() => {}); };
@@ -15775,7 +15775,7 @@ $('cattura').addEventListener('focusout', () => setTimeout(() => {
   const dentro = $('cattura').contains(document.activeElement);
   if (!dentro && !ui.cattura.subito && !ui.cattura.oggi) $('cattura-chips').hidden = true;
 }, 150));
-salvaCattura = async function () {
+async function salvaCattura() {
   const righe = righeCattura();
   if (!righe.length) { apriRapido(); return; }
   fermaDettatura();
@@ -15787,7 +15787,7 @@ salvaCattura = async function () {
   finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; campo.disabled = false; }
   if (nuove) { campo.value = ''; allungaCattura(); ui.cattura = { subito: false, oggi: false, mod: {}, ctxMod: {} }; aggiornaChipsCattura(); disegnaAnteprimaCattura(); }
   campo.focus();
-};
+}
 
 // ─── Salvare: subito, ognuna nel suo contesto; poi i doppioni e «Vai a Personale» ───
 const _showToastSn = showToast;
@@ -15891,7 +15891,7 @@ async function unisciInsieme(cose, tieniId) {
   for (const c of altre) await patchCiclo(c.id, { done: true, chiuso_at: ora, execution_status: 'done', note: `Unita a «${tieni.title}»${c.note ? '\n\n' + c.note : ''}` });
   return { tieni, prima, assegnazioni };
 }
-unisciGruppo = async function (k) {
+async function unisciGruppo(k) {
   const g = gruppiAperti().find(x => x.chiave === k);
   if (!g) return;
   const tieniId = g.cose.some(c => c.id === ui.doppTieni[k]) ? ui.doppTieni[k] : g.cose[0].id;
@@ -15901,7 +15901,7 @@ unisciGruppo = async function (k) {
     render();
     showToast(`Unite in «${r.tieni.title}»`, 'success', { annulla: () => annullaUnione(r.prima, r.assegnazioni) });
   } catch (err) { showToast('Unione interrotta: ' + err.message, 'error'); render(); }
-};
+}
 async function collegaAEvento(c, e) {
   const ora = e.ora || null;
   await patchCiclo(c.id, { scheduled_date: e.giorno, scheduled_time: ora, ...(ui.calEventColOk !== false ? { calendar_event_id: 'ext:' + e.id } : {}),
@@ -16523,7 +16523,7 @@ loadBattlePlan = async function () {
 };
 // la cosa e i suoi passi
 const conIPassi = id => [id, ...state.cicli.filter(c => c.parent_id === id).map(c => c.id)];
-azioneElimina = async function (id) {
+async function azioneElimina(id) {
   const c = ciclo(id);
   if (!c) return;
   if (!state.eliminatoColOk) {   // colonna non ancora creata: come prima, definitiva e con la domanda
@@ -16555,7 +16555,7 @@ azioneElimina = async function (id) {
     state.cicli = [...copie.map(x => ({ ...x, eliminato_at: null })), ...state.cicli.filter(x => !ids.includes(x.id))];
     await reloadWeekData();
   } });
-};
+}
 // il tasto c'è sempre: aperte, fatte, in Un giorno
 const _apriDettaglioV11 = apriDettaglio;
 apriDettaglio = function (id) {
@@ -16619,7 +16619,7 @@ apriRapido = function () {
   if (b && t && !t.value) { t.value = b; disegnaAnteprima(); }
   return r;
 };
-apriRapidoCon = function (testo) { apriRapido(); $('rapido-testo').value = testo; bozzaScrivi(V12.BOZZA_RAPIDO, testo); disegnaAnteprima(); };
+function apriRapidoCon(testo) { apriRapido(); $('rapido-testo').value = testo; bozzaScrivi(V12.BOZZA_RAPIDO, testo); disegnaAnteprima(); }
 const _salvaRapidoV12 = salvaRapido;
 salvaRapido = async function () {
   const r = await _salvaRapidoV12.apply(this, arguments);
@@ -16954,14 +16954,14 @@ function conTutto(fn) { return function () { ui._tuttiCtx++; try { return fn.app
 ['creaPdfSettimana', 'quotaSettimana', 'vociCoach', 'bpwCandidati', 'righePdfGiorno'].forEach(nome => { if (typeof window[nome] === 'function') window[nome] = conTutto(window[nome]); });
 
 // --- il filtro in alto ---
-switchCtx = function (ctx) {
+function switchCtx(ctx) {
   state.filtro = ['lavoro', 'personale'].includes(ctx) ? ctx : 'tutto';
   state.ctx = state.filtro === 'personale' ? 'personale' : 'lavoro';
   state.filter_cat = null;
   state.filter_persona = null;
   try { localStorage.setItem(LS.CAT_FILTER, ''); } catch (_) { /* niente */ }
   render();
-};
+}
 const _disegnaV13 = disegna;
 disegna = function () {
   const r = _disegnaV13.apply(this, arguments);
@@ -17101,7 +17101,7 @@ salvaRapido = async function () {
 
 // Fatte: tutte le cose chiuse, con cerca e Riapri
 ui.fatteQ = '';
-vistaFatte = function () {
+function vistaFatte() {
   const q = normTitolo(ui.fatteQ || '');
   const tutte = state.cicli.filter(c => c.done && vedi(c.ctx));
   const lista = tutte.filter(c => !q || normTitolo(c.title).includes(q) || normTitolo(c.note || '').includes(q))
@@ -17123,7 +17123,7 @@ vistaFatte = function () {
         <button type="button" class="btn btn-ghost btn-sm v14-riapri" data-act="v14-seguito" data-id="${c.id}">+ Seguito</button>` })).join('')}</div>`;
   });
   return h;
-};
+}
 AZIONI['v14-riapri'] = (el, id) => azioneFatto(id);   // su una cosa fatta, Fatto la riapre
 AZIONI['v14-seguito'] = (el, id) => apriSeguito(ciclo(id));
 document.addEventListener('input', e => {
@@ -17148,7 +17148,7 @@ vistaTutto = function () {
 // · «Non è mio» e «Cancella da Google Calendar» sotto «Altro»
 // ══════════════════════════════════════════════════════════════
 const multiGiorno = e => !!(e && e.tuttoIlGiorno && giorniEvento(e) > 1);
-eventoSpuntabile = function (e) { return !!(e && e.id && !e.routine && !multiGiorno(e) && !eFiglie(e) && !eNascosto(e)); };
+function eventoSpuntabile(e) { return !!(e && e.id && !e.routine && !multiGiorno(e) && !eFiglie(e) && !eNascosto(e)); }
 
 state.evtInfo = {};   // { id evento: { titolo, feedback, giorno, fatto_at } }
 async function caricaEventiInfo() {
@@ -17204,7 +17204,7 @@ async function chiudiConFeedback(id, testo) {
 
 // il foglio dell'appuntamento, rifatto
 ui.evtFb = null;
-disegnaFoglioEvento = function (id) {
+function disegnaFoglioEvento(id) {
   const e = eventoPerId(id), corpo = $('evt-corpo');
   if (!corpo) return;
   if (!e) { corpo.innerHTML = '<p class="t-label muted">Questo appuntamento non c\'è più.</p>'; return; }
@@ -17237,7 +17237,7 @@ disegnaFoglioEvento = function (id) {
       ${togli}</div>
       ${!e.orgIo ? `<p class="t-caption muted">È un invito di ${escHtml(e.org || 'un\'altra persona')}: per rifiutarlo usa Google Calendar.</p>` : ''}</details>`;
   if (ui.evtFb === e.id) setTimeout(() => { const t = $('evt-fb-testo'); if (t) t.focus(); }, 50);
-};
+}
 Object.assign(AZIONI, {
   'evt-fb': el => { ui.evtFb = el.dataset.evt; disegnaFoglioEvento(el.dataset.evt); },
   'evt-fb-annulla': el => { ui.evtFb = null; disegnaFoglioEvento(el.dataset.evt); },
@@ -18245,7 +18245,7 @@ const V26 = { RITMO_OFF: 'v26_ritmo_off', FISSI_LS: 'eventi_fissi', OB_LS: 'obie
 const v26Esc = s => escHtml(String(s == null ? '' : s));
 
 // --- «in giornata» al posto di «tutto il giorno» ---
-orarioEvento = function (e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : V26.SENZA_ORA; };
+function orarioEvento(e) { return e.ora ? `${e.ora}${e.fine ? '–' + e.fine : ''}` : V26.SENZA_ORA; }
 
 // --- appuntamenti che non si spostano ---
 state.evtFissi = new Set((() => { try { const v = JSON.parse(localStorage.getItem(V26.FISSI_LS) || '[]'); return Array.isArray(v) ? v : []; } catch (_) { return []; } })());
@@ -18750,10 +18750,10 @@ async function v26Stampa(date, opz = {}) {
   return { doc, nome };
 }
 // il tasto stampante di Oggi e dei giorni: il foglio nuovo
-stampaGiorno = async function (idx, daOggi) {
+async function stampaGiorno(idx, daOggi) {
   const d = daOggi ? oggiData() : dataDelGiorno(idx);
   return v26Stampa([new Date(d.getFullYear(), d.getMonth(), d.getDate())]);
-};
+}
 AZIONI['v26-stampa-giorni'] = el => { const d = parseISODate(el.dataset.v); if (d) v26Stampa([d]); };
 // la scelta: solo un giorno, da oggi a domenica, tutta la settimana (+ il riepilogo per il coach)
 function v26OverlayStampa() {
@@ -19023,7 +19023,7 @@ async function v27SubitoAvanti() {
   v27DisegnaSubito();
 }
 AZIONI['v27-subito-avanti'] = () => v27SubitoAvanti();
-creaDaSubito = async function () {
+async function creaDaSubito() {
   const s = ui.subito;
   if (!s) return;
   const t = ($('subito-testo').value || '').trim();
@@ -19040,7 +19040,7 @@ creaDaSubito = async function () {
     render();
     showToast('Aggiunta a Importante · dice da dove nasce', 'success', nuova ? { annulla: () => apriDettaglio(nuova.id), etichetta: 'Dettagli' } : undefined);
   } catch (e) { s.creando = false; showToast('Non aggiunta: ' + e.message, 'error'); }
-};
+}
 
 // In Dettagli: da dove nasce (anche per quelle create con la versione vecchia)
 function v27Origine(c) {
@@ -19552,7 +19552,7 @@ function v30Riprogrammata(e) {
 }
 // la parola deve essere l'azione, non stare tra parentesi: «Cena a La Bottega (orario da chiedere)» è un appuntamento (4/11)
 const v30Parola = t => PAROLE_CICLO.test(normTitolo(String(t || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')));
-cercaCicliInCalendario = async function () {
+async function cercaCicliInCalendario() {
   if (!isGcalTokenValid()) return;
   const cur = bpSettimanaCorrente(), oggi = parseISODate(oggiLocale());
   let ev = [...(await caricaEventi(cur.week, cur.year) || [])];
@@ -19594,7 +19594,7 @@ cercaCicliInCalendario = async function () {
   render();
   if ($('calCicliOverlay').classList.contains('open')) disegnaCalCicli();
   if (messe) showToast(messe === 1 ? '1 promemoria passato è in «Da pianificare» · da rivedere' : `${messe} promemoria passati sono in «Da pianificare» · da rivedere`, 'info');
-};
+}
 // il foglio: per i promemoria passati «Già fatta · Mettila tra le cose da fare · Lascia stare»
 const _disegnaCalCicliV30 = disegnaCalCicli;
 disegnaCalCicli = function () {
@@ -19664,8 +19664,8 @@ patchCiclo = function (id, patch) {
 //   Poi la giornata dalle 8 alle 18 (pieno/libero) e gli obiettivi della settimana.
 // · Menu: Settimana → Pianifica, Cicli → Tutte.
 // ══════════════════════════════════════════════════════════════
-cardCoach = () => '';
-v22RigaCoach = () => '';
+function cardCoach() { return ''; }
+function v22RigaCoach() { return ''; }
 
 const V31 = { DALLE: 8 * 60, ALLE: 18 * 60, BUCO_MIN: 15 };
 const v31Hm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -19769,7 +19769,7 @@ function v31Obiettivi() {
 }
 
 // «Adesso» prende il posto del vecchio riquadro «Adesso tocca a…» e ne porta dentro il suggerimento
-v25RitmoCard = function () { return v31Adesso() + v31Giornata() + v31Obiettivi(); };
+function v25RitmoCard() { return v31Adesso() + v31Giornata() + v31Obiettivi(); }
 const _vistaOggiV31 = vistaOggi;
 vistaOggi = function () {
   let h = _vistaOggiV31.apply(this, arguments);

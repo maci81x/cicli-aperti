@@ -72,7 +72,7 @@ async function segnaEvento(id, fatto) {
 }
 
 const nomeCalendario = e => (CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || 'Google Calendar';
-rigaEvento = function (e) {
+function rigaEvento(e) {
   const dati = [`<span class="mono">${orarioEvento(e)}</span>`, `<span>${nomeCalendario(e)}</span>`];
   const sovrapposto = coseSovrapposte(e);
   const sovr = [
@@ -86,7 +86,7 @@ rigaEvento = function (e) {
   const tag = e.coach ? '<span class="tag-coach">Coach</span>' : e.prepCoach ? '<span class="tag-coach tag-prep">Preparazione coach</span>' : '';
   return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}${fatto ? ' is-fatto' : ''}"${apri}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}>${segno}
     <span class="evt-main"><span class="item-title">${tag}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
-};
+}
 
 document.body.insertAdjacentHTML('beforeend', `
 <div class="modal-overlay" id="evtOverlay" onclick="closeModalOnBg(event,'evtOverlay')">

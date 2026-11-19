@@ -27,7 +27,7 @@ const occupatiWizard = giorno => [..._bpwSel.values()].filter(v => v.giorno === 
 const occupatiPiano = gk => righeGiorno(gk).filter(r => r.ora).map(r => [minDi(r.ora), minDi(r.ora) + (r.durata || BP_DURATA_DEFAULT)]);
 
 // «+ Cuscinetto a metà / fine giornata» e i cuscinetti automatici: nello spazio libero più lungo di quella mezza giornata.
-bpwAggiungiCusc = function (giorno, quando, auto) {
+function bpwAggiungiCusc(giorno, quando, auto) {
   const idx = GIORNI.findIndex(g => g.key === giorno);
   const posti = idx >= 0 && _bpwWeek ? postiCuscinetto(bpDataGiorno(_bpwWeek, _bpwYear, idx), occupatiWizard(giorno)) : [];
   const meta = minDi(GIORNATA.META);
@@ -36,7 +36,7 @@ bpwAggiungiCusc = function (giorno, quando, auto) {
   const v = posto || { ora: quando === 'fine' ? CUSC.FINE : CUSC.META, durata: CUSC.DURATA };
   _bpwCusc.set('n' + (++_cuscN), { id: null, giorno, ora: v.ora, durata: v.durata, auto: !!auto });
   if (!auto) bpwRenderStep2();
-};
+}
 // Quando arrivano gli appuntamenti, i cuscinetti automatici ancora da salvare si rimettono negli spazi veri.
 function bpwRipiazzaAuto() {
   [..._bpwCusc.entries()].filter(([, v]) => v.auto && !v.id).forEach(([k]) => _bpwCusc.delete(k));
@@ -48,13 +48,13 @@ openBpWizard = async function (week, year, presel) {
   ui.bpwAuto = [..._bpwCusc.values()].some(v => v.auto);
   bpwConEventi(week, year);
 };
-bpwConEventi = function (week, year) {
+function bpwConEventi(week, year) {
   caricaEventi(week, year).then(() => {
     if (!$('bpWizOverlay').classList.contains('open') || _bpwWeek !== week || _bpwYear !== year) return;
     if (ui.bpwAuto && isGcalTokenValid()) bpwRipiazzaAuto();
     if (_bpwStep === 3) bpwRenderStep2(); else bpwRenderSummary();
   });
-};
+}
 const giornataPiena = (d, extra) => !!state.cuscColOk && isGcalTokenValid() && !postiCuscinetto(d, extra).length;
 const _bpwBloccoGiornoV4 = bpwBloccoGiorno;
 bpwBloccoGiorno = function (k, idx) {

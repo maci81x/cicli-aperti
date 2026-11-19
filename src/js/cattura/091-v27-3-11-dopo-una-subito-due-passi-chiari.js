@@ -56,7 +56,7 @@ async function v27SubitoAvanti() {
   v27DisegnaSubito();
 }
 AZIONI['v27-subito-avanti'] = () => v27SubitoAvanti();
-creaDaSubito = async function () {
+async function creaDaSubito() {
   const s = ui.subito;
   if (!s) return;
   const t = ($('subito-testo').value || '').trim();
@@ -73,7 +73,7 @@ creaDaSubito = async function () {
     render();
     showToast('Aggiunta a Importante · dice da dove nasce', 'success', nuova ? { annulla: () => apriDettaglio(nuova.id), etichetta: 'Dettagli' } : undefined);
   } catch (e) { s.creando = false; showToast('Non aggiunta: ' + e.message, 'error'); }
-};
+}
 
 // In Dettagli: da dove nasce (anche per quelle create con la versione vecchia)
 function v27Origine(c) {
