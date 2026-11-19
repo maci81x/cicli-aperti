@@ -11,8 +11,8 @@ const seed = { cicli: [base('v', 'Chiamare il notaio', { pianificato_data: '2026
   let r = await page.evaluate(() => { const c = document.querySelector('.v12-rosso'); return { lista: c ? [...c.querySelectorAll('.v12-righe .item-title')].map(x => x.innerText.trim()) : [], meta: c && c.querySelector('.item[data-id="v"] .ritardo') ? c.querySelector('.item[data-id="v"] .ritardo').innerText : '' }; });
   a(r.lista.some(t => /notaio/.test(t)) && !r.lista.some(t => /futura|chiusa/.test(t)) && /rimasta da gio/.test(r.meta), 'Oggi: la Subito del 12/11 è nella lista ' + JSON.stringify(r));
   await page.evaluate(() => { ui.pian = 'settimana'; vai('pianifica'); }); await page.waitForTimeout(700);
-  r = await page.evaluate(() => [...document.querySelectorAll('#dp-lista .item-title, #dp-lista .fascia-h')].map(x => x.innerText.trim()));
-  a(r[0] && /Subito rimaste indietro/.test(r[0]) && r.some(t => /notaio/.test(t)), 'Da pianificare: in cima le Subito rimaste indietro ' + JSON.stringify(r));
+  r = await page.evaluate(() => ({ sum: (document.querySelector('#dp-lista #v47-indietro summary') || {}).innerText, righe: [...document.querySelectorAll('#dp-lista #v47-indietro .item-title')].map(x => x.innerText.trim()) }));
+  a(/Rimaste indietro · 2/.test(r.sum || '') && r.righe.some(t => /notaio/.test(t)) && r.righe.some(t => /Importante vecchia/.test(t)), 'v47: Da pianificare, in cima tutte le rimaste indietro ' + JSON.stringify(r));
   await page.evaluate(() => { ui.pian = 'giorno'; ui.giorno = 2; render(); }); await page.waitForTimeout(500);
   r = await page.evaluate(() => [...document.querySelectorAll('.v40-apri .t')].map(x => x.innerText));
   a(r.some(t => /notaio/.test(t)), 'Giorno: nel riquadro da mettere in giornata ' + JSON.stringify(r));

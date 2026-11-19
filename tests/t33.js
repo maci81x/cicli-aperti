@@ -30,12 +30,12 @@ const OUT = process.env.OUT || '/tmp';
   await page.screenshot({ path: OUT + '/v33_oggi.png' });
   // Pianifica
   await page.evaluate(() => { ui.tab = 'pianifica'; ui.pian = 'settimana'; render(); }); await page.waitForTimeout(500);
-  r = await page.evaluate(() => { const vh = document.querySelector('#view .vh-board'), ob = document.querySelector('#view .v26-testa .v26-obiettivi'), cols = document.querySelector('#view .cols.board');
+  r = await page.evaluate(() => { const vh = document.querySelector('#view .vh-board'), ob = document.querySelector('#view .v47-alto .v26-obiettivi'), cols = document.querySelector('#view .cols.board');
     return { vh: Math.round(vh.getBoundingClientRect().height), ob: ob && Math.round(ob.getBoundingClientRect().height), tpl: cols.style.gridTemplateColumns,
       larg: [...cols.children].filter(x => x.classList.contains('bcol')).map(x => (x.querySelector('.bcol-h') || x).innerText.split('\n')[0] + ':' + Math.round(x.getBoundingClientRect().width)) }; });
-  a(r.vh <= 60, 'Pianifica: testa su una riga ' + r.vh);
-  a(r.ob && r.ob <= 60, 'obiettivi in una riga sottile ' + r.ob);
-  a(/\.7fr/.test(r.tpl) && /1fr/.test(r.tpl), 'giorni vuoti più stretti ' + JSON.stringify(r.larg));
+  a(r.vh <= 130, 'v47: testa compatta (una o due righe) ' + r.vh);
+  a(r.ob && r.ob <= 200, 'v47: obiettivi nel riquadro blu in alto ' + r.ob);
+  a(/\.75fr/.test(r.tpl) && /1fr/.test(r.tpl), 'v47: giorni vuoti più stretti ' + JSON.stringify(r.larg));
   await page.screenshot({ path: OUT + '/v33_pianifica.png' });
   // Tutte
   await page.evaluate(() => { ui.tab = 'tutto'; ui.tutto = 'lista'; render(); }); await page.waitForTimeout(500);

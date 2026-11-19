@@ -32,7 +32,7 @@ const seed = {
   let r = await page.evaluate(() => ({
     v: VERSIONE_APP,
     seg: [...document.querySelectorAll('#view [data-act="pian"]')].map(b => b.dataset.v),
-    ob: (document.querySelector('#view .v26-testa .v26-obiettivi') || {}).innerText || '',
+    ob: (document.querySelector('#view .v26-testa .v26-obiettivi, #view .v47-alto .v26-obiettivi') || {}).innerText || '',
     pdfAct: !!document.querySelector('#view [data-act="v26-stampa-scegli"]'),
     col: (() => { const z = [...document.querySelectorAll('#view .board section.bcol')].find(s => /Mar/.test(s.getAttribute('aria-label') || '')); if (!z) return null; return [...z.querySelectorAll('.bzona > *')].map(x => x.classList.contains('fascia-h') ? '#' + x.textContent.trim() : (x.classList.contains('v26-fisso') ? '!' : '') + ((x.querySelector('.item-title') || {}).textContent || '').trim().slice(0, 18)); })()
   }));

@@ -2458,6 +2458,41 @@ html:root .item.v46-traccia .item-row { background: transparent; }
 
 #v44-testa .v46-days .day { min-height: 44px; padding: 2px 0; }
 #v44-testa .v46-days .day small, #v44-testa .v46-days .day .dot { display: none; }
+
+/* ══ v47 · 19/11 — Pianifica › Settimana come il foglio di Leo: in alto, fissi mentre scorri, il giallo «In settimana»
+   e il blu «Obiettivi» affiancati e le intestazioni dei giorni; sotto tutti i giorni in vista, senza scorrere di lato.
+   Le rimaste indietro in cima a «Da pianificare». ══ */
+.v47-testa { position: sticky; top: 0; z-index: 30; background: var(--bg); padding-bottom: var(--sp-2); }
+.v47-testa .v26-testa { margin-bottom: var(--sp-2); }
+.v47-alto { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: var(--sp-3); align-items: stretch; }
+.v47-alto .bcol-sett { display: flex; flex-direction: column; min-width: 0; padding: 10px 12px; border-radius: var(--r-md); background: var(--pensa); border: 1px solid var(--pensa-bordo); }
+.v47-alto .bcol-sett .bcol-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 0; margin: 0 0 4px; color: var(--pensa-ink); font-weight: 700; }
+.v47-alto .bcol-sett .bcol-sotto { display: none; }
+.v47-alto .bcol-sett .bzona { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 10px; max-height: 128px; overflow-y: auto; background: transparent; border: 0; box-shadow: none; min-height: 34px; overscroll-behavior: contain; }
+.v47-alto .bcol-sett .item { background: transparent; border: 0; }
+.v47-alto .bcol-sett .item-row { padding: 4px 6px; min-height: 0; }
+.v47-alto .bcol-sett .item-title { font-size: 13.5px; }
+.v47-alto .bcol-sett .col-vuota { grid-column: 1 / -1; padding: 6px 0; font-size: 12.5px; color: var(--pensa-ink); text-align: left; background: none; border: 0; }
+.v47-alto .bcol-sett .bzona.drag-over { outline: 2px dashed var(--pensa-ink); outline-offset: 2px; }
+.v47-alto .v26-obiettivi { margin: 0; height: 100%; }
+.v47-pill { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--q1-mark) 40%, var(--border)); background: var(--q1-soft); color: var(--q1); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.v47-on .board-scorri { overflow: visible; }
+.v47-on .cols.board { min-width: 0 !important; align-items: stretch; }
+.v47-on .cols.board > .bcol > .bcol-h { position: sticky; top: var(--v47-h, 0px); z-index: 20; background: var(--bg); padding-top: 6px; padding-bottom: 6px; box-shadow: 0 1px 0 var(--border); }
+.v47-on .cols.board > .bcol.bcol-dp .bzona { max-height: none; }
+.v47-indietro { margin: 0 0 6px; border: 1px solid color-mix(in srgb, var(--q1-mark) 30%, var(--border)); border-radius: var(--r-sm); background: var(--surface); overflow: hidden; }
+.v47-indietro > summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 10px; background: var(--q1-soft); color: var(--q1); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.v47-indietro > summary::-webkit-details-marker { display: none; }
+
+.v47-testa .vh-board { flex-wrap: nowrap; align-items: center; gap: var(--sp-3); }
+.v47-testa .vh-board > div:first-child { flex: none; }
+.v47-testa .v22-testa { order: 0; flex: 1 1 0; min-width: 0; flex-wrap: wrap !important; row-gap: 8px; }
+.v47-testa .vh-board { width: 100%; }
+.v47-testa .v22-testa .bt-azioni { margin-left: auto; }
+.v47-testa .v22-testa .seg { flex: none; }
+.v47-indietro > summary .t-caption { display: none; }
+/* appuntamenti come sul foglio: righe chiare, il colore solo sull'orario */
+html:root .board .evt-riga.v24-altri, html:root .board .evt-riga.v24-mio { background: var(--surface); }
 </style>
 </head>
 <body>
@@ -18095,7 +18130,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-17 v46';
+const VERSIONE_APP = '2026-11-19 v47';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20989,7 +21024,7 @@ const v45Da = c => 'rimasta da ' + parseISODate(c.pianificato_data).toLocaleDate
   riga = function (r, opz) {
     let h = _rigaV45.apply(this, arguments);
     const c = r && r.c;
-    const indietro = c && !r.fatto && c.pianificato_data && c.pianificato_data < oggiLocale() && computeEffectiveQ(c) === 1 && ripetizioneDi(c) === 'nessuna';
+    const indietro = c && !r.fatto && !c.done && c.pianificato_data && c.pianificato_data < oggiLocale() && ripetizioneDi(c) === 'nessuna' && !isGiornaliero(c);   // v47: tutte, non solo le Subito
     if (indietro && opz && opz.passato && opz.data === c.pianificato_data)   // v46: nel suo giorno passato resta solo una traccia
       h = h.replace(/class="item /, 'class="item v46-traccia ').replace(/<span class="ritardo">in ritardo<\/span>/, '<span class="ritardo">ora in Da pianificare</span>');
     else if (indietro && !/rimasta da/.test(h))
@@ -21008,7 +21043,8 @@ const v45Da = c => 'rimasta da ' + parseISODate(c.pianificato_data).toLocaleDate
   const _candV45 = v40Candidate;
   v40Candidate = function () {
     const out = _candV45.apply(this, arguments), visti = new Set(out.map(x => x.c.id));
-    const extra = v45SubitoIndietro().filter(c => !visti.has(c.id)).map(c => ({ c, q: 1, da: v45Da(c) }));
+    const lista = typeof v47Indietro === 'function' ? v47Indietro() : v45SubitoIndietro();   // v47: tutte le rimaste indietro, Subito e Importanti
+    const extra = lista.filter(c => !visti.has(c.id) && [1, 2].includes(computeEffectiveQ(c))).map(c => ({ c, q: computeEffectiveQ(c), da: c.pianificato_data ? v45Da(c) : 'rimasta indietro' }));
     return [...extra, ...out];
   };
 }
@@ -21075,6 +21111,96 @@ function v46BarraTel(bar) {
     <button type="button" class="btn btn-icon" data-act="sett" data-dir="1" aria-label="Settimana dopo"><i class="ti ti-chevron-right"></i></button></div>
     <div class="days v46-days" style="${days.getAttribute('style') || ''};padding:0 12px 6px">${days.innerHTML}</div>`;
   bar.classList.add('su'); bar.removeAttribute('aria-hidden');
+}
+
+// ══════════════════════════════════════════════════════════════
+// v47 · 19/11 — Pianifica › Settimana sul computer come il foglio di Leo (call del 18/11, scelto da Roby)
+// · In alto e fissi mentre scorri: la testa (settimana, piano, coach), il giallo «In settimana · pensaci dopo»
+//   accanto al blu «Obiettivi», poi le intestazioni dei giorni. Sotto tutti i giorni in vista (niente scorrimento di lato).
+// · Le rimaste indietro (qualsiasi tipo: non fatte in un giorno passato) non sono più il blocco grande in cima:
+//   stanno in testa a «Da pianificare» («Rimaste indietro · N», con «rimasta da mer 11»), con un bollino in alto che ci porta.
+// ══════════════════════════════════════════════════════════════
+function v47Indietro() {
+  const oggi = oggiLocale(), visti = new Set(), out = [];
+  const ok = c => c && vedi(c.ctx) && !c.done && !isParcheggiato(c) && !c.parent_id && !isGiornaliero(c) && ripetizioneDi(c) === 'nessuna';
+  try { rimasteVisibili().forEach(({ item }) => { const c = ciclo(item.ciclo_id); if (ok(c) && !visti.has(c.id) && !(c.pianificato_data && c.pianificato_data >= oggi)) { visti.add(c.id); out.push(c); } }); } catch (_) {}
+  state.cicli.forEach(c => { if (ok(c) && !visti.has(c.id) && c.pianificato_data && c.pianificato_data < oggi) { visti.add(c.id); out.push(c); } });
+  return out.sort((a, b) => computeEffectiveQ(a) - computeEffectiveQ(b) || String(a.pianificato_data || '').localeCompare(String(b.pianificato_data || '')));
+}
+ui.v47Indietro = ui.v47Indietro !== false;
+{
+  // la colonna Da pianificare: in testa tutte le rimaste indietro (sostituisce il gruppo delle sole Subito della v45)
+  const _listaV47 = htmlDaPianificareLista;
+  htmlDaPianificareLista = function () {
+    let h = _listaV47.apply(this, arguments);
+    h = h.replace(/<div class="fascia-h v45-h">[\s\S]*?(?=<div class="fascia-h">Da pianificare<\/div>|$)/, '').replace(/^<div class="fascia-h">Da pianificare<\/div>/, '');
+    const q = (ui.dp.q || '').trim().toLowerCase();
+    const l = v47Indietro().filter(c => (!q || String(c.title || '').toLowerCase().includes(q)) && (!ui.dp.tipo || computeEffectiveQ(c) === ui.dp.tipo));
+    if (!l.length) return h;
+    const righe = l.map(c => riga({ c, fatto: false }, { trascina: true, data: oggiLocale() })).join('');
+    return `<details class="v47-indietro" id="v47-indietro"${ui.v47Indietro ? ' open' : ''}><summary data-act="v47-ind-apri"><span>Rimaste indietro · ${l.length}</span><span class="t-caption">trascinale in un giorno</span></summary>${righe}</details>`
+      + (/col-vuota/.test(h) ? '' : '<div class="fascia-h">Da pianificare</div>' + h);
+  };
+  AZIONI['v47-ind-apri'] = el => { setTimeout(() => { const d = el.closest('details'); ui.v47Indietro = !!(d && d.open); }, 0); };
+  AZIONI['v47-vai-indietro'] = () => {
+    ui.v47Indietro = true;
+    const d = document.getElementById('v47-indietro'); if (!d) return;
+    d.open = true;
+    const l = document.getElementById('dp-lista'); if (l) l.scrollTop = 0;
+    const m = document.getElementById('main'), top = d.getBoundingClientRect().top - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--v47-h')) || 0) - 60;
+    if (m) m.scrollBy({ top, behavior: 'smooth' });
+  };
+  const _vpV47 = vistaPianifica;
+  vistaPianifica = function () {
+    let h = _vpV47.apply(this, arguments);
+    if (ui.sub || ui.pian !== 'settimana' || !/cols board/.test(h) || window.innerWidth < 1024) return h;
+    try {
+      const t = document.createElement('template'); t.innerHTML = h; const f = t.content;
+      f.querySelectorAll('section.carry, .rimaste-riga').forEach(x => x.remove());
+      const testa = f.querySelector('.v26-testa'), sett = f.querySelector('.cols.board > .bcol-sett'), ob = f.querySelector('.v26-obiettivi');
+      if (!testa || !sett) return h;
+      const box = document.createElement('div'); box.className = 'v47-testa';
+      testa.before(box); box.appendChild(testa);
+      const alto = document.createElement('div'); alto.className = 'board v47-alto';
+      const hs = sett.querySelector('.bcol-h span'); if (hs) hs.textContent = 'In settimana · pensaci dopo';
+      alto.appendChild(sett);
+      if (ob) alto.appendChild(ob);
+      box.appendChild(alto);
+      const r2 = testa.querySelector('.v33-riga2'), seg = testa.querySelector('.seg'), riga = testa.querySelector('.v22-testa');
+      if (seg && riga) riga.appendChild(seg);
+      if (r2 && !r2.children.length) r2.remove();
+      const n = v47Indietro().length;
+      const stat = testa.querySelector('.bt-stat');
+      if (n && stat) stat.insertAdjacentHTML('afterend', `<button type="button" class="v47-pill" data-act="v47-vai-indietro"><i class="ti ti-clock-exclamation" aria-hidden="true"></i>${n} rimast${n === 1 ? 'a' : 'e'} indietro</button>`);
+      const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
+    } catch (e) { console.warn('[v47] settimana:', e.message); }
+    return h;
+  };
+  // dopo il disegno: giorni tutti in vista e altezza della testa per le intestazioni fisse
+  const _dV47 = disegna;
+  disegna = function () {
+    _dV47.apply(this, arguments);
+    const view = $('view'), on = !!(view && view.querySelector('.v47-testa'));
+    if (view) view.classList.toggle('v47-on', on);
+    if (!on) return;
+    const cols = view.querySelector('.cols.board');
+    if (cols) {
+      const sez = [...cols.children].filter(x => x.classList.contains('bcol'));
+      const giorni = sez.filter(x => !x.classList.contains('bcol-dp'));
+      const pieno = s => !!s.querySelector('.item') || [...s.querySelectorAll('.evt-riga')].some(e => /\d{2}:\d{2}/.test(e.textContent) && !e.closest('.spazio-riga, .cusc-riga'));
+      cols.style.gridTemplateColumns = `minmax(200px, 240px) ${giorni.map(s => pieno(s) ? 'minmax(0, 1fr)' : 'minmax(0, .75fr)').join(' ')}`;
+    }
+    const alza = () => { const b = view.querySelector('.v47-testa'); if (b) document.documentElement.style.setProperty('--v47-h', Math.round(b.getBoundingClientRect().height) + 'px'); };
+    alza(); requestAnimationFrame(alza);
+  };
+  // la barra della v44 sul computer non serve più: la testa resta già in vista
+  const _v44V47 = v44Aggiorna;
+  v44Aggiorna = function () {
+    if (window.innerWidth >= 1024 && document.querySelector('#view .v47-testa')) { V44.raf = 0; v44Barra().classList.remove('su'); return; }
+    return _v44V47.apply(this, arguments);
+  };
+  let _rzV47 = 0;
+  window.addEventListener('resize', () => { clearTimeout(_rzV47); _rzV47 = setTimeout(() => { if (ui.tab === 'pianifica') render(); }, 250); });
 }
 </script>
 </body>
