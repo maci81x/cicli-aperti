@@ -18239,7 +18239,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-19 v49';
+const VERSIONE_APP = '2026-11-19 v49.1';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -21381,8 +21381,8 @@ ui.v48Zitto = 0;
 function v48Libere(d) {
   const g = d.getDay();
   if (g === 0 || g === 6) return { t: 'weekend', weekend: true };
-  if (typeof isGcalTokenValid !== 'function' || !isGcalTokenValid()) return { t: '' };
-  const w = isoWeekParts(d);
+  const w = isoWeekParts(d), tok = typeof isGcalTokenValid === 'function' && isGcalTokenValid();
+  if (!ui.eventi[settKey(w.week, w.year)] && !tok) return { t: '' };   // v49 · senza accesso a Google valgono gli appuntamenti già in memoria
   if (!ui.eventi[settKey(w.week, w.year)]) { caricaEventi(w.week, w.year).then(() => v48Giorni()).catch(() => {}); return { t: '…' }; }
   let da = V31.DALLE;
   if (toISODate(d) === toISODate(oggiData())) da = Math.max(da, v31Ora());
