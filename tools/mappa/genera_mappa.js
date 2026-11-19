@@ -7,7 +7,7 @@ if (!reportPath || !out) { console.error('Uso: node genera_mappa.js report.json 
 const r = JSON.parse(fs.readFileSync(path.resolve(reportPath), 'utf8'));
 
 const md = s => String(s || '').replace(/─{2,}\s*/g, '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
-const verificateDinamiche = new Set(['p-q1', 'p-q3', 'p-q4', 'chip-q1', 'chip-q2', 'chip-q3', 't-q1', 't-q2', 't-q3', 't-q4', 'v17-q1', 'v17-q2', 'v17-q3', 'v17-q4']);
+const verificateDinamiche = new Set(['tag-q1', 'tag-q2', 'tag-q3', 'tag-q4', 'p-q1', 'p-q3', 'p-q4', 'chip-q1', 'chip-q2', 'chip-q3', 't-q1', 't-q2', 't-q3', 't-q4', 'v17-q1', 'v17-q2', 'v17-q3', 'v17-q4']);
 const catene = Object.entries(r.cateneMulti);
 const multi = catene.filter(([, v]) => v.strati.length >= 2);
 const singole = catene.filter(([, v]) => v.strati.length === 1);
