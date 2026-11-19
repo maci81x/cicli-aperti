@@ -3,7 +3,7 @@
 const fs = require('fs'), path = require('path');
 const [, , R, OUTF] = process.argv;
 const { chromium } = require(path.resolve(R, 'tests/node_modules/playwright'));
-const url = 'file://' + path.join(R, 'index.html');
+const url = 'file://' + path.resolve(R, 'index.html');
 const STATI = [
   { nome: 'chiaro', tema: 'light' }, { nome: 'scuro', tema: 'dark' },
   { nome: 'alto-chiaro', tema: 'light', alto: true }, { nome: 'alto-scuro', tema: 'dark', alto: true },

@@ -66,7 +66,6 @@
    DESIGN SYSTEM — token e componenti di DESIGN_SYSTEM.md
    ══════════════════════════════════════════════════════════════ */
 :root {
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* scala tipografica: 5 livelli */
@@ -98,87 +97,13 @@
 
 :root, [data-theme="light"] {
   color-scheme: light;
-  --bg: #F5F7F6;
-  --surface: #FFFFFF;
-  --surface-2: #ECF0EE;
-  --surface-3: #FFFFFF;
-  --border: #DFE5E2;
-  --border-strong: #84918C;
-  --text: #14201D;
-  --text-2: #46544F;
-  --text-3: #5F6C67;
-  --done-title: #5F6C67;
-  --done-meta: #5F6C67;
   --done-opacity: .6;
-
-  --primary: #0F766E;
-  --primary-deep: #0A544E;
-  --primary-ink: #0B5F58;
-  --primary-soft: #DDF2EE;
-  --on-primary: #FFFFFF;
-
-  /* colori = priorità. --qN: testo (≥ 4.5:1 su tutte le superfici); --qN-mark: segni (casella, puntini) col colore esatto */
-  --q1: #B42318;  --q1-mark: #D92D20;  --q1-soft: #FFF4F3;   /* Subito */
-  --q2: #0B5F58;  --q2-mark: #0F766E;  --q2-soft: #DDF2EE;   /* Importante */
-  --q3: #1D4ED8;  --q3-mark: #2563EB;  --q3-soft: #E8EFFE;   /* Delega */
-  --q4: #5F6C67;  --q4-mark: #7A8682;  --q4-soft: #ECF0EE;   /* Lascia stare · segno ≥ 3:1 anche su #FFF4F3 e #F3EEFE (22/10) */
-  --evt: #6D28D9; --evt-mark: #7C3AED; --evt-soft: #F3EEFE;  /* Appuntamento (Google Calendar) */
-  --v24-tratto: #C4B5FD;  /* v24 · tempo tuo, bordo tratteggiato */
-  --pensa: #FDF6D8; --pensa-bordo: #E3C65A; --pensa-ink: #6B5300;   /* «In settimana · pensaci dopo» */
-
-  --danger: #B42318; --danger-soft: #FCE8E6;
-  --warn: #92500A;   --warn-soft: #FBEFD5;
-
-  --inverse-bg: #14201D; --inverse-text: #FFFFFF; --inverse-accent: #5EEAD4;
-  --scrim: rgba(20, 32, 29, .42);
-  --ring: #0F766E;
-
-  --shadow-1: 0 1px 2px rgba(20, 32, 29, .06);
-  --shadow-2: 0 4px 12px rgba(20, 32, 29, .08), 0 1px 2px rgba(20, 32, 29, .05);
-  --shadow-3: 0 16px 40px rgba(20, 32, 29, .16), 0 2px 6px rgba(20, 32, 29, .06);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0D1312;
-  --surface: #161D1C;
-  --surface-2: #202A28;
-  --surface-3: #34413E;
-  --border: #2A3533;
-  --border-strong: #71807B;
-  --text: #ECF1EF;
-  --text-2: #B7C2BE;
-  --text-3: #93A09B;
   /* nel tema scuro le cose fatte salgono di un livello: titolo su testo-2, dettagli su testo-3 pieni */
-  --done-title: #B7C2BE;
-  --done-meta: #93A09B;
   --done-opacity: 1;
-
-  --primary: #2DD4BF;
-  --primary-deep: #15988A;
-  --primary-ink: #5EEAD4;
-  --primary-soft: #12332F;
-  --on-primary: #04201D;
-
-  --q1: #F97066;  --q1-mark: #F97066;  --q1-soft: #3A1D1A;
-  --q2: #2DD4BF;  --q2-mark: #2DD4BF;  --q2-soft: #12332F;
-  --q3: #93B4FF;  --q3-mark: #93B4FF;  --q3-soft: #1B2A4A;
-  --q4: #8A9692;  --q4-mark: #8A9692;  --q4-soft: #202A28;
-  --evt: #B9A2F7; --evt-mark: #B9A2F7; --evt-soft: #261E3D;
-  --v24-tratto: #5B4A8E;
-  --pensa: #2E2810; --pensa-bordo: #7A6420; --pensa-ink: #F2D675;
-
-  --danger: #F98B82; --danger-soft: #3B1A17;
-  --warn: #F5C261;   --warn-soft: #3A2C10;
-
-  --inverse-bg: #ECF1EF; --inverse-text: #14201D; --inverse-accent: #0B5F58;
-  --scrim: rgba(0, 0, 0, .6);
-  --ring: #5EEAD4;
-
-  /* nel tema scuro la profondità la danno le superfici, non le ombre */
-  --shadow-1: 0 0 0 1px #2A3533;
-  --shadow-2: 0 0 0 1px #2A3533, 0 6px 16px rgba(0, 0, 0, .4);
-  --shadow-3: 0 0 0 1px #2A3533, 0 20px 48px rgba(0, 0, 0, .55);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -598,7 +523,7 @@ a { color: var(--primary-ink); }
 .semplice .tabbar { grid-template-columns: repeat(2, 1fr); }
 
 /* contrasto alto: bordi più marcati, testo secondario più scuro, badge con bordo */
-[data-contrast="alto"] { --border: #84918C; --border-strong: #46544F; --text-2: #26332F; --text-3: #37443F; --done-meta: #37443F; --done-opacity: 1; }
+[data-contrast="alto"] { --done-opacity: 1; }
 [data-contrast="alto"][data-theme="dark"] { --border: #71807B; --border-strong: #B7C2BE; --text-2: #E2E9E6; --text-3: #CBD5D1; --done-meta: #CBD5D1; }
 [data-contrast="alto"] .tag, [data-contrast="alto"] .rapida, [data-contrast="alto"] .badge, [data-contrast="alto"] .hint-quando { padding: 0 6px; border: 1px solid currentColor; border-radius: var(--r-full); }
 [data-contrast="alto"] .chip, [data-contrast="alto"] .gchip, [data-contrast="alto"] .input { border-width: 2px; }
@@ -1848,9 +1773,7 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v26-testa > .vh-board { margin-bottom: 0; }
 @media (max-width: 1280px) { .v26-testa { grid-template-columns: minmax(0, 1fr); } }
 .v26-obiettivi { padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--v26-ob-bg, #EEF5FF); border: 1.5px solid var(--v26-ob-bordo, #9EC3F5); color: var(--text); margin-bottom: var(--sp-3); }
-:root { --v26-ob-bg: #EEF5FF; --v26-ob-bordo: #9EC3F5; --v26-ob-ink: #1D4E89; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --v26-ob-bg: #16243A; --v26-ob-bordo: #2F4F7A; --v26-ob-ink: #9CC5F2; } }
-:root[data-theme="dark"] { --v26-ob-bg: #16243A; --v26-ob-bordo: #2F4F7A; --v26-ob-ink: #9CC5F2; }
 .v26-ob-h { display: flex; align-items: center; gap: var(--sp-2); }
 .v26-ob-h b { flex: 1; color: var(--v26-ob-ink); font-size: var(--fs-label); }
 .v26-ob-h .mono { color: var(--v26-ob-ink); font-size: var(--fs-caption); }
@@ -1962,50 +1885,16 @@ button.sn-r { width: 100%; cursor: pointer; }
 html:root, html[data-theme="light"] {
   --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
-  --bg: #F4EFE4; --surface: #FFFCF5; --surface-2: #EDE6D7; --surface-3: #FFFCF5;
-  --border: #E3DAC7; --border-strong: #8A8270;
-  --text: #1C1B18; --text-2: #55503F; --text-3: #6B6553;
-  --done-title: #6B6553; --done-meta: #6B6553;
-  --primary: #1C1B18; --primary-deep: #000000; --primary-ink: #1C1B18; --primary-soft: #FAEFC3; --on-primary: #F4EFE4;
-  --q1: #B3261E; --q1-mark: #B3261E; --q1-soft: #F6E1DB;
-  --q2: #1E5E4E; --q2-mark: #1E5E4E; --q2-soft: #DCEAE3;
-  --q3: #3F6E7A; --q3-mark: #3F6E7A; --q3-soft: #E1ECEE;
-  --q4: #6B6553; --q4-mark: #8A8270; --q4-soft: #EDE6D7;
-  --evt: #5E4B8B; --evt-mark: #5E4B8B; --evt-soft: #EEEAF5; --v24-tratto: #B9AED3;
-  --pensa: #FAEFC3; --pensa-bordo: #D9B43A; --pensa-ink: #5E4A00;
-  --danger: #B3261E; --danger-soft: #F6E1DB;
-  --warn: #8A5A00; --warn-soft: #F7EBCF;
-  --inverse-bg: #1C1B18; --inverse-text: #F4EFE4; --inverse-accent: #8FE3C8;
   --scrim: rgba(28, 27, 24, .42);
-  --ring: #1C1B18;
-  --shadow-1: 0 1px 0 rgba(28, 27, 24, .04);
-  --shadow-2: 0 1px 0 rgba(28, 27, 24, .04), 0 6px 16px rgba(60, 48, 20, .08);
   --shadow-3: 0 18px 44px rgba(40, 32, 12, .18), 0 2px 6px rgba(40, 32, 12, .06);
-  --v26-ob-bg: #E4E8F6; --v26-ob-bordo: #B5C0E6; --v26-ob-ink: #2343A6;
-  --v31-notte: #151410; --v31-notte-2: #211F19; --v31-notte-3: #2E2B23; --v31-luce: #8FE3C8; --v31-su-notte: #F3EEE3; --v31-su-notte-2: #B9B2A2;
-  --v31-hl: #F1CE4A;
 }
 html:root[data-theme="dark"] {
-  --bg: #12110E; --surface: #1B1A16; --surface-2: #24221C; --surface-3: #2E2B23;
-  --border: #2C2A23; --border-strong: #8D8676;
-  --text: #F1ECE1; --text-2: #BDB5A4; --text-3: #A39B8A;
-  --done-title: #BDB5A4; --done-meta: #A39B8A;
-  --primary: #F1ECE1; --primary-deep: #BDB5A4; --primary-ink: #F1ECE1; --primary-soft: #3A3217; --on-primary: #12110E;
-  --q1: #FF8A7A; --q1-mark: #FF8A7A; --q1-soft: #3A1F1A;
-  --q2: #8FE3C8; --q2-mark: #8FE3C8; --q2-soft: #173129;
-  --q3: #9CCAD6; --q3-mark: #9CCAD6; --q3-soft: #182A2F;
   --q4: #A39B8A; --q4-mark: #8D8676; --q4-soft: #24221C;
-  --evt: #B9A8E6; --evt-mark: #B9A8E6; --evt-soft: #262035; --v24-tratto: #5B4F7E;
-  --pensa: #3A3217; --pensa-bordo: #7A6420; --pensa-ink: #F2D675;
-  --danger: #FF8A7A; --danger-soft: #3A1F1A;
   --warn: #F2C46A; --warn-soft: #3A2C10;
-  --inverse-bg: #F1ECE1; --inverse-text: #12110E; --inverse-accent: #1E5E4E;
   --scrim: rgba(0, 0, 0, .6);
-  --ring: #8FE3C8;
   --shadow-1: 0 0 0 1px #2C2A23;
   --shadow-2: 0 0 0 1px #2C2A23, 0 6px 16px rgba(0, 0, 0, .4);
   --shadow-3: 0 0 0 1px #2C2A23, 0 20px 48px rgba(0, 0, 0, .55);
-  --v26-ob-bg: #1D2440; --v26-ob-bordo: #34407A; --v26-ob-ink: #9DB2FF;
   --v31-hl: #E9C64A;
 }
 html:root[data-contrast="alto"] { --border: #8A8270; --border-strong: #55503F; --text-2: #3A362B; --text-3: #47423A; --done-meta: #47423A; }
@@ -2184,8 +2073,6 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
    appuntamenti tuoi = viola chiaro · con altri = viola pieno · spazi liberi = verde tratteggiato
    Subito = casella rosa con bordo rosso (ovunque) · Importante = foglio bianco
    ══════════════════════════════════════════════════════════════ */
-html:root { --v34-sub-bg: #F6E1DB; --v34-sub-bordo: #D9776E; --v34-sub-ink: #5A1410; --v34-io: #EEEAF5; --v34-io-ink: #5E4B8B; --v34-altri: #5E4B8B; --v34-altri-ink: #FFFFFF; --v34-altri-2: #E4DEF3; --v34-lib: #EEF6F2; --v34-lib-bordo: #9CC9B8; --v34-lib-ink: #1E5E4E; }
-html:root[data-theme="dark"] { --v34-sub-bg: #3A1F1A; --v34-sub-bordo: #8C3B33; --v34-sub-ink: #FFD9D3; --v34-io: #262035; --v34-io-ink: #C9BCEB; --v34-altri: #6C5AA0; --v34-altri-ink: #FFFFFF; --v34-altri-2: #E4DEF3; --v34-lib: #14281F; --v34-lib-bordo: #2F6B57; --v34-lib-ink: #8FE3C8; }
 /* Subito: tutta la casella */
 .item.p-q1:not(.is-done) .item-row { background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
 .item.p-q1:not(.is-done) .item-title { color: var(--v34-sub-ink); font-weight: 600; }
@@ -2267,18 +2154,13 @@ html:root, html[data-theme="light"] {
   --border: #E7E2D7; --border-strong: #9A9486;
   --text: #1B1A17; --text-2: #5C574D; --text-3: #6B665B; --done-title: #6B665B; --done-meta: #6B665B;
   --primary: #2F6B57; --primary-deep: #234F41; --primary-ink: #2F6B57; --primary-soft: #E6F0EB; --on-primary: #FFFFFF;
-  --q1: #A8431F; --q1-mark: #C2552D; --q1-soft: #FAEDE6;
-  --q2: #2F6B57; --q2-mark: #2F6B57; --q2-soft: #E6F0EB;
-  --q3: #3E5C76; --q3-mark: #3E5C76; --q3-soft: #E6EDF3;
   --q4: #6B665B; --q4-mark: #9A9486; --q4-soft: #F0EDE6;
   --evt: #55548A; --evt-mark: #5B5A8E; --evt-soft: #EFEFF7; --v24-tratto: #B9B8D8;
-  --pensa: #F7F2E2; --pensa-bordo: #DCCB8E; --pensa-ink: #5E4A00;
-  --danger: #A8431F; --danger-soft: #FAEDE6; --warn: #8A5A00; --warn-soft: #F7EED6;
+  --pensa: #F7F2E2; --pensa-bordo: #DCCB8E; --pensa-ink: #5E4A00; --warn: #8A5A00; --warn-soft: #F7EED6;
   --inverse-bg: #1D2A24; --inverse-text: #EEF2EE; --inverse-accent: #A7E3C5;
   --ring: #2F6B57;
   --shadow-1: 0 1px 2px rgba(27, 26, 23, .05);
   --shadow-2: 0 1px 2px rgba(27, 26, 23, .05), 0 6px 18px rgba(27, 26, 23, .06);
-  --v26-ob-bg: #EDF1FD; --v26-ob-bordo: #CAD5F7; --v26-ob-ink: #2F55D4;
   --v31-notte: #1D2A24; --v31-notte-2: #26352E; --v31-notte-3: #344A40; --v31-luce: #A7E3C5; --v31-su-notte: #EEF2EE; --v31-su-notte-2: #B5C4BB;
   --v31-hl: #E9D27A;
   --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
@@ -2290,14 +2172,9 @@ html:root[data-theme="dark"] {
   --border: #2D332E; --border-strong: #8C968E;
   --text: #EEF1EC; --text-2: #B9C1BA; --text-3: #A0A9A1; --done-title: #B9C1BA; --done-meta: #A0A9A1;
   --primary: #7FC8A9; --primary-deep: #5FAE8D; --primary-ink: #9ADBBF; --primary-soft: #1C3229; --on-primary: #0E1A15;
-  --q1: #F0936F; --q1-mark: #F0936F; --q1-soft: #3A2219;
-  --q2: #7FC8A9; --q2-mark: #7FC8A9; --q2-soft: #1C3229;
-  --q3: #9DB8CF; --q3-mark: #9DB8CF; --q3-soft: #1B2731;
   --evt: #B9B6E8; --evt-mark: #B9B6E8; --evt-soft: #25243A; --v24-tratto: #55548A;
   --pensa: #2C2714; --pensa-bordo: #6F6226; --pensa-ink: #EAD78F;
-  --danger: #F0936F; --danger-soft: #3A2219;
   --inverse-bg: #EEF1EC; --inverse-text: #1D2A24; --inverse-accent: #2F6B57; --ring: #9ADBBF;
-  --v26-ob-bg: #1B2340; --v26-ob-bordo: #2F3D6E; --v26-ob-ink: #A9BBFF;
   --v31-notte: #0E1411; --v31-notte-2: #18211C; --v31-notte-3: #26332C;
   --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
   --v34-io: var(--surface); --v34-io-ink: #B9B6E8; --v34-altri: #25243A; --v34-altri-ink: #EEF1EC; --v34-altri-2: #B9B6E8;

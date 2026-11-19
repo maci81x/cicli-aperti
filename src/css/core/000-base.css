@@ -2,7 +2,6 @@
    DESIGN SYSTEM — token e componenti di DESIGN_SYSTEM.md
    ══════════════════════════════════════════════════════════════ */
 :root {
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* scala tipografica: 5 livelli */
@@ -34,87 +33,13 @@
 
 :root, [data-theme="light"] {
   color-scheme: light;
-  --bg: #F5F7F6;
-  --surface: #FFFFFF;
-  --surface-2: #ECF0EE;
-  --surface-3: #FFFFFF;
-  --border: #DFE5E2;
-  --border-strong: #84918C;
-  --text: #14201D;
-  --text-2: #46544F;
-  --text-3: #5F6C67;
-  --done-title: #5F6C67;
-  --done-meta: #5F6C67;
   --done-opacity: .6;
-
-  --primary: #0F766E;
-  --primary-deep: #0A544E;
-  --primary-ink: #0B5F58;
-  --primary-soft: #DDF2EE;
-  --on-primary: #FFFFFF;
-
-  /* colori = priorità. --qN: testo (≥ 4.5:1 su tutte le superfici); --qN-mark: segni (casella, puntini) col colore esatto */
-  --q1: #B42318;  --q1-mark: #D92D20;  --q1-soft: #FFF4F3;   /* Subito */
-  --q2: #0B5F58;  --q2-mark: #0F766E;  --q2-soft: #DDF2EE;   /* Importante */
-  --q3: #1D4ED8;  --q3-mark: #2563EB;  --q3-soft: #E8EFFE;   /* Delega */
-  --q4: #5F6C67;  --q4-mark: #7A8682;  --q4-soft: #ECF0EE;   /* Lascia stare · segno ≥ 3:1 anche su #FFF4F3 e #F3EEFE (22/10) */
-  --evt: #6D28D9; --evt-mark: #7C3AED; --evt-soft: #F3EEFE;  /* Appuntamento (Google Calendar) */
-  --v24-tratto: #C4B5FD;  /* v24 · tempo tuo, bordo tratteggiato */
-  --pensa: #FDF6D8; --pensa-bordo: #E3C65A; --pensa-ink: #6B5300;   /* «In settimana · pensaci dopo» */
-
-  --danger: #B42318; --danger-soft: #FCE8E6;
-  --warn: #92500A;   --warn-soft: #FBEFD5;
-
-  --inverse-bg: #14201D; --inverse-text: #FFFFFF; --inverse-accent: #5EEAD4;
-  --scrim: rgba(20, 32, 29, .42);
-  --ring: #0F766E;
-
-  --shadow-1: 0 1px 2px rgba(20, 32, 29, .06);
-  --shadow-2: 0 4px 12px rgba(20, 32, 29, .08), 0 1px 2px rgba(20, 32, 29, .05);
-  --shadow-3: 0 16px 40px rgba(20, 32, 29, .16), 0 2px 6px rgba(20, 32, 29, .06);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0D1312;
-  --surface: #161D1C;
-  --surface-2: #202A28;
-  --surface-3: #34413E;
-  --border: #2A3533;
-  --border-strong: #71807B;
-  --text: #ECF1EF;
-  --text-2: #B7C2BE;
-  --text-3: #93A09B;
   /* nel tema scuro le cose fatte salgono di un livello: titolo su testo-2, dettagli su testo-3 pieni */
-  --done-title: #B7C2BE;
-  --done-meta: #93A09B;
   --done-opacity: 1;
-
-  --primary: #2DD4BF;
-  --primary-deep: #15988A;
-  --primary-ink: #5EEAD4;
-  --primary-soft: #12332F;
-  --on-primary: #04201D;
-
-  --q1: #F97066;  --q1-mark: #F97066;  --q1-soft: #3A1D1A;
-  --q2: #2DD4BF;  --q2-mark: #2DD4BF;  --q2-soft: #12332F;
-  --q3: #93B4FF;  --q3-mark: #93B4FF;  --q3-soft: #1B2A4A;
-  --q4: #8A9692;  --q4-mark: #8A9692;  --q4-soft: #202A28;
-  --evt: #B9A2F7; --evt-mark: #B9A2F7; --evt-soft: #261E3D;
-  --v24-tratto: #5B4A8E;
-  --pensa: #2E2810; --pensa-bordo: #7A6420; --pensa-ink: #F2D675;
-
-  --danger: #F98B82; --danger-soft: #3B1A17;
-  --warn: #F5C261;   --warn-soft: #3A2C10;
-
-  --inverse-bg: #ECF1EF; --inverse-text: #14201D; --inverse-accent: #0B5F58;
-  --scrim: rgba(0, 0, 0, .6);
-  --ring: #5EEAD4;
-
-  /* nel tema scuro la profondità la danno le superfici, non le ombre */
-  --shadow-1: 0 0 0 1px #2A3533;
-  --shadow-2: 0 0 0 1px #2A3533, 0 6px 16px rgba(0, 0, 0, .4);
-  --shadow-3: 0 0 0 1px #2A3533, 0 20px 48px rgba(0, 0, 0, .55);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

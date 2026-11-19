@@ -28,7 +28,12 @@ for (const [f, xs] of lavori) {
     } else {
       let trovata = null; root.walkDecls(d => { if (d.source.start.line === x.r && d.prop === x.prop && norm(d.parent.selectors.join(', ')) === norm(x.sel)) trovata = d; });
       if (!trovata) throw new Error(`${f}:${x.r} dichiarazione non trovata (${x.prop} in ${x.sel})`);
-      const regola = trovata.parent; trovata.remove(); fatti++;
+      const regola = trovata.parent;
+      // commento di fine riga della dichiarazione tolta
+      const dopo = trovata.next(); if (dopo && dopo.type === 'comment' && dopo.source.start.line === trovata.source.end.line) dopo.remove();
+      trovata.remove(); fatti++;
+      // commenti rimasti in fondo alla regola senza dichiarazioni dopo di sé
+      while (regola.last && regola.last.type === 'comment') regola.last.remove();
       if (!regola.nodes.some(n => n.type === 'decl')) { const su = regola.parent; regola.remove(); regoleTolte++; if (su && su.type === 'atrule' && !su.nodes.length) su.remove(); }
     }
   }
