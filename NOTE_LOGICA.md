@@ -1048,3 +1048,14 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Smaltisci: Delega apre il suo foglio e alla chiusura si torna a Smaltisci (la delegata conta come sistemata; Z la annulla, persone comprese). Esc chiude, il fuoco resta dentro la finestra.
 - Ore libere: Roby ha scelto di lasciarle come sono (solo appuntamenti).
 - Accessibilità (axe-core, WCAG 2.1 AA, computer/telefono, chiaro/scuro): da 7 problemi gravi a 0. Contrasto weekend e Smaltisci/viola pieno nel tema scuro; suggerimento vuoto non annunciato; appuntamenti senza bottoni dentro un bottone (si apre dal titolo, Invio); «Smaltisci» fuori dal summary. Test: tests/t50.js (usa axe se installato in NM).
+
+## Riordino · fase A · 19/11 — index.html generato da src/
+
+Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9bc5933465775a5ef10bd14734d23b2d9ac7267e177f85c039028b13aa6b` prima e dopo), quindi **i numeri di riga citati in questo file restano validi** e si riferiscono sempre a `index.html`.
+
+- Da oggi `index.html` non si modifica a mano: lo scrive `node build.js` mettendo in fila i file di `src/` nell'ordine di `src/ordine.txt` (istruzioni in `src/README.md`).
+- `src/css/` = il `<style>` diviso in 47 file, uno per sezione di versione (`/* … vNN …` a colonna 0). `src/js/` = lo `<script>` principale diviso in 115 file, uno per sezione (`// vNN` a colonna 0, più `// ║ PARTE 2`). `000-base.js` è la Parte 1 (logica legacy, righe 3499–6481); `001-parte-2-interfaccia.js` apre la Parte 2. `testa.html`, `corpo.html`, `coda.html` contengono il resto.
+- Per trovare una funzione: `grep -rn "function vistaOggi\|vistaOggi = " src/js/`. La catena degli strati di ogni funzione avvolta è in `docs/MAPPA.md` (con le righe di `index.html`; il file di `src/js/` è quello della versione indicata).
+- Regola nuova: niente strati nuovi. Per cambiare una funzione avvolta si modifica lo strato più alto, nel suo file.
+- Controlli: `node build.js --check`; hook `tools/hooks/pre-commit` (attivo con `git config core.hooksPath tools/hooks`).
+- Design e review EGM: `docs/egm/fase-a/`. Stato e prossimi passi: `docs/STATO_RIORDINO.md`.
