@@ -1,0 +1,13 @@
+{
+  "name": "cicli-aperti-mappa",
+  "private": true,
+  "description": "Genera docs/MAPPA.md da index.html (analisi statica)",
+  "scripts": {
+    "mappa": "node analizza.js ../../index.html > report.json && node genera_mappa.js report.json ../../docs/MAPPA.md $(git rev-parse --short HEAD)"
+  },
+  "dependencies": {
+    "acorn": "^8.14.0",
+    "acorn-walk": "^8.3.4",
+    "postcss": "^8.4.49"
+  }
+}
