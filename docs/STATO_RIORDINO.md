@@ -1,118 +1,127 @@
-# Stato del riordino — al 19/11/2026, fine sessione
+# Stato del riordino — al 19/11/2026, sera (sessione interrotta durante la fase D)
 
-Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · design e review della fase A: [egm/fase-a/](egm/fase-a/design_draft.md) · drift report: [egm/2026-11-19_DRIFT_REPORT.md](egm/2026-11-19_DRIFT_REPORT.md)
+Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · design e review: [egm/fase-a/](egm/fase-a/design_draft.md), [egm/fase-c/](egm/fase-c/design_draft.md), [egm/fase-d/](egm/fase-d/design_draft.md) · strumenti: [tools/riordino/](../tools/riordino/README.md)
 
-## Cosa è fatto
+## In breve
+
+| Fase | Stato | Dove |
+|---|---|---|
+| A — `src/` + `build.js` | fatta, pubblicata | `main` (`decc537`) |
+| B — cartelle per area | fatta, pubblicata | `main` (`f1b1c12`) |
+| Rete di sicurezza (`t51`, `t52`) | fatta | `main` locale (`e2603c4`, **non pubblicato**) e nei rami |
+| C — codice morto | **fatta** | ramo `riordino/fase-c` (su GitHub, non unito) |
+| D — appiattire le catene | **iniziata**: rete e strumenti pronti, **nessuna catena appiattita** | ramo `riordino/fase-d` (su GitHub, non unito) |
+| E — CSS | da fare | — |
+| Chiusura (v51, docs, pubblicazione) | da fare, solo dopo «ok pubblica» | — |
+
+`main` su GitHub è ancora `f1b1c12` (fase B): **online non è cambiato niente**. `main` locale ha in più `c768a0e` (README di contratto) e `e2603c4` (rete di sicurezza), entrambi anche nei rami.
+
+## Impronte e righe
+
+| | SHA-256 di `index.html` | righe |
+|---|---|---|
+| v50 (fasi A e B, `main`) | `e8ef9bc5933465775a5ef10bd14734d23b2d9ac7267e177f85c039028b13aa6b` | 21.798 |
+| dopo la fase C (`dc17335`) | cambia (codice tolto): la garanzia è la rete di sicurezza | 20.878 |
+
+## Prove
+
+Criterio: una prova passa solo se esce con 0 **e** non ha righe `FAIL`.
+
+| Momento | Risultato |
+|---|---|
+| fase B su `main` | 27/27 |
+| + rete di sicurezza (`t51`, `t52`) | 29/29 |
+| ogni commit della fase C | 29/29, 16 schermate di `t52` a 0,000%, HTML uguale |
+| ramo fase D con `t53` | 30/30 (vedi l'ultimo commit) |
+
+Rete di sicurezza:
+- `t51-globali` — nomi globali dopo l'avvio contro `tests/riferimento/globali.json` (si aggiorna solo quando si tolgono nomi apposta, con `AGGIORNA=1`, controllando il diff).
+- `t52-golden` — HTML di Oggi, Pianifica (Settimana, Giorno), Tutto (Lista, Matrice), Un giorno, Altro, Smaltisci su telefono e computer; 16 schermate (Oggi, Pianifica, Smaltisci, Tutto › Matrice × telefono/computer × chiaro/scuro), soglia 0,1%, immagine delle differenze in `$OUT`. Le schermate dipendono dalla macchina: riferimento preso su questo Mac.
+- `t53-caratterizza` (fase D) — anteprima del «+» e del campo «Cosa hai in testa?» mentre si scrive, righe salvate dal campo.
+
+## Fase C — fatta (ramo `riordino/fase-c`)
+
+Ciclo EGM completo (10 revisori; report in `docs/egm/fase-c/`). Commit, ognuno 29/29:
 
 | Commit | Cosa |
 |---|---|
-| `e76082d` | `docs/MAPPA.md`, `docs/PIANO_RIORDINO.md`, `tools/mappa/` (`analizza.js`, `genera_mappa.js`, `npm run mappa`) |
-| `decc537` | **Fase A**: `src/` (testa, corpo, coda, 47 CSS, 115 JS, `ordine.txt`, `README.md`), `build.js`, `tools/hooks/pre-commit`, design e review EGM in `docs/egm/fase-a/` |
-| (questo commit) | `NOTE_LOGICA.md` (sezione «Riordino · fase A»), questo file, drift report |
+| `9fe6f1a` | `t52` esteso a Tutto, Un giorno, Altro (la review aveva trovato che `tag-q3/4` erano vive e nessuna prova le vedeva) |
+| `380056b` | design, review e `tools/riordino/` |
+| `074a0c0` | commento «file generato» in testa a `index.html` |
+| `3f5d840` | 25 funzioni mai chiamate + catena `apriNuovo` (163 righe) |
+| `b5f5b02` | strati sostituiti di 33 funzioni: 31 basi, 18 strati, 13 alias (534 righe) |
+| `ae0cdf1` | 5 funzioni rimaste senza chiamate dopo gli strati (30 righe) |
+| `7a2423c` | 31 assegnazioni rimaste senza base tornate `function` (niente globali implicite) |
+| `755ba86` | 74 selettori CSS senza elementi |
+| `dc17335` | 252 variabili delle tavolozze sempre coperte (valori calcolati identici in 5 stati) |
 
-- `index.html` non si modifica più a mano: `node build.js` lo riscrive da `src/`. Istruzioni: [src/README.md](../src/README.md).
-- Hook attivo **in questa copia** (`git config core.hooksPath tools/hooks`). Su un'altra copia va rilanciato.
-- `CLAUDE.md` (solo locale) aggiornato: si modifica `src/`, niente strati nuovi, `src/` e `index.html` nello stesso commit.
-- **Non committati, da rivedere** (scritti dal bootstrap EGM): `README.md` in radice (sezioni EGM aggiunte), `supabase/README.md`, `supabase/functions/README.md`, `supabase/functions/claude/README.md`, `tools/README.md`, `tools/mappa/README.md`, `tools/posta/README.md`. `tools/README.md` non elenca ancora `hooks/`.
+Verifiche: copertura V8 all'avvio e 76 trappole `[morto]` con le 29 prove: nessun pezzo tolto veniva eseguito.
 
-## Impronte
+**Rinviato dalla fase C** (codice che non è una funzione, rimasto senza uso): `MACRO_AREA_COLORS` e `MACRO_AREA_EMOJIS`; il foglio `#postponeOverlay` con `doPostpone`, `doPostponeCustom`, `_applyPostpone` (lo apriva solo `openPostponeModal`, tolta); `let messe` e il toast nel file v30 dopo `v30InDaPianificare`; file `src/js/altro/000-26-macro-area-helpers.js` e `src/js/core/000-07-navigation.js` rimasti con il solo marcatore.
 
-| | SHA-256 di `index.html` |
-|---|---|
-| prima (v50, `948aad8`) | `e8ef9bc5933465775a5ef10bd14734d23b2d9ac7267e177f85c039028b13aa6b` |
-| dopo la fase A (`decc537`) | `e8ef9bc5933465775a5ef10bd14734d23b2d9ac7267e177f85c039028b13aa6b` |
+## Fase D — a che punto è (ramo `riordino/fase-d`)
 
-## Prove (questo Mac: macOS 26.7.1, Node 26.0.0, Playwright 1.65.1, Chromium headless shell 159.0.8154.6)
+**Fatto (commit di questa interruzione):**
+- `tests/t53-caratterizza.js` + `tests/riferimento/caratterizza.json`, verificata anche al contrario (fallisce se cambia l'anteprima finale).
+- `tools/riordino/catene.js`: per ogni pezzo di una catena, file, riga, contenitore e nomi locali usati. Risultato sulle sei catene: l'unico nome locale usato dagli strati è il loro alias → il codice si può spostare nel punto dell'ultimo strato.
+- `tools/riordino/appiattisci.js`: genera la funzione unica in due forme esatte (sequenza di passi se ogni strato chiama per prima cosa la versione precedente; forma annidata `passo0…passoN` se qualche strato fa qualcosa prima). Provato in `--prova` su 5 catene: `vistaOggi` (sequenza, 376 righe), `riga` (sequenza), `salvaCattura` (sequenza), `disegna` e `avviaApp` (annidata). **Non ancora applicato a nessuna catena.**
+- `docs/egm/fase-d/design_draft.md`: bozza. La review EGM era appena partita ed è stata fermata: **nessun report**.
 
-Prima e dopo la fase A, risultati **identici**: 25 su 27.
+**Catene:**
 
-| Esito | Prove |
-|---|---|
-| passano | `smoke`, `t26b`, `t27`, `t28`, `t30`, `t31`, `t32`, `t33`, `t35`, `t36`, `t37`, `t38`, `t39`, `t40`, `t40b`, `t41`, `t42`, `t43`, `t44`, `t45`, `t46`, `t47`, `t48`, `t49`, `t50` (axe: 0 problemi gravi in tutte le viste) |
-| si fermano (timeout) | `t26` (dopo 5 `ok`), `t29` (dopo 2 `ok`), sempre allo stesso punto, anche rilanciate |
+| Funzione | Strati | Forma | Stato |
+|---|---|---|---|
+| `vistaOggi` | base + 15 | sequenza | da fare |
+| `disegna` | base + 13 | annidata (`v46` prepara prima di chiamare) | da fare |
+| `avviaApp` | base + 7 | annidata (ogni strato legge `_appAvviata` prima) | da fare |
+| `disegnaAnteprima` | base catturata + 1 + 3 | togliere base e ascoltatore ridondante, poi sequenza | da fare |
+| `salvaCattura` | base + 2 (l'ultimo è una IIFE) | sequenza | da fare |
+| `riga` | base + 6 | sequenza | da fare |
 
-### Prima indagine su t26 e t29
+**Cose scoperte:**
+- `disegnaAnteprima` e `disegnaAnteprimaCattura`: la base v9 è catturata da `addEventListener('input', disegnaAnteprima)` (riga 12318 di `index.html`) e gira a ogni tasto, ma il suo risultato è sempre sovrascritto dall'ascoltatore v9 `() => disegnaAnteprima()` (riga 13101). `t53` lo conferma: alterando solo la base la prova non cambia.
+- Strati per nome, invisibili all'analisi per alias: `window[nome] = …(window[nome])` per `bpChiudiSettimana`, `inviaPiano`, `salvaEsercizioQ2`, `bpAttiva` (`src/js/pianifica/063-…js:888`) e `creaPdfSettimana`, `quotaSettimana`, `vociCoach`, `bpwCandidati`, `righePdfGiorno` (`src/js/altro/077-…js:22`).
+- Nella forma a sequenza il nome del risultato non può essere `r`: alcuni strati dichiarano una `const r` (corretto nello strumento, sceglie un nome libero).
+- La funzione finale non va dichiarata `async` (restituisce quello che restituiva lo strato più esterno).
 
-Roby riferisce che nell'ambiente di riferimento passano 27 su 27 con lo stesso file. Le prove **non sono state riscritte**. Cosa ho misurato qui, aprendo l'app esattamente come le due prove (stessi dati, stessa finestra) e, al posto del clic, ispezionando la pagina:
+## Altre cose di questa sessione
 
-**t26** (computer, finestra 1440×1000, `deviceScaleFactor` 1, `window.innerWidth` = 1440):
-- Il clic cerca `#view .v26-testa .v26-ob-voce[data-i="0"]`. Il pulsante esiste ma sta in `main > div.wide.largo.v47-on > div.v47-testa > div.board.v47-alto > section.v26-obiettivi`: la v47 (`vistaPianifica`, `src/js/110-v47-…`) riscrive la testa di Pianifica › Settimana quando `window.innerWidth >= 1024` e sposta gli obiettivi da `.v26-testa` a `.v47-alto`.
-- La stessa prova, poche righe prima, **legge** gli obiettivi con `.v26-testa .v26-obiettivi, .v47-alto .v26-obiettivi` (cioè accetta entrambi i posti), ma per il **clic** cerca solo `.v26-testa`.
-- Perché passi altrove, lì la trasformazione v47 non deve avvenire: `innerWidth < 1024`, oppure il blocco `try` della v47 fallisce (in console comparirebbe `[v47] settimana: …`), oppure la vista non contiene `cols board`.
+- README di contratto (bootstrap EGM) corretti e committati (`c768a0e`, su `main` locale).
+- Plugin `agent-memory` (sincronizzato con l'account) **disattivato**: a ogni uso di uno strumento avrebbe salvato un riassunto dell'esito nel suo archivio. Chiamava `python`, che sul Mac non esiste, quindi non ha mai funzionato. I suoi comandi ora chiamano `python3`, nel caso lo si riattivi (`claude plugin enable agent-memory@synced`).
+- Skill installate: `working-with-legacy-code` (wondelai, solo testo); EGM c'era già.
+- `CLAUDE.md` locale aggiornato alle cartelle per area (si modifica `src/<css|js>/<area>/`, niente strati nuovi).
 
-**t29** (telefono, `devices['iPhone 13']`: 390×664, `deviceScaleFactor` 3, `pointer: coarse`):
-- Il pulsante `.v29-prep [data-act="v29-min"][data-evt="pan"][data-m="60"]` esiste, ma sta dentro `details.v49-r` **chiuso**, nella sezione v50 «Da controllare sul telefono» (`vistaOggi`, `src/js/113-v50-…`). Il contenuto di un `<details>` chiuso non viene disegnato: `elementFromPoint` al centro del pulsante non restituisce niente e `scrollIntoView` non lo sposta, quindi Playwright lo considera «non visibile».
-- Lo stato «aperto» è `ui.v49Aperti`, che vive solo in memoria e parte vuoto: nel codice non c'è niente che dipenda da font, `deviceScaleFactor` o versione del browser.
+## Prossimo giro
 
-**Caratteri**: in entrambe le prove `document.fonts` ha caricato solo `tabler-icons`; «Instrument Sans» non viene caricato (l'harness non lo serve), quindi il testo usa il carattere di ripiego del sistema. Non incide sui due punti sopra, che dipendono dal DOM e non dalle misure.
-
-**Ipotesi da verificare nell'ambiente di riferimento** (in ordine di probabilità):
-1. che lì giri lo stesso `tests/` di `decc537`: `t26.js` e `t29.js` sono cambiati l'ultima volta con il commit v47 (`5d45faf`, 19/11 08:08), prima che arrivassero la v49 e la v50;
-2. che `window.innerWidth` sia davvero 1440 in `t26` (basta `console.log(await page.evaluate(() => innerWidth))` dopo `apriApp`);
-3. che in `t29` il `details.v49-r` sia aperto (`document.querySelector('.v29-prep').closest('details').open`).
-
-Sonda usata: una copia di `t26.js`/`t29.js` troncata prima del clic, con `require` verso `tests/harness.js` e una `page.evaluate` che stampa `navigator.userAgent`, `innerWidth`, `devicePixelRatio`, `matchMedia`, font caricati e antenati del pulsante.
-
-## Drift report (sintesi)
-
-Report completo: [egm/2026-11-19_DRIFT_REPORT.md](egm/2026-11-19_DRIFT_REPORT.md). Corretti subito prima del commit della fase A: àncora `$` nell'hook, 2.983 righe di `000-base.js`, codice di build nel PIANO, commenti `#` e `RADICE` in `src/README.md`, `axe-core` in `tests/README.md`.
-
-| Documento | Derive rimaste |
-|---|---|
-| `docs/egm/fase-a/design_draft.md` | nessuna dopo i commit (citava questo file e il commit, ora fatti) |
-| `src/README.md` | il codice 2 vale per ogni errore di build, non solo per voci ripetute e file mancanti |
-| `README.md` (bootstrap, non committato) | 10: non citava `src/` (aggiunto), scorciatoie e viste ferme a prima della v2, elenco tabelle e Realtime incompleti, `gcalFetchUtente` può cancellare eventi non dell'app su comando esplicito; la frase «niente email nel repo» era falsa ed è stata corretta |
-| `tests/README.md` | `apriApp` restituisce anche `browser`/`context`; `errori`, `assertDi`, `OUT`, `attesa` non documentati; `NM` serve anche per i font |
-| `tools/README.md`, `tools/mappa/README.md`, `tools/posta/README.md` (bootstrap) | manca `hooks/`; `verificateDinamiche` non copre `p-q2`/`chip-q4`; dettagli di `leggi.js` |
-| `supabase/**/README.md` (bootstrap) | risposte di `stato` non elencate; `claude/README` rimanda a `index.html` invece di `src/js/068-v9-22-10-claude-dal-server.js` |
-| `docs/PIANO_RIORDINO.md` | il nome d'esempio `090-v26-il-metodo-di-leo.js` non esiste (è `090-v26-3-11-il-metodo-di-leo-disegni-della-sezi.js`); la regola di taglio non cita `PARTE 2` |
-
-## Aggiornamento 19/11 sera — t26 e t29 sistemate
-
-- Verificato nell'ambiente di riferimento: anche lì t26 e t29 si fermavano (uscita 1); il conteggio di prima guardava solo le righe `FAIL` e non l'esito del processo. Le due prove erano davvero rimaste indietro rispetto all'app, come trovato qui.
-- Corrette solo le prove (commit «tests: …»): t26 clicca l'obiettivo sia in `.v26-testa` sia in `.v47-alto`; t29 apre la riga `details.v49-r` che contiene `.v29-prep` prima di ogni clic e legge il riquadro «sparito» con `textContent`.
-- Risultato: **27 su 27**, tutte con uscita 0. Da ora una prova conta come passata solo se esce con 0 e non ha righe `FAIL`.
-- Il ramo `claude/adoring-ritchie-oxjzlf` (una seconda sessione che ha rifatto solo mappa e piano) è un doppione: non va unito.
-
-## Fase B — fatta il 19/11 sera
-
-- src/css/<area>/ e src/js/<area>/ con le aree core, oggi, pianifica, smaltisci, calendario, posta, stampa, cattura, altro; 47 CSS e 167 JS (000-base in 44 pezzi, v10 calendario di scrittura in 9, v10 snella in 2; v6 e v26 interi perché senza titoli interni). Spostamenti con git mv (la storia dei file resta).
-- ordine.txt nella sequenza storica: index.html identico (e8ef9bc5…aa6b), `node build.js --check` ok, prove 27 su 27 con uscita 0.
-- Restano da rivedere sul Mac i README del bootstrap (mai committati).
-
-## Prossimi passi
-
-0. **Decidere sui README del bootstrap** (sopra): committarli dopo averli rivisti, sistemando le derive elencate.
-1. ~~t26/t29~~: fatto (vedi sopra).
-2. ~~Fase B~~: fatta (vedi sopra).
-3. **Fasi C, D, E**: **un ramo per fase** (`riordino/fase-c`, `riordino/fase-d`, `riordino/fase-e`), e a ogni passo:
-   - tutte le prove di `tests/`, con lo stesso criterio (risultati uguali o migliori di quelli registrati qui);
-   - confronto delle schermate prima/dopo: Oggi, Pianifica, Smaltisci × telefono e computer × tema chiaro e scuro (12 immagini), con `seed` e `ora` fissi dell'harness;
-   - niente push né pubblicazione senza l'ok di Roby.
-   - C: codice morto (MAPPA §3 e §5). D: appiattire le catene, una funzione per commit, partendo da `vistaOggi` (15), `disegna` (13), `avviaApp` (7). E: CSS per area, una tavolozza, meno `!important`.
-4. **Ciclo EGM per ogni fase** (in una sessione nuova le skill sono disponibili con `/egm:`):
-   - `/egm:egm-draft` → bozza in `docs/egm/fase-X/design_draft.md`
-   - `/egm:egm-review docs/egm/fase-X/design_draft.md` (modalità «report consolidato»)
-   - `/egm:egm-resolve` sul report → applicare le correzioni approvate
-   - a fine fase `/egm:egm-drift-report` su `docs/egm/` e sui README.
+1. `git checkout riordino/fase-d && git pull`.
+2. Ripetere la review EGM della fase D (consolidata) su `docs/egm/fase-d/design_draft.md`, poi `egm-resolve`.
+3. Una catena per commit, nell'ordine `vistaOggi`, `disegna`, `avviaApp`, `disegnaAnteprima`, `salvaCattura`, `riga`:
+   ```sh
+   node tools/riordino/appiattisci.js . vistaOggi --prova > $TMPDIR/vistaOggi.js   # leggere
+   node tools/riordino/appiattisci.js . vistaOggi && node build.js
+   # 30 prove; t51 deve elencare come tolti solo gli alias della catena → cd tests && AGGIORNA=1 NM="$PWD/node_modules" node t51-globali.js
+   git add src index.html tests/riferimento/globali.json && git commit -m "refactor: fase D, vistaOggi in una funzione"
+   ```
+   Per `disegnaAnteprima`: prima togliere la base catturata e il suo `addEventListener` (riga 12318), trasformare `disegnaAnteprima = function` (v10) in `function disegnaAnteprima`, poi appiattire.
+4. Fase E (ramo `riordino/fase-e` da `fase-d`): un selettore definito una volta, una tavolozza, meno `!important`, schermate entro la soglia; `tools/riordino/variabili.js` come controllo dei colori.
+5. Chiusura (si ferma per l'ok di Roby): `VERSIONE_APP` «2026-11-xx v51 riordino», `NOTE_LOGICA.md`, `docs/MAPPA.md` rigenerata (e i testi fissi di `genera_mappa.js`), questo file, `/egm:egm-drift-report`. Niente unione su `main` né pubblicazione senza «ok pubblica».
 
 ## Comandi per ripartire
 
 ```sh
 cd ~/Sites/cicli-aperti-roby
-git pull --ff-only
-git config core.hooksPath tools/hooks          # se è una copia nuova
-node build.js --check                           # deve dire «index.html è aggiornato»
-shasum -a 256 index.html                        # e8ef9bc5… finché non si cambia l'app
+git fetch && git checkout riordino/fase-d && git pull --ff-only
+git config core.hooksPath tools/hooks            # se è una copia nuova
+node build.js --check                             # «index.html è aggiornato»
 
-# prove (dipendenze una volta sola)
-cd tests && npm i playwright @supabase/supabase-js@2 jspdf@2.5.1 @tabler/icons-webfont@3.31.0 axe-core && npx playwright install chromium
-for f in smoke.js t*.js; do NM="$PWD/node_modules" OUT=/tmp/prove node "$f" > "/tmp/prove/${f%.js}.log" 2>&1; echo "$f exit=$?"; done   # mkdir -p /tmp/prove prima
-cd ..
+# dipendenze (una volta, sempre tutte insieme: npm i --no-save toglie quelle non elencate)
+cd tests && npm i --no-save playwright @supabase/supabase-js@2 jspdf@2.5.1 @tabler/icons-webfont@3.31.0 axe-core pngjs@7.0.0 pixelmatch@5.3.0 && npx playwright install chromium && cd ..
+cd tools/mappa && npm i && cd ../..
 
-# mappa aggiornata
-cd tools/mappa && npm i && npm run mappa && cd ../..
+# tutte le prove (criterio stretto)
+cd tests && mkdir -p $TMPDIR/prove && for f in smoke.js t*.js; do NM="$PWD/node_modules" OUT=$TMPDIR/prove node "$f" > "$TMPDIR/prove/${f%.js}.log" 2>&1; echo "$f exit=$? FAIL=$(grep -c '^FAIL' $TMPDIR/prove/${f%.js}.log)"; done; cd ..
 
-# modificare l'app
-#   1. cambiare il file in src/   2. node build.js   3. git add src index.html && git commit
+# analisi
+node tools/riordino/catene.js . vistaOggi disegna avviaApp disegnaAnteprima salvaCattura riga
+cd tools/mappa && node analizza.js ../../index.html > $TMPDIR/report.json && cd ../..
 ```
