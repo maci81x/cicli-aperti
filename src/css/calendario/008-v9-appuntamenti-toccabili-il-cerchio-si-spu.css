@@ -74,13 +74,9 @@
 .rio-vaga { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: start; gap: var(--sp-1) var(--sp-2); margin: var(--sp-3) 0 0; font-size: var(--fs-label); line-height: var(--lh-label); color: var(--warn); }
 .rio-vaga .ti { font-size: 18px; margin-top: 1px; }
 .rio-vaga .btn { grid-column: 2; justify-self: start; }
-.rap-vaga { display: flex; align-items: flex-start; gap: var(--sp-1); margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--warn); }
-.rap-vaga .ti { font-size: 14px; margin-top: 1px; }
-.ca-vaga { color: var(--warn); }
 .rap-breve { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); }
 .rap-breve .chip { height: 36px; }
 .rap-breve .chip .ti { font-size: 16px; }
-.ca-falla { flex: none; }
 /* tempo per il futuro: barra 0–50% con la fascia 25–30 segnata; sotto / dentro / sopra */
 .futuro { display: grid; gap: var(--sp-2); min-width: 0; margin-bottom: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface-2); --f-col: var(--primary); --f-ink: var(--primary-ink); }
 .futuro[data-stato="basso"] { --f-col: var(--warn); --f-ink: var(--warn); }

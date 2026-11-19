@@ -85,8 +85,6 @@
 .stat div { display: grid; gap: 2px; }
 .stat b { font-family: var(--font-mono); font-size: var(--fs-title); font-weight: 500; }
 .stat span { font-size: var(--fs-caption); color: var(--text-2); }
-.acc-body .pad { padding: var(--sp-4); }
-.acc-body .pad p { font-size: var(--fs-label); line-height: var(--lh-label); color: var(--text-2); margin-bottom: var(--sp-3); }
 
 /* --- Matrice --- */
 .matrice { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
@@ -129,7 +127,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .form-row > * { min-width: 0; }
 .modal-more-opts { display: none; }
 .modal-more-opts.open { display: block; }
-.chip.selected, .bp-slot-opt.sel, .bp-rev-opt.sel { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: var(--fw-strong); }
+.chip.selected, .bp-slot-opt.sel { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: var(--fw-strong); }
 .ctx-pick-btn.selected { background: var(--surface-3); color: var(--text); font-weight: var(--fw-strong); box-shadow: var(--shadow-1); }
 .quad.selected { border-color: var(--text); background: var(--surface-2); }
 .nudge { display: none; gap: var(--sp-3); margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--primary-soft); }
@@ -138,7 +136,7 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 .nudge .btn { background: var(--surface); justify-self: start; }
 .det-azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
 .det-box { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface-2); font-size: var(--fs-label); line-height: var(--lh-label); }
-.det-box .pv-row, .det-box .azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.det-box .azioni { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .det-box .btn { background: var(--surface); }
 .det-log { margin-top: var(--sp-5); padding-top: var(--sp-3); border-top: 1px solid var(--border); font-size: var(--fs-caption); line-height: 18px; color: var(--text-3); }
 .pf-field + .pf-field { margin-top: var(--sp-1); }

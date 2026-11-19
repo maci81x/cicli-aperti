@@ -15,6 +15,5 @@
 .v40-apri .m .tardi { color: var(--q1); font-weight: var(--fw-strong); }
 .v40-metti { flex: none; display: grid; place-items: center; min-width: 40px; padding: 0 8px; border: 0; border-left: 1px solid rgba(0,0,0,.08); background: none; color: inherit; cursor: pointer; border-radius: 0 var(--r-sm, 8px) var(--r-sm, 8px) 0; font-size: 18px; }
 .v40-metti:hover, .v40-metti:focus-visible { background: rgba(0,0,0,.06); }
-.v40-altre { justify-self: start; background: none; border: 0; padding: 2px 0; color: var(--ink-2, #444); font: inherit; font-size: var(--fs-caption); text-decoration: underline; cursor: pointer; }
 .v40-vuoto { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); }
 

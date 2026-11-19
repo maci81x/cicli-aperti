@@ -23,13 +23,13 @@ for (const [f, xs] of lavori) {
       let trovata = null; root.walkRules(r => { if (r.source.start.line === x.r && x.sel.every(s => r.selectors.map(norm).includes(s))) trovata = r; });
       if (!trovata) throw new Error(`${f}:${x.r} regola non trovata (${x.sel.join(' | ')})`);
       const restano = trovata.selectors.filter(s => !x.sel.includes(norm(s)));
-      if (restano.length) trovata.selectors = restano; else { trovata.remove(); regoleTolte++; }
+      if (restano.length) trovata.selectors = restano; else { const su = trovata.parent; trovata.remove(); regoleTolte++; if (su && su.type === 'atrule' && !su.nodes.length) su.remove(); }
       fatti += x.sel.length;
     } else {
       let trovata = null; root.walkDecls(d => { if (d.source.start.line === x.r && d.prop === x.prop && norm(d.parent.selectors.join(', ')) === norm(x.sel)) trovata = d; });
       if (!trovata) throw new Error(`${f}:${x.r} dichiarazione non trovata (${x.prop} in ${x.sel})`);
       const regola = trovata.parent; trovata.remove(); fatti++;
-      if (!regola.nodes.some(n => n.type === 'decl')) { regola.remove(); regoleTolte++; }
+      if (!regola.nodes.some(n => n.type === 'decl')) { const su = regola.parent; regola.remove(); regoleTolte++; if (su && su.type === 'atrule' && !su.nodes.length) su.remove(); }
     }
   }
   let testo = root.toString();
