@@ -1,7 +1,8 @@
 // Riordino · rete di sicurezza 2 (golden master): con dati e ora fissi, l'HTML delle viste e le schermate
 // devono restare quelli del riferimento (v50).
-// - HTML di #view: Oggi, Pianifica › Settimana, Pianifica › Giorno; Smaltisci = HTML del foglio #v49Overlay. Telefono e computer.
-// - 12 schermate: Oggi, Pianifica (Settimana), Smaltisci × telefono/computer × chiaro/scuro, confronto pixel per pixel:
+// - HTML di #view: Oggi, Pianifica › Settimana, Pianifica › Giorno, Tutto › Lista, Tutto › Matrice, Un giorno, Altro;
+//   Smaltisci = HTML del foglio #v49Overlay. Telefono e computer.
+// - 16 schermate: Oggi, Pianifica (Settimana), Smaltisci, Tutto › Matrice × telefono/computer × chiaro/scuro, confronto pixel per pixel:
 //   passa con al massimo lo 0,1% di pixel diversi; altrimenti salva l'immagine delle differenze in $OUT.
 // Le schermate dipendono dalla macchina (caratteri di sistema, Chromium): il riferimento è di questo Mac.
 // AGGIORNA=1 node t52-golden.js → riscrive i riferimenti (solo per un cambiamento voluto).
@@ -37,7 +38,8 @@ const seed = {
     cosa('d', 'Contratto fornitore', { q: 3, delega_persona_id: 'pn', delega_controllo: '2026-11-21' }),
     cosa('g', 'Rinnovo assicurazione', { q: 2, due_date: '2026-11-28' }),
     cosa('p', 'SSI – report amministrativo', { fonte: 'posta', posta_tipo: 'da_fare', due_date: '2026-11-20' }),
-    cosa('x', 'Ordinare la cancelleria', { q: 4 })
+    cosa('x', 'Ordinare la cancelleria', { q: 4 }),
+    cosa('u', 'Rifare il sito un giorno', { q: 4, parcheggiato: true, parcheggiato_at: ora })
   ],
   obiettivi_settimana: [{ settimana_anno: '2026-W47', voci: [{ testo: 'Chiudere il budget', fatto: false }, { testo: 'Due clienti nuovi', fatto: true }] }]
 };
@@ -47,7 +49,11 @@ const VISTE = {
   oggi: async page => { await page.evaluate(() => vai('oggi')); },
   settimana: async page => { await page.evaluate(() => { ui.sub = null; ui.pian = 'settimana'; vai('pianifica'); }); },
   giorno: async page => { await page.evaluate(() => { ui.sub = null; ui.pian = 'giorno'; vai('pianifica'); }); },
-  smaltisci: async page => { await page.evaluate(() => { vai('oggi'); v49Apri(); }); }
+  smaltisci: async page => { await page.evaluate(() => { vai('oggi'); v49Apri(); }); },
+  lista: async page => { await page.evaluate(() => { ui.sub = null; vai('tutto', { tutto: 'lista' }); }); },
+  matrice: async page => { await page.evaluate(() => { ui.sub = null; vai('tutto', { tutto: 'matrice' }); }); },
+  ungiorno: async page => { await page.evaluate(() => { vai('tutto'); ui.sub = 'attesa'; render(); }); },
+  altro: async page => { await page.evaluate(() => { ui.sub = null; vai('altro'); }); }
 };
 const htmlDi = (page, vista) => page.evaluate(v => {
   const el = v === 'smaltisci' ? document.getElementById('v49Overlay') : document.getElementById('view');
@@ -85,10 +91,10 @@ async function dispositivo(nome, opzioni) {
   }
   for (const tema of ['chiaro', 'scuro']) {
     await page.evaluate(t => { document.documentElement.setAttribute('data-theme', t === 'scuro' ? 'dark' : 'light'); }, tema);
-    for (const vista of ['oggi', 'settimana', 'smaltisci']) {
+    for (const vista of ['oggi', 'settimana', 'smaltisci', 'matrice']) {
       await page.evaluate(chiudiFogli); await VISTE[vista](page); await page.waitForTimeout(900);
       await page.evaluate(() => { const m = document.getElementById('main'); if (m) m.scrollTop = 0; });
-      confrontaSchermata(`${vista === 'settimana' ? 'pianifica' : vista}_${nome}_${tema}`, await page.screenshot({ animations: 'disabled', caret: 'hide' }));
+      confrontaSchermata(`${{ settimana: 'pianifica', matrice: 'tutto-matrice' }[vista] || vista}_${nome}_${tema}`, await page.screenshot({ animations: 'disabled', caret: 'hide' }));
     }
   }
   { const e = errori(logs); a(!e.length, `${nome}: console pulita ` + JSON.stringify(e.slice(0, 3))); }
