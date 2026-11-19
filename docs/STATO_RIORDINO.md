@@ -74,11 +74,17 @@ Report completo: [egm/2026-11-19_DRIFT_REPORT.md](egm/2026-11-19_DRIFT_REPORT.md
 - Risultato: **27 su 27**, tutte con uscita 0. Da ora una prova conta come passata solo se esce con 0 e non ha righe `FAIL`.
 - Il ramo `claude/adoring-ritchie-oxjzlf` (una seconda sessione che ha rifatto solo mappa e piano) è un doppione: non va unito.
 
+## Fase B — fatta il 19/11 sera
+
+- src/css/<area>/ e src/js/<area>/ con le aree core, oggi, pianifica, smaltisci, calendario, posta, stampa, cattura, altro; 47 CSS e 167 JS (000-base in 44 pezzi, v10 calendario di scrittura in 9, v10 snella in 2; v6 e v26 interi perché senza titoli interni). Spostamenti con git mv (la storia dei file resta).
+- ordine.txt nella sequenza storica: index.html identico (e8ef9bc5…aa6b), `node build.js --check` ok, prove 27 su 27 con uscita 0.
+- Restano da rivedere sul Mac i README del bootstrap (mai committati).
+
 ## Prossimi passi
 
 0. **Decidere sui README del bootstrap** (sopra): committarli dopo averli rivisti, sistemando le derive elencate.
 1. ~~t26/t29~~: fatto (vedi sopra).
-2. **Fase B** (cartelle per area, identica byte per byte) — nel PIANO viene prima di C. Una richiesta del 19/11 parlava di «dividere per area»: la fase A fatta divide per strato di versione.
+2. ~~Fase B~~: fatta (vedi sopra).
 3. **Fasi C, D, E**: **un ramo per fase** (`riordino/fase-c`, `riordino/fase-d`, `riordino/fase-e`), e a ogni passo:
    - tutte le prove di `tests/`, con lo stesso criterio (risultati uguali o migliori di quelli registrati qui);
    - confronto delle schermate prima/dopo: Oggi, Pianifica, Smaltisci × telefono e computer × tema chiaro e scuro (12 immagini), con `seed` e `ora` fissi dell'harness;

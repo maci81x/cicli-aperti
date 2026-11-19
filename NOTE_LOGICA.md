@@ -1059,3 +1059,7 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 - Regola nuova: niente strati nuovi. Per cambiare una funzione avvolta si modifica lo strato più alto, nel suo file.
 - Controlli: `node build.js --check`; hook `tools/hooks/pre-commit` (attivo con `git config core.hooksPath tools/hooks`).
 - Design e review EGM: `docs/egm/fase-a/`. Stato e prossimi passi: `docs/STATO_RIORDINO.md`.
+
+## Riordino · fase B · 19/11 sera — cartelle per area
+- I file di src/ sono in cartelle per area: core, oggi, pianifica, smaltisci, calendario, posta, stampa, cattura, altro (CSS e JS). I cinque file grandi sono stati tagliati ai loro titoli `// ═══`: 000-base (44 pezzi), v10 calendario di scrittura (9), v10 snella (2); v6 e v26 non hanno titoli interni e restano interi.
+- ordine.txt resta nella sequenza storica: index.html è identico byte per byte (sha256 e8ef9bc5…aa6b), prove 27 su 27 (uscita 0, nessun FAIL). Spiegazione delle aree in src/README.md.

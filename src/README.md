@@ -25,9 +25,23 @@ In `ordine.txt` i percorsi sono relativi a `src/`; le righe vuote e quelle che i
 |---|---|
 | `ordine.txt` | l'elenco dei file, nell'ordine in cui finiscono in `index.html` |
 | `testa.html` | da `<!DOCTYPE>` a `<style>`: meta, script del tema, librerie dai CDN |
-| `css/NNN-vX-….css` | il CSS, un file per ogni sezione di versione (47) |
+| `css/<area>/NNN-….css` | il CSS, per area (47 file) |
 | `corpo.html` | da `</style>` a `<script>`: tutto l'HTML del body |
-| `js/NNN-vX-….js` | il JavaScript, un file per ogni sezione di versione (115) |
+| `js/<area>/NNN-….js` | il JavaScript, per area (167 file) |
 | `coda.html` | `</script></body></html>` |
 
-`NNN` è solo la posizione, `vX` la versione che ha introdotto la sezione. Ogni file finisce con un a-capo; `build.js` li unisce così come sono. La divisione per area (oggi, pianifica, smaltisci…) è la fase B del piano.
+## Le aree (fase B, 19/11)
+
+| Cartella | Cosa c'è |
+|---|---|
+| `core` | configurazione, stato, utilità, Supabase, disegno, navigazione, azioni `data-act`, toast e tema, avvio, aggiornamento versione, accessibilità |
+| `oggi` | la vista Oggi: Adesso, giornata, «Oggi: N cose da chiudere», Da controllare, la sera per domani, routine |
+| `pianifica` | Pianifica settimana/giorno/mese, Battle Plan e wizard, cuscinetti, obiettivi, metodo di Leo, preparazione appuntamenti, «Quando» e spostamenti |
+| `smaltisci` | rimaste indietro, chiudi la settimana, togliere, fatta = sparisce, doppioni e «già chiuse», Smaltisci |
+| `calendario` | Google Calendar: accesso, lettura, promemoria, appuntamenti, cestino, scelte del calendario |
+| `posta` | dalla posta di lavoro, «Da rispondere» |
+| `stampa` | PDF della settimana e del giorno, invio al coach |
+| `cattura` | aggiungere: campo unico, Plaud, voce, Claude dal server, svuota la testa, collegate |
+| `altro` | Tutte, Altro, impostazioni, categorie e aree, guida, mete |
+
+`NNN` è la posizione nella sequenza storica (i pezzi dei file grandi hanno `NNN-kk-`): dentro una cartella i file sono già in ordine di esecuzione. **L'ordine vero è quello di `ordine.txt`**, che resta storico: le aree sono cartelle, non blocchi contigui in `index.html`. Ogni file finisce con un a-capo; `build.js` li unisce così come sono. Dove sta uno strato di una funzione: [docs/MAPPA.md](../docs/MAPPA.md) (numeri di sezione = `NNN`).
