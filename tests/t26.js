@@ -42,7 +42,7 @@ const seed = {
   a(r.pdfAct, 'la stampante della settimana sceglie i giorni');
   a(r.col && r.col[0] === '#Non si sposta' && r.col.filter(x => x.startsWith('!')).length === 2 && r.col.includes('#Si può spostare'), 'martedì: in cima Non si sposta ' + JSON.stringify(r.col));
   // obiettivo spuntato
-  await page.click('#view .v26-testa .v26-ob-voce[data-i="0"]'); await page.waitForTimeout(400);
+  await page.click('#view .v26-testa .v26-ob-voce[data-i="0"], #view .v47-alto .v26-ob-voce[data-i="0"]');   // dalla v47 gli obiettivi stanno in .v47-alto await page.waitForTimeout(400);
   a(db.tabelle.obiettivi_settimana[0].voci[0].fatto === true, 'spunta obiettivo salvata');
   await page.screenshot({ path: (process.env.OUT || '/tmp') + '/v26_settimana.png' });
   // un appuntamento: Non si sposta

@@ -17,6 +17,8 @@ const events = { 'r.macinai@sisoluzioniimpresa.it': [
 (async () => {
   const { browser, page, logs, db, cal } = await apriApp({ mobile: true, ora: ORA, events, seed: { prep_appuntamenti: [] }, attesa: 3500 });
   await page.evaluate(() => { ui.tab = 'oggi'; render(); }); await page.waitForTimeout(500);
+  // dalla v50, sul telefono, le preparazioni stanno nella riga «Da controllare», che parte chiusa: si apre prima di ogni clic
+  { const _clic = page.click.bind(page); page.click = async (sel, o) => { await page.evaluate(() => document.querySelectorAll('details.v49-r').forEach(d => { if (d.querySelector('.v29-prep')) d.open = true; })); return _clic(sel, o); }; }
   let r = await page.evaluate(() => ({ t: (document.querySelector('.v29-prep .v29-t') || {}).textContent, voci: [...document.querySelectorAll('.v29-prep .v29-tit')].map(x => x.textContent), perche: [...document.querySelectorAll('.v29-prep .v29-perche')].map(x => x.textContent) }));
   a(r.t === '3 appuntamenti da preparare?' && r.voci.join('|') === 'Rossi – presentazione|Riunione periodica PAN|Sopralluogo cantiere Bianchi', 'riquadro: ' + JSON.stringify(r));
   a(/invitati esterni/.test(r.perche[0]) && /sopralluogo/.test(r.perche[2]), 'perché: ' + JSON.stringify(r.perche));
@@ -71,7 +73,7 @@ const events = { 'r.macinai@sisoluzioniimpresa.it': [
   // sparisce Rossi
   await page.evaluate(() => { for (const k of Object.keys(ui.eventi)) ui.eventi[k] = ui.eventi[k].filter(e => e.id !== 'prev'); Object.keys(ui.eventi).forEach(k => { ui.eventiLetti[k] = Date.now(); ui.eventiDaCache.delete(k); }); _v29Ultimo = 0; return v29Controlla(); }); await page.waitForTimeout(600);
   await page.evaluate(() => render()); await page.waitForTimeout(300);
-  r = await page.evaluate(() => (document.querySelector('.v29-sparito') || {}).innerText || '');
+  r = await page.evaluate(() => (document.querySelector('.v29-sparito') || {}).textContent || '');
   a(/Rossi – presentazione/.test(r) && /non è più in calendario/.test(r), 'sparito: ' + r.replace(/\n/g, ' | '));
   await page.screenshot({ path: (process.env.OUT || '/tmp') + '/v29_sparito.png' });
   await page.click('[data-act="v29-sparito-togli"]'); await page.waitForTimeout(800);

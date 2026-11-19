@@ -67,10 +67,17 @@ Report completo: [egm/2026-11-19_DRIFT_REPORT.md](egm/2026-11-19_DRIFT_REPORT.md
 | `supabase/**/README.md` (bootstrap) | risposte di `stato` non elencate; `claude/README` rimanda a `index.html` invece di `src/js/068-v9-22-10-claude-dal-server.js` |
 | `docs/PIANO_RIORDINO.md` | il nome d'esempio `090-v26-il-metodo-di-leo.js` non esiste (è `090-v26-3-11-il-metodo-di-leo-disegni-della-sezi.js`); la regola di taglio non cita `PARTE 2` |
 
+## Aggiornamento 19/11 sera — t26 e t29 sistemate
+
+- Verificato nell'ambiente di riferimento: anche lì t26 e t29 si fermavano (uscita 1); il conteggio di prima guardava solo le righe `FAIL` e non l'esito del processo. Le due prove erano davvero rimaste indietro rispetto all'app, come trovato qui.
+- Corrette solo le prove (commit «tests: …»): t26 clicca l'obiettivo sia in `.v26-testa` sia in `.v47-alto`; t29 apre la riga `details.v49-r` che contiene `.v29-prep` prima di ogni clic e legge il riquadro «sparito» con `textContent`.
+- Risultato: **27 su 27**, tutte con uscita 0. Da ora una prova conta come passata solo se esce con 0 e non ha righe `FAIL`.
+- Il ramo `claude/adoring-ritchie-oxjzlf` (una seconda sessione che ha rifatto solo mappa e piano) è un doppione: non va unito.
+
 ## Prossimi passi
 
 0. **Decidere sui README del bootstrap** (sopra): committarli dopo averli rivisti, sistemando le derive elencate.
-1. **t26/t29**: verificare le tre ipotesi nell'ambiente di riferimento prima di toccare le prove.
+1. ~~t26/t29~~: fatto (vedi sopra).
 2. **Fase B** (cartelle per area, identica byte per byte) — nel PIANO viene prima di C. Una richiesta del 19/11 parlava di «dividere per area»: la fase A fatta divide per strato di versione.
 3. **Fasi C, D, E**: **un ramo per fase** (`riordino/fase-c`, `riordino/fase-d`, `riordino/fase-e`), e a ogni passo:
    - tutte le prove di `tests/`, con lo stesso criterio (risultati uguali o migliori di quelli registrati qui);
