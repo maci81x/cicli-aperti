@@ -22,13 +22,13 @@ const seed = { cicli: [...titoli.map((t, i) => base('s' + i, t, i < 3 ? { fonte:
     await page.evaluate(() => { document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open')); vai('oggi'); }); await page.waitForTimeout(600);
     const r = await page.evaluate(() => {
       const sub = document.querySelector('.item.p-q1:not(.is-done) .item-row');
-      const metodo = document.querySelector('.v33-sx .v43-metodo');
+      const metodo = document.querySelector('.v33-dx .v49-ctl');   // v49: il metodo è nel riquadro «Da controllare»
       const centro = document.querySelector('.v33-centro .v12-card.v12-rosso');
       return { bgSub: sub && getComputedStyle(sub).backgroundColor, metodo: metodo ? [...metodo.querySelectorAll('.v12-card h3')].map(x => x.innerText) : null,
         larghezzaCentro: centro ? Math.round(centro.getBoundingClientRect().width) : 0, bg: getComputedStyle(document.body).backgroundColor };
     });
     a(r.bgSub === 'rgb(253, 238, 236)', tag + ': Subito con il velo rosso ' + r.bgSub);
-    if (!vp.mobile) a(r.metodo && r.metodo.length >= 1 && r.larghezzaCentro > 600, 'computer: metodo a sinistra, cose da chiudere larghe ' + JSON.stringify(r));
+    if (!vp.mobile) a(r.metodo && r.metodo.length >= 1 && r.larghezzaCentro > 600, 'computer: metodo in Da controllare, cose da chiudere larghe ' + JSON.stringify(r));
     await page.screenshot({ path: (process.env.OUT || '/tmp') + `/v43_${tag}.png`, fullPage: !vp.mobile });
     await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; }); await page.waitForTimeout(300);
     await page.screenshot({ path: (process.env.OUT || '/tmp') + `/v43_${tag}_scuro.png` });

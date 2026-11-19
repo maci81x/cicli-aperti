@@ -2511,6 +2511,97 @@ html:root .board .evt-riga.v24-altri, html:root .board .evt-riga.v24-mio { backg
 .v48-g.su { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
 .v31-ad-ritmo > span { flex: 1 1 100% !important; }
 .v31-ad-ritmo .btn:not(.btn-icon) { flex: 1 1 auto !important; justify-content: center; }
+/* v49 · Smaltisci */
+.v49-sm { max-width: 680px; padding: 0; overflow: hidden; }
+.v49-sm .sheet-grab { margin-top: 8px; }
+.v49-testa { display: flex; align-items: center; gap: var(--sp-2); padding: 14px 16px 0 24px; }
+.v49-k { flex: 1; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--q1-ink, #B42318); }
+.v49-testa .mono { font-size: 12px; color: var(--text-2); }
+.v49-barra { height: 5px; margin: 8px 24px 0; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.v49-barra span { display: block; height: 100%; background: var(--primary); border-radius: 3px; transition: width .25s; }
+.v49-cosa { margin: 14px 0 0; padding: 18px 24px 16px; background: var(--surface); border-left: 4px solid var(--border-strong, #CFC8B8); }
+.v49-cosa.p-q1 { background: var(--q1-soft); border-left-color: var(--q1-mark, #D92D20); }
+.v49-cosa.p-q2 { border-left-color: var(--q2-mark, #2563EB); }
+.v49-tit { margin: 0; font-family: var(--font-display, Georgia, serif); font-size: 26px; font-weight: 600; line-height: 1.15; }
+.v49-meta { margin: 6px 0 0; font-size: 13px; color: var(--text-2); }
+.v49-da { color: var(--q1-ink, #B42318); font-weight: 700; }
+.v49-dom { margin: 16px 24px 8px; font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+.v49-dom small { font-weight: 400; color: var(--text-3); }
+.v49-giorni { margin: 0 24px; }
+.v49-giorni .v48-g { min-height: 64px; }
+.v49-giorni .v48-g.v49-big { border-color: var(--primary); background: var(--primary-soft, #E3EFE9); }
+.v49-sm kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font: 700 10.5px var(--font-mono, monospace); vertical-align: middle; }
+.v49-scelte { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 24px 0; }
+.v49-sc { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.v49-sc:hover { border-color: var(--primary); }
+.v49-sc .ti { font-size: 19px; color: var(--text-2); }
+.v49-sc span { flex: 1; min-width: 0; line-height: 1.3; }
+.v49-sc b, .v49-sc small { line-height: 1.3; }
+.v49-sc b { display: block; font-size: 14.5px; }
+.v49-sc small { font-size: 12px; color: var(--text-2); }
+.v49-sc.v49-ok { background: var(--primary-soft, #E3EFE9); border-color: var(--primary); }
+.v49-sc.v49-ok .ti, .v49-sc.v49-ok b { color: var(--primary-ink, var(--primary)); }
+.v49-piede { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 12px 24px; border-top: 1px solid var(--border); background: var(--bg); }
+.v49-piede [data-act="v49-salta"] { margin-left: auto; }
+.v49-fine { padding: 28px 24px 24px; text-align: center; }
+.v49-fine > .ti { font-size: 40px; color: var(--primary); }
+.v49-fine-t { margin: 6px 0 2px; font-family: var(--font-display, Georgia, serif); font-size: 22px; font-weight: 600; }
+.v49-fine-b { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+@media (max-width: 767px) {
+  .v49-solo-pc, .v49-sm .v48-n kbd, .v49-sc kbd, .v49-piede [data-act="v49-indietro"] { display: none; }
+  .v49-piede { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .v49-giorni { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .v49-giorni .v48-g.v49-big { grid-column: span 2; min-height: 78px; }
+  .v49-giorni .v48-g:nth-child(n+7) { display: none; }
+  .v49-giorni .v48-g.v49-big b { font-size: 24px; }
+  .v49-tit { font-size: 22px; }
+  .v49-testa, .v49-cosa, .v49-dom, .v49-giorni, .v49-scelte, .v49-piede { padding-left: 16px; padding-right: 16px; }
+  .v49-giorni, .v49-scelte, .v49-dom { margin-left: 16px; margin-right: 16px; padding-left: 0; padding-right: 0; }
+  .v49-barra { margin-left: 16px; margin-right: 16px; }
+}
+.v47-indietro > summary { display: flex !important; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.v47-indietro > summary > span:first-child { white-space: nowrap; }
+.v49-sm-btn { flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--q1-mark, #D92D20); background: var(--surface); color: var(--q1-ink, #B42318); font: 700 12px inherit; cursor: pointer; }
+.v49-oggi { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 16px; border: 0; border-top: 1px solid var(--border); background: var(--surface); color: var(--q1-ink, #B42318); font: 700 13.5px inherit; cursor: pointer; text-align: left; }
+.v49-oggi span { flex: 1; }
+.v49-oggi:hover { background: var(--q1-soft); }
+/* v49 · Oggi: Da controllare */
+.v49-ctl { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: var(--sp-3); }
+.v49-ctl-h { display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 14px 16px; font-family: var(--font-display, Georgia, serif); font-size: 19px; font-weight: 600; }
+.v49-ctl-h .mono { font-family: var(--font-mono, monospace); font-size: 12px; color: var(--text-2); font-weight: 400; }
+.v49-ctl > .v49-diretto { margin: 0 !important; border: 0 !important; border-top: 1px solid var(--border) !important; border-radius: 0 !important; box-shadow: none !important; width: 100%; background: var(--surface); }
+.v49-r { border-top: 1px solid var(--border); }
+.v49-r > summary { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; list-style: none; }
+.v49-r > summary::-webkit-details-marker { display: none; }
+.v49-r > summary:hover { background: var(--surface-2); }
+.v49-r > summary > .ti:first-child { font-size: 18px; width: 22px; text-align: center; color: var(--text-2); }
+.v49-r-t { flex: 1; min-width: 0; }
+.v49-r-t b { display: block; font-size: 14px; }
+.v49-r-t small { display: block; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v49-r-v { color: var(--text-3); transition: transform .15s; }
+.v49-r[open] .v49-r-v { transform: rotate(180deg); }
+.v49-r-corpo { padding: 0 12px 12px; }
+.v49-r-corpo > * { margin: 0 !important; }
+/* v49 · Pianifica: schede separate (stile 14), colori della 15 */
+.board .bzona:not(#dp-lista) { display: flex; flex-direction: column; gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; overflow: visible !important; }
+.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item { margin: 0 !important; border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--surface); box-shadow: 0 1px 2px rgba(27, 26, 23, .05) !important; overflow: hidden; }
+.board .bzona > .item.p-q1 { background: var(--q1-soft); border-color: #F2B8B0 !important; }
+.board .bzona > .item.p-q2 { box-shadow: inset 3px 0 0 var(--q2-mark), 0 1px 2px rgba(27, 26, 23, .05) !important; }
+.board .bzona > .fascia-h { margin: 6px 2px 0; padding: 0; background: none !important; border: 0 !important; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+.board .bzona > .fascia-h:first-child { margin-top: 0; }
+html:root .board .evt-riga.evt-app { display: flex; align-items: flex-start; gap: 8px; }
+html:root .board .evt-riga.v24-altri { background: var(--evt-mark, #5B5A8E) !important; border-color: var(--evt-mark, #5B5A8E) !important; box-shadow: none !important; }
+html:root .board .evt-riga.v24-altri .item-title, html:root .board .evt-riga.v24-altri .item-meta, html:root .board .evt-riga.v24-altri .item-meta *, html:root .board .evt-riga.v24-altri .v24-chi, html:root .board .evt-riga.v24-altri .v24-chi *, html:root .board .evt-riga.v24-altri .v49-ore, html:root .board .evt-riga.v24-altri .v18-cestino { color: #fff !important; }
+html:root .board .evt-riga.v24-altri .evt-cerchio { border-color: rgba(255, 255, 255, .8) !important; }
+html:root .board .evt-riga.v24-mio { background: var(--evt-soft, #EFEFF7) !important; border-color: transparent !important; box-shadow: none !important; }
+html:root .board .evt-riga.v24-mio .v49-ore { color: var(--evt, #55548A); }
+.board .v49-ore { flex: none; width: 40px; padding-top: 2px; font-size: 11.5px; font-weight: 700; line-height: 1.35; }
+html:root .board .bzona > .spazio-riga { min-height: 0 !important; padding: 6px 10px !important; background: var(--primary-soft, #E3EFE9) !important; border: 1px dashed #9CC7B2 !important; box-shadow: none !important; color: var(--primary-ink, var(--primary)); }
+html:root .board .bzona > .spazio-riga .item-meta { display: none; }
+html:root .board .bzona > .spazio-riga .item-title { font-size: 12.5px; font-weight: 600; color: var(--primary-ink, var(--primary)); }
+html:root .board .bzona > .spazio-riga .evt-ico { width: 18px; height: 18px; font-size: 14px; }
+html:root[data-theme="dark"] .board .bzona > .item.p-q1 { border-color: #8C3B33 !important; }
+html:root[data-theme="dark"] .board .bzona > .spazio-riga { border-color: #3E6B57 !important; }
 </style>
 </head>
 <body>
@@ -18148,7 +18239,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-19 v48';
+const VERSIONE_APP = '2026-11-19 v49';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -21273,6 +21364,7 @@ ui.v48Zitto = 0;
     const c = ciclo(id);
     if (!c || zona === 'dapiano' || siRipete(c)) return _bsV48.apply(this, arguments);   // le ricorrenti chiedono «solo questa o tutte»
     const f = v48Foto(id);
+    if (zona === 'settimana' && state.pianificaColsOk && c.pianificato_data) { try { await patchCiclo(id, { pianificato_data: null }); } catch (_) {} }
     let r;
     ui.v48Zitto++;
     try { r = await _bsV48.apply(this, arguments); } finally { ui.v48Zitto--; }
@@ -21337,6 +21429,216 @@ async function v48MettiIn(id, iso) {
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 AZIONI['v48-giorno'] = el => v48MettiIn(_pfCicloId, el.dataset.iso);
+// ══════════════════════════════════════════════════════════════
+// v49 · 19/11 — approvate le bozze della sezione 17 e lo stile di Pianifica della 14 con i colori della 15:
+// (1) Smaltisci: le rimaste indietro una alla volta (tasti sul computer, bottoni grandi sul telefono)
+// (2) Oggi sul computer: un solo riquadro «Da controllare» (posta, obiettivi, calendario, deleghe, preparazioni, il metodo)
+// (3) Pianifica: ogni cosa e ogni appuntamento è una scheda a sé; appuntamenti viola (con altri pieno, tuoi chiaro) con l'orario a sinistra; spazi liberi in una riga sottile
+// ══════════════════════════════════════════════════════════════
+ui.v49 = null;
+document.body.insertAdjacentHTML('beforeend', `<div class="modal-overlay" id="v49Overlay" onclick="closeModalOnBg(event,'v49Overlay')">
+  <div class="modal sheet v49-sm" role="dialog" aria-modal="true" aria-labelledby="v49-t"><div class="sheet-grab"></div><div id="v49-corpo"></div></div></div>`);
+const v49Lista = () => v47Indietro();
+function v49Da(c) {
+  if (c.pianificato_data) return v45Da(c);
+  try { const r = rimasteVisibili().find(x => x.item.ciclo_id === c.id); const d = r && carryData(r.item, r.plan); if (d) return 'rimasta da ' + d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'numeric' }); } catch (_) {}
+  return 'rimasta da una settimana passata';
+}
+function v49Apri() {
+  ui.v49 = { idx: 0, fatte: 0, storia: [] };
+  v49Disegna();
+  $('v49Overlay').classList.add('open');
+  setTimeout(() => { const b = document.querySelector('#v49-corpo .v48-g'); if (b && window.innerWidth >= 768) b.focus(); }, 50);
+}
+function v49Disegna() {
+  const box = $('v49-corpo'), s = ui.v49;
+  if (!box || !s) return;
+  const l = v49Lista(), tot = s.fatte + l.length;
+  const kbd = t => `<kbd>${t}</kbd>`;
+  const testa = n => `<div class="v49-testa"><span class="v49-k" id="v49-t">Smaltisci le rimaste indietro</span><span class="mono">${n}</span>
+    <button type="button" class="btn btn-icon" onclick="closeModal('v49Overlay')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div class="v49-barra" aria-hidden="true"><span style="width:${tot ? Math.round(s.fatte / tot * 100) : 100}%"></span></div>`;
+  if (!l.length) {
+    box.innerHTML = testa(`${s.fatte} di ${tot}`) + `<div class="v49-fine"><i class="ti ti-circle-check" aria-hidden="true"></i><p class="v49-fine-t">Niente più rimaste indietro</p>
+      <p class="t-caption muted">${s.fatte ? `Ne hai sistemate ${s.fatte}.` : 'Non ce n\'erano.'}</p>
+      <div class="v49-fine-b">${s.storia.length ? `<button type="button" class="btn btn-ghost" data-act="v49-annulla"><i class="ti ti-arrow-back-up"></i>Annulla l'ultima</button>` : ''}<button type="button" class="btn btn-primary" onclick="closeModal('v49Overlay')">Chiudi</button></div></div>`;
+    return;
+  }
+  if (s.idx >= l.length) {
+    box.innerHTML = testa(`${s.fatte} di ${tot}`) + `<div class="v49-fine"><i class="ti ti-player-skip-forward" aria-hidden="true"></i><p class="v49-fine-t">Le hai viste tutte</p>
+      <p class="t-caption muted">Ne restano ${l.length} che hai saltato.</p>
+      <div class="v49-fine-b"><button type="button" class="btn btn-ghost" onclick="closeModal('v49Overlay')">Basta per ora</button><button type="button" class="btn btn-primary" data-act="v49-ricomincia">Ricomincia da quelle</button></div></div>`;
+    return;
+  }
+  const c = l[s.idx], q = computeEffectiveQ(c), oggi = oggiData();
+  const corrente = eSettimanaCorrente();
+  const giorni = Array.from({ length: 8 }, (_, i) => piuGiorni(oggi, i)).map((d, i) => {
+    const iso = toISODate(d), lb = v48Libere(d);
+    const nome = i === 0 ? 'Oggi' : i === 1 ? 'Domani' : d.toLocaleDateString('it-IT', { weekday: 'short' }).replace('.', '');
+    return `<button type="button" class="v48-g${lb.pieno ? ' pieno' : ''}${lb.weekend ? ' we' : ''}${i < 2 ? ' v49-big' : ''}" data-act="v49-giorno" data-iso="${iso}" aria-label="${escHtml(fmtGiorno(d))}${lb.t ? ', libere ' + escHtml(lb.t) : ''}">
+      <span class="v48-n">${escHtml(nome)}${i < 2 ? ` ${kbd(i + 1)}` : ''}</span><b>${d.getDate()}</b><span class="v48-l mono">${escHtml(lb.t || ' ')}</span></button>`;
+  }).join('');
+  const scelta = (act, ico, t, sub, k, extra = '') => `<button type="button" class="v49-sc${extra}" data-act="${act}"><i class="ti ${ico}" aria-hidden="true"></i><span><b>${t}</b><small>${sub}</small></span>${kbd(k)}</button>`;
+  box.innerHTML = testa(`${s.fatte + s.idx + 1} di ${tot}`) + `
+    <div class="v49-cosa p-q${q}"><p class="v49-tit">${escHtml(c.title)}</p>
+      <p class="v49-meta"><span class="v49-da">● ${escHtml(v49Da(c))}</span> · ${escHtml(TIPI[q].label)}${c.durata_minuti ? ` · ${c.durata_minuti} min` : ''}</p></div>
+    <p class="v49-dom">Quando la fai? <small>sotto la data, le ore libere tolti gli appuntamenti</small></p>
+    <div class="v48-giorni v49-giorni">${giorni}</div>
+    <div class="v49-scelte">
+      ${corrente ? scelta('v49-settimana', 'ti-bulb', 'Pensaci dopo', 'in settimana, senza giorno', '3') : ''}
+      ${scelta('v49-chiusa', 'ti-check', 'È chiusa', 'fatta, la tolgo', '4', ' v49-ok')}
+      ${scelta('v49-delega', 'ti-user-share', 'Delega', 'a chi e quando controlli', 'D')}
+      ${scelta('v49-lascia', 'ti-wind', 'Lascia stare', 'va in Un giorno', 'L')}
+    </div>
+    <div class="v49-piede">
+      <button type="button" class="btn btn-ghost btn-sm" data-act="v49-indietro"${s.idx ? '' : ' disabled'}><i class="ti ti-arrow-left"></i>Indietro</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="v49-annulla"${s.storia.length ? '' : ' disabled'}><i class="ti ti-arrow-back-up"></i>Annulla l'ultima <span class="v49-solo-pc">${kbd('Z')}</span></button>
+      <button type="button" class="btn btn-secondary btn-sm" data-act="v49-salta">Salta<i class="ti ti-arrow-right"></i></button>
+    </div>`;
+}
+async function v49Fai(tipo, iso) {
+  const s = ui.v49; if (!s || s.occupato) return;
+  const c = v49Lista()[s.idx]; if (!c) return;
+  if (tipo === 'delega') { closeModal('v49Overlay'); apriDelega(c.id); return; }
+  const f = v48Foto(c.id); f.q = c.q;
+  s.occupato = true;
+  try {
+    if (tipo === 'giorno') await v48MettiIn(c.id, iso);
+    else if (tipo === 'settimana') await bordoSposta(c.id, 'settimana');
+    else if (tipo === 'chiusa') await azioneFatto(c.id);
+    else if (tipo === 'lascia') await azioneLascia(c.id);
+    const d = ciclo(c.id);
+    const fatto = !d || tipo === 'chiusa' ? !!(d && d.done) || !d : !v49Lista().some(x => x.id === c.id);
+    if (fatto) { s.storia.push({ tipo, f, id: c.id }); s.fatte++; }
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { s.occupato = false; }
+  v49Disegna();
+}
+async function v49Annulla() {
+  const s = ui.v49, u = s && s.storia.pop();
+  if (!u) return;
+  try {
+    if (u.tipo === 'chiusa') { const c = ciclo(u.id); if (c && c.done) await azioneFatto(u.id); }
+    else if (u.tipo === 'lascia') await patchCiclo(u.id, { q: u.f.q, ...(state.parcheggioColsOk ? { parcheggiato: !!u.f.campi.parcheggiato, parcheggiato_at: u.f.campi.parcheggiato_at || null } : {}) });
+    else await v48Rimetti(u.f);
+    s.fatte = Math.max(0, s.fatte - 1);
+    const i = v49Lista().findIndex(x => x.id === u.id);
+    if (i >= 0) s.idx = i;
+    render();
+  } catch (e) { showToast('Non riesco ad annullare: ' + e.message, 'error'); }
+  v49Disegna();
+}
+Object.assign(AZIONI, {
+  'v49-apri': () => v49Apri(),
+  'v49-giorno': el => v49Fai('giorno', el.dataset.iso),
+  'v49-settimana': () => v49Fai('settimana'),
+  'v49-chiusa': () => v49Fai('chiusa'),
+  'v49-lascia': () => v49Fai('lascia'),
+  'v49-delega': () => v49Fai('delega'),
+  'v49-salta': () => { if (ui.v49) { ui.v49.idx++; v49Disegna(); } },
+  'v49-indietro': () => { if (ui.v49 && ui.v49.idx) { ui.v49.idx--; v49Disegna(); } },
+  'v49-annulla': () => v49Annulla(),
+  'v49-ricomincia': () => { if (ui.v49) { ui.v49.idx = 0; v49Disegna(); } }
+});
+// il bollino «N rimaste indietro» e il gruppo in Da pianificare aprono Smaltisci
+AZIONI['v47-vai-indietro'] = () => v49Apri();
+document.addEventListener('click', e => { if (e.target.closest('summary [data-act="v49-apri"]')) e.preventDefault(); }, true);
+document.addEventListener('keydown', e => {
+  const o = $('v49Overlay');
+  if (!o || !o.classList.contains('open') || !ui.v49 || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase(), oggi = oggiData();
+  const mappa = { '1': () => v49Fai('giorno', toISODate(oggi)), '2': () => v49Fai('giorno', toISODate(piuGiorni(oggi, 1))), '3': () => eSettimanaCorrente() && v49Fai('settimana'), '4': () => v49Fai('chiusa'),
+    'd': () => v49Fai('delega'), 'l': () => v49Fai('lascia'), 'z': () => v49Annulla(), 'arrowright': AZIONI['v49-salta'], 'arrowleft': AZIONI['v49-indietro'] };
+  if (mappa[k]) { e.preventDefault(); mappa[k](); }
+});
+{
+  const _listaV49 = htmlDaPianificareLista;
+  htmlDaPianificareLista = function () {
+    return _listaV49.apply(this, arguments).replace('<span class="t-caption">trascinale in un giorno</span></summary>',
+      '<button type="button" class="v49-sm-btn" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i>Smaltisci</button></summary>');
+  };
+}
+// Oggi: sotto «Oggi: N cose da chiudere», il bottone per smaltire le rimaste indietro
+{
+  const _oggiV49a = vistaOggi;
+  vistaOggi = function () {
+    let h = _oggiV49a.apply(this, arguments);
+    try {
+      const n = v49Lista().length;
+      if (!n) return h;
+      const tpl = document.createElement('template'); tpl.innerHTML = h;
+      const card = tpl.content.querySelector('.v12-card.v12-rosso');
+      const b = `<button type="button" class="v49-oggi" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i><span>Smaltisci ${n === 1 ? 'la rimasta indietro' : `le ${n} rimaste indietro`}</span><i class="ti ti-chevron-right" aria-hidden="true"></i></button>`;
+      if (card) card.insertAdjacentHTML('beforeend', b);
+      else { const g = tpl.content.querySelector('.v33-centro') || tpl.content.querySelector('.v12-oggi') || tpl.content; g.insertAdjacentHTML('afterbegin', b); }
+      const d = document.createElement('div'); d.appendChild(tpl.content); h = d.innerHTML;
+    } catch (e) { console.warn('[v49] oggi smaltisci:', e.message); }
+    return h;
+  };
+}
+// (2) Oggi sul computer: «Da controllare»
+ui.v49Aperti = ui.v49Aperti || new Set();
+function v49Chiave(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9àèéìòù]+/g, '-').slice(0, 40); }
+{
+  const _oggiV49b = vistaOggi;
+  vistaOggi = function () {
+    let h = _oggiV49b.apply(this, arguments);
+    if (!/v33-tre/.test(h)) return h;
+    try {
+      const tpl = document.createElement('template'); tpl.innerHTML = h;
+      const f = tpl.content, tre = f.querySelector('.v33-tre'), dx = f.querySelector('.v33-dx');
+      if (!tre || !dx) return h;
+      const righe = [];
+      const testo = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
+      // già compatti: restano come sono (si aprono da soli)
+      tre.querySelectorAll('.v31-ob, .v23-posta').forEach(el => { el.classList.add('v49-diretto'); righe.push(el.outerHTML); el.remove(); });
+      const blocchi = [...tre.querySelectorAll('.v29-prep, .banner-piano, .v43-metodo .v12-card')];
+      blocchi.forEach(el => {
+        const tEl = el.querySelector('.v29-t, b, h3, strong') || el.querySelector('p');
+        const t = testo(tEl) || 'Da guardare';
+        const sEl = [...el.querySelectorAll('.v29-s, .t-caption, p, small')].find(x => x !== tEl && !x.contains(tEl) && testo(x) && testo(x) !== t);
+        const sub = sEl ? testo(sEl) : '';
+        const ico = (el.querySelector('i.ti') || {}).className || 'ti ti-point';
+        const k = v49Chiave(t);
+        righe.push(`<details class="v49-r" data-v49="${esc(k)}"${ui.v49Aperti.has(k) ? ' open' : ''}><summary><i class="${esc(ico)}" aria-hidden="true"></i><span class="v49-r-t"><b>${escHtml(corta(t, 60))}</b>${sub ? `<small>${escHtml(corta(sub, 70))}</small>` : ''}</span><i class="ti ti-chevron-down v49-r-v" aria-hidden="true"></i></summary><div class="v49-r-corpo">${el.outerHTML}</div></details>`);
+        el.remove();
+      });
+      const metodo = tre.querySelector('.v43-metodo');
+      if (metodo && !metodo.querySelector('.v12-card')) metodo.remove();
+      if (righe.length) dx.insertAdjacentHTML('afterbegin', `<section class="v49-ctl" aria-label="Da controllare"><p class="v49-ctl-h"><span>Da controllare</span><span class="mono">${righe.length}</span></p>${righe.join('')}</section>`);
+      const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
+    } catch (e) { console.warn('[v49] da controllare:', e.message); }
+    return h;
+  };
+}
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details[data-v49]')) { if (d.open) ui.v49Aperti.add(d.dataset.v49); else ui.v49Aperti.delete(d.dataset.v49); } }, true);
+// (3) Pianifica: l'orario degli appuntamenti a sinistra, in colonna
+function v49Orari() {
+  document.querySelectorAll('.board .evt-riga.evt-app:not([data-v49o])').forEach(r => {
+    r.setAttribute('data-v49o', '1');
+    const m = r.querySelector('.item-meta .mono');
+    const t = m && m.textContent.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
+    const main = r.querySelector('.evt-main');
+    if (!main) return;
+    if (t) {
+      main.insertAdjacentHTML('beforebegin', `<span class="v49-ore mono">${t[1]}<br>${t[2]}</span>`);
+      const sep = m.nextElementSibling; if (sep && sep.classList.contains('sep')) sep.remove();
+      m.remove();
+    } else if (/senza orario|tutto il giorno/i.test(m ? m.textContent : '')) {
+      main.insertAdjacentHTML('beforebegin', `<span class="v49-ore mono">tutto il<br>giorno</span>`);
+    }
+  });
+  document.querySelectorAll('.board .spazio-riga .item-title:not([data-v49o])').forEach(t => {
+    t.setAttribute('data-v49o', '1');
+    const o = t.querySelector('.mono');
+    if (o) t.innerHTML = `Libero dalle <span class="mono">${escHtml(o.textContent)}</span>`;
+  });
+}
+{
+  const _disegnaV49 = disegna;
+  disegna = function () { const r = _disegnaV49.apply(this, arguments); try { v49Orari(); } catch (e) { console.warn('[v49] orari:', e.message); } return r; };
+}
 </script>
 </body>
 </html>

@@ -1035,3 +1035,9 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 - Adesso: «Prima di iniziare» a tutta larghezza con il bottone sotto (era schiacciato in una colonna stretta).
 - PDF: colori «Carta e salvia» (Importante blu, Delega ocra, appuntamenti prugna, inchiostro #1B1A17, obiettivi blu notte).
 - Bozze sul canvas (sezione 17): «Smaltisci» le rimaste indietro una alla volta, e Oggi più pulito con un solo riquadro «Da controllare». Da approvare. Test: tests/t48.js.
+
+## v49 · 19/11 — approvate le bozze 17; Pianifica con le schede della 14 e i colori della 15
+- Roby: «15 i colori ok · Pianifica come bozza 14 (stile) · 17 ok»; poi precisato: «14 mi serve solo per Pianifica, come le card sono visualizzate». La struttura della v47 (giallo e Obiettivi in alto, testa fissa) resta.
+- Smaltisci (#v49Overlay): le rimaste indietro (v47Indietro) una alla volta, prima le Subito. Giorni con le ore libere (Oggi=1, Domani=2), Pensaci dopo=3 (in settimana, senza data: la data passata si toglie anche trascinando nel giallo), È chiusa=4, Delega=D, Lascia stare=L, ← → per andare, Z annulla l'ultima. Sul telefono Oggi e Domani grandi, 6 giorni, niente tasti. Si apre dal bollino «N rimaste indietro», dal bottone «Smaltisci» nel gruppo di Da pianificare e da «Smaltisci le N rimaste indietro» sotto «Oggi: N cose da chiudere».
+- Oggi sul computer: a destra un solo riquadro «Da controllare» col numero: Da rispondere e Obiettivi come sono; preparazioni, avvisi (calendario, sera, mete, deleghe) e le schede del metodo come righe che si aprono (restano aperte tra un disegno e l'altro). Sinistra e centro senza avvisi.
+- Pianifica: ogni cosa/appuntamento è una scheda (spazio 8px), Subito rosa col bordo, Importante con la riga blu; appuntamenti con altri viola pieno e tuoi viola chiaro, orario a sinistra; spazi liberi in una riga «Libero dalle 13:00». Test: tests/t49.js.
