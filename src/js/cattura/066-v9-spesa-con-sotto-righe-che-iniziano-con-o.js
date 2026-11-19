@@ -184,12 +184,12 @@ async function aggiungiFrasi(voci, r) {
     return nuove;
   } catch (e) { showToast('Errore: ' + e.message, 'error'); return null; }
 }
-salvaRapido = async function () {
+async function salvaRapido() {
   const righe = righeCampo($('rapido-testo').value);
   if (!righe.length) { $('rapido-testo').focus(); return; }
   fermaDettatura();
   if (await aggiungiFrasi(vociDaRighe(righe, ui.rapido), { ...ui.rapido })) closeModal('rapidoOverlay');
-};
+}
 // campo fisso del telefono: stesso riepilogo, in breve; «Modifica» apre il foglio con il testo
 function disegnaAnteprimaCattura() {
   const box = $('cattura-anteprima');

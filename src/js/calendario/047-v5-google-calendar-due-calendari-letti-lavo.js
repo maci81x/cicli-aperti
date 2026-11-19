@@ -74,7 +74,7 @@ async function leggiEventi(da, a, calendari) {
 ui.eventiCarico = {};
 function eventiSettimanaDi(d) { const w = isoWeekParts(d); return ui.eventi[settKey(w.week, w.year)] || []; }
 // Gli appuntamenti del giorno, senza la routine del mattino (quella va in Routine)
-eventiDelGiorno = function (d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); };
+function eventiDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); }
 function routineDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && e.routine); }
 function arcoRoutine(lista) {
   if (!lista.length) return null;

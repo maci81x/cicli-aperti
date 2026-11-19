@@ -22,14 +22,14 @@ function conTutto(fn) { return function () { ui._tuttiCtx++; try { return fn.app
 ['creaPdfSettimana', 'quotaSettimana', 'vociCoach', 'bpwCandidati', 'righePdfGiorno'].forEach(nome => { if (typeof window[nome] === 'function') window[nome] = conTutto(window[nome]); });
 
 // --- il filtro in alto ---
-switchCtx = function (ctx) {
+function switchCtx(ctx) {
   state.filtro = ['lavoro', 'personale'].includes(ctx) ? ctx : 'tutto';
   state.ctx = state.filtro === 'personale' ? 'personale' : 'lavoro';
   state.filter_cat = null;
   state.filter_persona = null;
   try { localStorage.setItem(LS.CAT_FILTER, ''); } catch (_) { /* niente */ }
   render();
-};
+}
 const _disegnaV13 = disegna;
 disegna = function () {
   const r = _disegnaV13.apply(this, arguments);

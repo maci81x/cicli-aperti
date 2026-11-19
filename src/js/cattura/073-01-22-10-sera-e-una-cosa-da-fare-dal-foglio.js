@@ -45,7 +45,7 @@ async function calendariScrivibili() {
   return ((lista && lista.items) || []).filter(c => CAL_SCRITTURA.RUOLI.includes(c.accessRole))
     .map(c => ({ id: c.id, nome: (CAL_LETTURA.find(x => x.id === c.id) || {}).nome || c.summaryOverride || c.summary || c.id }));
 }
-ensureGcalCalendar = async function () {
+async function ensureGcalCalendar() {
   if (!isGcalTokenValid()) return;
   const scelto = calScelto();
   if (gcal.calendarId === scelto && ui.calVerificato) return;
@@ -60,7 +60,7 @@ ensureGcalCalendar = async function () {
   ui.calVerificato = true;
   localStorage.setItem('gcal_cal_id', id);
   if (cambiato) await saveGcalTokenToDB();
-};
+}
 // un id vecchio (localStorage gcal_cal_id o user_tokens.google_calendar_id) che non è quello di scrittura → Lavoro, subito
 function normalizzaCalendario() {
   const giusto = calScelto();
@@ -86,7 +86,7 @@ function sceltaCalScrittura() {
 
 // Gli eventi dell'app: titolo «16.45 - titolo», popup all'ora e 10 minuti prima, link all'app, proprietà cicli_aperti
 const PROMEMORIA_EVENTO = { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }, { method: 'popup', minutes: 10 }] };
-corpoEvento = function (c, slot) {
+function corpoEvento(c, slot) {
   const durata = slot.durata || AVVISO.DURATA;
   const inizio = new Date(`${slot.data}T${slot.ora}:00`), fine = new Date(inizio.getTime() + durata * 60000);
   return { summary: titoloAvviso(slot.ora, c.title), description: `Cicli Aperti · appuntamento con te stesso\n${APP_URL}#ciclo=${c.id}`,
@@ -94,7 +94,7 @@ corpoEvento = function (c, slot) {
     end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     reminders: PROMEMORIA_EVENTO,
     extendedProperties: { private: { cicli_aperti: 'blocco', ciclo_id: c.id } } };
-};
+}
 // togli: un evento che non è dell'app non si cancella, si scollega soltanto
 const _togliBloccoV10 = togliBlocco;
 togliBlocco = async function (c, silenzioso) {
@@ -106,7 +106,7 @@ togliBlocco = async function (c, silenzioso) {
   }
 };
 // chiusa: avviso → cancellato; blocco futuro → cancellato; blocco passato → «✓» davanti al titolo. Solo eventi dell'app.
-chiudiBlocco = async function (c) {
+async function chiudiBlocco(c) {
   if (!c || !c.calendar_event_id || bloccoEsterno(c) || !isGcalTokenValid()) return;
   try {
     await ensureGcalCalendar();
@@ -118,7 +118,7 @@ chiudiBlocco = async function (c) {
     if (eAvviso(ev) || futuro) { await togliBlocco(ciclo(c.id) || c, true); return; }
     if (!/^✓ /.test(ev.summary || '')) await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', { summary: '✓ ' + (ev.summary || c.title) });
   } catch (e) { if (!nonEsiste(e)) console.warn('[GCal] chiudi:', e.message); }
-};
+}
 
 // In Oggi e nelle colonne: un evento dell'app collegato a una cosa non compare (si vede la cosa, con la sua ora)
 const collegatoACosa = e => !!(e && e.app && e.cicloId);
@@ -163,7 +163,7 @@ async function corpoPromemoriaV10(tipo) {
     start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
     recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: PROMEMORIA_EVENTO, extendedProperties: { private: { cicli_aperti: 'promemoria', promemoria: 'q2' } } } };
 }
-sincronizzaPromemoria = async function (tipo, forza) {
+async function sincronizzaPromemoria(tipo, forza) {
   if (!isGcalTokenValid()) return null;
   await ensureGcalCalendar();
   if (!gcal.calendarId) return null;
@@ -187,7 +187,7 @@ sincronizzaPromemoria = async function (tipo, forza) {
     scriviJson(LS5.PROM, { ...leggiJson(LS5.PROM, {}), [tipo]: { id, firma, cal: gcal.calendarId } });
     return id;
   } catch (e) { console.warn(`[GCal] promemoria ${tipo}:`, e.message); return null; }
-};
+}
 
 // ══════════════════════════════════════════════════════════════
 // 22/10 sera · «È una cosa da fare» dal foglio di un appuntamento
@@ -206,7 +206,7 @@ const eventoDiSerie = e => !!(e && e.serie && e.serie !== e.id);
 const _eventiDelGiornoDalCal = eventiDelGiorno;
 eventiDelGiorno = function (d) { return _eventiDelGiornoDalCal(d).filter(e => !eventoCollegato(e)); };
 
-eventoInElenco = async function (id) {
+async function eventoInElenco(id) {
   const e = eventoPerId(id);
   if (!e) return;
   const gia = cosaDiEvento(e);
@@ -224,7 +224,7 @@ eventoInElenco = async function (id) {
     ui.evtNuova = { evtId: e.id, cicloId: c.id };
     disegnaDomandaEvento(e);
   } catch (err) { showToast('Non riesco: ' + err.message, 'error'); }
-};
+}
 function disegnaDomandaEvento(e) {
   const b = (v, cls, testo) => `<button type="button" class="btn ${cls} btn-block" data-act="evt-togli" data-v="${v}">${testo}</button>`;
   const quando = `${fmtGiornoLungo(parseISODate(e.giorno))}${e.ora ? ` alle <span class="mono">${e.ora}</span>` : ''}`;

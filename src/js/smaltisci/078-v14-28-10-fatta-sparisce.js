@@ -64,7 +64,7 @@ salvaRapido = async function () {
 
 // Fatte: tutte le cose chiuse, con cerca e Riapri
 ui.fatteQ = '';
-vistaFatte = function () {
+function vistaFatte() {
   const q = normTitolo(ui.fatteQ || '');
   const tutte = state.cicli.filter(c => c.done && vedi(c.ctx));
   const lista = tutte.filter(c => !q || normTitolo(c.title).includes(q) || normTitolo(c.note || '').includes(q))
@@ -86,7 +86,7 @@ vistaFatte = function () {
         <button type="button" class="btn btn-ghost btn-sm v14-riapri" data-act="v14-seguito" data-id="${c.id}">+ Seguito</button>` })).join('')}</div>`;
   });
   return h;
-};
+}
 AZIONI['v14-riapri'] = (el, id) => azioneFatto(id);   // su una cosa fatta, Fatto la riapre
 AZIONI['v14-seguito'] = (el, id) => apriSeguito(ciclo(id));
 document.addEventListener('input', e => {

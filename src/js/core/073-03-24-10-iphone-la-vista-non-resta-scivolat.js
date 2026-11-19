@@ -117,7 +117,7 @@ function rileggiSettimana(week, year) {
   ui.eventiCarico[k] = p;
   return p;
 }
-caricaEventi = function (week, year) {
+function caricaEventi(week, year) {
   const k = settKey(week, year);
   if (!isGcalTokenValid()) return Promise.resolve(ui.eventi[k] || []);
   if (ui.eventiCarico[k]) return ui.eventiCarico[k];
@@ -126,7 +126,7 @@ caricaEventi = function (week, year) {
   const fallito = (ui.eventiTentati[k] || 0) > letto;
   if (fallito && Date.now() - ui.eventiTentati[k] < EVENTI_AGG.RIPROVA_MS) return Promise.resolve(ui.eventi[k] || []);
   return rileggiSettimana(week, year);
-};
+}
 function chiaveSett(k) { const m = /^(\d{4})-W(\d{2})$/.exec(k); return m ? { week: +m[2], year: +m[1] } : null; }
 function aggiornaEventiAperti(motivo) {
   if (!_appAvviata || !isGcalTokenValid() || document.visibilityState === 'hidden') return;

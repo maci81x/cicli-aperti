@@ -95,10 +95,10 @@ async function caricaNonDoppioni() {
   }
   scriviJson(DOPP.LS_NO, unici([...leggiJson(DOPP.LS_NO, []), ...state.nonDopp]));   // la copia locale resta allineata
 }
-gruppiAperti = function () {
+function gruppiAperti() {
   const no = new Set([...doppioniNo(), ...state.nonDopp]);
   return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
-};
+}
 AZIONI['dopp-no'] = async el => {
   const k = el.dataset.k;
   scriviJson(DOPP.LS_NO, unici([...doppioniNo(), k]));

@@ -24,7 +24,7 @@ function v30Riprogrammata(e) {
 }
 // la parola deve essere l'azione, non stare tra parentesi: «Cena a La Bottega (orario da chiedere)» è un appuntamento (4/11)
 const v30Parola = t => PAROLE_CICLO.test(normTitolo(String(t || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')));
-cercaCicliInCalendario = async function () {
+async function cercaCicliInCalendario() {
   if (!isGcalTokenValid()) return;
   const cur = bpSettimanaCorrente(), oggi = parseISODate(oggiLocale());
   let ev = [...(await caricaEventi(cur.week, cur.year) || [])];
@@ -66,7 +66,7 @@ cercaCicliInCalendario = async function () {
   render();
   if ($('calCicliOverlay').classList.contains('open')) disegnaCalCicli();
   if (messe) showToast(messe === 1 ? '1 promemoria passato è in «Da pianificare» · da rivedere' : `${messe} promemoria passati sono in «Da pianificare» · da rivedere`, 'info');
-};
+}
 // il foglio: per i promemoria passati «Già fatta · Mettila tra le cose da fare · Lascia stare»
 const _disegnaCalCicliV30 = disegnaCalCicli;
 disegnaCalCicli = function () {

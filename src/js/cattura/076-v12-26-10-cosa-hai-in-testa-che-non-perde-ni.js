@@ -40,7 +40,7 @@ apriRapido = function () {
   if (b && t && !t.value) { t.value = b; disegnaAnteprima(); }
   return r;
 };
-apriRapidoCon = function (testo) { apriRapido(); $('rapido-testo').value = testo; bozzaScrivi(V12.BOZZA_RAPIDO, testo); disegnaAnteprima(); };
+function apriRapidoCon(testo) { apriRapido(); $('rapido-testo').value = testo; bozzaScrivi(V12.BOZZA_RAPIDO, testo); disegnaAnteprima(); }
 const _salvaRapidoV12 = salvaRapido;
 salvaRapido = async function () {
   const r = await _salvaRapidoV12.apply(this, arguments);
