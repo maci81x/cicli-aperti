@@ -10371,24 +10371,6 @@ function prossimoGiorno(idx, ora) {   // la prossima data (da oggi) con quel gio
   d.setDate(d.getDate() + diff);
   return d;
 }
-function corpoPromemoria(tipo) {
-  const promemoria = { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }, { method: 'popup', minutes: 30 }] };
-  if (tipo === 'bp') {
-    const { giorno, ora } = quandoPiano(), durata = durataPiano(), d = prossimoGiorno(giorno, ora);
-    const fine = new Date(`${toISODate(d)}T${ora}:00`); fine.setMinutes(fine.getMinutes() + durata);
-    return { firma: `${giorno}|${ora}|${durata}|${calScelto()}`, corpo: {
-      summary: 'Prepara il Business Plan', description: `Il piano della prossima settimana: scegli le Q2, i cicli aperti realistici, distribuiscili nei giorni. Poi stampalo e mandalo al coach.\n${APP_URL}`,
-      start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
-      recurrence: [`RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[giorno]}`], reminders: promemoria, extendedProperties: { private: { cicli_aperti: 'bp' } } } };
-  }
-  const base = state.ultimoQ2 ? new Date(state.ultimoQ2) : new Date();
-  const d = new Date(base); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + Q2.OGNI_GIORNI);
-  const { ora } = quandoPiano(), fine = new Date(`${toISODate(d)}T${ora}:00`); fine.setMinutes(fine.getMinutes() + 120);
-  return { firma: `${toISODate(d)}|${ora}|${calScelto()}`, corpo: {
-    summary: 'Esercizio Q2', description: `Scegli le attività importanti dei prossimi 3 mesi e fissale in agenda.\n${APP_URL}`,
-    start: { dateTime: `${toISODate(d)}T${ora}:00`, timeZone: 'Europe/Rome' }, end: { dateTime: `${toISODate(fine)}T${hhmm(fine)}:00`, timeZone: 'Europe/Rome' },
-    recurrence: ['RRULE:FREQ=MONTHLY;INTERVAL=3'], reminders: promemoria, extendedProperties: { private: { cicli_aperti: 'q2' } } } };
-}
 
 // ══════════════════════════════════════════════════════════════
 // v5 · BANNER: è ora del Business Plan · incontro con il coach · esercizio Q2 · appuntamenti che sembrano cicli
@@ -12162,14 +12144,6 @@ function riservaCoach() {
   return r.inizioMs > Date.now() ? { ...r, riserva: true } : null;
 }
 const coachEvento = () => ui.coach.evento || riservaCoach();
-const fmtGiornoNum = d => `${d.toLocaleDateString('it-IT', { weekday: 'long' })} ${d.getDate()}/${d.getMonth() + 1}`;
-function testoQuandoCoach() {
-  const e = coachEvento(), collegato = isGcalTokenValid();
-  if (ui.coach.evento) return `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> · ${contoAllaRovescia(e.inizioMs)}`;
-  const nota = !collegato ? 'dal calendario quando è collegato' : ui.coach.letto ? 'l\'ultima data trovata: ora sul calendario non c\'è' : 'sto guardando il calendario';
-  return e ? `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> <span class="cc-nota">(${nota})</span>`
-    : `Prossimo incontro: da fissare <span class="cc-nota">(${nota})</span>`;
-}
 // Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
 const _bannerCoachV5 = bannerCoach;
 bannerCoach = function () {
@@ -13910,7 +13884,6 @@ function testoDopp(m) {
   if (m.tipo === 'evento') return `In agenda c'è già: ${m.e.titoloOrig || m.e.titolo}, ${giornoEvento(m.e)}`;
   return `Vedi anche: ${m.c.title}`;
 }
-const suggerimentoParente = m => m && m.tipo === 'parente' ? `<p class="dopp-parente"><i class="ti ti-link" aria-hidden="true"></i>Vedi anche: ${escHtml(m.c.title)}</p>` : '';
 
 // ─── Il foglio «C'è già» (una voce alla volta) ───
 document.body.insertAdjacentHTML('beforeend', `
@@ -17778,9 +17751,6 @@ function daPianificarePdf(z) {
     .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
     .forEach(metti);
   return out.slice(0, 12);
-}
-function v21GiornoVuoto(idx) {
-  return !righeGiorno(GIORNI[idx].key).length && !eventiDelGiorno(dataDelGiorno(idx)).length;
 }
 AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), el.dataset.oggi === '1'); };
 
