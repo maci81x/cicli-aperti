@@ -485,7 +485,6 @@ function testoDopp(m) {
   if (m.tipo === 'evento') return `In agenda c'è già: ${m.e.titoloOrig || m.e.titolo}, ${giornoEvento(m.e)}`;
   return `Vedi anche: ${m.c.title}`;
 }
-const suggerimentoParente = m => m && m.tipo === 'parente' ? `<p class="dopp-parente"><i class="ti ti-link" aria-hidden="true"></i>Vedi anche: ${escHtml(m.c.title)}</p>` : '';
 
 // ─── Il foglio «C'è già» (una voce alla volta) ───
 document.body.insertAdjacentHTML('beforeend', `

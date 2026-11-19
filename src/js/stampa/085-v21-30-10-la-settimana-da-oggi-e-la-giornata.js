@@ -120,9 +120,6 @@ function daPianificarePdf(z) {
     .forEach(metti);
   return out.slice(0, 12);
 }
-function v21GiornoVuoto(idx) {
-  return !righeGiorno(GIORNI[idx].key).length && !eventiDelGiorno(dataDelGiorno(idx)).length;
-}
 AZIONI['v21-stampa-giorno'] = el => { stampaGiorno(parseInt(el.dataset.i, 10), el.dataset.oggi === '1'); };
 
 // ══════════════════════════════════════════════════════════════

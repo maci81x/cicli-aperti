@@ -844,14 +844,6 @@ function riservaCoach() {
   return r.inizioMs > Date.now() ? { ...r, riserva: true } : null;
 }
 const coachEvento = () => ui.coach.evento || riservaCoach();
-const fmtGiornoNum = d => `${d.toLocaleDateString('it-IT', { weekday: 'long' })} ${d.getDate()}/${d.getMonth() + 1}`;
-function testoQuandoCoach() {
-  const e = coachEvento(), collegato = isGcalTokenValid();
-  if (ui.coach.evento) return `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> · ${contoAllaRovescia(e.inizioMs)}`;
-  const nota = !collegato ? 'dal calendario quando è collegato' : ui.coach.letto ? 'l\'ultima data trovata: ora sul calendario non c\'è' : 'sto guardando il calendario';
-  return e ? `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> <span class="cc-nota">(${nota})</span>`
-    : `Prossimo incontro: da fissare <span class="cc-nota">(${nota})</span>`;
-}
 // Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
 const _bannerCoachV5 = bannerCoach;
 bannerCoach = function () {
