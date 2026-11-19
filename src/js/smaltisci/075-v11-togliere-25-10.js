@@ -58,8 +58,6 @@ eventiDelGiorno = function (d) { return _eventiDelGiornoV11(d).filter(e => !eNas
 const _routineDelGiornoV11 = routineDelGiorno;
 routineDelGiorno = function (d) { return _routineDelGiornoV11(d).filter(e => !eNascosto(e)); };
 function figlieDelGiorno(d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && eFiglie(e) && !eNascosto(e)); }
-const _eventoSpuntabileV11 = eventoSpuntabile;
-eventoSpuntabile = function (e) { return _eventoSpuntabileV11(e) && !eFiglie(e) && !eNascosto(e); };
 
 // la riga di un impegno delle figlie: grigia, con l'etichetta
 function rigaFiglie(e) {
@@ -77,24 +75,6 @@ vistaOggi = function () {
 };
 
 // --- il foglio dell'appuntamento: nascondi / togli ---
-const _disegnaFoglioEventoV11 = disegnaFoglioEvento;
-disegnaFoglioEvento = function (id) {
-  _disegnaFoglioEventoV11(id);
-  const e = eventoPerId(id), corpo = $('evt-corpo');
-  if (!e || !corpo) return;
-  if (eFiglie(e)) {
-    const q = corpo.querySelector('.evt-quando');
-    if (q) q.insertAdjacentHTML('afterbegin', '<span class="tag-coach tag-figlie">Figlie</span>');
-  }
-  const riga = (act, ico, testo, sotto, cls) => `<button type="button" class="riga-link${cls ? ' ' + cls : ''}" data-act="${act}" data-evt="${esc(e.id)}"><i class="ti ${ico}"></i><span>${testo}${sotto ? `<small>${sotto}</small>` : ''}</span><span></span><i class="ti ti-chevron-right"></i></button>`;
-  const togli = e.orgIo && !(e.nomiInvitati || []).length
-    ? riga('evt-togli-cal', 'ti-trash', 'Toglilo dal calendario', 'sparisce anche da Google Calendar', 'riga-danger')
-    : '';
-  corpo.insertAdjacentHTML('beforeend', `<p class="list-head"><span>Non ti serve?</span></p><div class="group">
-    ${riga('evt-nascondi', 'ti-eye-off', 'Non è mio · nascondilo', 'solo nell\'app: il calendario resta com\'è')}
-    ${togli}</div>
-    ${!e.orgIo ? `<p class="t-caption muted">È un invito di ${escHtml(e.org || 'un\'altra persona')}: per rifiutarlo usa Google Calendar.</p>` : ''}`);
-};
 // la seconda domanda, nello stesso foglio
 function domandaFoglioEvento(id, tipo) {
   const e = eventoPerId(id), corpo = $('evt-corpo');

@@ -179,25 +179,6 @@ async function saveGcalTokenToDB() {
   } catch (e) { console.warn('[GCal] salvataggio token:', e.message); localStorage.setItem('gcal_da_salvare', '1'); }
 }
 
-async function ensureGcalCalendar() {
-  if (!isGcalTokenValid()) return;
-  if (gcal.calendarId) return;
-  try {
-    // Cerca calendario esistente
-    const listRes = await gcalFetch('/users/me/calendarList', 'GET');
-    const existing = listRes?.items?.find(c => c.summary === GCAL_CAL_NAME);
-    if (existing) {
-      gcal.calendarId = existing.id;
-    } else {
-      const created = await gcalFetch('/calendars', 'POST', { summary: GCAL_CAL_NAME, timeZone: 'Europe/Rome' });
-      gcal.calendarId = created.id;
-    }
-    localStorage.setItem('gcal_cal_id', gcal.calendarId);
-    await saveGcalTokenToDB();
-  } catch (e) {
-    console.warn('[GCal] ensureCalendar:', e.message);
-  }
-}
 
 async function gcalFetch(path, method, body) {
   if (!isGcalTokenValid()) { rinnovaGcalSilenzioso('richiesta a token scaduto'); return null; }

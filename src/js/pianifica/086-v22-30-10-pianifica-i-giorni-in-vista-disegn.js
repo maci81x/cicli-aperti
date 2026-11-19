@@ -6,14 +6,6 @@
 // ══════════════════════════════════════════════════════════════
 ui.v22Coach = false;
 AZIONI['v22-coach'] = () => { ui.v22Coach = !ui.v22Coach; render(); };
-function v22RigaCoach() {
-  try { caricaCoach(); } catch (_) {}
-  const voci = vociCoach(), mancano = voci.filter(v => !v.ok).length, e = coachEvento();
-  const d = e ? new Date(e.inizioMs) : null;
-  const quando = d ? `${d.toLocaleDateString('it-IT', { weekday: 'short' })} ${d.getDate()}/${d.getMonth() + 1}, <span class="mono">${e.ora}</span>` : 'incontro da fissare';
-  const stato = mancano ? `mancano ${mancano} su ${voci.length}` : 'tutto pronto';
-  return `<button type="button" class="v22-riga v22-coach${mancano ? '' : ' ok'}" data-act="v22-coach" aria-expanded="${ui.v22Coach}"><span class="v22-punto" aria-hidden="true"></span><span class="v22-testo"><b>Per il coach</b> · ${quando} · <span class="v22-stato">${stato}</span></span><span class="v22-apri">${ui.v22Coach ? 'Chiudi' : 'Apri'}<i class="ti ti-chevron-${ui.v22Coach ? 'up' : 'down'}" aria-hidden="true"></i></span></button>`;
-}
 // il coach: riga sottile al posto della card (la card resta sotto se aperta)
 function v22Coach(f, dopo) {
   const card = f.querySelector('section.coach-card');

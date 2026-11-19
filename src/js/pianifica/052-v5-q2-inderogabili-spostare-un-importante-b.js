@@ -96,7 +96,5 @@ togliBlocco = async function (c, silenzioso) {
 };
 const _aggiornaBloccoV4 = aggiornaBlocco;
 aggiornaBlocco = id => bloccoEsterno(ciclo(id)) ? Promise.resolve() : _aggiornaBloccoV4(id);
-const _chiudiBloccoV4 = chiudiBlocco;
-chiudiBlocco = c => bloccoEsterno(c) ? Promise.resolve() : _chiudiBloccoV4(c);
 
 // ══════════════════════════════════════════════════════════════

@@ -1,32 +1,6 @@
 // v2 · APPUNTAMENTI DI GOOGLE CALENDAR (sola lettura)
 // ══════════════════════════════════════════════════════════════
 const hhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-async function caricaEventi(week, year) {
-  const k = settKey(week, year);
-  if (!isGcalTokenValid() || ui.eventi[k]) return ui.eventi[k] || [];
-  ui.eventi[k] = [];   // segnaposto: non richiedere due volte
-  try {
-    const da = getWeekStart(week, year);
-    const a = new Date(da); a.setDate(a.getDate() + 7);
-    const qs = new URLSearchParams({ timeMin: da.toISOString(), timeMax: a.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });
-    const res = await gcalFetch('/calendars/primary/events?' + qs.toString(), 'GET');
-    ui.eventi[k] = ((res && res.items) || []).filter(e => e.status !== 'cancelled').map(e => {
-      const inizio = e.start.dateTime ? new Date(e.start.dateTime) : parseISODate(e.start.date);
-      const fine = e.end && e.end.dateTime ? new Date(e.end.dateTime) : null;
-      return { id: e.id, titolo: e.summary || '(senza titolo)', giorno: toISODate(inizio), ora: e.start.dateTime ? hhmm(inizio) : null,
-        fine: fine ? hhmm(fine) : null, minuti: fine ? Math.max(0, Math.round((fine - inizio) / 60000)) : 0 };
-    });
-    render();
-  } catch (e) {
-    delete ui.eventi[k];
-    console.warn('[GCal] lettura appuntamenti:', e.message);
-  }
-  return ui.eventi[k] || [];
-}
-function eventiDelGiorno(d) {
-  const w = isoWeekParts(d);
-  return (ui.eventi[settKey(w.week, w.year)] || []).filter(e => e.giorno === toISODate(d));
-}
 // 22/10 · un evento «di giornata» (tutto il giorno o di 12 ore o più) non occupa ore
 // e non dà avvisi di sovrapposizione
 const GIORNATA_EVENTO_MIN = 12 * 60;

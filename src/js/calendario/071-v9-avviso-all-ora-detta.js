@@ -66,17 +66,6 @@ aggiornaBlocco = async function (id) {
     await gcalFetch(`${percorsoEventi(c)}/${c.calendar_event_id}`, 'PATCH', corpoAvviso(c, slot));
   } catch (e) { console.warn('[GCal] aggiorna avviso:', e.message); }
 };
-// chiusa: l'avviso si cancella sempre (il blocco di «Blocca in agenda» fa come prima)
-const _chiudiBloccoV9 = chiudiBlocco;
-chiudiBlocco = async function (c) {
-  if (!c || !c.calendar_event_id || !isGcalTokenValid()) return;
-  try {
-    await ensureGcalCalendar();
-    if (!gcal.calendarId) return;
-    if (eAvviso(await eventoDellApp(c))) { await togliBlocco(ciclo(c.id) || c, true); return; }
-  } catch (e) { console.warn('[GCal] chiudi avviso:', e.message); return; }
-  return _chiudiBloccoV9(c);
-};
 
 // Ogni spostamento passa da patchCiclo o upsertOverride: dopo un attimo l'evento si allinea (una volta sola)
 const _seguiTimer = new Map();
@@ -137,23 +126,7 @@ vociDaRighe = function (righe, r) {
   const no = (r && r.noAvviso) || [];
   return _vociDaRigheV9(righe, r).map(v => ({ ...v, avvisa: puoAvvisare(v) && !no.includes(v.testo) }));
 };
-const _disegnaAnteprimaV9 = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaV9();
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  document.querySelectorAll('#rapido-anteprima .rap-voce[data-i]').forEach(box => {
-    const v = voci[+box.dataset.i], h = spuntaAvviso(v, `data-avvisa="${box.dataset.i}"`);
-    if (h) box.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', h);
-  });
-};
 ui.catturaNoAvviso = false;
-const _disegnaAnteprimaCatturaV9 = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaV9();
-  const box = $('cattura-anteprima'), voci = vociDaRighe(righeCattura(), { noAvviso: [] }).filter(puoAvvisare);
-  if (!box || box.hidden || !voci.length) return;
-  box.insertAdjacentHTML('beforeend', `<label class="check rap-avvisa"><input type="checkbox" id="cattura-avvisa"${ui.catturaNoAvviso ? '' : ' checked'}><span>Avvisami ${voci.length === 1 ? 'alle ' + voci[0].ora : 'all\'ora detta'}</span></label>`);
-};
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'cattura-avvisa') { ui.catturaNoAvviso = !t.checked; return; }
@@ -168,14 +141,6 @@ $('rapido-testo').addEventListener('input', () => disegnaAnteprima());
 $('cattura-testo').addEventListener('input', () => disegnaAnteprimaCattura());
 const _apriRapidoV9 = apriRapido;
 apriRapido = function () { ui.rapido = { ...(ui.rapido || {}), noAvviso: [] }; _apriRapidoV9(); };
-// il campo del telefono: la sua spunta vale per tutte le righe con un'ora
-const _salvaCatturaV9 = salvaCattura;
-salvaCattura = async function () {
-  const no = ui.catturaNoAvviso;
-  ui._catturaNoAvviso = no;
-  try { return await _salvaCatturaV9.apply(this, arguments); }
-  finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; }
-};
 // dopo il salvataggio: un avviso per ogni cosa con giorno e ora e la spunta attiva
 const _aggiungiFrasiV9 = aggiungiFrasi;
 aggiungiFrasi = async function (voci, r) {

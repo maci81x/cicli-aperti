@@ -83,38 +83,6 @@ rigaDaVoce = async function (v, r, ctx) {
   const riga = await _rigaDaVocePr.apply(this, arguments);
   return v && v.cinque && state.ritualiColsOk ? { ...riga, durata_minuti: PRINC.BREVE_MIN } : riga;
 };
-const _disegnaAnteprimaPr = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaPr();
-  const box = $('rapido-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  box.querySelectorAll('.rap-voce[data-i]').forEach(el => {
-    const i = +el.dataset.i, v = voci[i];
-    if (!v) return;
-    const sintesi = el.querySelector('.rap-sintesi');
-    if (!sintesi) return;
-    let extra = '';
-    if (v.vaga) extra += `<p class="rap-vaga"><i class="ti ti-help-circle" aria-hidden="true"></i><span>Troppo generica: cosa devi fare, con chi, quanto?</span></p>`;
-    if (v.q !== 3) extra += `<div class="rap-breve"><button type="button" class="chip" data-act="rap-cinque" data-i="${i}" aria-pressed="${!!v.cinque}"><i class="ti ti-clock-bolt"></i>5 min</button>
-      ${v.breve ? `<button type="button" class="btn btn-secondary btn-sm" data-act="rap-fallaora" data-i="${i}"><i class="ti ti-player-play"></i>Falla ora</button><span class="t-caption muted">Ci vogliono pochi minuti? Falla adesso.</span>` : ''}</div>`;
-    sintesi.insertAdjacentHTML('afterend', extra);
-  });
-};
-const _disegnaAnteprimaCatturaPr = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaPr();
-  const box = $('cattura-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCattura(), {});
-  const spans = box.querySelectorAll('.ca-voci > span[class^="p-q"]');
-  spans.forEach((el, i) => { if (voci[i] && voci[i].vaga) el.insertAdjacentHTML('beforeend', ' <span class="ca-vaga">· troppo generica: cosa, con chi, quanto?</span>'); });
-  if (voci.length === 1 && voci[0].breve) {
-    const mod = box.querySelector('[data-act="cattura-modifica"]');
-    const b = '<button type="button" class="btn btn-secondary btn-sm ca-falla" data-act="ca-fallaora"><i class="ti ti-player-play"></i>Falla ora</button>';
-    if (mod) mod.insertAdjacentHTML('beforebegin', b); else box.insertAdjacentHTML('beforeend', b);
-  }
-};
 AZIONI['rap-cinque'] = el => {
   const v = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido)[+el.dataset.i];
   if (!v) return;
@@ -152,20 +120,6 @@ salvaRapido = async function () {
   offriFallaOraDopo(voci, idsPrima);
   return r;
 };
-const _salvaCatturaPr = salvaCattura;
-salvaCattura = async function () {
-  const voci = vociDaRighe(righeCattura(), {});
-  const idsPrima = new Set(state.cicli.map(c => c.id));
-  const r = await _salvaCatturaPr.apply(this, arguments);
-  offriFallaOraDopo(voci, idsPrima);
-  return r;
-};
-function offriFallaOraDopo(voci, idsPrima) {
-  if (voci.length !== 1 || !voci[0].breve || ui.fallaOra) return;
-  const c = state.cicli.find(x => !idsPrima.has(x.id) && !x.parent_id && x.title === voci[0].title);
-  if (!c) return;
-  setTimeout(() => showToast('Ci vogliono pochi minuti?', 'info', { annulla: () => avviaFallaOra({ id: c.id, voce: voci[0] }), etichetta: 'Falla ora' }), 250);
-}
 
 // ─── Il timer di 5 minuti ───
 document.body.insertAdjacentHTML('beforeend', `<div class="falla-ora" id="fallaOra" role="region" aria-label="Falla ora" hidden></div>`);

@@ -72,17 +72,6 @@ async function leggiEventi(da, a, calendari) {
 }
 
 ui.eventiCarico = {};
-caricaEventi = function (week, year) {
-  const k = settKey(week, year);
-  if (!isGcalTokenValid()) return Promise.resolve(ui.eventi[k] || []);
-  if (ui.eventiCarico[k]) return ui.eventiCarico[k];
-  if (ui.eventi[k]) return Promise.resolve(ui.eventi[k]);
-  const da = getWeekStart(week, year), a = new Date(da); a.setDate(a.getDate() + 7);
-  ui.eventiCarico[k] = leggiEventi(da, a).then(lista => { ui.eventi[k] = lista; render(); return lista; })
-    .catch(e => { console.warn('[GCal] lettura appuntamenti:', e.message); return []; })
-    .finally(() => { delete ui.eventiCarico[k]; });
-  return ui.eventiCarico[k];
-};
 function eventiSettimanaDi(d) { const w = isoWeekParts(d); return ui.eventi[settKey(w.week, w.year)] || []; }
 // Gli appuntamenti del giorno, senza la routine del mattino (quella va in Routine)
 eventiDelGiorno = function (d) { const iso = toISODate(d); return eventiSettimanaDi(d).filter(e => e.giorno === iso && !e.routine); };
@@ -92,41 +81,9 @@ function arcoRoutine(lista) {
   return { da: lista.map(e => e.ora).sort()[0], a: lista.map(e => e.fine || e.ora).sort().slice(-1)[0] };
 }
 
-rigaEvento = function (e) {
-  const nomeCal = (CAL_LETTURA.find(c => c.tipo === e.cal) || {}).nome || 'Google Calendar';
-  const dati = [`<span class="mono">${orarioEvento(e)}</span>`, `<span>${nomeCal}</span>`];
-  const sovrapposto = coseSovrapposte(e);
-  const note = [
-    sovrapposto.length ? `<span class="evt-nota"><i class="ti ti-alert-triangle"></i><span>si sovrappone a ${escHtml(sovrapposto[0])}${sovrapposto.length > 1 ? ` e altre ${sovrapposto.length - 1}` : ''}</span></span>` : '',
-    e.orarioDiverso ? `<span class="evt-nota evt-diverso" data-tip="Nel titolo c'è ${e.oraTitolo}, l'evento è alle ${e.ora}"><i class="ti ti-clock-exclamation"></i><span>orario nel titolo diverso (${e.oraTitolo})</span></span>` : ''];
-  const sovr = note.join('');
-  const sposta = e.id && e.ora && !e.routine ? ` data-act="evt-sposta" data-evt="${esc(e.id)}" data-cal="${esc(e.calId || '')}" role="button" tabindex="0" aria-label="Sposta l'appuntamento ${esc(e.titolo)}"` : '';
-  return `<div class="evt-riga evt-app${sovr ? ' evt-sovrapposto' : ''}"${sposta}${e.id ? ` data-evt-id="${esc(e.id)}"` : ''}><span class="evt-ico" aria-hidden="true"><span class="evt-cerchio"></span></span>
-    <span class="evt-main"><span class="item-title">${e.coach ? '<span class="tag-coach">Coach</span>' : e.prepCoach ? '<span class="tag-coach tag-prep">Preparazione coach</span>' : ''}${escHtml(e.titolo)}</span><span class="item-meta">${dati.join('<span class="sep">·</span>')}</span>${sovr}</span></div>`;
-};
 
 // Calendario di scrittura: prima per id (Impostazioni, predefinito il primo «Cicli Aperti — Battle Plan»),
 // poi per nome, e si crea solo se non ne esiste nessuno.
 const calScelto = () => (lsLeggi(LS5.CAL_SCRITTURA) || '').trim() || GCAL_CAL_PREFERITO;
-ensureGcalCalendar = async function () {
-  if (!isGcalTokenValid()) return;
-  const scelto = calScelto();
-  if (gcal.calendarId === scelto && ui.calVerificato) return;
-  try {
-    let id = null;
-    try { const c = await gcalFetch(`/calendars/${encodeURIComponent(scelto)}`, 'GET'); if (c && c.id) id = c.id; } catch (_) { id = null; }
-    if (!id) {
-      const lista = await gcalFetch('/users/me/calendarList', 'GET');
-      const esiste = ((lista && lista.items) || []).find(c => c.summary === GCAL_CAL_NAME);
-      if (esiste) id = esiste.id;
-      else { const creato = await gcalFetch('/calendars', 'POST', { summary: GCAL_CAL_NAME, timeZone: 'Europe/Rome' }); id = creato && creato.id; }
-    }
-    if (!id) return;
-    gcal.calendarId = id;
-    ui.calVerificato = true;
-    localStorage.setItem('gcal_cal_id', id);
-    await saveGcalTokenToDB();
-  } catch (e) { console.warn('[GCal] calendario di scrittura:', e.message); }
-};
 
 // ══════════════════════════════════════════════════════════════

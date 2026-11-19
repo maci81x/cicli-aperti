@@ -1,10 +1,6 @@
 // v4 · CUSCINETTI: nel wizard, Riempi, Urgenza arrivata
 // ══════════════════════════════════════════════════════════════
 let _cuscN = 0;
-function bpwAggiungiCusc(giorno, quando, silenzioso) {
-  _bpwCusc.set('n' + (++_cuscN), { id: null, giorno, ora: quando === 'fine' ? CUSC.FINE : CUSC.META, durata: CUSC.DURATA });
-  if (!silenzioso) bpwRenderStep2();
-}
 function bpwCambiaCusc(k, patch) {
   const v = _bpwCusc.get(k);
   if (!v) return;

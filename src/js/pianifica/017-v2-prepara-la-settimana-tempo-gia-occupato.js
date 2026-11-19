@@ -18,13 +18,6 @@ function bpwCambiaSettimana(dir) {
   apriWizard(w.week, w.year);
 }
 
-// Gli appuntamenti arrivano dopo: quando ci sono, ridisegna il riepilogo del wizard.
-function bpwConEventi(week, year) {
-  caricaEventi(week, year).then(() => {
-    if (!$('bpWizOverlay').classList.contains('open') || _bpwWeek !== week || _bpwYear !== year) return;
-    if (_bpwStep === 2) bpwRenderStep2(); else bpwRenderSummary();
-  });
-}
 function bpwMinutiAppuntamenti() {
   if (!_bpwWeek) return 0;
   return GIORNI.reduce((s, _, idx) => s + minutiOccupati(bpDataGiorno(_bpwWeek, _bpwYear, idx)), 0);

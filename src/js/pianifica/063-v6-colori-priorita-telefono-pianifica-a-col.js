@@ -44,17 +44,6 @@ document.addEventListener('keydown', e => {
 
 // ─── 3. CAMPO FISSO DEL TELEFONO ─────────────────────────────
 function righeCattura() { return righeCampo($('cattura-testo').value); }   // 24/10 · con le righe vuote: chiudono un'intestazione («Mattina 26»)
-async function salvaCattura() {
-  const righe = righeCattura();
-  if (!righe.length) { apriRapido(); return; }       // campo vuoto: [+] apre il foglio con Subito / Oggi / Con…
-  fermaDettatura();
-  const campo = $('cattura-testo');
-  campo.disabled = true;
-  const nuove = await aggiungiRighe(righe, { subito: false, oggi: false, persona: null });
-  campo.disabled = false;
-  if (nuove) { campo.value = ''; allungaCattura(); }
-  campo.focus();
-}
 function allungaCattura() {
   const t = $('cattura-testo');
   t.style.height = 'auto';
@@ -861,16 +850,6 @@ function testoQuandoCoach() {
   const nota = !collegato ? 'dal calendario quando è collegato' : ui.coach.letto ? 'l\'ultima data trovata: ora sul calendario non c\'è' : 'sto guardando il calendario';
   return e ? `Prossimo incontro: ${fmtGiornoNum(new Date(e.inizioMs))} alle <span class="mono">${e.ora}</span> <span class="cc-nota">(${nota})</span>`
     : `Prossimo incontro: da fissare <span class="cc-nota">(${nota})</span>`;
-}
-function cardCoach() {
-  caricaCoach();
-  const voci = vociCoach(), fatte = voci.filter(v => v.ok).length;
-  const quando = testoQuandoCoach();
-  return `<section class="coach-card" aria-label="Per il coach">
-    <div class="cc-testa"><i class="ti ti-user-check" aria-hidden="true"></i><div><h2>Per il coach</h2><p>${quando}</p></div><span class="mono cc-n">${fatte}/${voci.length}</span></div>
-    <ul class="cc-lista">${voci.map(v => `<li class="${v.ok ? 'ok' : ''}"><span class="cc-check" aria-hidden="true">${v.ok ? SVG_SPUNTA : ''}</span>
-      <div><b>${v.l}</b><span>${escHtml(v.d)}</span></div><span class="sr-only">${v.ok ? 'fatto' : 'da fare'}</span>${v.az}</li>`).join('')}</ul>
-  </section>`;
 }
 // Banner in Oggi: 48 ore prima dell'incontro, se una voce è ancora aperta
 const _bannerCoachV5 = bannerCoach;

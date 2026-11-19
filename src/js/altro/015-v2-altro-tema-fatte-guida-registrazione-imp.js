@@ -17,21 +17,6 @@ function vistaAltro() {
     </div>`;
 }
 
-function vistaFatte() {
-  const lista = state.cicli.filter(c => c.done).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
-  const seg = [['cose', 'Cose'], ['settimane', 'Settimane']].map(([k, l]) =>
-    `<button type="button" data-act="fatte" data-v="${k}" aria-pressed="${ui.fatte === k}">${l}</button>`).join('');
-  let h = `${indietro('altro', 'Altro')}<div class="vh"><div><h1>Fatte${btnAiuto('fatte')}</h1></div></div><div class="seg" role="group" aria-label="Vista" style="margin-bottom:var(--sp-4)">${seg}</div>`;
-  if (ui.fatte === 'settimane') return h + fatteSettimane();
-  if (!lista.length) return h + vuoto('ti-circle-check', 'Ancora niente, inizia da Oggi', 'Ogni cosa che spunti finisce qui, così vedi quanta strada hai fatto.', `<button type="button" class="btn btn-primary btn-sm" data-tab="oggi">Vai a Oggi</button>`);
-  const mesi = new Map();
-  lista.forEach(c => { const d = new Date(c.updated_at || c.created_at); const k = d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }); if (!mesi.has(k)) mesi.set(k, []); mesi.get(k).push(c); });
-  mesi.forEach((items, k) => {
-    h += `<p class="list-head"><span style="text-transform:capitalize">${k}</span><span class="mono">${items.length}</span></p><div class="group">${items.map(c =>
-      riga({ c, fatto: true }, { senzaAzioni: true, lato: `<span class="t-caption">${fmtCorta(new Date(c.updated_at || c.created_at))}</span>` })).join('')}</div>`;
-  });
-  return h;
-}
 
 const MAPPA_PAROLE = [['Subito', 'Q1 · Crisi'], ['Importante', 'Q2 · Qualità'], ['Delega', 'Q3 · Inganno'], ['Lascia stare', 'Q4 · Spreco'], ['Cose aperte', 'Cicli aperti'],
   ['Tutto', 'Armadio'], ['Piano della settimana', 'Business Plan settimanale'], ['Chiudi la settimana', 'Review'], ['Da piazzare', 'Da pianificare'], ['Un giorno', 'Parcheggio'], ['Routine', 'Rituali'], ['Fatte', 'Storico']];

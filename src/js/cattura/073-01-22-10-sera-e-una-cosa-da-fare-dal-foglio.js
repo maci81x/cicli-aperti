@@ -575,26 +575,6 @@ aggiungiFrasi = async function (voci, r) {
 };
 
 // ─── Il riepilogo prima di salvare: «c'è già» / «simile», e «Vedi anche» per i parenti ───
-const _disegnaAnteprimaDopp = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaDopp();
-  const box = $('rapido-anteprima');
-  if (!box || box.hidden) return;
-  vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido).forEach((v, i) => {
-    const m = trovaDoppione(v.title), voce = box.querySelector(`.rap-voce[data-i="${i}"]`);
-    if (!m || !voce) return;
-    if (forte(m.livello)) voce.querySelector('.rap-sintesi > span').insertAdjacentHTML('afterend', etichettaDopp(m));
-    else voce.querySelector('.rap-sintesi').insertAdjacentHTML('afterend', suggerimentoParente(m));
-  });
-};
-const _disegnaAnteprimaCatturaDopp = disegnaAnteprimaCattura;
-disegnaAnteprimaCattura = function () {
-  _disegnaAnteprimaCatturaDopp();
-  const box = $('cattura-anteprima');
-  if (!box || box.hidden) return;
-  const voci = vociDaRighe(righeCattura(), {});
-  box.querySelectorAll('.ca-voci > span[class^="p-q"]').forEach((el, i) => { const m = voci[i] && trovaDoppione(voci[i].title); if (m && forte(m.livello)) el.insertAdjacentHTML('beforeend', ' ' + etichettaDopp(m)); });
-};
 
 // ─── Plaud: le cose che ci sono già partono senza spunta, con «c'è già» (si possono riattivare) ───
 const _preparaPlaudDopp = preparaPlaud;
@@ -626,10 +606,6 @@ eventoInElenco = async function (id) {
 // ─── Altro → Doppioni: i gruppi tra le cose aperte, «Unisci» e «Non sono doppioni» ───
 ui.doppTieni = {};
 const doppioniNo = () => leggiJson(DOPP.LS_NO, []);
-function gruppiAperti() {
-  const no = new Set(doppioniNo());
-  return gruppiDoppioni(coseAperteDopp(), nomiNoti()).filter(g => !no.has(g.chiave));
-}
 const TIPO_GRUPPO = { uguali: 'Uguali', simili: 'Simili', 'da guardare': 'Da guardare' };
 function rigaDopp(c, k, tieni) {
   const passi = state.cicli.filter(p => p.parent_id === c.id && !p.done).length;
@@ -661,31 +637,6 @@ const campiUnione = () => ['note', 'done', 'chiuso_at', 'execution_status', 'per
 function notaUnione(c) {
   const date = [`creata il ${fmtGgMm(giornoIso(c.created_at))}`, c.pianificato_data ? `giorno ${fmtGgMm(c.pianificato_data)}` : '', c.due_date ? `scadenza ${fmtGgMm(c.due_date)}` : '', c.delega_controllo ? `controllo ${fmtGgMm(c.delega_controllo)}` : ''].filter(Boolean).join(', ');
   return `— Unita: «${c.title}» (${date})${c.note ? '\n' + c.note : ''}`;
-}
-async function unisciGruppo(k) {
-  const g = gruppiAperti().find(x => x.chiave === k);
-  if (!g) return;
-  const tieniId = g.cose.some(c => c.id === ui.doppTieni[k]) ? ui.doppTieni[k] : g.cose[0].id;
-  const tieni = ciclo(tieniId), altre = g.cose.map(c => ciclo(c.id)).filter(c => c && c.id !== tieniId && !c.done);
-  if (!tieni || !altre.length) return;
-  const ids = altre.map(c => c.id);
-  const passi = state.cicli.filter(p => ids.includes(p.parent_id));
-  const prima = [tieni, ...altre, ...passi].map(c => ({ id: c.id, campi: campi(c, campiUnione()) }));
-  let assegnazioni = [];
-  try {
-    const conDelega = altre.find(c => c.delega_persona_id);
-    await patchCiclo(tieni.id, { note: [tieni.note, ...altre.map(notaUnione)].filter(Boolean).join('\n\n'),
-      persone_menzionate: unici([...(tieni.persone_menzionate || []), ...altre.flatMap(c => c.persone_menzionate || [])]),
-      ...(state.delegaColsOk && !tieni.delega_persona_id && conDelega ? { delega_persona_id: conDelega.delega_persona_id, delega_controllo: conDelega.delega_controllo } : {}) });
-    for (const p of passi) await patchCiclo(p.id, { parent_id: tieni.id });
-    const { data: ass } = await db.from('assegnazioni').select('id,ciclo_id').in('ciclo_id', ids);
-    assegnazioni = ass || [];
-    if (assegnazioni.length) await db.from('assegnazioni').update({ ciclo_id: tieni.id }).in('id', assegnazioni.map(a => a.id));
-    const ora = new Date().toISOString();
-    for (const c of altre) await patchCiclo(c.id, { done: true, chiuso_at: ora, execution_status: 'done', note: `Unita a «${tieni.title}»${c.note ? '\n\n' + c.note : ''}` });
-  } catch (err) { showToast('Unione interrotta: ' + err.message, 'error'); render(); return; }
-  render();
-  showToast(`Unite in «${tieni.title}»`, 'success', { annulla: () => annullaUnione(prima, assegnazioni) });
 }
 async function annullaUnione(prima, assegnazioni) {
   try {
