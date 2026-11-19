@@ -3629,12 +3629,6 @@ function getWeekStart(week, year) {
   return iso;
 }
 
-function formatWeekLabel(week, year) {
-  const start = getWeekStart(week, year);
-  const end = new Date(start); end.setDate(start.getDate() + 6);
-  const fmt = d => `${d.getDate()}/${d.getMonth()+1}`;
-  return `Sett. ${week} — ${fmt(start)}–${fmt(end)}`;
-}
 
 function getEscalation(c) {
   if (!c.due_date) return null;
@@ -3683,16 +3677,6 @@ function catNome(cat) {
   return cat;
 }
 
-function catIcona(cat) {
-  if (!cat) return CAT_FALLBACK_EMOJI;
-  if (CAT_EMOJIS[cat]) return CAT_EMOJIS[cat];
-  const m = /^custom_(.+)$/.exec(cat);
-  if (m) {
-    const found = (state.categorie || []).find(c => String(c.id) === m[1]);
-    if (found && found.emoji && found.emoji.trim()) return found.emoji;
-  }
-  return CAT_FALLBACK_EMOJI;
-}
 
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -3851,17 +3835,7 @@ function switchCtx(ctx) {
 }
 
 
-function filterByCat(cat) {
-  state.filter_cat = cat || null;
-  state.filter_persona = null;
-  localStorage.setItem(LS.CAT_FILTER, cat || '');
-  render();
-}
 
-function filterByPersona(nome) {
-  state.filter_persona = state.filter_persona === nome ? null : nome;
-  render();
-}
 
 // ══════════════════════════════════════════════════════════════
 // RENDER
@@ -3870,12 +3844,6 @@ function filterByPersona(nome) {
 
 
 
-function applyFilters(cicli) {
-  let result = cicli;
-  if (state.filter_cat)     result = result.filter(c => c.cat === state.filter_cat);
-  if (state.filter_persona) result = result.filter(c => (c.persone_menzionate || []).includes(state.filter_persona));
-  return result;
-}
 
 
 
@@ -4600,27 +4568,12 @@ function addDays(isoDate, n) {
   return d.toISOString().slice(0, 10);
 }
 
-function dayName(isoDate) {
-  return new Date(isoDate).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
-}
 
-function monthName(offset) {
-  const d = new Date();
-  d.setMonth(d.getMonth() + offset);
-  return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
-}
 
 // ══════════════════════════════════════════════════════════════
 // MACRO AREA HELPERS
 // ══════════════════════════════════════════════════════════════
-function getMaCssClass(area) {
-  if (!area) return '';
-  const k = area.replace('&','').replace(' ','').replace('Da Delegare','Delegare').replace('R&D','RD').replace('R/D','RD');
-  return 'ma-' + k;
-}
 
-function getMaColor(area) { return MACRO_AREA_COLORS[area] || '#64748b'; }
-function getMaEmoji(area) { return MACRO_AREA_EMOJIS[area] || ''; }
 
 // ══════════════════════════════════════════════════════════════
 // AUTO-CATEGORIZZAZIONE CLAUDE
@@ -4943,14 +4896,6 @@ async function syncCicloToGcal(ciclo) {
   }
 }
 
-async function retryFailedSyncs() {
-  if (!isGcalTokenValid()) return;
-  const failed = state.cicli.filter(c => c.sync_status === 'failed' && !c.done);
-  for (const c of failed.slice(0, 5)) {
-    await syncCicloToGcal(c);
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
 
 
 
@@ -4963,17 +4908,6 @@ function disconnectGcal() {
   showToast('Google Calendar disconnesso', 'info');
 }
 
-async function batchSyncAll() {
-  const toSync = state.cicli.filter(c => !c.done && c.scheduled_date);
-  showToast(`Sincronizzo ${toSync.length} cose...`, 'info');
-  let ok = 0;
-  for (const c of toSync) {
-    await syncCicloToGcal(c).then(() => ok++).catch(() => {});
-    await new Promise(r => setTimeout(r, 200));
-  }
-  showToast(`${ok}/${toSync.length} cose sincronizzate`, 'success');
-  closeModal('gcalOverlay');
-}
 
 // ══════════════════════════════════════════════════════════════
 // VISTA OGGI
@@ -4999,15 +4933,6 @@ async function batchSyncAll() {
 // ══════════════════════════════════════════════════════════════
 // MODAL POSTICIPA
 // ══════════════════════════════════════════════════════════════
-function openPostponeModal(cicloId) {
-  _postponeId = cicloId;
-  const ciclo = state.cicli.find(c => c.id === cicloId);
-  const baseDate = ciclo?.scheduled_date || todayISO();
-  // Pre-fill date input
-  const customInput = document.getElementById('postpone-custom-date');
-  if (customInput) customInput.value = addDays(baseDate, 1);
-  document.getElementById('postponeOverlay').classList.add('open');
-}
 
 async function doPostpone(days) {
   if (!_postponeId) return;
@@ -5109,17 +5034,7 @@ let _expandedQBox = null;
 let _agendaDragId  = null;   // ciclo in trascinamento
 
 
-// Data del giorno `idx` (0=lunedì) nella settimana selezionata
-function agendaDayDate(idx) {
-  const start = getWeekStart(state.week, state.year);
-  const d = new Date(start);
-  d.setDate(start.getDate() + idx);
-  return d;
-}
 
-function isSameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
 
 // Override attivo per un ciclo nella settimana corrente (o null)
@@ -5224,15 +5139,7 @@ function haPianificazione(c) {
   return !!agendaOverrideFor(c.id);
 }
 
-// Cicli aperti del contesto corrente, con i filtri di sidebar applicati
-function agendaBaseCicli() {
-  return applyFilters(state.cicli.filter(c => vedi(c.ctx) && isAttivo(c)));
-}
 
-// I rituali giornalieri hanno un blocco dedicato: escludili dalla griglia
-// settimanale, altrimenti comparirebbero 7 volte.
-function agendaPianificati()   { return agendaBaseCicli().filter(c => !isGiornaliero(c) && agendaSlotFor(c).giorno); }
-function agendaDaPianificare() { return agendaBaseCicli().filter(c => !haPianificazione(c)); }
 
 // «Da sistemare»: una sola definizione per la colonna Da pianificare, Da piazzare, Riordina e la card del coach.
 // Aperta (non fatta, non parcheggiata), senza giorno, senza data (né scadenza né data pianificata), fuori dal piano della settimana.
@@ -5321,20 +5228,6 @@ async function moveCicloInAgenda(cicloId, giorno, fascia) {
 // ── VISTA PARCHEGGIO ──
 
 // ── AZIONI PARCHEGGIO ──
-async function parcheggiaCiclo(cicloId) {
-  if (!state.parcheggioColsOk) { showToast('Migration parcheggio non applicata', 'error'); return; }
-  const now = new Date().toISOString();
-  try {
-    const { error } = await db.from('cicli')
-      .update({ parcheggiato: true, parcheggiato_at: now, updated_at: now })
-      .eq('id', cicloId);
-    if (error) throw error;
-    state.cicli = state.cicli.map(c =>
-      c.id === cicloId ? { ...c, parcheggiato: true, parcheggiato_at: now } : c);
-      render();
-    showToast('Messo in parcheggio ', 'success');
-  } catch (err) { showToast('Errore: ' + err.message, 'error'); }
-}
 
 async function riattivaCiclo(cicloId) {
   const now = new Date().toISOString();
@@ -5777,7 +5670,6 @@ function bpStats(items) {
   return { tot, done, pct: tot ? Math.round(done / tot * 100) : 0 };
 }
 
-function bpPctClass(pct) { return pct >= 80 ? 'ok' : (pct >= 50 ? 'mid' : 'low'); }
 
 // Un ciclo ricorrente non si chiude quando lo spunti nel piano: torna la settimana dopo.
 function bpEricorrente(c) {
@@ -6441,20 +6333,6 @@ const BP_REV_OPZIONI = [
 
 
 // ── Q2: SPINTA VERSO L'AGENDA ────────────────────────────────
-// Banner informativo sotto il quadrant picker: i Q2 non urgenti spariscono
-// se non vengono piazzati in agenda. Non blocca il salvataggio.
-async function q2PianificaOra() {
-  if (editingId) {
-    const id = editingId;
-    closeModal('modalOverlay');
-    openPianificaModal(id);
-    return;
-  }
-  const titolo = document.getElementById('f-title').value.trim();
-  if (!titolo) { showToast('Inserisci prima un titolo', 'warn'); return; }
-  const saved = await saveCiclo();
-  if (saved && saved.id) setTimeout(() => openPianificaModal(saved.id), 150);
-}
 
 // ── EXPORT PDF A4 ────────────────────────────────────────────
 // jsPDF usa i font standard PDF (WinAnsi): niente emoji, vanno rimosse
@@ -6654,20 +6532,6 @@ function tornaAOggi() {
   reloadWeekData().then(render);
 }
 
-// Nomi di vista della versione precedente → nuove sezioni (li usa ancora la logica).
-function switchView(v) {
-  const mappa = {
-    oggi: ['oggi'], bp: ['pianifica', { pian: 'settimana' }], settimana: ['pianifica', { pian: 'settimana' }],
-    mese: ['pianifica', { pian: 'mese' }], agenda: ['pianifica', { pian: 'settimana' }],
-    matrix: ['tutto', { tutto: 'matrice' }], list: ['tutto', { tutto: 'lista' }], persone: ['tutto', { tutto: 'persone' }],
-    aree: ['tutto', { tutto: 'lista' }], parcheggio: ['tutto', { sub: 'attesa' }],
-    storico: ['altro', { sub: 'fatte' }], guida: ['altro', { sub: 'guida' }]
-  };
-  const m = mappa[v] || ['oggi'];
-  if (v === 'aree') { ui.raggruppa = 'area'; }
-  state.view = v;
-  vai(m[0], m[1]);
-}
 
 function changeWeek(dir) {
   const d = getWeekStart(state.week, state.year);
@@ -7228,21 +7092,6 @@ function toggleMoreOpts() { $('moreOptsSection').classList.contains('open') ? cl
 function openMoreOpts()  { $('moreOptsSection').classList.add('open');    const b = $('moreOptsBtn'); b.textContent = 'Meno opzioni';  b.setAttribute('aria-expanded', 'true'); }
 function closeMoreOpts() { $('moreOptsSection').classList.remove('open'); const b = $('moreOptsBtn'); b.textContent = 'Altre opzioni'; b.setAttribute('aria-expanded', 'false'); }
 
-function apriNuovo(q) {
-  openModal(q || 2);
-  closeMoreOpts();
-  $('sheetTitle').textContent = 'Cosa devi fare?';
-  $('btn-save').textContent = 'Aggiungi';
-  $('nuovo-quando').hidden = false;
-  $('det-azioni').hidden = true;
-  $('det-pianificazione').hidden = true;
-  $('det-passi').hidden = true;
-  $('det-log').hidden = true;
-  impostaScelta('quando', ui.tab === 'oggi' ? 'oggi' : 'nessuna');
-  riempiSelectAree('');
-  impostaDurata(null);
-  $('q2-nudge').classList.remove('show');   // su una cosa nuova compare solo se tocchi «Importante»
-}
 
 function apriDettaglio(id) {
   const c = ciclo(id);
@@ -9462,7 +9311,6 @@ function disegnaRapido() {
     ? state.persone.map(x => `<button type="button" class="chip" data-act="rapido-persona" data-p="${x.id}" aria-pressed="${String(r.persona) === String(x.id)}">${escHtml(x.nome)}</button>`).join('')
     : '<p class="t-label muted">Nessuna persona: aggiungile in Impostazioni.</p>';
 }
-function chiudiRapido() { fermaDettatura(); closeModal('rapidoOverlay'); }
 
 function rigaNuova(title, r, ctx) {
   const oggi = todayISO();
@@ -15277,8 +15125,6 @@ function disegnaDetMeta(c) {
 }
 const _apriDettaglioPr = apriDettaglio;
 apriDettaglio = function (id) { const r = _apriDettaglioPr.apply(this, arguments); disegnaDetMeta(ciclo(id)); return r; };
-const _apriNuovoPr = apriNuovo;
-apriNuovo = function () { const r = _apriNuovoPr.apply(this, arguments); $('det-meta').hidden = true; return r; };
 async function collegaMeta(id, metaId, silenzioso) {
   const c = ciclo(id);
   if (!c || !state.metaColOk) return;
@@ -20230,17 +20076,8 @@ function v30Riprogrammata(e) {
   if (migliore(e.titolo, cose, ['uguale', 'molto'], c => c.title)) return 'gia-tra-le-cose';
   return null;
 }
-const v30Marca = k => `[${V30.MARK}${k}]`;
 // la parola deve essere l'azione, non stare tra parentesi: «Cena a La Bottega (orario da chiedere)» è un appuntamento (4/11)
 const v30Parola = t => PAROLE_CICLO.test(normTitolo(String(t || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')));
-async function v30InDaPianificare(k, e) {
-  if (state.cicli.some(c => (c.note || '').includes(v30Marca(k)))) return false;   // già fatta su un altro dispositivo
-  const ctx = e.cal === 'privato' ? 'personale' : indovinaContesto(e.titolo, { ctx: 'lavoro', cal: e.cal }).ctx;
-  const nota = `Promemoria del calendario ${e.cal === 'privato' ? 'Privato' : 'Lavoro'} del ${v29GiornoBreve(e.giorno)}${e.ora ? ' alle ' + e.ora : ''}, mai deciso: è ancora da fare? ${v30Marca(k)}`;
-  const c = await upsertCiclo({ ...rigaNuova(e.titolo, { subito: false }, ctx), note: nota, da_rivedere: true });
-  if (c) state.cicli = [c, ...state.cicli];
-  return !!c;
-}
 cercaCicliInCalendario = async function () {
   if (!isGcalTokenValid()) return;
   const cur = bpSettimanaCorrente(), oggi = parseISODate(oggiLocale());

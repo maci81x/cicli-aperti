@@ -5,12 +5,6 @@
 
 
 
-function applyFilters(cicli) {
-  let result = cicli;
-  if (state.filter_cat)     result = result.filter(c => c.cat === state.filter_cat);
-  if (state.filter_persona) result = result.filter(c => (c.persone_menzionate || []).includes(state.filter_persona));
-  return result;
-}
 
 
 

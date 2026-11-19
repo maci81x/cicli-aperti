@@ -25,7 +25,6 @@ function disegnaRapido() {
     ? state.persone.map(x => `<button type="button" class="chip" data-act="rapido-persona" data-p="${x.id}" aria-pressed="${String(r.persona) === String(x.id)}">${escHtml(x.nome)}</button>`).join('')
     : '<p class="t-label muted">Nessuna persona: aggiungile in Impostazioni.</p>';
 }
-function chiudiRapido() { fermaDettatura(); closeModal('rapidoOverlay'); }
 
 function rigaNuova(title, r, ctx) {
   const oggi = todayISO();

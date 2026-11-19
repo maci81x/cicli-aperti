@@ -4,21 +4,6 @@ function toggleMoreOpts() { $('moreOptsSection').classList.contains('open') ? cl
 function openMoreOpts()  { $('moreOptsSection').classList.add('open');    const b = $('moreOptsBtn'); b.textContent = 'Meno opzioni';  b.setAttribute('aria-expanded', 'true'); }
 function closeMoreOpts() { $('moreOptsSection').classList.remove('open'); const b = $('moreOptsBtn'); b.textContent = 'Altre opzioni'; b.setAttribute('aria-expanded', 'false'); }
 
-function apriNuovo(q) {
-  openModal(q || 2);
-  closeMoreOpts();
-  $('sheetTitle').textContent = 'Cosa devi fare?';
-  $('btn-save').textContent = 'Aggiungi';
-  $('nuovo-quando').hidden = false;
-  $('det-azioni').hidden = true;
-  $('det-pianificazione').hidden = true;
-  $('det-passi').hidden = true;
-  $('det-log').hidden = true;
-  impostaScelta('quando', ui.tab === 'oggi' ? 'oggi' : 'nessuna');
-  riempiSelectAree('');
-  impostaDurata(null);
-  $('q2-nudge').classList.remove('show');   // su una cosa nuova compare solo se tocchi «Importante»
-}
 
 function apriDettaglio(id) {
   const c = ciclo(id);

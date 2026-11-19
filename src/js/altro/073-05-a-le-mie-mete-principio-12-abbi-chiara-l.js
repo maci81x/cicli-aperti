@@ -188,8 +188,6 @@ function disegnaDetMeta(c) {
 }
 const _apriDettaglioPr = apriDettaglio;
 apriDettaglio = function (id) { const r = _apriDettaglioPr.apply(this, arguments); disegnaDetMeta(ciclo(id)); return r; };
-const _apriNuovoPr = apriNuovo;
-apriNuovo = function () { const r = _apriNuovoPr.apply(this, arguments); $('det-meta').hidden = true; return r; };
 async function collegaMeta(id, metaId, silenzioso) {
   const c = ciclo(id);
   if (!c || !state.metaColOk) return;

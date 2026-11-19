@@ -12,15 +12,5 @@ function switchCtx(ctx) {
 }
 
 
-function filterByCat(cat) {
-  state.filter_cat = cat || null;
-  state.filter_persona = null;
-  localStorage.setItem(LS.CAT_FILTER, cat || '');
-  render();
-}
 
-function filterByPersona(nome) {
-  state.filter_persona = state.filter_persona === nome ? null : nome;
-  render();
-}
 

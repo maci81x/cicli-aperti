@@ -20,13 +20,5 @@ function addDays(isoDate, n) {
   return d.toISOString().slice(0, 10);
 }
 
-function dayName(isoDate) {
-  return new Date(isoDate).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
-}
 
-function monthName(offset) {
-  const d = new Date();
-  d.setMonth(d.getMonth() + offset);
-  return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
-}
 

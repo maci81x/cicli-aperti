@@ -1,15 +1,6 @@
 // ══════════════════════════════════════════════════════════════
 // MODAL POSTICIPA
 // ══════════════════════════════════════════════════════════════
-function openPostponeModal(cicloId) {
-  _postponeId = cicloId;
-  const ciclo = state.cicli.find(c => c.id === cicloId);
-  const baseDate = ciclo?.scheduled_date || todayISO();
-  // Pre-fill date input
-  const customInput = document.getElementById('postpone-custom-date');
-  if (customInput) customInput.value = addDays(baseDate, 1);
-  document.getElementById('postponeOverlay').classList.add('open');
-}
 
 async function doPostpone(days) {
   if (!_postponeId) return;

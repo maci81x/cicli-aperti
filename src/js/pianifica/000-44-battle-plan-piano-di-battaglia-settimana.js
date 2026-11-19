@@ -86,7 +86,6 @@ function bpStats(items) {
   return { tot, done, pct: tot ? Math.round(done / tot * 100) : 0 };
 }
 
-function bpPctClass(pct) { return pct >= 80 ? 'ok' : (pct >= 50 ? 'mid' : 'low'); }
 
 // Un ciclo ricorrente non si chiude quando lo spunti nel piano: torna la settimana dopo.
 function bpEricorrente(c) {
@@ -750,20 +749,6 @@ const BP_REV_OPZIONI = [
 
 
 // ── Q2: SPINTA VERSO L'AGENDA ────────────────────────────────
-// Banner informativo sotto il quadrant picker: i Q2 non urgenti spariscono
-// se non vengono piazzati in agenda. Non blocca il salvataggio.
-async function q2PianificaOra() {
-  if (editingId) {
-    const id = editingId;
-    closeModal('modalOverlay');
-    openPianificaModal(id);
-    return;
-  }
-  const titolo = document.getElementById('f-title').value.trim();
-  if (!titolo) { showToast('Inserisci prima un titolo', 'warn'); return; }
-  const saved = await saveCiclo();
-  if (saved && saved.id) setTimeout(() => openPianificaModal(saved.id), 150);
-}
 
 // ── EXPORT PDF A4 ────────────────────────────────────────────
 // jsPDF usa i font standard PDF (WinAnsi): niente emoji, vanno rimosse

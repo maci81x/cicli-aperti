@@ -18,12 +18,6 @@ function getWeekStart(week, year) {
   return iso;
 }
 
-function formatWeekLabel(week, year) {
-  const start = getWeekStart(week, year);
-  const end = new Date(start); end.setDate(start.getDate() + 6);
-  const fmt = d => `${d.getDate()}/${d.getMonth()+1}`;
-  return `Sett. ${week} — ${fmt(start)}–${fmt(end)}`;
-}
 
 function getEscalation(c) {
   if (!c.due_date) return null;
@@ -72,16 +66,6 @@ function catNome(cat) {
   return cat;
 }
 
-function catIcona(cat) {
-  if (!cat) return CAT_FALLBACK_EMOJI;
-  if (CAT_EMOJIS[cat]) return CAT_EMOJIS[cat];
-  const m = /^custom_(.+)$/.exec(cat);
-  if (m) {
-    const found = (state.categorie || []).find(c => String(c.id) === m[1]);
-    if (found && found.emoji && found.emoji.trim()) return found.emoji;
-  }
-  return CAT_FALLBACK_EMOJI;
-}
 
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
