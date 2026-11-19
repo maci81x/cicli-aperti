@@ -44,15 +44,7 @@
 .v26-insett { padding: var(--sp-3); border-radius: var(--r-md); background: var(--pensa); border: 1px solid var(--pensa-bordo); font-size: var(--fs-label); line-height: var(--lh-label); }
 .v26-st-scelte { display: grid; gap: 2px; margin: var(--sp-3) 0; }
 .v26-st-scelte .riga-link[aria-checked="true"] { background: var(--primary-soft); }
-.v26-ritmo { flex-wrap: wrap; padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-1); min-height: 52px; }
-.v26-ritmo-testa { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-2) 0 0; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; border-radius: var(--r-sm); }
-.v26-ritmo-testa:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .v26-ritmo .v25-testo b { display: inline; }
-.v26-ritmo-pre { color: var(--text-2); font-weight: 500; }
-.v26-ritmo-s { display: block; margin-top: 2px; color: var(--text-2); }
-.v26-ritmo-chev { color: var(--text-3); font-size: 18px; }
-.v26-ritmo .ti-ico { width: 32px; height: 32px; font-size: 18px; }
-@media (max-width: 480px) { .v26-ritmo .v26-ritmo-testa { order: 1; flex: 1 1 0; } .v26-ritmo .btn-icon { order: 2; flex: none; } .v26-ritmo .btn-primary { order: 3; flex: 1 1 100%; } }
 .v26-cg-lista { display: grid; gap: var(--sp-1); margin-bottom: var(--sp-3); }
 .v26-cg-voce { padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--border); }
 .v26-cg-voce.rosso { background: var(--q1-soft); border-color: var(--q1-mark); }

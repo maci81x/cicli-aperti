@@ -152,6 +152,4 @@
 #tooltip.visible { opacity: 1; }
 .skel { height: 64px; border-radius: var(--r-lg); background: var(--surface-2); margin-bottom: var(--sp-2); animation: skel 1.2s ease-in-out infinite; }
 @keyframes skel { 50% { opacity: .5; } }
-.ptr { display: grid; place-items: center; height: 0; overflow: hidden; color: var(--text-3); transition: height var(--t-base); }
-.ptr.on { height: 40px; }
 @media print { .top, .side, .tabbar, .cattura { display: none; } html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

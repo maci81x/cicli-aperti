@@ -18,4 +18,3 @@
 .acol .item-side .btn-icon { display: none; } .acol .item:hover .item-side .btn-icon, .acol .item:focus-within .item-side .btn-icon { display: inline-flex; }
 .acol .col-vuota { padding: var(--sp-4); border: 1.5px dashed var(--border); border-radius: var(--r-md); color: var(--text-3); font-size: var(--fs-caption); text-align: center; }
 .armadio-tel .acc { margin-bottom: var(--sp-2); }
-.v25-sezione-chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-caption); line-height: 18px; }

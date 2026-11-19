@@ -13,12 +13,7 @@
 .v22-riga { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 48px; box-sizing: border-box; padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; }
 .v22-coach { border-color: var(--evt-mark); cursor: pointer; }
 .v22-coach:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.v22-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--evt-mark); flex: none; }
 .v22-testo { flex: 1; min-width: 0; }
-.v22-stato { color: var(--evt); font-weight: var(--fw-strong); }
-.v22-coach.ok .v22-punto { background: var(--primary); }
-.v22-coach.ok .v22-stato { color: var(--primary-ink); }
-.v22-apri { display: inline-flex; align-items: center; gap: 4px; padding-right: var(--sp-1); color: var(--evt); font-weight: var(--fw-strong); white-space: nowrap; }
 .v22-piano .futuro-chip { flex: none; }
 .v22-vh { align-items: center; }
 .v22-weeknav { margin: var(--sp-2) 0; }
