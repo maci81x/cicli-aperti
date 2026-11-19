@@ -3,13 +3,19 @@
 L'app vera (`../index.html`) in Chromium con Supabase e Google Calendar finti, tutto in memoria.
 
 ```
-cd tests && npm i playwright @supabase/supabase-js@2 jspdf@2.5.1 @tabler/icons-webfont@3.31.0 axe-core
+cd tests && npm i playwright @supabase/supabase-js@2 jspdf@2.5.1 @tabler/icons-webfont@3.31.0 axe-core pngjs@7.0.0 pixelmatch@5.3.0
 npx playwright install chromium
 mkdir -p /tmp/prove
 for f in smoke.js t*.js; do NM="$PWD/node_modules" OUT=/tmp/prove node "$f" > "/tmp/prove/${f%.js}.log" 2>&1; echo "$f exit=$? FAIL=$(grep -c '^FAIL' /tmp/prove/${f%.js}.log)"; done
 ```
 
-Una prova **passa solo se esce con 0 e non ha righe `FAIL`**.
+Una prova **passa solo se esce con 0 e non ha righe `FAIL`**. Installare sempre tutti i pacchetti nello stesso comando: `npm i --no-save` toglie quelli non elencati.
+
+## Rete di sicurezza del riordino
+
+- `t51-globali.js` — l'elenco ordinato dei nomi globali dopo l'avvio (proprietà aggiunte a `window` + dichiarazioni di livello alto dello script, con il loro `typeof`) deve coincidere con `riferimento/globali.json` (preso dalla v50).
+- `t52-golden.js` — con dati e ora fissi: l'HTML di `#view` per Oggi, Pianifica › Settimana, Pianifica › Giorno e quello del foglio Smaltisci, su telefono e computer, deve coincidere con `riferimento/golden/`; 12 schermate (Oggi, Pianifica, Smaltisci × telefono/computer × chiaro/scuro) confrontate con `riferimento/schermate/`: al massimo lo 0,1% di pixel diversi, altrimenti l'immagine delle differenze va in `$OUT/diff_*.png`. Le schermate dipendono dalla macchina (riferimento preso su questo Mac).
+- Quando un cambiamento è voluto (per esempio si toglie una funzione morta), si riscrive il riferimento con `AGGIORNA=1 node t51-globali.js` (o `t52-golden.js`) e si controlla nel diff di git che cambi solo quello che ci si aspetta.
 
 `harness.js` esporta:
 
