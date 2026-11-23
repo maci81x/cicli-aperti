@@ -1,4 +1,4 @@
-# Stato del riordino — al 23/11/2026 (fase E fatta e chiusa: v53 riordino, in attesa dell'ok per pubblicare)
+# Stato del riordino — al 23/11/2026: fase E pubblicata, riordino concluso (v53 riordino)
 
 Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · design e review: [egm/fase-a/](egm/fase-a/design_draft.md), [egm/fase-c/](egm/fase-c/design_draft.md), [egm/fase-d/](egm/fase-d/design_draft.md), [egm/fase-e/](egm/fase-e/design_draft.md) · drift report: [egm/2026-11-23_DRIFT_REPORT.md](egm/2026-11-23_DRIFT_REPORT.md) · strumenti: [tools/riordino/](../tools/riordino/README.md)
 
@@ -11,10 +11,10 @@ Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · 
 | Rete di sicurezza (`t51`, `t52`, `t54`) | fatta | `main` (`t51`, `t52`); `t54` e gli avvisi in console nel ramo fase D |
 | C — codice morto | **fatta, pubblicata il 23/11** (riallineata a v51 e v52, unita su `main` in avanti veloce) | `main` (`f22f7c7`) |
 | D — appiattire le catene | **fatta, pubblicata il 23/11** | `main` (`1bf722d`) |
-| E — CSS | **fatta**: tavolozza unica, classi `rap-*` via, 4 unioni, 39 dichiarazioni coperte via; `!important` tutti rimasti (vedi sotto) | ramo `riordino/fase-e` (su GitHub, non unito) |
-| Chiusura (v53 riordino, docs) | **fatta** sul ramo fase E; pubblicazione solo dopo «ok pubblica» | ramo `riordino/fase-e` |
+| E — CSS | **fatta, pubblicata il 23/11**: tavolozza unica, classi `rap-*` via, 4 unioni, 39 dichiarazioni coperte via; `!important` tutti rimasti (vedi sotto) | `main` (`03bff65`, avanti veloce) |
+| Chiusura (v53 riordino, docs) | **fatta e pubblicata il 23/11**. Riordino concluso | `main` |
 
-Online c'è `1bf722d` (v52 + fasi C e D): `VERSIONE_APP` «2026-11-23 v52», console senza errori. Il ramo fase E ha `VERSIONE_APP` «2026-11-23 v53 riordino».
+Online c'è `03bff65` (v52 + fasi C, D, E): `VERSIONE_APP` «2026-11-23 v53 riordino». Verifica del 23/11 dopo la pubblicazione: la pagina servita da GitHub Pages è uguale byte per byte a `index.html` di `main`; Oggi, Pianifica (Settimana, Giorno, Mese), Smaltisci, Tutte e Altro si aprono su telefono e computer senza errori in console (dati finti); il sito vero, aperto senza dati, arriva alla schermata di accesso con la console vuota.
 
 ## Righe di `index.html`
 
@@ -24,7 +24,7 @@ Online c'è `1bf722d` (v52 + fasi C e D): `VERSIONE_APP` «2026-11-23 v52», con
 | v52 (`64abcf8`) | 21.836 |
 | v52 + fase C (`f22f7c7`, online) | 20.916 |
 | + fase D (`1bf722d`, online) | 20.978 (le funzioni appiattite hanno indice dei passi ed etichette; lo scopo della D è la struttura, non le righe) |
-| + fase E (`riordino/fase-e`) | 21.049 (la tavolozza è scritta una variabile per riga; il CSS ha 191 dichiarazioni di variabili e 39 dichiarazioni coperte in meno) |
+| + fase E (`03bff65`, online) | 21.049 (la tavolozza è scritta una variabile per riga; il CSS ha 191 dichiarazioni di variabili e 39 dichiarazioni coperte in meno) |
 
 ## Prove
 
@@ -72,7 +72,7 @@ Altri commit: `0b3af9c` avvisi in console in `t52`/`t54`; `15e0136` design e str
 - Semplificazioni dentro `vistaOggi` (fuori dalla D, che è solo meccanica): più passi inseriscono HTML dopo `.vh` (v23, v25, v29), v49 e v50 si somigliano, una decina di giri template → `innerHTML`.
 - Le altre ~150 catene della MAPPA con lo stesso strumento (ora si ferma da solo sui casi dubbi).
 
-## Fase E — fatta (ramo `riordino/fase-e`)
+## Fase E — fatta e pubblicata
 
 Review EGM (design, codebase, readiness, zoom-out; [report](egm/fase-e/goldfish_review_report.md)): 17 correzioni, tra cui tavolozza dal testo dichiarato (non dai valori calcolati), unioni solo dentro un file, criterio per `!important` indipendente dagli elementi.
 
@@ -93,23 +93,22 @@ Review EGM (design, codebase, readiness, zoom-out; [report](egm/fase-e/goldfish_
 
 - **Semplificazioni dentro `vistaOggi`**: più passi inseriscono HTML dopo `.vh` (v23, v25, v29), v49 e v50 si somigliano, una decina di giri template → `innerHTML`. Sono cambi di logica (non meccanici): vanno fatti uno alla volta con `t52`, `stili.js` e i testi controllati.
 - **Le altre ~150 catene** della MAPPA (44 funzioni avvolte due o più volte, 89 una volta): stesso strumento (`appiattisci.js`, che si ferma da solo sui casi dubbi) e stessa procedura della fase D.
-- **CSS**: `!important` e selettori tra file (sopra); i codici rimasti senza uso rinviati dalla fase C.
+- **CSS**: i codici rimasti senza uso rinviati dalla fase C. (`!important` e selettori tra file: lasciati come sono per decisione del 23/11.)
 
 ## Altre cose di questa sessione (23/11)
 
 - Hook «python: command not found»: era il file annidato `plugin/hooks/hooks.json` del plugin sincronizzato `agent-memory` (disattivato, ma l'hook girava lo stesso); ora chiama `python3`.
 - Fasi C e D unite su `main` e pubblicate (`f22f7c7`, poi `1bf722d`), verificate online.
 
-## Prossimo giro
+## Riordino concluso (23/11)
 
-1. Ok di Roby sulla fase E («ok pubblica»): unione di `riordino/fase-e` su `main` in avanti veloce, `git push`, attesa di GitHub Pages, verifica online di `VERSIONE_APP` «2026-11-23 v53 riordino» e della console.
-2. Lavoro futuro sopra, una cosa per volta.
+Le fasi A–E sono su `main` e online. Per decisione di Roby (23/11) **gli `!important` e i 48 selettori ripetuti tra file restano come sono**: non fanno parte del riordino, che è chiuso. Il «Lavoro futuro» sopra resta solo come nota, da riaprire solo su richiesta.
 
 ## Comandi per ripartire
 
 ```sh
 cd ~/Sites/cicli-aperti-roby
-git fetch && git checkout riordino/fase-e && git pull --ff-only
+git fetch && git checkout main && git pull --ff-only
 git config core.hooksPath tools/hooks            # se è una copia nuova
 node build.js --check                             # «index.html è aggiornato»
 
