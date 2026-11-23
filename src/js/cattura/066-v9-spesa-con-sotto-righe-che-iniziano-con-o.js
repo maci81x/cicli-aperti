@@ -217,15 +217,5 @@ function dopoIlCaricamento() {
   const inizio = Date.now();
   return new Promise(ok => { const t = setInterval(() => { if (!state.loading || Date.now() - inizio > NUOVA_URL.ATTESA_MS) { clearInterval(t); ok(); } }, NUOVA_URL.PASSO_MS); });
 }
-const _avviaAppV8 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV8(sessione);
-  if (prima) return;
-  const testo = testoNuovaDaUrl();
-  if (!testo) return;
-  togliNuovaDaUrl();
-  dopoIlCaricamento().then(() => { if ($('onb') && !$('onb').hidden) return; apriRapidoCon(testo); });   // prima volta: c'è l'introduzione
-};
 
 // ══════════════════════════════════════════════════════════════

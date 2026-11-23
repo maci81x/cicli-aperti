@@ -12336,16 +12336,6 @@ function dopoIlCaricamento() {
   const inizio = Date.now();
   return new Promise(ok => { const t = setInterval(() => { if (!state.loading || Date.now() - inizio > NUOVA_URL.ATTESA_MS) { clearInterval(t); ok(); } }, NUOVA_URL.PASSO_MS); });
 }
-const _avviaAppV8 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV8(sessione);
-  if (prima) return;
-  const testo = testoNuovaDaUrl();
-  if (!testo) return;
-  togliNuovaDaUrl();
-  dopoIlCaricamento().then(() => { if ($('onb') && !$('onb').hidden) return; apriRapidoCon(testo); });   // prima volta: c'è l'introduzione
-};
 
 // ══════════════════════════════════════════════════════════════
 // v8 · IMPORT PLAUD: un'attività madre per la riunione, le cose da fare come passi
@@ -13789,14 +13779,6 @@ vistaAltro = function () {
   return _vistaAltroDopp().replace('<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">', riga + '<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">');
 };
 
-const _avviaAppV9 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV9(sessione);
-  if (prima) return;
-  controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
-  caricaEventiFatti().catch(err => console.warn('[Appuntamenti] spunte:', err.message));
-};
 
 // ══════════════════════════════════════════════════════════════
 // ACCESSO · Supabase Auth con codice personale (password), un solo utente.
@@ -13909,38 +13891,6 @@ async function esci() {
   mostraAccesso();
 })();
 
-function avviaApp(sessione) {
-  if (_appAvviata) return;
-  _appAvviata = true;
-  clearInterval(_accessoTimer);
-  $('accesso').hidden = true;
-  state.utente = emailDi(sessione);
-  const corrente = bpSettimanaCorrente();
-  state.week = corrente.week; state.year = corrente.year;      // si apre sempre sulla settimana di oggi
-  ui.giorno = giornoIdxDi(oggiData());
-  ui.tab = 'oggi';   // Oggi è la schermata di apertura
-  render();
-  if (!localStorage.getItem(LS2.ONB)) onbApri();
-  applicaAspetto();
-  loadAll().then(() => {
-    rilevaColonneV3().then(() => setTimeout(controllaMattino, 600));
-    rilevaColonneV4();
-    avvioV5();
-    initGcal();
-    db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
-    setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
-    initPullToRefresh();
-    caricaEventi(state.week, state.year);
-    caricaRimaste();
-    const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
-    // 22/10 · al massimo una volta al giorno (localStorage avviso_salite = YYYY-MM-DD)
-    if (salite.length && lsLeggi('avviso_salite') !== oggiLocale()) {
-      lsScrivi('avviso_salite', oggiLocale());
-      setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
-    }
-  });
-  window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
-}
 
 // ══════════════════════════════════════════════════════════════
 // 24/10 · IPHONE: la vista non resta «scivolata» sotto la barra dopo la tastiera o il microfono
@@ -15115,13 +15065,6 @@ GUIDA_ITIME.push(
   { titolo: 'Fallo subito, e scrivilo specifico (principi 4 e 2)', testo: `<p><strong>Principio 4: se ci vogliono pochi minuti, fallo subito.</strong> Quando scrivi una cosa con «5 minuti», «al volo» o «subito», o tocchi il chip «5 min» nel riepilogo, compare <strong>Falla ora</strong>: parte un timer di 5 minuti con «Fatta» e «Non finita: salvala».</p><p><strong>Principio 2: una cosa specifica si fa, una generica si rimanda.</strong> «Incassi» o «Orto» non dicono cosa fare: l'app avvisa «Troppo generica: cosa devi fare, con chi, quanto?». Le trovi in Riordina e in Altro → <strong>Da rendere specifiche</strong>, con Spacchettala.</p>` },
   { titolo: 'La sera, le deleghe, la spinta (principi 3, 9, 10, 11)', testo: `<p><strong>Principio 3: prepara la giornata la sera prima.</strong> Dalle 18:30, nei giorni feriali, in Oggi compare «5 minuti per domani»: scegli dalla settimana cosa fai domani. In Impostazioni → Promemoria su Google Calendar c'è anche «Piano di domani», un promemoria alle 18:45 (lo crei tu con il tasto).</p><p><strong>Principio 9: delega con istruzioni scritte, alla persona giusta.</strong> Se con qualcuno le deleghe tornano spesso, l'app te lo dice e propone di scrivere le istruzioni o un punto settimanale con lui.</p><p><strong>Principio 10: non riprenderti il lavoro delegato.</strong> Prima di riprenderla, l'app chiede: è un'urgenza vera?</p><p><strong>Principio 11: accorgiti di cosa ti toglie la spinta.</strong> Se la settimana è andata storta, Chiudi la settimana chiede cosa ti ha tolto la spinta, e ti mostra le risposte delle ultime volte.</p>` }
 );
-const _avviaAppPr = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppPr(sessione);
-  if (prima) return;
-  dopoIlCaricamento().then(() => rilevaPrincipi()).catch(e => console.warn('[Principi] avvio:', e.message));
-};
 // ══════════════════════════════════════════════════════════════
 // v10 · SNELLA (25/10): meno tocchi, stesse funzioni
 // 1. Aggiungi in un tocco: Invio salva, un'etichetta per riga al massimo, niente secondo toast
@@ -16240,14 +16183,6 @@ apriDettaglio = function (id) {
   return r;
 };
 
-// all'avvio: i nascosti
-const _avviaAppV11 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV11(sessione);
-  if (prima) return;
-  caricaEventiNascosti().catch(err => console.warn('[Appuntamenti] nascosti:', err.message));
-};
 
 // ══════════════════════════════════════════════════════════════
 // v12 · 26/10 · «Cosa hai in testa?» che non perde niente, e Oggi che dice prima cosa fare
@@ -16536,15 +16471,6 @@ AZIONI['v12-indietro'] = (el, id, data, ev) => { setTimeout(() => { const d = el
 AZIONI['v12-tempo'] = el => { setTimeout(() => { const d = el.closest('details'); ui.v12Tempo = !!(d && d.open); }, 0); };
 
 
-// all'avvio: la bozza del campo e gli invii nel database
-const _avviaAppV12 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV12(sessione);
-  if (prima) return;
-  setTimeout(ripristinaBozzaCattura, 300);
-  caricaInviiDb().catch(err => console.warn('[Piano] invii:', err.message));
-};
 
 // ══════════════════════════════════════════════════════════════
 // v13 · 27/10 · UNA LISTA SOLA: lavoro e personale insieme
@@ -16627,17 +16553,6 @@ ensureGcalCalendar = async function () {
   return r;
 };
 
-// all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
-const _avviaAppV13 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV13(sessione);
-  if (prima) return;
-  state.filtro = 'tutto';
-  state.ctx = 'lavoro';
-  db.from('cicli').select('id,calendar_event_cal').limit(1).then(({ error }) => { state.calColCosaOk = !error; });
-  verificaCalPrivato().catch(() => {});
-};
 
 // ══════════════════════════════════════════════════════════════
 // v14 · 28/10 · FATTA = SPARISCE
@@ -16865,13 +16780,113 @@ vistaFatte = function () {
   return h + `<p class="list-head"><span>Appuntamenti fatti</span><span class="mono">${evts.length}</span></p><div class="group">${righe}</div>`;
 };
 
-const _avviaAppV15 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV15(sessione);
-  if (prima) return;
-  caricaEventiInfo().then(() => { if (ui.tab === 'altro') render(); }).catch(err => console.warn('[Appuntamenti] info:', err.message));
-};
+// avviaApp: catena appiattita nella fase D del riordino (base + 7 strati); i passi girano nell'ordine di prima.
+//   passo 0 · core/073-02-accesso-supabase-auth-con-codice-persona.js
+//   passo 1 · cattura/066-v9-spesa-con-sotto-righe-che-iniziano-con-o.js
+//   passo 2 · cattura/073-01-22-10-sera-e-una-cosa-da-fare-dal-foglio.js
+//   passo 3 · altro/073-09-altro-le-mie-mete-e-da-rendere-specifich.js
+//   passo 4 · smaltisci/075-v11-togliere-25-10.js — all'avvio: i nascosti
+//   passo 5 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js — all'avvio: la bozza del campo e gli invii nel database
+//   passo 6 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js — all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
+//   passo 7 · calendario/079-v15-28-10-appuntamenti-si-spuntano-tutti-anc.js
+// Forma annidata: alcuni strati fanno qualcosa prima di chiamare la versione precedente, quindi ogni strato resta una
+// funzione interna che chiama la precedente per nome (passo0 = base); si legge dal fondo: l'ultimo passo chiama il penultimo…
+function avviaApp(sessione) {
+  // ── passo 0 · core/073-02-accesso-supabase-auth-con-codice-persona.js
+  const passo0 = function (sessione) {
+    if (_appAvviata) return;
+    _appAvviata = true;
+    clearInterval(_accessoTimer);
+    $('accesso').hidden = true;
+    state.utente = emailDi(sessione);
+    const corrente = bpSettimanaCorrente();
+    state.week = corrente.week; state.year = corrente.year;      // si apre sempre sulla settimana di oggi
+    ui.giorno = giornoIdxDi(oggiData());
+    ui.tab = 'oggi';   // Oggi è la schermata di apertura
+    render();
+    if (!localStorage.getItem(LS2.ONB)) onbApri();
+    applicaAspetto();
+    loadAll().then(() => {
+      rilevaColonneV3().then(() => setTimeout(controllaMattino, 600));
+      rilevaColonneV4();
+      avvioV5();
+      initGcal();
+      db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
+      setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
+      initPullToRefresh();
+      caricaEventi(state.week, state.year);
+      caricaRimaste();
+      const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
+      // 22/10 · al massimo una volta al giorno (localStorage avviso_salite = YYYY-MM-DD)
+      if (salite.length && lsLeggi('avviso_salite') !== oggiLocale()) {
+        lsScrivi('avviso_salite', oggiLocale());
+        setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
+      }
+    });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
+  };
+  // ── passo 1 · cattura/066-v9-spesa-con-sotto-righe-che-iniziano-con-o.js
+  const passo1 = function (sessione) {
+    const prima = _appAvviata;
+    passo0(sessione);
+    if (prima) return;
+    const testo = testoNuovaDaUrl();
+    if (!testo) return;
+    togliNuovaDaUrl();
+    dopoIlCaricamento().then(() => { if ($('onb') && !$('onb').hidden) return; apriRapidoCon(testo); });   // prima volta: c'è l'introduzione
+  };
+  // ── passo 2 · cattura/073-01-22-10-sera-e-una-cosa-da-fare-dal-foglio.js
+  const passo2 = function (sessione) {
+    const prima = _appAvviata;
+    passo1(sessione);
+    if (prima) return;
+    controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
+    caricaEventiFatti().catch(err => console.warn('[Appuntamenti] spunte:', err.message));
+  };
+  // ── passo 3 · altro/073-09-altro-le-mie-mete-e-da-rendere-specifich.js
+  const passo3 = function (sessione) {
+    const prima = _appAvviata;
+    passo2(sessione);
+    if (prima) return;
+    dopoIlCaricamento().then(() => rilevaPrincipi()).catch(e => console.warn('[Principi] avvio:', e.message));
+  };
+  // ── passo 4 · smaltisci/075-v11-togliere-25-10.js
+  // all'avvio: i nascosti
+  const passo4 = function (sessione) {
+    const prima = _appAvviata;
+    passo3(sessione);
+    if (prima) return;
+    caricaEventiNascosti().catch(err => console.warn('[Appuntamenti] nascosti:', err.message));
+  };
+  // ── passo 5 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js
+  // all'avvio: la bozza del campo e gli invii nel database
+  const passo5 = function (sessione) {
+    const prima = _appAvviata;
+    passo4(sessione);
+    if (prima) return;
+    setTimeout(ripristinaBozzaCattura, 300);
+    caricaInviiDb().catch(err => console.warn('[Piano] invii:', err.message));
+  };
+  // ── passo 6 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js
+  // all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
+  const passo6 = function (sessione) {
+    const prima = _appAvviata;
+    passo5(sessione);
+    if (prima) return;
+    state.filtro = 'tutto';
+    state.ctx = 'lavoro';
+    db.from('cicli').select('id,calendar_event_cal').limit(1).then(({ error }) => { state.calColCosaOk = !error; });
+    verificaCalPrivato().catch(() => {});
+  };
+  // ── passo 7 · calendario/079-v15-28-10-appuntamenti-si-spuntano-tutti-anc.js
+  const passo7 = function (sessione) {
+    const prima = _appAvviata;
+    passo6(sessione);
+    if (prima) return;
+    caricaEventiInfo().then(() => { if (ui.tab === 'altro') render(); }).catch(err => console.warn('[Appuntamenti] info:', err.message));
+  };
+  return passo7.apply(this, arguments);
+}
 
 // ══════════════════════════════════════════════════════════════
 // v16 · 28/10 · RIPORTA IL FOGLIO, sempre (anche senza Battle Plan)

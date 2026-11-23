@@ -660,12 +660,4 @@ vistaAltro = function () {
   return _vistaAltroDopp().replace('<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">', riga + '<button type="button" class="riga-link" data-act="sub" data-tab="altro" data-sub="guida">');
 };
 
-const _avviaAppV9 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV9(sessione);
-  if (prima) return;
-  controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
-  caricaEventiFatti().catch(err => console.warn('[Appuntamenti] spunte:', err.message));
-};
 

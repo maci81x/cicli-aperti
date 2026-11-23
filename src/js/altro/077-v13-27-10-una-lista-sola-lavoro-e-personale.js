@@ -78,16 +78,5 @@ ensureGcalCalendar = async function () {
   return r;
 };
 
-// all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
-const _avviaAppV13 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV13(sessione);
-  if (prima) return;
-  state.filtro = 'tutto';
-  state.ctx = 'lavoro';
-  db.from('cicli').select('id,calendar_event_cal').limit(1).then(({ error }) => { state.calColCosaOk = !error; });
-  verificaCalPrivato().catch(() => {});
-};
 
 // ══════════════════════════════════════════════════════════════

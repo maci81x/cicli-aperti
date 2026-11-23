@@ -157,13 +157,5 @@ apriDettaglio = function (id) {
   return r;
 };
 
-// all'avvio: i nascosti
-const _avviaAppV11 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV11(sessione);
-  if (prima) return;
-  caricaEventiNascosti().catch(err => console.warn('[Appuntamenti] nascosti:', err.message));
-};
 
 // ══════════════════════════════════════════════════════════════

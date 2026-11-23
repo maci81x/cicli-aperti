@@ -109,36 +109,4 @@ async function esci() {
   mostraAccesso();
 })();
 
-function avviaApp(sessione) {
-  if (_appAvviata) return;
-  _appAvviata = true;
-  clearInterval(_accessoTimer);
-  $('accesso').hidden = true;
-  state.utente = emailDi(sessione);
-  const corrente = bpSettimanaCorrente();
-  state.week = corrente.week; state.year = corrente.year;      // si apre sempre sulla settimana di oggi
-  ui.giorno = giornoIdxDi(oggiData());
-  ui.tab = 'oggi';   // Oggi è la schermata di apertura
-  render();
-  if (!localStorage.getItem(LS2.ONB)) onbApri();
-  applicaAspetto();
-  loadAll().then(() => {
-    rilevaColonneV3().then(() => setTimeout(controllaMattino, 600));
-    rilevaColonneV4();
-    avvioV5();
-    initGcal();
-    db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
-    setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
-    initPullToRefresh();
-    caricaEventi(state.week, state.year);
-    caricaRimaste();
-    const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
-    // 22/10 · al massimo una volta al giorno (localStorage avviso_salite = YYYY-MM-DD)
-    if (salite.length && lsLeggi('avviso_salite') !== oggiLocale()) {
-      lsScrivi('avviso_salite', oggiLocale());
-      setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
-    }
-  });
-  window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
-}
 

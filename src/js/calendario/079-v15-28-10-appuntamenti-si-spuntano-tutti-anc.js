@@ -116,12 +116,112 @@ vistaFatte = function () {
   return h + `<p class="list-head"><span>Appuntamenti fatti</span><span class="mono">${evts.length}</span></p><div class="group">${righe}</div>`;
 };
 
-const _avviaAppV15 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV15(sessione);
-  if (prima) return;
-  caricaEventiInfo().then(() => { if (ui.tab === 'altro') render(); }).catch(err => console.warn('[Appuntamenti] info:', err.message));
-};
+// avviaApp: catena appiattita nella fase D del riordino (base + 7 strati); i passi girano nell'ordine di prima.
+//   passo 0 · core/073-02-accesso-supabase-auth-con-codice-persona.js
+//   passo 1 · cattura/066-v9-spesa-con-sotto-righe-che-iniziano-con-o.js
+//   passo 2 · cattura/073-01-22-10-sera-e-una-cosa-da-fare-dal-foglio.js
+//   passo 3 · altro/073-09-altro-le-mie-mete-e-da-rendere-specifich.js
+//   passo 4 · smaltisci/075-v11-togliere-25-10.js — all'avvio: i nascosti
+//   passo 5 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js — all'avvio: la bozza del campo e gli invii nel database
+//   passo 6 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js — all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
+//   passo 7 · calendario/079-v15-28-10-appuntamenti-si-spuntano-tutti-anc.js
+// Forma annidata: alcuni strati fanno qualcosa prima di chiamare la versione precedente, quindi ogni strato resta una
+// funzione interna che chiama la precedente per nome (passo0 = base); si legge dal fondo: l'ultimo passo chiama il penultimo…
+function avviaApp(sessione) {
+  // ── passo 0 · core/073-02-accesso-supabase-auth-con-codice-persona.js
+  const passo0 = function (sessione) {
+    if (_appAvviata) return;
+    _appAvviata = true;
+    clearInterval(_accessoTimer);
+    $('accesso').hidden = true;
+    state.utente = emailDi(sessione);
+    const corrente = bpSettimanaCorrente();
+    state.week = corrente.week; state.year = corrente.year;      // si apre sempre sulla settimana di oggi
+    ui.giorno = giornoIdxDi(oggiData());
+    ui.tab = 'oggi';   // Oggi è la schermata di apertura
+    render();
+    if (!localStorage.getItem(LS2.ONB)) onbApri();
+    applicaAspetto();
+    loadAll().then(() => {
+      rilevaColonneV3().then(() => setTimeout(controllaMattino, 600));
+      rilevaColonneV4();
+      avvioV5();
+      initGcal();
+      db.from('cicli').select('id,calendar_event_id').limit(1).then(({ error }) => { ui.calEventColOk = !error; });
+      setTimeout(riconciliaCalendar, 2500);   // dopo che initGcal ha ripreso il token
+      initPullToRefresh();
+      caricaEventi(state.week, state.year);
+      caricaRimaste();
+      const salite = state.cicli.filter(c => !c.done && computeEffectiveQ(c) !== c.q);
+      // 22/10 · al massimo una volta al giorno (localStorage avviso_salite = YYYY-MM-DD)
+      if (salite.length && lsLeggi('avviso_salite') !== oggiLocale()) {
+        lsScrivi('avviso_salite', oggiLocale());
+        setTimeout(() => showToast(`${plurale(salite.length, 'cosa è salita', 'cose sono salite')} di priorità per la scadenza`, 'warn'), 1200);
+      }
+    });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', () => render());
+  };
+  // ── passo 1 · cattura/066-v9-spesa-con-sotto-righe-che-iniziano-con-o.js
+  const passo1 = function (sessione) {
+    const prima = _appAvviata;
+    passo0(sessione);
+    if (prima) return;
+    const testo = testoNuovaDaUrl();
+    if (!testo) return;
+    togliNuovaDaUrl();
+    dopoIlCaricamento().then(() => { if ($('onb') && !$('onb').hidden) return; apriRapidoCon(testo); });   // prima volta: c'è l'introduzione
+  };
+  // ── passo 2 · cattura/073-01-22-10-sera-e-una-cosa-da-fare-dal-foglio.js
+  const passo2 = function (sessione) {
+    const prima = _appAvviata;
+    passo1(sessione);
+    if (prima) return;
+    controllaClaudeServer().then(() => { if (ui.tab === 'altro') render(); });
+    caricaEventiFatti().catch(err => console.warn('[Appuntamenti] spunte:', err.message));
+  };
+  // ── passo 3 · altro/073-09-altro-le-mie-mete-e-da-rendere-specifich.js
+  const passo3 = function (sessione) {
+    const prima = _appAvviata;
+    passo2(sessione);
+    if (prima) return;
+    dopoIlCaricamento().then(() => rilevaPrincipi()).catch(e => console.warn('[Principi] avvio:', e.message));
+  };
+  // ── passo 4 · smaltisci/075-v11-togliere-25-10.js
+  // all'avvio: i nascosti
+  const passo4 = function (sessione) {
+    const prima = _appAvviata;
+    passo3(sessione);
+    if (prima) return;
+    caricaEventiNascosti().catch(err => console.warn('[Appuntamenti] nascosti:', err.message));
+  };
+  // ── passo 5 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js
+  // all'avvio: la bozza del campo e gli invii nel database
+  const passo5 = function (sessione) {
+    const prima = _appAvviata;
+    passo4(sessione);
+    if (prima) return;
+    setTimeout(ripristinaBozzaCattura, 300);
+    caricaInviiDb().catch(err => console.warn('[Piano] invii:', err.message));
+  };
+  // ── passo 6 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js
+  // all'avvio: si parte da Tutto; la colonna del calendario della cosa c'è?
+  const passo6 = function (sessione) {
+    const prima = _appAvviata;
+    passo5(sessione);
+    if (prima) return;
+    state.filtro = 'tutto';
+    state.ctx = 'lavoro';
+    db.from('cicli').select('id,calendar_event_cal').limit(1).then(({ error }) => { state.calColCosaOk = !error; });
+    verificaCalPrivato().catch(() => {});
+  };
+  // ── passo 7 · calendario/079-v15-28-10-appuntamenti-si-spuntano-tutti-anc.js
+  const passo7 = function (sessione) {
+    const prima = _appAvviata;
+    passo6(sessione);
+    if (prima) return;
+    caricaEventiInfo().then(() => { if (ui.tab === 'altro') render(); }).catch(err => console.warn('[Appuntamenti] info:', err.message));
+  };
+  return passo7.apply(this, arguments);
+}
 
 // ══════════════════════════════════════════════════════════════

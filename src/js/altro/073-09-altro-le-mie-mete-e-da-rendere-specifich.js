@@ -18,11 +18,4 @@ GUIDA_ITIME.push(
   { titolo: 'Fallo subito, e scrivilo specifico (principi 4 e 2)', testo: `<p><strong>Principio 4: se ci vogliono pochi minuti, fallo subito.</strong> Quando scrivi una cosa con «5 minuti», «al volo» o «subito», o tocchi il chip «5 min» nel riepilogo, compare <strong>Falla ora</strong>: parte un timer di 5 minuti con «Fatta» e «Non finita: salvala».</p><p><strong>Principio 2: una cosa specifica si fa, una generica si rimanda.</strong> «Incassi» o «Orto» non dicono cosa fare: l'app avvisa «Troppo generica: cosa devi fare, con chi, quanto?». Le trovi in Riordina e in Altro → <strong>Da rendere specifiche</strong>, con Spacchettala.</p>` },
   { titolo: 'La sera, le deleghe, la spinta (principi 3, 9, 10, 11)', testo: `<p><strong>Principio 3: prepara la giornata la sera prima.</strong> Dalle 18:30, nei giorni feriali, in Oggi compare «5 minuti per domani»: scegli dalla settimana cosa fai domani. In Impostazioni → Promemoria su Google Calendar c'è anche «Piano di domani», un promemoria alle 18:45 (lo crei tu con il tasto).</p><p><strong>Principio 9: delega con istruzioni scritte, alla persona giusta.</strong> Se con qualcuno le deleghe tornano spesso, l'app te lo dice e propone di scrivere le istruzioni o un punto settimanale con lui.</p><p><strong>Principio 10: non riprenderti il lavoro delegato.</strong> Prima di riprenderla, l'app chiede: è un'urgenza vera?</p><p><strong>Principio 11: accorgiti di cosa ti toglie la spinta.</strong> Se la settimana è andata storta, Chiudi la settimana chiede cosa ti ha tolto la spinta, e ti mostra le risposte delle ultime volte.</p>` }
 );
-const _avviaAppPr = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppPr(sessione);
-  if (prima) return;
-  dopoIlCaricamento().then(() => rilevaPrincipi()).catch(e => console.warn('[Principi] avvio:', e.message));
-};
 // ══════════════════════════════════════════════════════════════

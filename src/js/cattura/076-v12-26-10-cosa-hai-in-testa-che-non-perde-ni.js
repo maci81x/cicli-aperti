@@ -284,14 +284,5 @@ AZIONI['v12-indietro'] = (el, id, data, ev) => { setTimeout(() => { const d = el
 AZIONI['v12-tempo'] = el => { setTimeout(() => { const d = el.closest('details'); ui.v12Tempo = !!(d && d.open); }, 0); };
 
 
-// all'avvio: la bozza del campo e gli invii nel database
-const _avviaAppV12 = avviaApp;
-avviaApp = function (sessione) {
-  const prima = _appAvviata;
-  _avviaAppV12(sessione);
-  if (prima) return;
-  setTimeout(ripristinaBozzaCattura, 300);
-  caricaInviiDb().catch(err => console.warn('[Piano] invii:', err.message));
-};
 
 // ══════════════════════════════════════════════════════════════
