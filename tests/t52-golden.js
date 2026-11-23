@@ -39,7 +39,9 @@ const seed = {
     cosa('g', 'Rinnovo assicurazione', { q: 2, due_date: '2026-11-28' }),
     cosa('p', 'SSI – report amministrativo', { fonte: 'posta', posta_tipo: 'da_fare', due_date: '2026-11-20' }),
     cosa('x', 'Ordinare la cancelleria', { q: 4 }),
-    cosa('u', 'Rifare il sito un giorno', { q: 4, parcheggiato: true, parcheggiato_at: ora })
+    cosa('u', 'Rifare il sito un giorno', { q: 4, parcheggiato: true, parcheggiato_at: ora }),
+    cosa('f1', 'Chiamare il fornitore', { q: 2, pianificato_data: '2026-11-17', durata_minuti: 45, done: true, chiuso_at: '2026-11-17T11:00:00+01:00' }),
+    cosa('f2', 'Rispondere a Nicco', { q: 1, pianificato_data: '2026-11-19', durata_minuti: 15, done: true, chiuso_at: '2026-11-19T08:10:00+01:00' })
   ],
   obiettivi_settimana: [{ settimana_anno: '2026-W47', voci: [{ testo: 'Chiudere il budget', fatto: false }, { testo: 'Due clienti nuovi', fatto: true }] }]
 };
