@@ -102,6 +102,7 @@ Codice di livello alto vicino agli strati (ascoltatori, `setInterval`, `insertAd
 | Un `return` dentro un passo della sequenza | resta locale al passo, come era locale allo strato |
 | Cambio di `this`/`arguments` | frecce nella sequenza (ereditano gli stessi valori); funzioni normali nella forma annidata |
 | Rientro e commenti peggiorano | indice dei passi in testa alla funzione; ogni passo porta file di provenienza, commento sopra l'alias/lo strato e i commenti interni; commenti attaccati e blocchi `{ }` rimasti vuoti si tolgono dal posto di prima (niente numeri di riga di `index.html`, che scadono) |
+| Il rientro cambia gli spazi dentro un template literal su più righe (HTML diverso, schermate uguali) | trovato da `t52` al commit di `riga`: lo strumento ora maschera gli a capo dei template; `testi.js` controlla a ogni commit che nessun testo di template o stringa cambi (verificato anche sui commit già fatti) |
 | Un passo chiuso in `try/catch` si rompe e lascia solo un `console.warn` | `t52` e `t54` confrontano gli avvisi in console con il riferimento (oggi nessuno); verificato al contrario con un avviso finto |
 | Lo strumento, riusato sulle altre catene, appiattisce male | si ferma se uno strato non sta a livello alto o in un blocco `{ }` di livello alto; sequenza solo se la chiamata è esattamente la prima istruzione (non dentro `?:`, `||`, frecce); `_x(a, b)` in sequenza solo se il passo prima non usa `this`/`arguments`; i nomi `passoN` e l'accumulatore non coprono nomi usati |
 | Catture al caricamento o chiamate prima dell'ultimo strato | verificato dai revisori: l'unica cattura è l'ascoltatore di `disegnaAnteprima` (gestito); nessuna chiamata sincrona al caricamento; `avviaApp` parte dopo `await db.auth.getSession()` o da `setTimeout`; `render` rimanda `disegna` in un microtask |
@@ -141,7 +142,7 @@ echo "TOTALE $ok/$n"; cd ..
 Per ogni funzione, in quest'ordine:
 
 1. **Prova dello strumento**: `node tools/riordino/appiattisci.js . <f> --prova > $T/<f>.js`. Criteri: uscita 0; su stderr «base + N strati → 1 funzione (forma X)» con N e X uguali alla tabella; nel file letto: ogni passo con la sua etichetta e i commenti. Se uno non torna: fermarsi.
-2. **Applicazione**: `node tools/riordino/appiattisci.js . <f> && node build.js`; `git diff --stat src` deve toccare solo i file degli strati di quella catena.
+2. **Applicazione**: `node tools/riordino/appiattisci.js . <f> && node build.js`; `git diff --stat src` deve toccare solo i file degli strati di quella catena; `node tools/riordino/testi.js HEAD WORK` deve dire «testi diversi: 0» (per `disegnaAnteprima` mancano solo i testi della base tolta).
 3. **Prove** (comando sopra). L'unico `NO` ammesso al primo giro è `t51-globali`, e solo se il suo `FAIL` elenca come tolti esattamente gli alias a colonna 0 della tabella e nessun nome aggiunto. Allora `cd tests && AGGIORNA=1 NM="$PWD/node_modules" node t51-globali.js; cd ..` e si rilanciano tutte le prove: serve `TOTALE 32/32` (in `t52`: 16 HTML uguali, 16 schermate «0.000%», nessun avviso in console; `t54` uguale). Qualunque altra differenza: `git checkout src index.html tests/riferimento`, fermarsi e segnalarla.
 4. **Commit**: `git add src index.html tests/riferimento/globali.json && git commit -m "refactor: fase D, <f> in una funzione"` (l'hook controlla `build.js --check`).
 

@@ -8,6 +8,7 @@
 // - annidata: altrimenti ogni strato resta una funzione interna (passo0 = base, passo1, …) che chiama la precedente per nome.
 // Si ferma (uscita 1) se: base non unica, uno strato non sta a livello alto o in un blocco `{ }` di livello alto, uno strato
 // non usa esattamente un alias, un alias è letto fuori dalla catena, un nome scelto copre un nome usato dagli strati.
+// Non cambia mai il testo dei template literal (gli a capo al loro interno sono esclusi dai rientri).
 // Toglie base, strati, alias, i commenti attaccati sopra (copiati nella funzione) e i blocchi `{ }` rimasti vuoti.
 // Uso (dalla radice, dopo node build.js): node tools/riordino/appiattisci.js . <funzione> [--prova]
 const fs = require('fs'), path = require('path');
@@ -20,8 +21,15 @@ const files = []; let pos = 0;
 for (const f of ordine) { const t = fs.readFileSync(path.join(R, 'src', f), 'utf8'); files.push({ f, da: pos, a: pos + t.length, t }); pos += t.length; }
 if (pos !== html.length) throw new Error('index.html non corrisponde a src/: lancia node build.js');
 const tagS = html.lastIndexOf('\n<script>\n') + 10, tagF = html.lastIndexOf('\n</script>');
-const src = html.slice(tagS, tagF);
-const ast = acorn.parse(src, { ecmaVersion: 'latest', sourceType: 'script', locations: true });
+const src0 = html.slice(tagS, tagF);
+const ast = acorn.parse(src0, { ecmaVersion: 'latest', sourceType: 'script', locations: true });
+// gli a capo dentro i template literal fanno parte del testo: si mascherano (stesso numero di caratteri) perché rientri e
+// allineamenti non li tocchino, e si rimettono alla fine
+const MASCHERA = '\uE000';
+if (src0.includes(MASCHERA)) throw new Error('il sorgente contiene già il carattere maschera');
+const srcArr = src0.split('');
+walk.full(ast, n => { if (n.type === 'TemplateElement') for (let i = n.start; i < n.end; i++) if (srcArr[i] === '\n') srcArr[i] = MASCHERA; });
+const src = srcArr.join('');
 const righePrima = html.slice(0, tagS).split('\n').length - 1;
 const L = n => n.loc.start.line + righePrima;
 const testo = n => src.slice(n.start, n.end);
@@ -164,7 +172,7 @@ if (sequenza) {
   out.push(`  return passo${passi.length}.apply(this, arguments);`);
 }
 out.push('}');
-const finale = out.join('\n') + '\n';
+const finale = (out.join('\n') + '\n').split(MASCHERA).join('\n');
 
 // modifiche (posizioni in html): togli nodi e blocchi vuoti con i commenti attaccati sopra; inserisci la finale dopo la radice dell'ultimo strato
 const modifiche = [];
