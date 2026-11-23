@@ -1,6 +1,6 @@
 # tools/riordino
 
-Strumenti del riordino (fase C, codice morto). Non fanno parte dell'app. Usano `acorn`/`postcss` di `tools/mappa/node_modules` (`cd tools/mappa && npm i`) e `playwright` di `tests/node_modules`.
+Strumenti del riordino: fase C (codice morto), fase D (catene appiattite), fase E (CSS). Non fanno parte dell'app. Usano `acorn`/`postcss` di `tools/mappa/node_modules` (`cd tools/mappa && npm i`) e `playwright` di `tests/node_modules`.
 
 | Script | Cosa fa |
 |---|---|

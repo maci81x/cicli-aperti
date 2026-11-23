@@ -1053,6 +1053,8 @@ Il 4/11 l'app chiedeva ancora «scrivere ad Anita per pranzo di domani» del 2/1
 
 Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9bc5933465775a5ef10bd14734d23b2d9ac7267e177f85c039028b13aa6b` prima e dopo), quindi **i numeri di riga citati in questo file restano validi** e si riferiscono sempre a `index.html`.
 
+> **Dal 23/11 (fasi C, D, E) le righe sono cambiate**: i numeri di riga di `index.html` citati in questo file valgono fino alla v52. Per trovare una funzione si cerca il nome in `src/js/` (`grep -rn "function nome" src/js/`).
+
 - Da oggi `index.html` non si modifica a mano: lo scrive `node build.js` mettendo in fila i file di `src/` nell'ordine di `src/ordine.txt` (istruzioni in `src/README.md`).
 - `src/css/` = il `<style>` diviso in 47 file, uno per sezione di versione (`/* … vNN …` a colonna 0). `src/js/` = lo `<script>` principale diviso in 115 file, uno per sezione (`// vNN` a colonna 0, più `// ║ PARTE 2`). `000-base.js` è la Parte 1 (logica legacy, righe 3499–6481); `001-parte-2-interfaccia.js` apre la Parte 2. `testa.html`, `corpo.html`, `coda.html` contengono il resto.
 - Per trovare una funzione: `grep -rn "function vistaOggi\|vistaOggi = " src/js/`. La catena degli strati di ogni funzione avvolta è in `docs/MAPPA.md` (con le righe di `index.html`; il file di `src/js/` è quello della versione indicata).
@@ -1075,3 +1077,19 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 - Roby: «sulla stampa ci deve essere quello che vedo in Pianifica… così faccio confusione». In Pianifica un passo (Marco, Mario, Mattia…) ha sotto «↳ Stampare elenco clienti degli agenti»; sul foglio c'era solo «Marco».
 - core/038: `madreDi(c)`, `testoMadre(c)` («Passo di «…»»), `disegnaMadreInTesta(c)`. Foglio del giorno (v26) e foglio della settimana/giorno (021): sotto il titolo del passo «Passo di «madre»», prima delle note. Dettaglio: in testa, sopra il titolo, una fascia blu «↳ Passo di <madre>» che apre la cosa intera.
 - Test: tests/t55.js (testo dei due PDF, dettaglio, tocco sulla fascia, cosa senza madre).
+
+## Riordino · fase C · 23/11 — codice che non girava (pubblicata con la v52)
+- Tolti, con la prova che nessuno li eseguiva (copertura all'avvio, 76 trappole con tutte le prove): 25 funzioni mai chiamate e la catena `apriNuovo`; gli strati sostituiti di 33 funzioni (31 basi, 18 strati, 13 alias); 5 funzioni rimaste senza chiamate; 74 selettori CSS senza elementi; 252 variabili delle tavolozze sempre coperte. 31 assegnazioni rimaste senza base sono tornate `function`. In tutto −920 righe di `index.html`.
+- Comportamento identico: HTML delle viste e 16 schermate uguali alla v52 pulita. Design e review: `docs/egm/fase-c/`.
+
+## Riordino · fase D · 23/11 — sei funzioni a strati diventano una
+- `vistaOggi` (base + 15 strati), `disegna` (13), `avviaApp` (7), `disegnaAnteprima` (3, dopo aver tolto la base v9 e il suo ascoltatore, sempre sovrascritti), `salvaCattura` (2), `riga` (6): ognuna è ora **una** `function`, nel file dove stava l'ultimo strato, con in testa l'indice dei passi (file di provenienza) e i passi nell'ordine in cui giravano. Forma «in sequenza» (ogni passo riceve in `ris` il risultato del precedente) o «annidata» (`passo0…passoN`, per `disegna` e `avviaApp`, dove qualche strato fa qualcosa prima di chiamare il precedente).
+- Per cambiare una di queste sei: si modifica il passo giusto dentro la funzione, non si aggiungono strati. Strumento: `tools/riordino/appiattisci.js`; i testi di template e stringhe sono controllati identici (`tools/riordino/testi.js`). Design e review: `docs/egm/fase-d/`.
+
+## Riordino · fase E · 23/11 — CSS: una tavolozza (v53 riordino)
+- **Tavolozza**: tutte le variabili della radice (`--bg`, `--surface`, `--q1`… 104) stanno in `src/css/core/000-tavolozza.css`, primo dei CSS: `:root` (chiaro, base di tutto), `:root[data-theme="dark"]` (63), `:root[data-contrast="alto"]` (6), scuro + contrasto (5). **Per cambiare un colore si modifica lì**; i rimandi tra token (`--meta-ink: var(--text-2)`) sono rimasti. Prima erano ridefinite in 16 regole di 8 file.
+- Tolte le classi `.rap-voce`, `.rap-sintesi`, `.rap-passi` (le disegnava solo la base di `disegnaAnteprima`) e i punti del JS che le cercavano; 4 selettori ripetuti nello stesso file uniti; 39 dichiarazioni che non potevano mai vincere (gemelle con `html:root` davanti) tolte.
+- `!important`: restano tutti i 95. Con un criterio valido per qualsiasi elemento (nessuna dichiarazione della stessa famiglia in tutto il foglio potrebbe approfittarne, nessuno stile in linea, nessuna animazione) ognuno ha un concorrente; i motivi e i 48 selettori ripetuti tra file diversi (non uniti per non spostare regole tra file) sono in `docs/egm/fase-e/casi.md`.
+- Controllo: stile calcolato di ogni elemento in 80 scenari (telefono, 900 px, computer; chiaro e scuro; contrasto alto; tema del sistema; testo 125%; stampa) identico prima e dopo ogni commit (`tools/riordino/stili.js`), variabili identiche negli 8 stati della radice, prove 32/32. Design e review: `docs/egm/fase-e/`.
+- `VERSIONE_APP` = «2026-11-23 v53 riordino».
+

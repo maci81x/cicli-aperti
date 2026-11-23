@@ -1,7 +1,7 @@
 # Fase E — CSS: una tavolozza, un selettore una volta, meno `!important`
 
 *   **Author:** Roby
-*   **Status:** Approvato dopo review EGM (vedi [goldfish_review_report.md](goldfish_review_report.md))
+*   **Status:** Fatto (23/11). Esito: tavolozza, classi `rap-*`, 4 unioni dentro i file e 39 dichiarazioni coperte; **nessun `!important` tolto** (col criterio di E4 ognuno dei 95 ha un concorrente) e E3 in un solo commit (le unioni possibili erano 4). Dettagli in [casi.md](casi.md) e in [STATO_RIORDINO.md](../../STATO_RIORDINO.md). Review: [goldfish_review_report.md](goldfish_review_report.md)
 *   **Date:** 2026-11-23
 *   **Contesto:** [PIANO_RIORDINO.md](../../PIANO_RIORDINO.md) (fase E), [fase C](../fase-c/design_draft.md) (variabili coperte già tolte), [fase D](../fase-d/design_draft.md) (forma del piano), [STATO_RIORDINO.md](../../STATO_RIORDINO.md). Ramo `riordino/fase-e` da `main` a `1bf722d` (v52 + fasi C e D, pubblicato).
 

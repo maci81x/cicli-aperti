@@ -1,6 +1,6 @@
-# Stato del riordino — al 23/11/2026 (fase D fatta, in attesa dell'ok per la fase E)
+# Stato del riordino — al 23/11/2026 (fase E fatta e chiusa: v53 riordino, in attesa dell'ok per pubblicare)
 
-Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · design e review: [egm/fase-a/](egm/fase-a/design_draft.md), [egm/fase-c/](egm/fase-c/design_draft.md), [egm/fase-d/](egm/fase-d/design_draft.md) · strumenti: [tools/riordino/](../tools/riordino/README.md)
+Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · design e review: [egm/fase-a/](egm/fase-a/design_draft.md), [egm/fase-c/](egm/fase-c/design_draft.md), [egm/fase-d/](egm/fase-d/design_draft.md), [egm/fase-e/](egm/fase-e/design_draft.md) · drift report: [egm/2026-11-23_DRIFT_REPORT.md](egm/2026-11-23_DRIFT_REPORT.md) · strumenti: [tools/riordino/](../tools/riordino/README.md)
 
 ## In breve
 
@@ -10,11 +10,11 @@ Piano: [PIANO_RIORDINO.md](PIANO_RIORDINO.md) · mappa: [MAPPA.md](MAPPA.md) · 
 | B — cartelle per area | fatta, pubblicata | `main` (`f1b1c12`) |
 | Rete di sicurezza (`t51`, `t52`, `t54`) | fatta | `main` (`t51`, `t52`); `t54` e gli avvisi in console nel ramo fase D |
 | C — codice morto | **fatta, pubblicata il 23/11** (riallineata a v51 e v52, unita su `main` in avanti veloce) | `main` (`f22f7c7`) |
-| D — appiattire le catene | **fatta**: sei catene, un commit ciascuna | ramo `riordino/fase-d` (su GitHub, non unito) |
-| E — CSS | da fare, dopo l'ok | — |
-| Chiusura (v52 riordino, docs, pubblicazione) | da fare, solo dopo «ok pubblica» | — |
+| D — appiattire le catene | **fatta, pubblicata il 23/11** | `main` (`1bf722d`) |
+| E — CSS | **fatta**: tavolozza unica, classi `rap-*` via, 4 unioni, 39 dichiarazioni coperte via; `!important` tutti rimasti (vedi sotto) | ramo `riordino/fase-e` (su GitHub, non unito) |
+| Chiusura (v53 riordino, docs) | **fatta** sul ramo fase E; pubblicazione solo dopo «ok pubblica» | ramo `riordino/fase-e` |
 
-Online c'è `f22f7c7` (v52 + fase C): `VERSIONE_APP` «2026-11-23 v52», console senza errori.
+Online c'è `1bf722d` (v52 + fasi C e D): `VERSIONE_APP` «2026-11-23 v52», console senza errori. Il ramo fase E ha `VERSIONE_APP` «2026-11-23 v53 riordino».
 
 ## Righe di `index.html`
 
@@ -23,7 +23,8 @@ Online c'è `f22f7c7` (v52 + fase C): `VERSIONE_APP` «2026-11-23 v52», console
 | v51 (`d745419`) | 21.817 |
 | v52 (`64abcf8`) | 21.836 |
 | v52 + fase C (`f22f7c7`, online) | 20.916 |
-| + fase D (`riordino/fase-d`) | 20.978 (le funzioni appiattite hanno indice dei passi ed etichette; lo scopo della D è la struttura, non le righe) |
+| + fase D (`1bf722d`, online) | 20.978 (le funzioni appiattite hanno indice dei passi ed etichette; lo scopo della D è la struttura, non le righe) |
+| + fase E (`riordino/fase-e`) | 21.049 (la tavolozza è scritta una variabile per riga; il CSS ha 191 dichiarazioni di variabili e 39 dichiarazioni coperte in meno) |
 
 ## Prove
 
@@ -34,6 +35,7 @@ Criterio: una prova passa solo se esce con 0 **e** non ha righe `FAIL`.
 | fase B su `main` | 27/27 |
 | fase C riallineata alla v52 | 31/31 (con `t53` della v51 e `t55` della v52); contro la v52 pulita di `main`: 16 HTML identici, 16 schermate 0,000% |
 | ogni commit della fase D | 32/32 (in più `t54`), 16 schermate 0,000%, HTML uguale, nessun avviso in console |
+| ogni commit della fase E | 32/32, schermate 0,000%; stile calcolato di ogni elemento in 80 scenari: 0 differenze; variabili della radice uguali negli 8 stati |
 
 Rete di sicurezza:
 - `t51-globali` — nomi globali dopo l'avvio contro `tests/riferimento/globali.json` (si aggiorna solo quando si tolgono nomi apposta, con `AGGIORNA=1`, controllando il diff).
@@ -47,7 +49,7 @@ Ciclo EGM completo (report in `docs/egm/fase-c/`). Riallineata due volte (v51, v
 
 **Rinviato dalla fase C** (codice che non è una funzione, rimasto senza uso): `MACRO_AREA_COLORS` e `MACRO_AREA_EMOJIS`; il foglio `#postponeOverlay` con `doPostpone`, `doPostponeCustom`, `_applyPostpone`; `let messe` e il toast nel file v30 dopo `v30InDaPianificare`; file `src/js/altro/000-26-macro-area-helpers.js` e `src/js/core/000-07-navigation.js` rimasti con il solo marcatore.
 
-## Fase D — fatta (ramo `riordino/fase-d`)
+## Fase D — fatta e pubblicata
 
 Review EGM consolidata (design, codebase, readiness, zoom-out; [report](egm/fase-d/goldfish_review_report.md)): nessun cambio di comportamento; corretti strumento e piano (15 correzioni).
 
@@ -68,25 +70,46 @@ Altri commit: `0b3af9c` avvisi in console in `t52`/`t54`; `15e0136` design e str
 
 **Candidati per dopo:**
 - Semplificazioni dentro `vistaOggi` (fuori dalla D, che è solo meccanica): più passi inseriscono HTML dopo `.vh` (v23, v25, v29), v49 e v50 si somigliano, una decina di giri template → `innerHTML`.
-- Fase E: le classi `.rap-voce`, `.rap-sintesi`, `.rap-passi` le disegnava solo la base di `disegnaAnteprima` tolta (restano lette in due `querySelectorAll` della v17 e nel CSS di `css/cattura/002` e `css/altro/005`).
 - Le altre ~150 catene della MAPPA con lo stesso strumento (ora si ferma da solo sui casi dubbi).
+
+## Fase E — fatta (ramo `riordino/fase-e`)
+
+Review EGM (design, codebase, readiness, zoom-out; [report](egm/fase-e/goldfish_review_report.md)): 17 correzioni, tra cui tavolozza dal testo dichiarato (non dai valori calcolati), unioni solo dentro un file, criterio per `!important` indipendente dagli elementi.
+
+| Commit | Cosa |
+|---|---|
+| `bb13208` | rete: `tests/dati-golden.js` (seme e viste di `t52`), `stili.js` (stile calcolato di ogni elemento in 80 scenari: stabile e sensibile), `variabili.js` a 8 stati, `css_riordina.js` |
+| `545f106` | via `.rap-voce`, `.rap-sintesi`, `.rap-passi` (7 regole) e i punti del JS che le cercavano |
+| `d3353c0` | **tavolozza**: 104 variabili da 16 regole di 8 file → `src/css/core/000-tavolozza.css` (chiaro 104, scuro 63, contrasto 6, scuro + contrasto 5), `var()` conservati |
+| `473a864` | 4 selettori ripetuti nello stesso file uniti; 4 coppie restano separate (regola in mezzo con stessa specificità e famiglia) |
+| `4b23c0d` | 39 dichiarazioni che non vincevano mai (gemelle `html:root S` delle v43/v44.1/v46) |
+| chiusura | `VERSIONE_APP` «2026-11-23 v53 riordino», NOTE_LOGICA, MAPPA rigenerata (testi fissi di `genera_mappa.js` aggiornati), questo file, drift report |
+
+**Cosa non si è potuto fare con sicurezza** (elenchi in [egm/fase-e/casi.md](egm/fase-e/casi.md)):
+- **`!important`: 0 tolti su 95.** Il criterio del design li toglie solo se nessuna dichiarazione della stessa famiglia, in tutto il foglio, potrebbe batterli senza `!important`, se la proprietà non è scritta in linea da JavaScript o dai template e se non è animata. Ognuno dei 95 ha almeno un concorrente (73 anche per gli stili in linea, 10 per le animazioni). Toglierne qualcuno richiede di sapere quali elementi colpisce ogni selettore: si può fare con gli scenari di `stili.js`, ma senza garanzie su `:hover`, animazioni e classi messe da JavaScript.
+- **48 selettori ripetuti tra file diversi** (es. `.t-title`, `.check-box`, `.list-head` in `core/000-base` e nella v30): non uniti, perché vorrebbe dire spostare regole tra file (la sistemazione «un file per area» del PIANO).
+
+## Lavoro futuro (annotato, non fatto)
+
+- **Semplificazioni dentro `vistaOggi`**: più passi inseriscono HTML dopo `.vh` (v23, v25, v29), v49 e v50 si somigliano, una decina di giri template → `innerHTML`. Sono cambi di logica (non meccanici): vanno fatti uno alla volta con `t52`, `stili.js` e i testi controllati.
+- **Le altre ~150 catene** della MAPPA (44 funzioni avvolte due o più volte, 89 una volta): stesso strumento (`appiattisci.js`, che si ferma da solo sui casi dubbi) e stessa procedura della fase D.
+- **CSS**: `!important` e selettori tra file (sopra); i codici rimasti senza uso rinviati dalla fase C.
 
 ## Altre cose di questa sessione (23/11)
 
 - Hook «python: command not found»: era il file annidato `plugin/hooks/hooks.json` del plugin sincronizzato `agent-memory` (disattivato, ma l'hook girava lo stesso); ora chiama `python3`.
-- `main` locale riportato uguale a `origin/main`; rami `riordino/fase-c` e `riordino/fase-d` aggiornati su GitHub con `--force-with-lease` dopo il riallineamento.
+- Fasi C e D unite su `main` e pubblicate (`f22f7c7`, poi `1bf722d`), verificate online.
 
 ## Prossimo giro
 
-1. Ok di Roby sulla fase D.
-2. Fase E (ramo `riordino/fase-e` da `fase-d`): un selettore definito una volta, una tavolozza chiara e una scura, meno `!important`, classi `rap-*` rimaste senza elementi; `tools/riordino/variabili.js` per i colori, schermate entro la soglia.
-3. Chiusura (si ferma per l'ok di Roby): `VERSIONE_APP` «2026-11-xx v52 riordino», `NOTE_LOGICA.md`, `docs/MAPPA.md` rigenerata (e i testi fissi di `genera_mappa.js`), questo file, `/egm:egm-drift-report`. Niente unione su `main` né pubblicazione senza «ok pubblica».
+1. Ok di Roby sulla fase E («ok pubblica»): unione di `riordino/fase-e` su `main` in avanti veloce, `git push`, attesa di GitHub Pages, verifica online di `VERSIONE_APP` «2026-11-23 v53 riordino» e della console.
+2. Lavoro futuro sopra, una cosa per volta.
 
 ## Comandi per ripartire
 
 ```sh
 cd ~/Sites/cicli-aperti-roby
-git fetch && git checkout riordino/fase-d && git pull --ff-only
+git fetch && git checkout riordino/fase-e && git pull --ff-only
 git config core.hooksPath tools/hooks            # se è una copia nuova
 node build.js --check                             # «index.html è aggiornato»
 
@@ -101,5 +124,8 @@ cd tests && mkdir -p $TMPDIR/prove && for f in smoke.js t*.js; do NM="$PWD/node_
 node tools/riordino/catene.js . <funzione> …
 node tools/riordino/appiattisci.js . <funzione> --prova
 node tools/riordino/testi.js HEAD WORK              # «testi diversi: 0»
+# CSS (fase E): riferimento dal commit di partenza, poi confronto dopo la modifica
+node tools/riordino/stili.js . $TMPDIR/stili_prima.json && node tools/riordino/variabili.js . $TMPDIR/var_prima.json
+node tools/riordino/stili.js . $TMPDIR/stili_dopo.json && node tools/riordino/stili.js --confronta $TMPDIR/stili_prima.json $TMPDIR/stili_dopo.json   # «differenze: 0»
 cd tools/mappa && node analizza.js ../../index.html > $TMPDIR/report.json && cd ../..
 ```

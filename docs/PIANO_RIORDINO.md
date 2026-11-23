@@ -1,6 +1,6 @@
 # PIANO DI RIORDINO — da un index.html di 21.800 righe a file sorgente per area
 
-> Proposta del 19/11/2026, sul commit `948aad8` (v50). Nessun file è stato ancora spostato: `index.html` non è toccato.
+> Proposta del 19/11/2026, sul commit `948aad8` (v50). **Stato al 23/11**: fatte le fasi A, B, C, D (pubblicate) ed E (ramo `riordino/fase-e`, v53 riordino); la struttura finale per componenti descritta sotto (`token.css`, `componenti/`, `js/dati/`, `avvio.js`) **non** è stata fatta: i file restano nelle cartelle per area della fase B, la tavolozza è in `src/css/core/000-tavolozza.css`. Cosa è fatto e cosa resta: [STATO_RIORDINO.md](STATO_RIORDINO.md).
 > Da leggere insieme a [MAPPA.md](MAPPA.md), che ha i numeri citati qui.
 
 ## L'obiettivo, e cosa non deve cambiare

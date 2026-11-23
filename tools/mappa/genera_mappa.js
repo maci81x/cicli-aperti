@@ -25,12 +25,12 @@ const tipoBreve = t => t.startsWith('sostituisce') ? '**sostituisce**' : t.repla
 
 let o = '';
 o += `# MAPPA di index.html — strati, sovrascritture, codice morto\n\n`;
-o += `> Generata il 19/11/2026 su \`index.html\` al commit \`${commit}\` (v50, 21.798 righe) con un'analisi statica (parser JavaScript *acorn* + parser CSS *postcss*), poi controllata a campione a mano.\n`;
+{ const h = require('fs').readFileSync(require('path').join(__dirname, '../../index.html'), 'utf8'); const ver = (h.match(/const VERSIONE_APP = '([^']+)'/) || [])[1] || '?'; const oggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }); o += `> Generata il ${oggi} su \`index.html\` al commit \`${commit}\` (${ver}, ${(h.split('\n').length - 1).toLocaleString('it-IT')} righe) con un'analisi statica (parser JavaScript *acorn* + parser CSS *postcss*). I file di \`src/\` sono in cartelle per area: per trovare un pezzo, \`grep -rn\` sul nome in \`src/\`.\n`; }
 o += `> I numeri di riga sono quelli di \`index.html\`. Se il file cambia, le righe scorrono: rigenerare la mappa (vedi in fondo).\n\n`;
 
 o += `## In breve\n\n`;
 o += `| | |\n|---|---|\n`;
-o += `| Blocchi | \`<style>\` righe ${r.blocchi.styles[0].join('–')} · HTML righe 2638–3497 · \`<script>\` principale righe ${r.blocchi.scripts[1].join('–')} (più un piccolo \`<script>\` in testa, righe ${r.blocchi.scripts[0].join('–')}) |\n`;
+o += `| Blocchi | \`<style>\` righe ${r.blocchi.styles[0].join('–')} · HTML righe ${r.blocchi.styles[0][1] + 1}–${r.blocchi.scripts[1][0] - 1} · \`<script>\` principale righe ${r.blocchi.scripts[1].join('–')} (più un piccolo \`<script>\` in testa, righe ${r.blocchi.scripts[0].join('–')}) |\n`;
 o += `| Funzioni top-level | ${r.nFunzioni} |\n`;
 o += `| Alias \`const _x = fn\` | ${r.nAlias} |\n`;
 o += `| Riassegnazioni \`fn = …\` | ${r.nRiassegnazioni} su ${catene.length} funzioni |\n`;
@@ -44,7 +44,7 @@ o += `| Funzioni mai chiamate | ${r.morte.length} |\n`;
 o += `| Classi CSS senza elementi | ${r.css.classiMorte.filter(c => !verificateDinamiche.has(c.classe)).length} |\n\n`;
 
 o += `**Legenda «tipo»**: *chiama \\_xV12* = lo strato richiama la versione precedente (avvolge davvero); *decoratore proteggi()* = \`fn = proteggi(fn)\`; *IIFE con orig* = \`fn = (function (orig) { … })(fn)\`; **sostituisce** = riscrive la funzione da capo: gli strati precedenti diventano codice morto.\n\n`;
-o += `**Versione** = l'ultimo commento di sezione \`// vNN ·\` a colonna 0 prima della riga. Tra le righe 6485 e 11722 le sezioni v2–v5 sono mescolate (la «PARTE 2» è nata a blocchi), quindi l'ordine delle versioni lì non è monotòno.\n\n`;
+o += `**Versione** = l'ultimo commento di sezione \`// vNN ·\` a colonna 0 prima della riga. Nella «PARTE 2» le sezioni v2–v5 sono mescolate (è nata a blocchi), quindi lì l'ordine delle versioni non è monotòno.\n\n`;
 
 o += `## 1. Funzioni avvolte più volte — la catena degli strati\n\n`;
 o += `Ordine = ordine di esecuzione dello script: l'ultimo strato è quello che gira per primo quando la funzione viene chiamata, e dentro di sé chiama i precedenti.\n\n`;
@@ -74,7 +74,7 @@ o += `\n`;
 
 o += `## 4. CSS sovrascritto\n\n`;
 o += `### 4.1 Le tavolozze (variabili \`--…\`)\n\n`;
-o += `I colori sono stati ridefiniti a ogni cambio di stile: \`:root\` in v1 (67, 98), v9 (1360), v26 (1912); poi \`html:root\` / \`html[data-theme="light"]\` in **v30 (2031, 2256), v43 (2335), v44.1 (2424)** e la versione scura \`html:root[data-theme="dark"]\` in v30 (2057, 2257), v43 (2358), v44.1 (2431). Vince l'ultima (v44.1 «Roby»), ritoccata in v50 (2605, sfondo salvia). Le tre tavolozze precedenti sono interamente sovrascritte: nel riordino resta **un solo** blocco di token chiaro + uno scuro.\n\n`;
+o += `Dalla fase E del riordino (23/11) tutte le variabili della radice stanno in \`src/css/core/000-tavolozza.css\`: \`:root\` (tema chiaro e base), \`:root[data-theme="dark"]\`, \`:root[data-contrast="alto"]\`, \`:root[data-theme="dark"][data-contrast="alto"]\`. Prima erano ridefinite a ogni cambio di stile (v1, v3, v9, v26, v30, v43, v44.1, v50). Fuori dalla tavolozza restano solo le variabili locali di alcuni componenti (\`.futuro\`, \`.sn-futuro\`).\n\n`;
 o += `### 4.2 Selettori definiti più volte\n\n`;
 o += `Stesso selettore nello stesso contesto (\`@media\` compreso). «Proprietà sovrascritte» = dichiarate in più di una delle regole (le altre si sommano).\n\n`;
 o += `| Selettore | Volte | Dove (versione@riga) | Proprietà sovrascritte | !important |\n|---|---|---|---|---|\n`;
@@ -85,7 +85,7 @@ o += `Molte più sovrascritture sono **indirette** (selettore diverso ma più sp
 o += `### 4.3 \`!important\` per versione\n\n`;
 o += `| Versione | ${Object.keys(r.css.importantPerVer).map(v => 'v' + v).join(' | ')} | Totale |\n|---|${Object.keys(r.css.importantPerVer).map(() => '---').join('|')}|---|\n`;
 o += `| N. | ${Object.values(r.css.importantPerVer).join(' | ')} | ${r.css.important} |\n\n`;
-o += `Quasi due terzi stanno in v49–v50: sono gli strati che hanno dovuto battere la cascata accumulata. Elenco completo: \`grep -n '!important' index.html | awk -F: '$1<2636'\`.\n\n`;
+o += `Quasi due terzi stanno in v49–v50: sono gli strati che hanno dovuto battere la cascata accumulata. Elenco completo: \`grep -rn '!important' src/css\`; perché ognuno resta: \`docs/egm/fase-e/casi.md\`.\n\n`;
 
 o += `## 5. Codice morto\n\n`;
 o += `### 5.1 Funzioni mai chiamate\n\n`;
