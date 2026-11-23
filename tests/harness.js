@@ -134,6 +134,7 @@ const SEED_BASE = { cicli: [], persone: [], categorie: [], battle_plan: [], batt
 async function apriApp(opts = {}) {
   const browser = await chromium.launch();
   const ctxOpts = opts.mobile ? { ...devices['iPhone 13'] } : { viewport: opts.viewport || { width: 1280, height: 900 } };
+  if (opts.colorScheme) ctxOpts.colorScheme = opts.colorScheme;   // tema del sistema (fase E: stati della tavolozza)
   if (opts.oraFinta) ctxOpts.timezoneId = 'Europe/Rome'; else ctxOpts.timezoneId = 'Europe/Rome';
   const context = await browser.newContext(ctxOpts);
   const db = makeDb({ ...SEED_BASE, ...(opts.seed || {}) });
