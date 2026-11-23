@@ -7,8 +7,6 @@
 .v40-gr-h { display: flex; justify-content: space-between; font-size: var(--fs-caption); font-weight: var(--fw-strong); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
 .v40-gr-h.q1 { color: var(--q1); } .v40-gr-h.q2 { color: var(--q2); }
 .v40-riga { display: flex; align-items: stretch; gap: 6px; border-radius: var(--r-sm, 8px); border: 1px solid transparent; }
-.v40-riga.q1 { background: var(--v34-sub-bg, var(--q1-soft)); border-color: var(--v34-sub-bordo, var(--q1-mark)); }
-.v40-riga.q2 { background: var(--q2-soft); border-color: color-mix(in srgb, var(--q2-mark) 35%, transparent); }
 .v40-apri { flex: 1; min-width: 0; display: grid; gap: 1px; padding: 6px 8px; text-align: left; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
 .v40-apri .t { font-size: var(--fs-label); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .v40-apri .m { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); display: flex; gap: 6px; flex-wrap: wrap; }

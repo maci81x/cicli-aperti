@@ -1,10 +1,7 @@
 /* v24 · appuntamenti con altre persone (viola pieno) e tempo tuo (tratteggiato); spazi liberi grigi */
-.evt-riga.evt-app.v24-altri { background: var(--evt-soft); box-shadow: inset 3px 0 0 var(--evt-mark); }
-.evt-riga.evt-app.v24-altri .item-title { color: var(--text); font-weight: var(--fw-strong); }
-.evt-riga.evt-app.v24-mio { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--v24-tratto); }
 .evt-riga.evt-app.v24-mio .evt-cerchio { border-style: dashed; }
 .evt-riga.evt-app.v24-mio .item-title { font-weight: 500; }
-.board .evt-riga.v24-mio { margin: 4px; border-radius: var(--r-sm); border: 1.5px dashed var(--v24-tratto); box-shadow: none; }
+.board .evt-riga.v24-mio { margin: 4px; border-radius: var(--r-sm); border: 1.5px dashed var(--v24-tratto); }
 .v24-chi { color: var(--evt); font-weight: var(--fw-strong); }
 .v24-mio .v24-chi { color: var(--text-3); font-weight: 500; }
 .v24-chi .ti { font-size: 13px; }

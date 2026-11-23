@@ -1,5 +1,5 @@
 /* v19 · posta di lavoro */
-.tag-posta { display: inline-flex; align-items: center; gap: 3px; padding: 0 7px; border-radius: var(--r-full); background: #E8F1FB; color: #1D5FA8; font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; white-space: nowrap; }
+.tag-posta { display: inline-flex; align-items: center; gap: 3px; padding: 0 7px; border-radius: var(--r-full); font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; white-space: nowrap; }
 .tag-posta .ti { font-size: 12px; }
 [data-theme="dark"] .tag-posta { background: #17283B; color: #9CC5F2; }
 .det-posta { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0; }

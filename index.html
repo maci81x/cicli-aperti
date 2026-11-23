@@ -534,7 +534,6 @@ a { color: var(--primary-ink); }
 /* --- Riga con azioni rapide --- */
 .item { position: relative; background: var(--surface); }
 .item-row { position: relative; z-index: 1; background: var(--surface); transition: transform var(--t-base) var(--ease-out); touch-action: pan-y; }
-.item.p-q1:not(.is-done) .item-row { background: var(--q1-soft); }
 .item.is-dragging .item-row { transition: none; }
 .item-title mark { background: var(--warn-soft); color: inherit; border-radius: 3px; }
 .item-side { gap: var(--sp-1); }
@@ -1711,22 +1710,16 @@ button.sn-r { width: 100%; cursor: pointer; }
 
 /* v12 · Oggi: prima di tutto, e i pensieri divisi */
 .v12-prima { margin: var(--sp-2) 0 var(--sp-4); }
-.v12-head span:first-child { color: var(--danger); letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-caption); }
+.v12-head span:first-child { letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-caption); }
 .v12-griglia { display: grid; gap: var(--sp-3); }
 @media (min-width: 1024px) { .v12-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v12-griglia > .v12-card:first-child { grid-column: 1 / -1; } }
 .v12-card { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); }
-.v12-card.v12-rosso { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
-.v12-card.v12-arancio { border-color: color-mix(in srgb, #C2410C 35%, var(--border)); }
-.v12-card.v12-viola { border-color: color-mix(in srgb, var(--evt, #6D28D9) 30%, var(--border)); }
-.v12-card.v12-urgente { border-width: 2px; }
 .v12-testa { display: flex; gap: var(--sp-3); align-items: flex-start; }
 .v12-testa h3 { margin: 0; font-size: var(--fs-body); font-weight: 800; line-height: 1.3; }
 .v12-testa p { margin: 2px 0 0; font-size: var(--fs-label); color: var(--text-2); line-height: 1.45; }
 .v12-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; }
 .v12-rosso .v12-ico { background: var(--danger-soft); color: var(--danger); }
-.v12-arancio .v12-ico { background: color-mix(in srgb, #C2410C 14%, var(--surface)); color: #9A3E0C; }
 [data-theme="dark"] .v12-arancio .v12-ico { color: #F9A27A; }
-.v12-viola .v12-ico { background: var(--evt-soft, #F3EEFD); color: var(--evt, #6D28D9); }
 .v12-righe { margin: 0; }
 .v12-indietro { border-radius: var(--r-md); background: var(--danger-soft); }
 .v12-indietro > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-3); cursor: pointer; list-style: none; color: var(--danger); font-size: var(--fs-label); font-weight: 700; }
@@ -1763,7 +1756,7 @@ button.sn-r { width: 100%; cursor: pointer; }
 @media (max-width: 480px) { .top { gap: var(--sp-2); } .top-ctx button { padding: 0 8px; font-size: 13px; } .logo-top { font-size: 19px; letter-spacing: 1px; min-width: 0; overflow: hidden; text-overflow: clip; } }
 @media (max-width: 360px) { .top-ctx button { padding: 0 6px; font-size: 12px; } .logo-top { font-size: 18px; letter-spacing: 1px; } }
 
-.tag-pers { display: inline-flex; align-items: center; padding: 0 7px; border-radius: var(--r-full); background: #F6F0FD; color: #6D28D9; font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; }
+.tag-pers { display: inline-flex; align-items: center; padding: 0 7px; border-radius: var(--r-full); font-size: 11px; line-height: 18px; vertical-align: 1px; }
 [data-theme="dark"] .tag-pers { background: #2A1F3D; color: #C4B5FD; }
 
 /* v14 · fatta = sparisce */
@@ -1816,7 +1809,7 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v18-menu-cestino { color: var(--danger, #c0392b) !important; }
 
 /* v19 · posta di lavoro */
-.tag-posta { display: inline-flex; align-items: center; gap: 3px; padding: 0 7px; border-radius: var(--r-full); background: #E8F1FB; color: #1D5FA8; font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; white-space: nowrap; }
+.tag-posta { display: inline-flex; align-items: center; gap: 3px; padding: 0 7px; border-radius: var(--r-full); font-size: 11px; font-weight: 800; line-height: 18px; vertical-align: 1px; white-space: nowrap; }
 .tag-posta .ti { font-size: 12px; }
 [data-theme="dark"] .tag-posta { background: #17283B; color: #9CC5F2; }
 .det-posta { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0; }
@@ -1863,7 +1856,7 @@ button.sn-r { width: 100%; cursor: pointer; }
 .day.v22-passati small { font-size: 11px; line-height: 14px; font-weight: var(--fw-strong); color: var(--text-3); }
 .day.v22-passati.indietro small { color: var(--danger, #B42318); }
 /* v23 · Oggi: «Da rispondere (N)», le cose dalla posta che aspettano una risposta */
-.v23-posta { margin: 0 0 var(--sp-4); border: 1px solid var(--q1-mark); border-left-width: 4px; border-radius: var(--r-md); background: var(--q1-soft); overflow: hidden; }
+.v23-posta { margin: 0 0 var(--sp-4); border-radius: var(--r-md); overflow: hidden; }
 .v23-h { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 52px; box-sizing: border-box; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); border: 0; background: transparent; color: var(--q1); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
 .v23-h:focus-visible { outline: 2px solid var(--q1-mark); outline-offset: -2px; }
 .v23-h > .ti { flex: none; font-size: 20px; }
@@ -1896,12 +1889,9 @@ button.sn-r { width: 100%; cursor: pointer; }
 .acol .col-vuota { padding: var(--sp-4); border: 1.5px dashed var(--border); border-radius: var(--r-md); color: var(--text-3); font-size: var(--fs-caption); text-align: center; }
 .armadio-tel .acc { margin-bottom: var(--sp-2); }
 /* v24 · appuntamenti con altre persone (viola pieno) e tempo tuo (tratteggiato); spazi liberi grigi */
-.evt-riga.evt-app.v24-altri { background: var(--evt-soft); box-shadow: inset 3px 0 0 var(--evt-mark); }
-.evt-riga.evt-app.v24-altri .item-title { color: var(--text); font-weight: var(--fw-strong); }
-.evt-riga.evt-app.v24-mio { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--v24-tratto); }
 .evt-riga.evt-app.v24-mio .evt-cerchio { border-style: dashed; }
 .evt-riga.evt-app.v24-mio .item-title { font-weight: 500; }
-.board .evt-riga.v24-mio { margin: 4px; border-radius: var(--r-sm); border: 1.5px dashed var(--v24-tratto); box-shadow: none; }
+.board .evt-riga.v24-mio { margin: 4px; border-radius: var(--r-sm); border: 1.5px dashed var(--v24-tratto); }
 .v24-chi { color: var(--evt); font-weight: var(--fw-strong); }
 .v24-mio .v24-chi { color: var(--text-3); font-weight: 500; }
 .v24-chi .ti { font-size: 13px; }
@@ -2211,20 +2201,14 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
    Subito = casella rosa con bordo rosso (ovunque) · Importante = foglio bianco
    ══════════════════════════════════════════════════════════════ */
 /* Subito: tutta la casella */
-.item.p-q1:not(.is-done) .item-row { background: var(--surface); /* elenchi più leggeri: le Subito non hanno più lo sfondo rosso, basta il segno rosso */ background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
-.item.p-q1:not(.is-done) .item-title { color: var(--v34-sub-ink); font-weight: 600; }
 .item.p-q1:not(.is-done) .check-box { background: var(--surface); }
-.item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid var(--v34-sub-bordo); }
-.board .item.p-q1:not(.is-done) { outline: 1.5px solid var(--v34-sub-bordo); outline-offset: -1.5px; }
+.board .item.p-q1:not(.is-done) { outline-offset: -1.5px; }
 /* appuntamenti */
 .evt-riga.evt-app.v24-mio, .board .evt-riga.v24-mio { background: var(--v34-io); border: 0; box-shadow: none; }
 .evt-riga.evt-app.v24-mio .evt-cerchio { border-color: var(--v34-io-ink); }
 .evt-riga.evt-app.v24-mio .item-meta .mono, .evt-riga.evt-app.v24-mio .v24-chi { color: var(--v34-io-ink); }
 .evt-riga.evt-app.v24-altri, .board .evt-riga.v24-altri { background: var(--v34-altri); box-shadow: none; }
-.evt-riga.evt-app.v24-altri .item-title { color: var(--v34-altri-ink); }
 .evt-riga.evt-app.v24-altri .item-meta, .evt-riga.evt-app.v24-altri .item-meta *, .evt-riga.evt-app.v24-altri .v24-chi, .evt-riga.evt-app.v24-altri .evt-ico, .evt-riga.evt-app.v24-altri .evt-ico .ti { color: var(--v34-altri-2) !important; }
-.evt-riga.evt-app.v24-altri .evt-cerchio { border-color: var(--v34-altri-ink); }
-.evt-riga.evt-app.v24-altri .v18-cestino { color: var(--v34-altri-2); }
 .board .evt-riga.v24-mio, .board .evt-riga.v24-altri { margin: 4px; border-radius: var(--r-sm); }
 .group > .evt-riga + .evt-riga { border-top: 2px solid var(--surface); }
 /* spazi liberi */
@@ -2244,8 +2228,6 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
 .v40-gr-h { display: flex; justify-content: space-between; font-size: var(--fs-caption); font-weight: var(--fw-strong); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
 .v40-gr-h.q1 { color: var(--q1); } .v40-gr-h.q2 { color: var(--q2); }
 .v40-riga { display: flex; align-items: stretch; gap: 6px; border-radius: var(--r-sm, 8px); border: 1px solid transparent; }
-.v40-riga.q1 { background: var(--v34-sub-bg, var(--q1-soft)); border-color: var(--v34-sub-bordo, var(--q1-mark)); }
-.v40-riga.q2 { background: var(--q2-soft); border-color: color-mix(in srgb, var(--q2-mark) 35%, transparent); }
 .v40-apri { flex: 1; min-width: 0; display: grid; gap: 1px; padding: 6px 8px; text-align: left; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
 .v40-apri .t { font-size: var(--fs-label); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .v40-apri .m { font-size: var(--fs-caption); color: var(--ink-3, #6b6b6b); display: flex; gap: 6px; flex-wrap: wrap; }

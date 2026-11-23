@@ -1,21 +1,15 @@
 /* v12 · Oggi: prima di tutto, e i pensieri divisi */
 .v12-prima { margin: var(--sp-2) 0 var(--sp-4); }
-.v12-head span:first-child { color: var(--danger); letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-caption); }
+.v12-head span:first-child { letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-caption); }
 .v12-griglia { display: grid; gap: var(--sp-3); }
 @media (min-width: 1024px) { .v12-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v12-griglia > .v12-card:first-child { grid-column: 1 / -1; } }
 .v12-card { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); }
-.v12-card.v12-rosso { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
-.v12-card.v12-arancio { border-color: color-mix(in srgb, #C2410C 35%, var(--border)); }
-.v12-card.v12-viola { border-color: color-mix(in srgb, var(--evt, #6D28D9) 30%, var(--border)); }
-.v12-card.v12-urgente { border-width: 2px; }
 .v12-testa { display: flex; gap: var(--sp-3); align-items: flex-start; }
 .v12-testa h3 { margin: 0; font-size: var(--fs-body); font-weight: 800; line-height: 1.3; }
 .v12-testa p { margin: 2px 0 0; font-size: var(--fs-label); color: var(--text-2); line-height: 1.45; }
 .v12-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; }
 .v12-rosso .v12-ico { background: var(--danger-soft); color: var(--danger); }
-.v12-arancio .v12-ico { background: color-mix(in srgb, #C2410C 14%, var(--surface)); color: #9A3E0C; }
 [data-theme="dark"] .v12-arancio .v12-ico { color: #F9A27A; }
-.v12-viola .v12-ico { background: var(--evt-soft, #F3EEFD); color: var(--evt, #6D28D9); }
 .v12-righe { margin: 0; }
 .v12-indietro { border-radius: var(--r-md); background: var(--danger-soft); }
 .v12-indietro > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-3); cursor: pointer; list-style: none; color: var(--danger); font-size: var(--fs-label); font-weight: 700; }

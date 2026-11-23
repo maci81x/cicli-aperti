@@ -1,5 +1,5 @@
 /* v23 · Oggi: «Da rispondere (N)», le cose dalla posta che aspettano una risposta */
-.v23-posta { margin: 0 0 var(--sp-4); border: 1px solid var(--q1-mark); border-left-width: 4px; border-radius: var(--r-md); background: var(--q1-soft); overflow: hidden; }
+.v23-posta { margin: 0 0 var(--sp-4); border-radius: var(--r-md); overflow: hidden; }
 .v23-h { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 52px; box-sizing: border-box; padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); border: 0; background: transparent; color: var(--q1); font: inherit; font-size: var(--fs-label); line-height: var(--lh-label); text-align: left; cursor: pointer; }
 .v23-h:focus-visible { outline: 2px solid var(--q1-mark); outline-offset: -2px; }
 .v23-h > .ti { flex: none; font-size: 20px; }

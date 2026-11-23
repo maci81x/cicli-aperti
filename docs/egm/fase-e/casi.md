@@ -59,3 +59,101 @@ Generato da `tools/riordino/css_riordina.js`: per ogni modo, cosa resta e perch�
 - `.v47-testa`: pianifica/038-v47-19-11-pianifica-settimana-come-il-foglio.css, core/043-v50-sfondo-salvia-chiarissimo-solo-tema-chia.css
 - `.v47-indietro > summary`: pianifica/038-v47-19-11-pianifica-settimana-come-il-foglio.css, smaltisci/040-v49-smaltisci.css
 - `.v48-g.we`: pianifica/039-v48-giorni-con-un-tocco-nel-quando-prima-di.css, core/046-v50-accessibilita.css
+
+## !important che restano
+
+- `[hidden]` { display } (css/core/000-base.css:179): selettore universale o [hidden]
+- `.solo-tel` { display } (css/core/000-base.css:254): proprietà scritta in linea da JavaScript o nei template
+- `.semplice .nav [data-tab="pianifica"], .semplice .nav [data-tab="altro"], .semplice .side [data-tab=` { display } (css/core/001-v3.css:50): proprietà scritta in linea da JavaScript o nei template
+- `*, *::before, *::after` { animation-duration } (css/core/001-v3.css:62): stampa o riduci movimento
+- `*, *::before, *::after` { animation-iteration-count } (css/core/001-v3.css:62): stampa o riduci movimento
+- `*, *::before, *::after` { transition-duration } (css/core/001-v3.css:62): stampa o riduci movimento
+- `*, *::before, *::after` { scroll-behavior } (css/core/001-v3.css:62): stampa o riduci movimento
+- `.sheet-narrow` { max-width } (css/core/001-v3.css:100): proprietà scritta in linea da JavaScript o nei template
+- `.sheet-wide` { max-width } (css/core/001-v3.css:113): proprietà scritta in linea da JavaScript o nei template
+- `.pchip` { background } (css/core/001-v3.css:150): proprietà scritta in linea da JavaScript o nei template
+- `.pchip` { color } (css/core/001-v3.css:150): proprietà scritta in linea da JavaScript o nei template
+- `.pchip-av` { background } (css/core/001-v3.css:151): proprietà scritta in linea da JavaScript o nei template
+- `.pchip-av` { color } (css/core/001-v3.css:151): proprietà scritta in linea da JavaScript o nei template
+- `.persona-dd-av` { background } (css/core/001-v3.css:156): proprietà scritta in linea da JavaScript o nei template
+- `.persona-dd-av` { color } (css/core/001-v3.css:156): proprietà scritta in linea da JavaScript o nei template
+- `.bp-qgroup-hd span[style]` { color } (css/cattura/003-v8-import-della-riunione.css:37): proprietà scritta in linea da JavaScript o nei template
+- `.blocco-ico` { font-size } (css/pianifica/004-v4-coaching-19-10.css:27): proprietà scritta in linea da JavaScript o nei template
+- `.blocco-ico` { color } (css/pianifica/004-v4-coaching-19-10.css:27): proprietà scritta in linea da JavaScript o nei template
+- `.invia-ogg` { font-family } (css/pianifica/004-v4-coaching-19-10.css:117): proprietà scritta in linea da JavaScript o nei template
+- `.riordina-overlay` { align-items } (css/pianifica/006-v6-colori-priorita-colonne-riordina-coach.css:69): proprietà scritta in linea da JavaScript o nei template
+- `.riordina-overlay` { padding } (css/pianifica/006-v6-colori-priorita-colonne-riordina-coach.css:69): proprietà scritta in linea da JavaScript o nei template
+- `.cattura, .riordina-overlay` { display } (css/pianifica/006-v6-colori-priorita-colonne-riordina-coach.css:108): stampa o riduci movimento
+- `#bprev-back[hidden]` { display } (css/cattura/009-v10-snella-aggiungi-in-un-tocco-doppioni-che.css:57): selettore universale o [hidden]
+- `.bp-sn.sheet-wide` { max-width } (css/cattura/009-v10-snella-aggiungi-in-un-tocco-doppioni-che.css:98): proprietà scritta in linea da JavaScript o nei template
+- `.v18-menu-cestino` { color } (css/calendario/016-v18-cestino-negli-appuntamenti.css:19): proprietà scritta in linea da JavaScript o nei template
+- `.v32-coppia > *` { margin-bottom } (css/calendario/028-v30-da-rivedere.css:101): selettore universale o [hidden]
+- `.v12-head .mono .v32-tel-n` { display } (css/calendario/028-v30-da-rivedere.css:118): proprietà scritta in linea da JavaScript o nei template
+- `.v33-col > :first-child, .v33-col > .v12-prima:first-child .list-head` { margin-top } (css/calendario/028-v30-da-rivedere.css:154): proprietà scritta in linea da JavaScript o nei template
+- `.v33-dx > .group` { margin-top } (css/calendario/028-v30-da-rivedere.css:159): proprietà scritta in linea da JavaScript o nei template
+- `.evt-riga.evt-app.v24-altri .item-meta, .evt-riga.evt-app.v24-altri .item-meta *, .evt-riga.evt-app.` { color } (css/calendario/028-v30-da-rivedere.css:197): selettore universale o [hidden]
+- `html:root .evt-riga.evt-app.v24-altri .item-meta, html:root .evt-riga.evt-app.v24-altri .item-meta *` { color } (css/core/034-v43-17-11-carta-e-salvia-mix-delle-tavolozze.css:24): selettore universale o [hidden]
+- `html:root .evt-riga.evt-app.v24-altri .item-meta .mono` { color } (css/core/034-v43-17-11-carta-e-salvia-mix-delle-tavolozze.css:25): proprietà scritta in linea da JavaScript o nei template
+- `.v47-on .cols.board` { min-width } (css/pianifica/038-v47-19-11-pianifica-settimana-come-il-foglio.css:19): proprietà scritta in linea da JavaScript o nei template
+- `.v47-testa .v22-testa` { flex-wrap } (css/pianifica/038-v47-19-11-pianifica-settimana-come-il-foglio.css:28): proprietà scritta in linea da JavaScript o nei template
+- `.v31-ad-ritmo > span` { flex } (css/pianifica/039-v48-giorni-con-un-tocco-nel-quando-prima-di.css:17): proprietà scritta in linea da JavaScript o nei template
+- `.v31-ad-ritmo .btn:not(.btn-icon)` { flex } (css/pianifica/039-v48-giorni-con-un-tocco-nel-quando-prima-di.css:18): proprietà scritta in linea da JavaScript o nei template
+- `.v47-indietro > summary` { display } (css/smaltisci/040-v49-smaltisci.css:49): proprietà scritta in linea da JavaScript o nei template
+- `.v49-ctl > .v49-diretto` { margin } (css/oggi/041-v49-oggi-da-controllare.css:5): proprietà scritta in linea da JavaScript o nei template
+- `.v49-ctl > .v49-diretto` { border } (css/oggi/041-v49-oggi-da-controllare.css:5): proprietà scritta in linea da JavaScript o nei template
+- `.v49-ctl > .v49-diretto` { border-top } (css/oggi/041-v49-oggi-da-controllare.css:5): proprietà scritta in linea da JavaScript o nei template
+- `.v49-ctl > .v49-diretto` { border-radius } (css/oggi/041-v49-oggi-da-controllare.css:5): proprietà scritta in linea da JavaScript o nei template
+- `.v49-ctl > .v49-diretto` { box-shadow } (css/oggi/041-v49-oggi-da-controllare.css:5): proprietà animata da un @keyframes
+- `.v49-r-corpo > *` { margin } (css/oggi/041-v49-oggi-da-controllare.css:17): selettore universale o [hidden]
+- `.board .bzona:not(#dp-lista)` { background } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:2): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona:not(#dp-lista)` { border } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:2): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona:not(#dp-lista)` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:2): proprietà animata da un @keyframes
+- `.board .bzona:not(#dp-lista)` { padding } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:2): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona:not(#dp-lista)` { overflow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:2): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item` { margin } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:3): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item` { border-radius } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:3): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item` { border } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:3): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .item, .board .bzona > .evt-riga, .board .bzona > details > .item` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:3): proprietà animata da un @keyframes
+- `.board .bzona > .item.p-q1` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:4): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .item.p-q2` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:5): proprietà animata da un @keyframes
+- `.board .bzona > .fascia-h` { background } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:6): proprietà scritta in linea da JavaScript o nei template
+- `.board .bzona > .fascia-h` { border } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:6): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-altri` { background } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:9): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-altri` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:9): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-altri` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:9): proprietà animata da un @keyframes
+- `html:root .board .evt-riga.v24-altri .item-title, html:root .board .evt-riga.v24-altri .item-meta, h` { color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:10): selettore universale o [hidden]
+- `html:root .board .evt-riga.v24-altri .evt-cerchio` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:11): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-mio` { background } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:12): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-mio` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:12): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .evt-riga.v24-mio` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:12): proprietà animata da un @keyframes
+- `html:root .board .bzona > .spazio-riga` { min-height } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:15): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .bzona > .spazio-riga` { padding } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:15): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .bzona > .spazio-riga` { background } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:15): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .bzona > .spazio-riga` { border } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:15): proprietà scritta in linea da JavaScript o nei template
+- `html:root .board .bzona > .spazio-riga` { box-shadow } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:15): proprietà animata da un @keyframes
+- `html:root[data-theme="dark"] .board .bzona > .item.p-q1` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:19): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] .board .bzona > .spazio-riga` { border-color } (css/pianifica/042-v49-pianifica-schede-separate-stile-14-color.css:20): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe` { background } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:2): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe` { border } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:2): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe` { box-shadow } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:2): proprietà animata da un @keyframes
+- `#view.v50-oggi .group:not(.giornata), #view.v50-oggi .v12-righe` { overflow } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:2): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .v12-rosso .v12-righe` { padding } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:3): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata) > .item, #view.v50-oggi .v12-righe > .item` { margin } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:4): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata) > .item, #view.v50-oggi .v12-righe > .item` { border } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:4): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata) > .item, #view.v50-oggi .v12-righe > .item` { border-radius } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:4): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group:not(.giornata) > .item + .item, #view.v50-oggi .v12-righe > .item + .item` { border-top } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:5): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group > .item.p-q1, #view.v50-oggi .v12-righe > .item.p-q1` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:6): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group > .item.p-q2, #view.v50-oggi .v12-righe > .item.p-q2` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:7): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group > .item.p-q3, #view.v50-oggi .v12-righe > .item.p-q3` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:8): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .item.p-q1::before, #view.v50-oggi .item.p-q2::before` { display } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:9): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group.giornata` { background } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:10): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group.giornata` { border } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:10): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group.giornata` { box-shadow } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:10): proprietà animata da un @keyframes
+- `#view.v50-oggi .group.giornata > .evt-riga` { margin } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:11): proprietà scritta in linea da JavaScript o nei template
+- `#view.v50-oggi .group.giornata > .evt-riga` { border-radius } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:11): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q1, html:root[data-theme="dark"] #view.` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:12): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q2, html:root[data-theme="dark"] #view.` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:13): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] #view.v50-oggi .group > .item.p-q3, html:root[data-theme="dark"] #view.` { border-color } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:14): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] .board .bzona > .item.p-q2` { box-shadow } (css/oggi/044-v50-oggi-ogni-cosa-e-una-scheda-a-se-i-tipi.css:15): proprietà animata da un @keyframes
+- `html:root[data-theme="dark"] .board .evt-riga.v24-altri` { background } (css/core/046-v50-accessibilita.css:6): proprietà scritta in linea da JavaScript o nei template
+- `html:root[data-theme="dark"] .board .evt-riga.v24-altri` { border-color } (css/core/046-v50-accessibilita.css:6): proprietà scritta in linea da JavaScript o nei template

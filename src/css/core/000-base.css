@@ -269,7 +269,6 @@ a { color: var(--primary-ink); }
 /* --- Riga con azioni rapide --- */
 .item { position: relative; background: var(--surface); }
 .item-row { position: relative; z-index: 1; background: var(--surface); transition: transform var(--t-base) var(--ease-out); touch-action: pan-y; }
-.item.p-q1:not(.is-done) .item-row { background: var(--q1-soft); }
 .item.is-dragging .item-row { transition: none; }
 .item-title mark { background: var(--warn-soft); color: inherit; border-radius: 3px; }
 .item-side { gap: var(--sp-1); }

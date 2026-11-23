@@ -183,20 +183,14 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
    Subito = casella rosa con bordo rosso (ovunque) · Importante = foglio bianco
    ══════════════════════════════════════════════════════════════ */
 /* Subito: tutta la casella */
-.item.p-q1:not(.is-done) .item-row { background: var(--surface); /* elenchi più leggeri: le Subito non hanno più lo sfondo rosso, basta il segno rosso */ background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
-.item.p-q1:not(.is-done) .item-title { color: var(--v34-sub-ink); font-weight: 600; }
 .item.p-q1:not(.is-done) .check-box { background: var(--surface); }
-.item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid var(--v34-sub-bordo); }
-.board .item.p-q1:not(.is-done) { outline: 1.5px solid var(--v34-sub-bordo); outline-offset: -1.5px; }
+.board .item.p-q1:not(.is-done) { outline-offset: -1.5px; }
 /* appuntamenti */
 .evt-riga.evt-app.v24-mio, .board .evt-riga.v24-mio { background: var(--v34-io); border: 0; box-shadow: none; }
 .evt-riga.evt-app.v24-mio .evt-cerchio { border-color: var(--v34-io-ink); }
 .evt-riga.evt-app.v24-mio .item-meta .mono, .evt-riga.evt-app.v24-mio .v24-chi { color: var(--v34-io-ink); }
 .evt-riga.evt-app.v24-altri, .board .evt-riga.v24-altri { background: var(--v34-altri); box-shadow: none; }
-.evt-riga.evt-app.v24-altri .item-title { color: var(--v34-altri-ink); }
 .evt-riga.evt-app.v24-altri .item-meta, .evt-riga.evt-app.v24-altri .item-meta *, .evt-riga.evt-app.v24-altri .v24-chi, .evt-riga.evt-app.v24-altri .evt-ico, .evt-riga.evt-app.v24-altri .evt-ico .ti { color: var(--v34-altri-2) !important; }
-.evt-riga.evt-app.v24-altri .evt-cerchio { border-color: var(--v34-altri-ink); }
-.evt-riga.evt-app.v24-altri .v18-cestino { color: var(--v34-altri-2); }
 .board .evt-riga.v24-mio, .board .evt-riga.v24-altri { margin: 4px; border-radius: var(--r-sm); }
 .group > .evt-riga + .evt-riga { border-top: 2px solid var(--surface); }
 /* spazi liberi */
