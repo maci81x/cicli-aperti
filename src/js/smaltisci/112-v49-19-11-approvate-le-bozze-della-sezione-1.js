@@ -128,59 +128,9 @@ document.addEventListener('keydown', e => {
     return '<button type="button" class="v49-sm-btn v50-sm-riga" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i>Smaltisci, una alla volta</button>' + h;
   };
 }
-// Oggi: sotto «Oggi: N cose da chiudere», il bottone per smaltire le rimaste indietro
-{
-  const _oggiV49a = vistaOggi;
-  vistaOggi = function () {
-    let h = _oggiV49a.apply(this, arguments);
-    try {
-      const n = v49Lista().length;
-      if (!n) return h;
-      const tpl = document.createElement('template'); tpl.innerHTML = h;
-      const card = tpl.content.querySelector('.v12-card.v12-rosso');
-      const b = `<button type="button" class="v49-oggi" data-act="v49-apri"><i class="ti ti-player-track-next" aria-hidden="true"></i><span>Smaltisci ${n === 1 ? 'la rimasta indietro' : `le ${n} rimaste indietro`}</span><i class="ti ti-chevron-right" aria-hidden="true"></i></button>`;
-      if (card) card.insertAdjacentHTML('beforeend', b);
-      else { const g = tpl.content.querySelector('.v33-centro') || tpl.content.querySelector('.v12-oggi') || tpl.content; g.insertAdjacentHTML('afterbegin', b); }
-      const d = document.createElement('div'); d.appendChild(tpl.content); h = d.innerHTML;
-    } catch (e) { console.warn('[v49] oggi smaltisci:', e.message); }
-    return h;
-  };
-}
 // (2) Oggi sul computer: «Da controllare»
 ui.v49Aperti = ui.v49Aperti || new Set();
 function v49Chiave(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9àèéìòù]+/g, '-').slice(0, 40); }
-{
-  const _oggiV49b = vistaOggi;
-  vistaOggi = function () {
-    let h = _oggiV49b.apply(this, arguments);
-    if (!/v33-tre/.test(h)) return h;
-    try {
-      const tpl = document.createElement('template'); tpl.innerHTML = h;
-      const f = tpl.content, tre = f.querySelector('.v33-tre'), dx = f.querySelector('.v33-dx');
-      if (!tre || !dx) return h;
-      const righe = [];
-      const testo = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
-      // già compatti: restano come sono (si aprono da soli)
-      tre.querySelectorAll('.v31-ob, .v23-posta').forEach(el => { el.classList.add('v49-diretto'); righe.push(el.outerHTML); el.remove(); });
-      const blocchi = [...tre.querySelectorAll('.v29-prep, .banner-piano, .v43-metodo .v12-card')];
-      blocchi.forEach(el => {
-        const tEl = el.querySelector('.v29-t, b, h3, strong') || el.querySelector('p');
-        const t = testo(tEl) || 'Da guardare';
-        const sEl = [...el.querySelectorAll('.v29-s, .t-caption, p, small')].find(x => x !== tEl && !x.contains(tEl) && testo(x) && testo(x) !== t);
-        const sub = sEl ? testo(sEl) : '';
-        const ico = (el.querySelector('i.ti') || {}).className || 'ti ti-point';
-        const k = v49Chiave(t);
-        righe.push(`<details class="v49-r" data-v49="${esc(k)}"${ui.v49Aperti.has(k) ? ' open' : ''}><summary><i class="${esc(ico)}" aria-hidden="true"></i><span class="v49-r-t"><b>${escHtml(corta(t, 60))}</b>${sub ? `<small>${escHtml(corta(sub, 70))}</small>` : ''}</span><i class="ti ti-chevron-down v49-r-v" aria-hidden="true"></i></summary><div class="v49-r-corpo">${el.outerHTML}</div></details>`);
-        el.remove();
-      });
-      const metodo = tre.querySelector('.v43-metodo');
-      if (metodo && !metodo.querySelector('.v12-card')) metodo.remove();
-      if (righe.length) dx.insertAdjacentHTML('afterbegin', `<section class="v49-ctl" aria-label="Da controllare"><p class="v49-ctl-h"><span>Da controllare</span><span class="mono">${righe.length}</span></p>${righe.join('')}</section>`);
-      const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
-    } catch (e) { console.warn('[v49] da controllare:', e.message); }
-    return h;
-  };
-}
 document.addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details[data-v49]')) { if (d.open) ui.v49Aperti.add(d.dataset.v49); else ui.v49Aperti.delete(d.dataset.v49); } }, true);
 // (3) Pianifica: l'orario degli appuntamenti a sinistra, in colonna
 function v49Orari() {

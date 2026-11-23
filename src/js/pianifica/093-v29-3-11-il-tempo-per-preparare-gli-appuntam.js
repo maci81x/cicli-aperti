@@ -159,22 +159,6 @@ function v29Blocco() {
     ${n > V29.VISIBILI ? `<button type="button" class="btn btn-ghost btn-sm btn-block" data-act="v29-tutti">${ui.v29Tutti ? 'Mostra meno' : `Altri ${n - V29.VISIBILI}`}</button>` : ''}
     <p class="v29-nota">Finché non rispondi resta qui: non creo niente da solo.</p></section>`;
 }
-const _vistaOggiV29 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV29.apply(this, arguments);
-  try {
-    const b = v29Blocco();
-    if (b) {
-      const tpl = document.createElement('template');
-      tpl.innerHTML = h;
-      const vh = tpl.content.querySelector('.vh');
-      if (vh) { vh.insertAdjacentHTML('afterend', b); const box = document.createElement('div'); box.appendChild(tpl.content); h = box.innerHTML; }
-      else h = b + h;
-    }
-    v29ControllaPresto();
-  } catch (err) { console.warn('[v29] riquadro:', err.message); }
-  return h;
-};
 
 // --- le scelte ---
 async function v29Memorizza(e, minuti) {

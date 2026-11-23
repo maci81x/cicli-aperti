@@ -17,19 +17,6 @@ function v25Momento(d = new Date()) {
   return { k: 'sera', ico: 'ti-moon', t: 'Sera: 2 minuti', s: 'Spunta quello che hai fatto sul foglio e metti dentro le cose nuove.', act: 'v16-riporta', btn: 'Riporta il foglio' };
 }
 AZIONI['v25-ritmo-chiudi'] = el => { try { sessionStorage.setItem(V25.RITMO_CHIUSO, el.dataset.k + toISODate(new Date())); } catch (_) {} render(); };
-const _vistaOggiV25 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV25.apply(this, arguments);
-  try {
-    if (modoSemplice()) return h;
-    const b = v25RitmoCard();
-    if (!b) return h;
-    const tpl = document.createElement('template'); tpl.innerHTML = h;
-    const vh = tpl.content.querySelector('.vh');
-    if (vh) { vh.insertAdjacentHTML('afterend', b); const box = document.createElement('div'); box.appendChild(tpl.content); h = box.innerHTML; }
-  } catch (e) { console.warn('[v25] ritmo:', e.message); }
-  return h;
-};
 
 // --- l'armadio ---
 if (!localStorage.getItem('cicli_tutto_v25')) { ui.tutto = 'armadio'; try { localStorage.setItem('cicli_tutto_v25', '1'); } catch (_) {} }

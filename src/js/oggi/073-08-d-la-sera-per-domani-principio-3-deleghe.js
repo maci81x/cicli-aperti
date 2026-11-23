@@ -174,14 +174,6 @@ Object.assign(AZIONI, {
     } catch (e) { showToast('Non aggiunta: ' + e.message, 'error'); }
   }
 });
-// in Oggi: sopra «Da controllare» (o tra i banner); in Tutto → Persone: sotto il nome
-const _vistaOggiPr = vistaOggi;
-vistaOggi = function () {
-  const h = _vistaOggiPr.apply(this, arguments);
-  const segno = '<p class="list-head"><span><i class="ti ti-user-check lh-ico"></i>Da controllare';
-  const card = h.includes(segno) ? cardDeleghe() : '';
-  return card ? h.replace(segno, card + segno) : h;
-};
 const _bannerCicliCalPr = bannerCicliCal;
 bannerCicliCal = function () {
   const conControlli = daControllare().length > 0;

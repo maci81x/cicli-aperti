@@ -23,30 +23,6 @@ v31Obiettivi = (function (orig) {
   };
 })(v31Obiettivi);
 
-const _vistaOggiV32 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV32.apply(this, arguments);
-  try {
-    const tpl = document.createElement('template'); tpl.innerHTML = h;
-    const f = tpl.content, g = f.querySelector('.v31-giornata'), ob = f.querySelector('.v31-ob');
-    if (g && ob && g.nextElementSibling === ob) { const c = document.createElement('div'); c.className = 'v32-coppia'; g.before(c); c.append(g, ob); }
-    // routine: quelle del calendario già passate stanno in una riga chiusa
-    const acc = f.querySelector('.acc-head[data-k="routine"]');
-    const corpo = acc && acc.parentElement.querySelector('.acc-body');
-    const nm = v31Ora(), finiti = new Set(routineDelGiorno(oggiData()).filter(e => e.ora && minDi(e.fine || e.ora) <= nm).map(e => String(e.id)));
-    const passate = corpo ? [...corpo.querySelectorAll(':scope > .evt-riga[data-evt-id]')].filter(x => finiti.has(x.dataset.evtId)) : [];
-    if (passate.length) {
-      const d = document.createElement('details'); d.className = 'v32-passate';
-      d.innerHTML = `<summary><i class="ti ti-chevron-right" aria-hidden="true"></i>Già passate · <span class="mono">${passate.length}</span></summary>`;
-      passate[0].before(d); passate.forEach(p => d.appendChild(p));
-    }
-    // «Prima di tutto»: sul telefono il conto delle Subito va nell'intestazione (il riquadro interno non c'è più)
-    const rosso = f.querySelector('.v12-prima .v12-card.v12-rosso .v12-testa p'), testa = f.querySelector('.v12-prima .v12-head .mono');
-    if (rosso && testa) testa.innerHTML = `<span class="v32-tel-n">${escHtml(rosso.textContent.trim())}</span><span class="v32-pc-n">${testa.innerHTML}</span>`;
-    const box = document.createElement('div'); box.appendChild(f); h = box.innerHTML;
-  } catch (e) { console.warn('[v32] oggi:', e.message); }
-  return h;
-};
 
 // --- «Cosa hai in testa?» dal centro del menu ---
 function v32ApriCattura(conMic) {

@@ -112,19 +112,6 @@ function v31Obiettivi() {
 
 // «Adesso» prende il posto del vecchio riquadro «Adesso tocca a…» e ne porta dentro il suggerimento
 function v25RitmoCard() { return v31Adesso() + v31Giornata() + v31Obiettivi(); }
-const _vistaOggiV31 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV31.apply(this, arguments);
-  try {
-    if (modoSemplice()) return h;
-    const tpl = document.createElement('template'); tpl.innerHTML = h;
-    const f = tpl.content, vh = f.querySelector('.vh');
-    const pezzi = ['.v31-adesso', '.v31-giornata', '.v31-ob'].map(s => f.querySelector(s)).filter(Boolean);
-    if (vh && pezzi.length) { let dopo = vh; pezzi.forEach(p => { dopo.after(p); dopo = p; }); }
-    const box = document.createElement('div'); box.appendChild(f); h = box.innerHTML;
-  } catch (e) { console.warn('[v31] oggi:', e.message); }
-  return h;
-};
 // ogni minuto: si aggiornano solo «Adesso» e la giornata (niente ridisegno completo)
 setInterval(() => {
   try {

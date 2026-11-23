@@ -283,62 +283,6 @@ AZIONI['v12-passati'] = () => { ui.v12Passati = !ui.v12Passati; render(); };
 AZIONI['v12-indietro'] = (el, id, data, ev) => { setTimeout(() => { const d = el.closest('details'); ui.v12Indietro = !!(d && d.open); }, 0); };
 AZIONI['v12-tempo'] = el => { setTimeout(() => { const d = el.closest('details'); ui.v12Tempo = !!(d && d.open); }, 0); };
 
-const _vistaOggiV12 = vistaOggi;
-vistaOggi = function () {
-  const h = _vistaOggiV12.apply(this, arguments);
-  if (ui.tab !== 'oggi' || modoSemplice()) return h;
-  let p;
-  try { p = primaDiTutto(); } catch (err) { console.warn('[Oggi] prima di tutto:', err.message); return h; }
-  const tpl = document.createElement('template');
-  tpl.innerHTML = h;
-  const f = tpl.content;
-  const coperti = new Set(p.carte.map(x => x.k));
-  // i suggerimenti: fuori dalla cima, in «Quando hai tempo»
-  const tempo = [];
-  f.querySelectorAll('section.banner-piano:not(.delega-avviso)').forEach(s => {
-    const lab = s.getAttribute('aria-label') || '';
-    const doppio = (s.classList.contains('banner-coach') && coperti.has('coach')) || (/^Esercizio Q2$/.test(lab) && p.q2NelCoach) || (/^Piano della settimana$/.test(lab) && (coperti.has('piano') || coperti.has('prossima')));
-    if (!doppio) tempo.push({ lab, html: s.outerHTML });
-    s.remove();
-  });
-  // rimaste indietro e Subito: sono già nella prima carta
-  if (coperti.has('oggi')) {
-    f.querySelectorAll('.rimaste-riga, section.carry').forEach(x => x.remove());
-    const lh = f.querySelector('.lh-subito');
-    if (lh) { const g = lh.nextElementSibling; if (g && g.classList.contains('group')) g.remove(); lh.remove(); }
-    p.ids.forEach(id => f.querySelectorAll(`.giornata .item[data-id="${CSS.escape(String(id))}"], .group:not(.v12-righe) > .item[data-id="${CSS.escape(String(id))}"]`).forEach(x => x.remove()));
-    f.querySelectorAll('.group').forEach(g => { if (!g.children.length) { const prima = g.previousElementSibling; g.remove(); if (prima && prima.classList.contains('list-head') && /Senza ora/.test(prima.textContent)) prima.remove(); } });
-  }
-  if (coperti.has('coach')) f.querySelectorAll('.oggi-coach').forEach(x => x.remove());
-  // la giornata: gli appuntamenti finiti si chiudono
-  const passati = f.querySelectorAll('.giornata .evt-passato').length;
-  const head = [...f.querySelectorAll('p.list-head')].find(x => /La giornata/.test(x.textContent));
-  if (passati && head) {
-    const n = head.querySelector('.mono');
-    if (n) n.innerHTML = `${escHtml(n.textContent)}${n.textContent ? ' · ' : ''}${passati} finiti <button type="button" class="v12-mostra" data-act="v12-passati">${ui.v12Passati ? 'Nascondi' : 'Mostra'}</button>`;
-  }
-  // in cima
-  const vh = f.querySelector('.vh');
-  const blocco = document.createElement('div');
-  blocco.className = 'v12-prima';
-  blocco.innerHTML = p.carte.length
-    ? `<p class="list-head v12-head"><span>Prima di tutto</span><span class="mono">${plurale(p.carte.length, 'cosa', 'cose')}</span></p><div class="v12-griglia">${p.carte.map(x => x.html).join('')}</div>`
-    : `<p class="v12-libero"><i class="ti ti-circle-check" aria-hidden="true"></i>Niente in ritardo, il piano c'è, il coach è a posto.</p>`;
-  if (vh) vh.after(blocco); else f.prepend(blocco);
-  // in fondo: quando hai tempo
-  if (tempo.length) {
-    const d = document.createElement('details');
-    d.className = 'v12-tempo';
-    if (ui.v12Tempo) d.open = true;
-    const nomi = tempo.map(x => x.lab).filter(Boolean).join(' · ');
-    d.innerHTML = `<summary data-act="v12-tempo"><span><b>Quando hai tempo · ${tempo.length}</b><small>${escHtml(nomi)}</small></span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="v12-tempo-corpo">${tempo.map(x => x.html).join('')}</div>`;
-    const coach = f.querySelector('.oggi-coach');
-    if (coach) coach.before(d); else f.append(d);
-  }
-  const box = document.createElement('div');
-  box.appendChild(f);
-  return `<div class="v12-oggi${ui.v12Passati ? ' mostra-passati' : ''}">${box.innerHTML}</div>`;
-};
 
 // all'avvio: la bozza del campo e gli invii nel database
 const _avviaAppV12 = avviaApp;

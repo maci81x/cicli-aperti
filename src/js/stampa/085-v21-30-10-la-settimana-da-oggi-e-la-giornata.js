@@ -96,16 +96,6 @@ pianSettimana = function () {
   return t.innerHTML;
 };
 
-// Oggi: la stampante accanto al titolo
-const _vistaOggiV21 = vistaOggi;
-vistaOggi = function () {
-  const h = _vistaOggiV21.apply(this, arguments);
-  const t = v21Tpl(h), vh = t.content.querySelector('.vh');
-  if (!vh) return h;
-  const btn = v21BtnStampa(giornoIdxDi(oggiData()), ' data-oggi="1"').replace('data-tip="Stampa la giornata"', 'data-tip="Stampa la giornata di oggi"').replace('v21-stampa"', 'v21-stampa v21-stampa-oggi"');
-  v21InTesta(vh, btn);
-  return t.innerHTML;
-};
 
 // «Da pianificare» del foglio del giorno: prima le rimaste indietro, poi le Subito non ancora messe in un giorno
 function daPianificarePdf(z) {

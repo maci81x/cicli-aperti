@@ -16,36 +16,6 @@ function v33InSettimana() {
     return `<section class="v33-insett"><p class="list-head"><span>In settimana, senza giorno</span><span class="mono">${r.length}</span></p><div class="group">${r.map(x => riga(x, { data: toISODate(oggiData()) })).join('')}</div></section>`;
   } catch (e) { console.warn('[v33] in settimana:', e.message); return ''; }
 }
-const _vistaOggiV33 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV33.apply(this, arguments);
-  if (!v33Largo()) return h;
-  try {
-    const tpl = document.createElement('template'); tpl.innerHTML = h;
-    const f = tpl.content, radice = f.querySelector('.v12-oggi') || f;
-    const qui = sel => [...radice.querySelectorAll(':scope > ' + sel + ', :scope > .v32-coppia > ' + sel)];
-    const sx = [], dx = [];
-    ['.vh', '.v31-adesso', '.v31-giornata'].forEach(s => sx.push(...qui(s)));
-    const gio = radice.querySelector(':scope > .group.giornata');
-    if (gio) { const t = gio.previousElementSibling; if (t && t.classList.contains('list-head')) sx.push(t); sx.push(gio); }
-    ['.v23-posta', '.v31-ob'].forEach(s => dx.push(...qui(s)));
-    const routine = radice.querySelector(':scope > .group .acc-head[data-k="routine"]');
-    const tempo = radice.querySelector(':scope > .v12-tempo');
-    const grid = document.createElement('div'); grid.className = 'v33-tre';
-    const col = c => { const d = document.createElement('div'); d.className = 'v33-col ' + c; return d; };
-    const cs = col('v33-sx'), cc = col('v33-centro'), cd = col('v33-dx');
-    sx.forEach(x => cs.appendChild(x));
-    dx.forEach(x => cd.appendChild(x));
-    cd.insertAdjacentHTML('beforeend', v33InSettimana());
-    if (routine) cd.appendChild(routine.closest('.group'));
-    if (tempo) cd.appendChild(tempo);
-    [...radice.children].forEach(x => { if (x.classList.contains('v32-coppia') && !x.children.length) x.remove(); else cc.appendChild(x); });
-    grid.append(cs, cc, cd);
-    radice.appendChild(grid);
-    const box = document.createElement('div'); box.appendChild(f); h = box.innerHTML;
-  } catch (e) { console.warn('[v33] oggi:', e.message); }
-  return h;
-};
 
 // Pianifica e Tutte: si sistemano dopo il disegno
 function v33DopoDisegno() {

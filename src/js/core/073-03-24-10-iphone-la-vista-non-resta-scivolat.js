@@ -157,8 +157,6 @@ function eventiVecchi() {
   return Date.now() - quando > EVENTI_AGG.VECCHI_MS;
 }
 const notaEventiVecchi = () => eventiVecchi() ? '<p class="gcal-ieri"><i class="ti ti-cloud-off" aria-hidden="true"></i>Appuntamenti: dati di ieri</p>' : '';
-const _vistaOggiAgg = vistaOggi;
-vistaOggi = function () { const h = _vistaOggiAgg.apply(this, arguments); const n = notaEventiVecchi(); return n ? h.replace('</h1></div>', '</h1>' + n + '</div>') : h; };
 const _vistaPianificaAgg = vistaPianifica;
 vistaPianifica = function () { const h = _vistaPianificaAgg.apply(this, arguments); const n = notaEventiVecchi(); return n && h.includes('</h1></div>') ? h.replace('</h1></div>', '</h1>' + n + '</div>') : h; };
 

@@ -64,15 +64,6 @@ function rigaFiglie(e) {
   return rigaEvento({ ...e, titolo: titoloSenzaFiglie(e.titolo) }).replace('class="evt-riga evt-app', 'class="evt-riga evt-app evt-figlie')
     .replace('<span class="item-title">', '<span class="item-title"><span class="tag-coach tag-figlie">Figlie</span>');
 }
-const _vistaOggiV11 = vistaOggi;
-vistaOggi = function () {
-  const h = _vistaOggiV11.apply(this, arguments);
-  const lista = figlieDelGiorno(new Date());
-  if (!lista.length) return h;
-  const blocco = `<p class="list-head"><span><i class="ti ti-heart lh-ico"></i>Le figlie</span><span class="mono">non contano come tuoi</span></p><div class="group">${lista.map(rigaFiglie).join('')}</div>`;
-  const prima = ['<p class="list-head"><span><i class="ti ti-bolt lh-ico">', '<p class="list-head"><span><i class="ti ti-user-check lh-ico">'].map(s => h.indexOf(s)).filter(i => i >= 0).sort((a, b) => a - b)[0];
-  return prima >= 0 ? h.slice(0, prima) + blocco + h.slice(prima) : h + blocco;
-};
 
 // --- il foglio dell'appuntamento: nascondi / togli ---
 // la seconda domanda, nello stesso foglio

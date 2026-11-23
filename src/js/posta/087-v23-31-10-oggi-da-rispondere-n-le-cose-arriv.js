@@ -25,20 +25,5 @@ function v23Blocco() {
     </button>${righe}</section>`;
 }
 AZIONI['v23-apri'] = () => { ui.v23Aperto = !ui.v23Aperto; render(); };
-const _vistaOggiV23 = vistaOggi;
-vistaOggi = function () {
-  let h = _vistaOggiV23.apply(this, arguments);
-  try {
-    const b = v23Blocco();
-    if (b) {   // subito sotto la testata «Oggi», prima di tutto il resto (anche dentro la cornice v12)
-      const tpl = document.createElement('template');
-      tpl.innerHTML = h;
-      const vh = tpl.content.querySelector('.vh');
-      if (vh) { vh.insertAdjacentHTML('afterend', b); const box = document.createElement('div'); box.appendChild(tpl.content); h = box.innerHTML; }
-      else h = b + h;
-    }
-  } catch (e) { console.warn('[v23] Da rispondere:', e.message); }
-  return h;
-};
 
 // ══════════════════════════════════════════════════════════════
