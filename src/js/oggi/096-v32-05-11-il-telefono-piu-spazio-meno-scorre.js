@@ -49,13 +49,40 @@ function v32ChiudiCattura() {
   allinea(); if (micVero) new MutationObserver(allinea).observe(micVero, { attributes: true, attributeFilter: ['hidden'] });
   $('cattura-testo').addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('v32-cat')) { e.preventDefault(); v32ChiudiCattura(); } });
 })();
-salvaCattura = (function (orig) {
-  return async function () {
-    const r = await orig.apply(this, arguments);
+// salvaCattura: catena appiattita nella fase D del riordino (base + 2 strati); i passi girano nell'ordine di prima.
+//   passo 0 · smaltisci/074-01-4-chiudi-la-settimana-in-una-schermata-l.js
+//   passo 1 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js
+//   passo 2 · oggi/096-v32-05-11-il-telefono-piu-spazio-meno-scorre.js
+// Forma in sequenza: ogni passo riceve in `ris` il risultato del passo prima (era la chiamata alla versione precedente).
+function salvaCattura() {   // restituisce quello che restituiva lo strato più esterno (una promessa)
+  // ── passo 0 · smaltisci/074-01-4-chiudi-la-settimana-in-una-schermata-l.js
+  let ris = (async () => {
+    const righe = righeCattura();
+    if (!righe.length) { apriRapido(); return; }
+    fermaDettatura();
+    const campo = $('cattura-testo'), r = rCattura();
+    campo.disabled = true;
+    ui._catturaNoAvviso = ui.catturaNoAvviso;
+    let nuove = null;
+    try { nuove = await aggiungiFrasi(vociDaRighe(righe, r), r); }
+    finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; campo.disabled = false; }
+    if (nuove) { campo.value = ''; allungaCattura(); ui.cattura = { subito: false, oggi: false, mod: {}, ctxMod: {} }; aggiornaChipsCattura(); disegnaAnteprimaCattura(); }
+    campo.focus();
+  })();
+  // ── passo 1 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js
+  ris = (async () => {
+    const r = await ris;
+    if (!($('cattura-testo').value || '').trim()) bozzaScrivi(V12.BOZZA_CATTURA, '');
+    return r;
+  })();
+  // ── passo 2 · oggi/096-v32-05-11-il-telefono-piu-spazio-meno-scorre.js
+  ris = (async () => {
+    const r = await ris;
     if (document.body.classList.contains('v32-cat') && !$('cattura-testo').value.trim()) v32ChiudiCattura();
     return r;
-  };
-})(salvaCattura);
+  })();
+  return ris;
+}
 
 // --- la barra in alto: «Tutto ▾» e il titolo quando scorri ---
 const V32_CTX = { tutto: 'Tutto', lavoro: 'Lavoro', personale: 'Personale' };

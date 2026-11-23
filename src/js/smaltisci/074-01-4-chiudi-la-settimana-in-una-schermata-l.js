@@ -321,19 +321,6 @@ $('cattura').addEventListener('focusout', () => setTimeout(() => {
   const dentro = $('cattura').contains(document.activeElement);
   if (!dentro && !ui.cattura.subito && !ui.cattura.oggi) $('cattura-chips').hidden = true;
 }, 150));
-async function salvaCattura() {
-  const righe = righeCattura();
-  if (!righe.length) { apriRapido(); return; }
-  fermaDettatura();
-  const campo = $('cattura-testo'), r = rCattura();
-  campo.disabled = true;
-  ui._catturaNoAvviso = ui.catturaNoAvviso;
-  let nuove = null;
-  try { nuove = await aggiungiFrasi(vociDaRighe(righe, r), r); }
-  finally { ui._catturaNoAvviso = false; ui.catturaNoAvviso = false; campo.disabled = false; }
-  if (nuove) { campo.value = ''; allungaCattura(); ui.cattura = { subito: false, oggi: false, mod: {}, ctxMod: {} }; aggiornaChipsCattura(); disegnaAnteprimaCattura(); }
-  campo.focus();
-}
 
 // ─── Salvare: subito, ognuna nel suo contesto; poi i doppioni e «Vai a Personale» ───
 const _showToastSn = showToast;

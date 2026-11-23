@@ -47,12 +47,6 @@ salvaRapido = async function () {
   if (!$('rapidoOverlay').classList.contains('open') || !($('rapido-testo').value || '').trim()) { bozzaScrivi(V12.BOZZA_RAPIDO, ''); ui.v12Unite = new Set(); salvaUnite(); }
   return r;
 };
-const _salvaCatturaV12 = salvaCattura;
-salvaCattura = async function () {
-  const r = await _salvaCatturaV12.apply(this, arguments);
-  if (!($('cattura-testo').value || '').trim()) bozzaScrivi(V12.BOZZA_CATTURA, '');
-  return r;
-};
 AZIONI['cattura-modifica'] = () => { const t = $('cattura-testo').value; fermaDettatura(); $('cattura-testo').value = ''; bozzaScrivi(V12.BOZZA_CATTURA, ''); allungaCattura(); disegnaAnteprimaCattura(); apriRapidoCon(t); };
 function ripristinaBozzaCattura() {
   const b = bozzaLeggi(V12.BOZZA_CATTURA), t = $('cattura-testo');
