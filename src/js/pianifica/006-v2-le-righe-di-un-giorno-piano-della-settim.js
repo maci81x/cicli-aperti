@@ -47,6 +47,16 @@ function righeGiorno(gk) {
   return [...out.values()].sort((a, b) => (ordine[a.fascia] - ordine[b.fascia]) || (a.ora || '99').localeCompare(b.ora || '99') || String(a.c.title).localeCompare(String(b.c.title)));
 }
 
+// v51 · 23/11 · negli elenchi dei giorni e nei fogli da stampare le cose già chiuse non compaiono:
+// restano solo nel conteggio «N fatte» in testa al giorno (Roby: «se è già flaggata come fatta, perché è ancora nell'elenco?»).
+function righeDaFare(gk) { return righeGiorno(gk).filter(r => !r.fatto); }
+function fatteDelGiorno(gk) { return righeGiorno(gk).filter(r => r.fatto).length; }
+function etichettaFatte(n, breve) {
+  if (!n) return '';
+  const t = `${n} ${n === 1 ? 'fatta' : 'fatte'}`;
+  return `<span class="v51-fatte" data-tip="${t}: chiuse in questo giorno" aria-label="${t}"><i class="ti ti-check" aria-hidden="true"></i>${breve ? `<span class="mono" aria-hidden="true">${n}</span>` : t}</span>`;
+}
+
 function dataDelGiorno(idx) { return bpDataGiorno(state.week, state.year, idx); }
 const giornoPassato = d => toISODate(d) < oggiLocale();
 // righe della settimana chiusa: si guardano, non si toccano

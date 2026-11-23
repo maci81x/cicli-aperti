@@ -6,12 +6,12 @@ function creaPdfSettimana(opz = {}) {
   const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
   if (!jsPDFCtor) { showToast('Libreria PDF non caricata, riprova', 'error'); return null; }
   const giorni = GIORNI.map((g, idx) => {
-    const d = dataDelGiorno(idx), voci = righePdfGiorno(righeGiorno(g.key), d), routine = arcoRoutine(routineDelGiorno(d));
+    const d = dataDelGiorno(idx), voci = righePdfGiorno(righeDaFare(g.key), d), routine = arcoRoutine(routineDelGiorno(d));
     const pieno = idx < 5 && !cuscinettiDelGiorno(d).length && giornataPiena(d, occupatiPiano(g.key));
     // sabato e domenica solo se c'è una cosa, un cuscinetto o un appuntamento non ricorrente
     return { idx, titolo: `${g.label} ${d.getDate()}/${d.getMonth() + 1}`, voci: routine ? [{ tipo: 'routine', routine }, ...voci] : voci, pieno, weekend: idx > 4, haVoci: voci.some(v => v.tipo !== 'evento' || !v.e.serie) };
   }).filter(z => unGiorno ? z.idx === opz.giorno : (!z.weekend || z.haVoci));
-  const inSett = unGiorno ? daPianificarePdf(giorni[0]) : righeGiorno('settimana').map(r => ({ tipo: 'cosa', r }));
+  const inSett = unGiorno ? daPianificarePdf(giorni[0]) : righeDaFare('settimana').map(r => ({ tipo: 'cosa', r }));
   const cose = [...inSett, ...giorni.flatMap(z => z.voci.filter(v => v.tipo === 'cosa'))];
   if (!unGiorno && !cose.length && !giorni.some(z => z.haVoci)) { showToast('Niente da stampare in questa settimana', 'warn'); return null; }
 

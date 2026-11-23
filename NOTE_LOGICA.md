@@ -1063,3 +1063,10 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 ## Riordino · fase B · 19/11 sera — cartelle per area
 - I file di src/ sono in cartelle per area: core, oggi, pianifica, smaltisci, calendario, posta, stampa, cattura, altro (CSS e JS). I cinque file grandi sono stati tagliati ai loro titoli `// ═══`: 000-base (44 pezzi), v10 calendario di scrittura (9), v10 snella (2); v6 e v26 non hanno titoli interni e restano interi.
 - ordine.txt resta nella sequenza storica: index.html è identico byte per byte (sha256 e8ef9bc5…aa6b), prove 27 su 27 (uscita 0, nessun FAIL). Spiegazione delle aree in src/README.md.
+
+## v51 · 23/11 — una cosa chiusa esce dagli elenchi dei giorni e dai fogli da stampare
+- Roby: «se è già flaggata come fatta, perché è ancora nell'elenco con la spunta e barrata? e perché me la ritrovo tra le cose da fare nella stampa?». Una sola causa: `righeGiorno` tiene dentro anche le fatte (`fattaVisibile`) e i due fogli PDF leggono lo stesso elenco.
+- Nuove in `pianifica/006`: `righeDaFare(gk)` (righe del giorno senza le chiuse), `fatteDelGiorno(gk)`, `etichettaFatte(n, breve)`. `righeGiorno` resta com'è: la usano i conteggi (riepilogo, giorni passati, settimana scorsa, percentuale del futuro, chiudi la settimana).
+- Usano `righeDaFare`: colonne della settimana e `In settimana` (v6/063), settimana e giorno sul telefono (013), vista Giorno e foglio del giorno v26 (090), foglio della settimana e del giorno v21/v2 (021). Scelta di Roby: «sparisce subito», come in Oggi.
+- Il conteggio resta: in testa alla colonna una pill «✓ N» (aria-label «N fatte»), per esteso «✓ N fatte» nella vista Giorno e sul telefono; la testa della settimana conta solo quello che resta e aggiunge «· N fatte». Il tempo del giorno e della settimana è il tempo che rimane.
+- Test: tests/t53.js (colonna, vista Giorno, i dati dei due PDF, spunta e Annulla, telefono). Tutte le 28 prove passano.

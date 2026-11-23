@@ -190,7 +190,7 @@ function primoLiberoDa(iso, min, tranne) {
 }
 function righeGiornoData(d) {
   const w = isoWeekParts(d);
-  return w.week === state.week && w.year === state.year ? righeGiorno(giornoKeyDi(d)) : [];
+  return w.week === state.week && w.year === state.year ? righeDaFare(giornoKeyDi(d)) : [];
 }
 function sovrapposti(iso, ora, min, tranne) {
   const d = parseISODate(iso), s = minDi(ora), f = s + min;
@@ -412,7 +412,8 @@ async function caricaScorsa(week, year) {
 function righeSettimana() { return [...GIORNI.map(g => g.key), 'settimana'].flatMap(k => righeGiorno(k)); }
 function testaBoard() {
   const da = getWeekStart(state.week, state.year), a = new Date(da); a.setDate(a.getDate() + 6);
-  const tutte = righeSettimana(), minuti = tutte.reduce((s, r) => s + (r.durata || BP_DURATA_DEFAULT), 0);
+  const tutte = righeSettimana(), daFare = tutte.filter(r => !r.fatto), fatte = tutte.length - daFare.length;   // v51 · il conto è di quello che resta
+  const minuti = daFare.reduce((s, r) => s + (r.durata || BP_DURATA_DEFAULT), 0);
   caricaScorsa(state.week, state.year);
   const sc = ui.scorsa[settKey(state.week, state.year)];
   const scorsa = sc && sc.tot ? ` · sett. scorsa <b class="mono">${sc.done}</b> su <b class="mono">${sc.tot}</b> (${sc.pct}%)` : '';
@@ -424,7 +425,7 @@ function testaBoard() {
         <span class="mono">${fmtGgMm(toISODate(da))} – ${fmtGgMm(toISODate(a))}</span>
         <button type="button" class="btn btn-icon" data-act="sett" data-dir="1" aria-label="Settimana dopo"><i class="ti ti-chevron-right"></i></button>
         ${eSettimanaCorrente() ? '' : '<button type="button" class="btn btn-ghost btn-sm" data-act="sett-oggi"><i class="ti ti-arrow-back-up"></i>Torna alla settimana di oggi</button>'}</div></div>
-    <p class="bt-stat"><b class="mono">${tutte.length}</b> ${tutte.length === 1 ? 'cosa' : 'cose'} · <b class="mono">${fmtTempo(minuti)}</b>${scorsa}</p>
+    <p class="bt-stat"><b class="mono">${daFare.length}</b> ${daFare.length === 1 ? 'cosa' : 'cose'} · <b class="mono">${fmtTempo(minuti)}</b>${fatte ? ` · <b class="mono">${fatte}</b> ${fatte === 1 ? 'fatta' : 'fatte'}` : ''}${scorsa}</p>
     ${legendaColori()}
     <div class="bt-azioni">${piano}
       <button type="button" class="btn btn-secondary btn-sm" data-act="pdf"${tutte.length ? '' : ' disabled'}><i class="ti ti-printer"></i>Stampa il foglio</button>
@@ -463,7 +464,7 @@ function rigaSpazio(p) {
     <span class="evt-main"><span class="item-title">Spazio libero <span class="sep">·</span> <span class="mono">${p.ora}</span></span><span class="item-meta"><span class="mono">${fmtTempo(p.durata)}</span><span class="sep">·</span><span>buono per un cuscinetto</span></span></span></div>`;
 }
 function colonnaGiorno(gg, idx) {
-  const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), tot = minutiGiorno(rs, d), op = opzRighe(d);
+  const d = dataDelGiorno(idx), rs = righeDaFare(gg.key), tot = minutiGiorno(rs, d), op = opzRighe(d), fatte = fatteDelGiorno(gg.key);
   const oggi = eSettimanaCorrente() && giornoIdxDi(oggiData()) === idx;
   const muovi = r => ({ ...op, trascina: !r.fatto && !op.solaLettura });
   const { conOra, senzaOra } = sequenzaGiorno(rs, d);
@@ -475,7 +476,7 @@ function colonnaGiorno(gg, idx) {
   const piu = op.solaLettura ? '' : `<div class="bcol-piu"><button type="button" class="btn btn-ghost btn-sm" data-act="b-ciclo" data-v="${toISODate(d)}"><i class="ti ti-plus"></i>Ciclo</button>
     <button type="button" class="btn btn-ghost btn-sm" data-act="b-evento" data-v="${toISODate(d)}"><i class="ti ti-calendar-plus"></i>Appuntamento</button></div>`;
   return `<section class="bcol${oggi ? ' oggi' : ''}" aria-label="${gg.label} ${d.getDate()}">
-    <div class="bcol-h"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${tot ? `<span class="mono" data-tip="Cose, appuntamenti e cuscinetti">${fmtTempo(tot)}</span>` : ''}</div>
+    <div class="bcol-h"><span>${gg.label.slice(0, 3)} <span class="mono">${d.getDate()}</span></span>${etichettaFatte(fatte, true)}${tot ? `<span class="mono" data-tip="Cose, appuntamenti e cuscinetti">${fmtTempo(tot)}</span>` : ''}</div>
     <div class="group bzona" data-zona="${gg.key}">${corpo || '<div class="col-vuota">—</div>'}</div>${piu}
   </section>`;
 }
@@ -483,7 +484,7 @@ function giorniVisibili() {
   return GIORNI.map((g, idx) => ({ g, idx })).filter(({ g, idx }) => idx < 5 || ui.weekend || righeGiorno(g.key).length || eventiDelGiorno(dataDelGiorno(idx)).length);
 }
 function pianLargo() {
-  const inSett = righeGiorno('settimana'), fineSett = dataDelGiorno(6);
+  const inSett = righeDaFare('settimana'), fineSett = dataDelGiorno(6);
   const giorni = giorniVisibili();
   const weekend = giorni.length < 7 ? `<button type="button" class="btn btn-ghost btn-sm" data-act="weekend">${ui.weekend ? 'Nascondi sabato e domenica' : 'Mostra sabato e domenica'}</button>` : '';
   const pensaci = `<section class="bcol bcol-sett" aria-label="In settimana, pensaci dopo">

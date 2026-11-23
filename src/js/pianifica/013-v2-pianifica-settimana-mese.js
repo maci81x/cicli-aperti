@@ -60,7 +60,7 @@ function pianSettimana() {
   const eOggi = idx => eSettimanaCorrente() && giornoIdxDi(oggi) === idx;
   let h = cardPiano() + (eSettimanaCorrente() ? bloccoRimaste() : '');
   const desk = window.innerWidth >= 768;
-  const inSett = righeGiorno('settimana');
+  const inSett = righeDaFare('settimana');
   const fineSett = dataDelGiorno(6);
   // le cose della settimana senza giorno stanno in cima, come nel piano stampato del coach
   h += inSett.length ? `<p class="list-head"><span>In settimana, senza giorno</span><span class="mono">${inSett.length}</span></p><div class="group">${inSett.map(r => riga(r, { ...opzRighe(fineSett), data: oggiLocale() })).join('')}</div>` : '';
@@ -68,13 +68,13 @@ function pianSettimana() {
 
   // telefono: un giorno alla volta
   const giorni = GIORNI.map((g, idx) => {
-    const d = dataDelGiorno(idx), n = righeGiorno(g.key).length;
+    const d = dataDelGiorno(idx), n = righeDaFare(g.key).length;
     return `<button type="button" class="day${eOggi(idx) ? ' oggi' : ''}${n ? ' ha' : ''}" data-act="giorno" data-i="${idx}" aria-pressed="${ui.giorno === idx}" aria-label="${g.label} ${d.getDate()}, ${plurale(n, 'cosa', 'cose')}">${g.label.slice(0, 1)}<b>${d.getDate()}</b><i></i></button>`;
   }).join('');
-  const g = GIORNI[ui.giorno], dSel = dataDelGiorno(ui.giorno), righe = righeGiorno(g.key);
+  const g = GIORNI[ui.giorno], dSel = dataDelGiorno(ui.giorno), righe = righeDaFare(g.key), fatteG = fatteDelGiorno(g.key);
   const tot = minutiGiorno(righe, dSel), corpo = htmlGiorno(righe, opzRighe(dSel), dSel);
   h += `<div style="margin-top:var(--sp-4)"><div class="days" role="group" aria-label="Giorno">${giorni}</div>
-    <p class="list-head"><span>${fmtGiornoLungo(dSel)}</span>${tot ? `<span class="mono" data-tip="Cose, appuntamenti e cuscinetti">${fmtTempo(tot)} in tutto</span>` : ''}</p>
+    <p class="list-head"><span>${fmtGiornoLungo(dSel)}</span>${etichettaFatte(fatteG)}${tot ? `<span class="mono" data-tip="Cose, appuntamenti e cuscinetti">${fmtTempo(tot)} in tutto</span>` : ''}</p>
     ${corpo ? corpo.replace('<p class="list-head">', '<p class="list-head" style="margin-top:var(--sp-3)">')
       : `<div class="group"><div class="col-vuota">Niente in programma per ${g.label.toLowerCase()}</div></div>`}</div>`;
   return h;
@@ -88,7 +88,7 @@ function pianSettimanaColonne(eOggi) {
   const puoiTrascinare = state.agendaColsOk && state.agendaTableOk;
   return `<div><div class="tools-row" style="justify-content:flex-end;margin-bottom:var(--sp-2)"><button type="button" class="btn btn-ghost btn-sm" data-act="weekend">${ui.weekend ? 'Nascondi sabato e domenica' : 'Mostra sabato e domenica'}</button></div>
     <div class="cols${ui.weekend ? ' sette' : ''}">${GIORNI.slice(0, quanti).map((gg, idx) => {
-      const d = dataDelGiorno(idx), rs = righeGiorno(gg.key), tot = minutiGiorno(rs, d);
+      const d = dataDelGiorno(idx), rs = righeDaFare(gg.key), tot = minutiGiorno(rs, d);
       const op = opzRighe(d);
       const trascina = r => ({ ...op, trascina: puoiTrascinare && !r.fatto && !op.solaLettura });
       const { conOra, senzaOra } = sequenzaGiorno(rs, d);

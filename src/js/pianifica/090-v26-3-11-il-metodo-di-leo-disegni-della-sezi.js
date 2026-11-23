@@ -264,7 +264,7 @@ function v26InserisciObiettivi(h) {
 }
 function v26VistaGiorno() {
   const idx = Math.max(0, Math.min(6, ui.giorno || 0)), d = dataDelGiorno(idx), g = GIORNI[idx];
-  const rs = righeGiorno(g.key), op = opzRighe(d);
+  const rs = righeDaFare(g.key), op = opzRighe(d), fatte = fatteDelGiorno(g.key);
   const { conOra, senzaOra } = sequenzaGiorno(rs, d);
   const seq = [...conOra.filter(x => x.tipo !== 'evento' || !x.e.routine), ...senzaOra.map(r => ({ tipo: 'cosa', r }))];
   const html = x => x.tipo === 'evento' ? rigaEvento(x.e) : x.tipo === 'cuscinetto' ? rigaCuscinetto(x.item, op) : riga(x.r, op);
@@ -273,12 +273,12 @@ function v26VistaGiorno() {
   const oggiIdx = eSettimanaCorrente() ? giornoIdxDi(oggiData()) : -1;
   const chips = GIORNI.map((x, i) => `<button type="button" class="v26-chip-g${i === oggiIdx ? ' oggi' : ''}" data-act="v26-giorno" data-i="${i}" aria-pressed="${i === idx}" aria-label="${x.label} ${dataDelGiorno(i).getDate()}">${x.short.charAt(0)} <span class="mono">${dataDelGiorno(i).getDate()}</span></button>`).join('');
   const seg = [['settimana', 'Settimana'], ['giorno', 'Giorno'], ['mese', 'Mese']].map(([k, l]) => `<button type="button" data-act="pian" data-v="${k}" aria-pressed="${ui.pian === k}">${l}</button>`).join('');
-  const inSett = righeGiorno('settimana').filter(r => !r.fatto);
+  const inSett = righeDaFare('settimana');
   const vuoto = !seq.length;
   const titolo = fmtGiornoLungo(d).replace(/^./, c => c.toUpperCase());
   return `<div class="vh"><div><h1>Pianifica${btnAiuto('pianifica')}</h1></div><div class="seg" role="group" aria-label="Vista">${seg}</div></div>
     <div class="v26-g-nav">
-      <div class="v26-g-frecce"><button type="button" class="btn btn-icon" data-act="v26-giorno-sposta" data-v="-1" aria-label="Giorno prima"><i class="ti ti-chevron-left"></i></button><b>${v26Esc(titolo)}</b><button type="button" class="btn btn-icon" data-act="v26-giorno-sposta" data-v="1" aria-label="Giorno dopo"><i class="ti ti-chevron-right"></i></button></div>
+      <div class="v26-g-frecce"><button type="button" class="btn btn-icon" data-act="v26-giorno-sposta" data-v="-1" aria-label="Giorno prima"><i class="ti ti-chevron-left"></i></button><b>${v26Esc(titolo)}</b>${etichettaFatte(fatte)}<button type="button" class="btn btn-icon" data-act="v26-giorno-sposta" data-v="1" aria-label="Giorno dopo"><i class="ti ti-chevron-right"></i></button></div>
       <div class="v26-g-chips" role="group" aria-label="Giorni della settimana ${state.week}">${chips}</div>
       <button type="button" class="btn btn-primary btn-sm v26-g-stampa" data-act="v26-stampa-giorni" data-v="${toISODate(d)}"><i class="ti ti-printer"></i>Stampa questo giorno</button>
     </div>
@@ -328,7 +328,7 @@ async function v26AssicuraSettimana(d) {
   try { await caricaEventi(state.week, state.year); } catch (_) {}
 }
 function v26DatiGiorno(idx) {
-  const g = GIORNI[idx], d = dataDelGiorno(idx), rs = righeGiorno(g.key);
+  const g = GIORNI[idx], d = dataDelGiorno(idx), rs = righeDaFare(g.key);
   const eventi = (gcalEraCollegato() ? eventiDelGiorno(d) : []).filter(e => !e.routine && !eNascosto(e));
   const perOra = (a, b) => String(a.ora || '99').localeCompare(String(b.ora || '99'));
   const coseFisse = rs.filter(r => v26CosaFissa(r.c) && !r.fatto).map(r => ({ tipo: 'cosa', r, ora: r.ora || '' }));
@@ -338,7 +338,7 @@ function v26DatiGiorno(idx) {
     fissi: [...evFissi.filter(x => !x.ora), ...[...coseFisse, ...evFissi.filter(x => x.ora)].sort(perOra)],
     cose: rs.filter(r => !(v26CosaFissa(r.c) && !r.fatto)).map(r => ({ tipo: 'cosa', r, ora: r.ora || '' })).sort(perOra),
     appuntamenti: [...eventi.filter(e => !v26EventoFisso(e) && !e.ora), ...eventi.filter(e => !v26EventoFisso(e) && e.ora)].map(e => ({ tipo: 'evento', e, ora: e.ora || '' })),
-    inSett: righeGiorno('settimana').filter(r => !r.fatto),
+    inSett: righeDaFare('settimana'),
     vuoto: !rs.length && !eventi.length
   };
 }
