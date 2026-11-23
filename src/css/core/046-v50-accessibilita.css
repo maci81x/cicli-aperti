@@ -6,3 +6,8 @@ html:root[data-theme="dark"] .v49-sm-btn, html:root[data-theme="dark"] .v49-oggi
 html:root[data-theme="dark"] .board .evt-riga.v24-altri { background: #4A4880 !important; border-color: #4A4880 !important; }
 #view .evt-riga .item-title[role="button"] { cursor: pointer; }
 #view .evt-riga .item-title[role="button"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+.v52-madre { display: flex; align-items: center; gap: 6px; width: 100%; margin: 0 0 8px; padding: 8px 12px; border: 0; border-radius: 10px; background: var(--q2-soft, #EBF1FE); color: var(--text-2); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.v52-madre b { color: var(--q2-ink, #1D4ED8); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v52-madre .ti { font-size: 16px; color: var(--q2-mark, #2563EB); }
+.v52-madre:hover { filter: brightness(.97); }
+html:root[data-theme="dark"] .v52-madre { background: #1D2440; }

@@ -24,7 +24,7 @@ function creaPdfSettimana(opz = {}) {
   prova.setFont('helvetica', 'bold'); prova.setFontSize(PDF_TESTO.PICCOLO);
   const X_ORA = M + 6 * s, X_TIT = X_ORA + prova.getTextWidth(PDF_TESTO.ORARIO_MAX) + PDF_TESTO.STACCO * s, MIN_RIGHE = 2;
   const LARGO_TIT = COL_L - (X_TIT - M);
-  const nota = v => v.tipo === 'cosa' && v.r.c.note ? pdfTxt(String(v.r.c.note).split(/\r?\n/).find(x => x.trim()) || '') : '';
+  const nota = v => { if (v.tipo !== 'cosa') return ''; const n = v.r.c.note ? String(v.r.c.note).split(/\r?\n/).find(x => x.trim()) || '' : ''; return pdfTxt([testoMadre(v.r.c), n].filter(Boolean).join(' · ')); };   // v52 · il passo dice di cosa è
   // il titolo di una voce: testo, font e larghezza disponibile (sulle cose a destra c'è il tipo)
   const tipoDi = v => { const q = computeEffectiveQ(v.r.c); return pdfTxt(TIPI[q].label + (v.r.c.inderogabile && q === 2 ? ' - fissa' : '') + (v.r.c.ctx === 'personale' ? ' · Personale' : '')); };
   const testoVoce = v => {

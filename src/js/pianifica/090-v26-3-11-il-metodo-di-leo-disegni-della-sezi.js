@@ -403,7 +403,7 @@ function v26DisegnaFoglio(doc, dati, n, tot) {
     const ev = x.tipo === 'evento', c = ev ? null : x.r.c, fatto = !ev && x.r.fatto;
     const titolo = T(ev ? `${x.e.coach ? 'Coach: ' : ''}${x.e.titolo}` : c.title);
     const sotto = ev ? (x.sovrap ? `si sovrappone a «${x.sovrap}» · ` : '') + (v26EventoFisso(x.e) ? 'non si sposta · ' : '') + (typeof v24ConChi === 'function' && typeof v24ConAltri === 'function' ? (v24ConAltri(x.e) ? v24ConChi(x.e) : 'tempo tuo') : '')
-      : [c.inderogabile && state.inderoColOk ? 'non si sposta' : computeEffectiveQ(c) === 1 ? 'Subito' : '', (String(c.note || '').split(/\r?\n/).find(s => s.trim() && !/^📧/.test(s)) || '').trim()].filter(Boolean).join(' · ');
+      : [testoMadre(c), c.inderogabile && state.inderoColOk ? 'non si sposta' : computeEffectiveQ(c) === 1 ? 'Subito' : '', (String(c.note || '').split(/\r?\n/).find(s => s.trim() && !/^📧/.test(s)) || '').trim()].filter(Boolean).join(' · ');
     doc.setFont('helvetica', rosa || ev ? 'bold' : 'normal'); doc.setFontSize(9.5);
     const righeT = doc.splitTextToSize(titolo, L_TIT).slice(0, 3);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8);

@@ -2641,6 +2641,11 @@ html:root[data-theme="dark"] .v49-sm-btn, html:root[data-theme="dark"] .v49-oggi
 html:root[data-theme="dark"] .board .evt-riga.v24-altri { background: #4A4880 !important; border-color: #4A4880 !important; }
 #view .evt-riga .item-title[role="button"] { cursor: pointer; }
 #view .evt-riga .item-title[role="button"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+.v52-madre { display: flex; align-items: center; gap: 6px; width: 100%; margin: 0 0 8px; padding: 8px 12px; border: 0; border-radius: 10px; background: var(--q2-soft, #EBF1FE); color: var(--text-2); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.v52-madre b { color: var(--q2-ink, #1D4ED8); font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v52-madre .ti { font-size: 16px; color: var(--q2-mark, #2563EB); }
+.v52-madre:hover { filter: brightness(.97); }
+html:root[data-theme="dark"] .v52-madre { background: #1D2440; }
 </style>
 </head>
 <body>
@@ -8454,7 +8459,7 @@ function creaPdfSettimana(opz = {}) {
   prova.setFont('helvetica', 'bold'); prova.setFontSize(PDF_TESTO.PICCOLO);
   const X_ORA = M + 6 * s, X_TIT = X_ORA + prova.getTextWidth(PDF_TESTO.ORARIO_MAX) + PDF_TESTO.STACCO * s, MIN_RIGHE = 2;
   const LARGO_TIT = COL_L - (X_TIT - M);
-  const nota = v => v.tipo === 'cosa' && v.r.c.note ? pdfTxt(String(v.r.c.note).split(/\r?\n/).find(x => x.trim()) || '') : '';
+  const nota = v => { if (v.tipo !== 'cosa') return ''; const n = v.r.c.note ? String(v.r.c.note).split(/\r?\n/).find(x => x.trim()) || '' : ''; return pdfTxt([testoMadre(v.r.c), n].filter(Boolean).join(' · ')); };   // v52 · il passo dice di cosa è
   // il titolo di una voce: testo, font e larghezza disponibile (sulle cose a destra c'è il tipo)
   const tipoDi = v => { const q = computeEffectiveQ(v.r.c); return pdfTxt(TIPI[q].label + (v.r.c.inderogabile && q === 2 ? ' - fissa' : '') + (v.r.c.ctx === 'personale' ? ' · Personale' : '')); };
   const testoVoce = v => {
@@ -9931,7 +9936,21 @@ function infoPassi(c, fatto) {
   if (!fatto && (c.durata_minuti || 0) >= PASSI.GROSSA) return '<span class="hint-quando"><i class="ti ti-list-tree"></i>Grossa: scomponila in passi</span>';
   return '';
 }
+// v52 · 23/11 · un passo si riconosce ovunque: in Pianifica (riga ↳), nei fogli stampati e in testa al dettaglio
+function madreDi(c) { const m = c && c.parent_id ? ciclo(c.parent_id) : null; return m || null; }
+function testoMadre(c) { const m = madreDi(c); return m ? `Passo di «${m.title}»` : ''; }
+function disegnaMadreInTesta(c) {
+  const t = $('f-title'); if (!t) return;
+  let el = $('v52-madre');
+  const m = madreDi(c);
+  if (!m) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('button'); el.type = 'button'; el.id = 'v52-madre'; el.className = 'v52-madre'; t.before(el); }
+  el.dataset.act = 'apri-madre'; el.dataset.id = m.id;
+  el.innerHTML = `<i class="ti ti-corner-down-right" aria-hidden="true"></i><span>Passo di</span><b>${escHtml(m.title)}</b>`;
+  el.setAttribute('aria-label', `Passo di «${m.title}»: apri la cosa intera`);
+}
 function disegnaPassi(c) {
+  try { disegnaMadreInTesta(c); } catch (_) {}
   const box = $('det-passi');
   if (!box) return;
   if (!c || !state.passiColOk) { box.hidden = true; return; }
@@ -18289,7 +18308,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-23 v51';
+const VERSIONE_APP = '2026-11-23 v52';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -19322,7 +19341,7 @@ function v26DisegnaFoglio(doc, dati, n, tot) {
     const ev = x.tipo === 'evento', c = ev ? null : x.r.c, fatto = !ev && x.r.fatto;
     const titolo = T(ev ? `${x.e.coach ? 'Coach: ' : ''}${x.e.titolo}` : c.title);
     const sotto = ev ? (x.sovrap ? `si sovrappone a «${x.sovrap}» · ` : '') + (v26EventoFisso(x.e) ? 'non si sposta · ' : '') + (typeof v24ConChi === 'function' && typeof v24ConAltri === 'function' ? (v24ConAltri(x.e) ? v24ConChi(x.e) : 'tempo tuo') : '')
-      : [c.inderogabile && state.inderoColOk ? 'non si sposta' : computeEffectiveQ(c) === 1 ? 'Subito' : '', (String(c.note || '').split(/\r?\n/).find(s => s.trim() && !/^📧/.test(s)) || '').trim()].filter(Boolean).join(' · ');
+      : [testoMadre(c), c.inderogabile && state.inderoColOk ? 'non si sposta' : computeEffectiveQ(c) === 1 ? 'Subito' : '', (String(c.note || '').split(/\r?\n/).find(s => s.trim() && !/^📧/.test(s)) || '').trim()].filter(Boolean).join(' · ');
     doc.setFont('helvetica', rosa || ev ? 'bold' : 'normal'); doc.setFontSize(9.5);
     const righeT = doc.splitTextToSize(titolo, L_TIT).slice(0, 3);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8);

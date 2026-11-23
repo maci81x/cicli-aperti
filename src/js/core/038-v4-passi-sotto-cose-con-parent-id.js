@@ -14,7 +14,21 @@ function infoPassi(c, fatto) {
   if (!fatto && (c.durata_minuti || 0) >= PASSI.GROSSA) return '<span class="hint-quando"><i class="ti ti-list-tree"></i>Grossa: scomponila in passi</span>';
   return '';
 }
+// v52 · 23/11 · un passo si riconosce ovunque: in Pianifica (riga ↳), nei fogli stampati e in testa al dettaglio
+function madreDi(c) { const m = c && c.parent_id ? ciclo(c.parent_id) : null; return m || null; }
+function testoMadre(c) { const m = madreDi(c); return m ? `Passo di «${m.title}»` : ''; }
+function disegnaMadreInTesta(c) {
+  const t = $('f-title'); if (!t) return;
+  let el = $('v52-madre');
+  const m = madreDi(c);
+  if (!m) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('button'); el.type = 'button'; el.id = 'v52-madre'; el.className = 'v52-madre'; t.before(el); }
+  el.dataset.act = 'apri-madre'; el.dataset.id = m.id;
+  el.innerHTML = `<i class="ti ti-corner-down-right" aria-hidden="true"></i><span>Passo di</span><b>${escHtml(m.title)}</b>`;
+  el.setAttribute('aria-label', `Passo di «${m.title}»: apri la cosa intera`);
+}
 function disegnaPassi(c) {
+  try { disegnaMadreInTesta(c); } catch (_) {}
   const box = $('det-passi');
   if (!box) return;
   if (!c || !state.passiColOk) { box.hidden = true; return; }

@@ -1070,3 +1070,8 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 - Usano `righeDaFare`: colonne della settimana e `In settimana` (v6/063), settimana e giorno sul telefono (013), vista Giorno e foglio del giorno v26 (090), foglio della settimana e del giorno v21/v2 (021). Scelta di Roby: «sparisce subito», come in Oggi.
 - Il conteggio resta: in testa alla colonna una pill «✓ N» (aria-label «N fatte»), per esteso «✓ N fatte» nella vista Giorno e sul telefono; la testa della settimana conta solo quello che resta e aggiunge «· N fatte». Il tempo del giorno e della settimana è il tempo che rimane.
 - Test: tests/t53.js (colonna, vista Giorno, i dati dei due PDF, spunta e Annulla, telefono). Tutte le 28 prove passano.
+
+## v52 · 23/11 — i passi si riconoscono anche sulla carta e nel dettaglio
+- Roby: «sulla stampa ci deve essere quello che vedo in Pianifica… così faccio confusione». In Pianifica un passo (Marco, Mario, Mattia…) ha sotto «↳ Stampare elenco clienti degli agenti»; sul foglio c'era solo «Marco».
+- core/038: `madreDi(c)`, `testoMadre(c)` («Passo di «…»»), `disegnaMadreInTesta(c)`. Foglio del giorno (v26) e foglio della settimana/giorno (021): sotto il titolo del passo «Passo di «madre»», prima delle note. Dettaglio: in testa, sopra il titolo, una fascia blu «↳ Passo di <madre>» che apre la cosa intera.
+- Test: tests/t55.js (testo dei due PDF, dettaglio, tocco sulla fascia, cosa senza madre).
