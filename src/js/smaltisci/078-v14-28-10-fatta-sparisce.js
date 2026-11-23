@@ -40,13 +40,6 @@ apriRapido = function () {
   if (t) t.placeholder = 'Cosa hai in testa?';
   return _apriRapidoV14.apply(this, arguments);
 };
-const _disegnaAnteprimaV14 = disegnaAnteprima;
-disegnaAnteprima = function () {
-  const r = _disegnaAnteprimaV14.apply(this, arguments);
-  const nota = document.querySelector('#rapidoOverlay .rapido-nota');
-  if (nota && ui.seguitoDi) nota.innerHTML = `<b>Seguito di «${escHtml(ui.seguitoDi.title)}»</b> · con giorno e ora diventa un promemoria con l'avviso.`;
-  return r;
-};
 const _rigaDaVoceV14 = rigaDaVoce;
 rigaDaVoce = async function (v, r, ctx) {
   const s = ui.seguitoDi;

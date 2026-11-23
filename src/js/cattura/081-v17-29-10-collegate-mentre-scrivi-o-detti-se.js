@@ -92,21 +92,71 @@ function htmlCollegate(titolo) {
   const viste = lista.slice(0, V17.MAX);
   return `<div class="v17-coll"><p class="v17-testa"><i class="ti ti-link" aria-hidden="true"></i>Su ${nome} hai già <b class="mono">${lista.length}</b></p>${viste.map(riga).join('')}${lista.length > viste.length ? `<p class="v17-altre">e altre ${lista.length - viste.length}: cercale in Cose aperte</p>` : ''}</div>`;
 }
-// nel foglio Aggiungi: sotto ogni cosa
-const _disegnaAnteprimaV17 = disegnaAnteprima;
-disegnaAnteprima = function () {
-  const r = _disegnaAnteprimaV17.apply(this, arguments);
-  const box = $('rapido-anteprima');
-  if (!box || box.hidden) return r;
-  const voci = vociDi('rapido');
-  box.querySelectorAll('.sn-voce[data-i], .rap-voce[data-i]').forEach(el => {
-    const v = voci[+el.dataset.i];
-    if (!v || el.querySelector('.v17-coll')) return;
-    const h = htmlCollegate(v.title || v.testo);
-    if (h) el.insertAdjacentHTML('beforeend', h);
-  });
-  return r;
-};
+// disegnaAnteprima: catena appiattita nella fase D del riordino (base + 3 strati); i passi girano nell'ordine di prima.
+//   passo 0 · smaltisci/074-01-4-chiudi-la-settimana-in-una-schermata-l.js
+//   passo 1 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js — «unisci ↑» tra due pezzi della stessa frase
+//   passo 2 · smaltisci/078-v14-28-10-fatta-sparisce.js
+//   passo 3 · cattura/081-v17-29-10-collegate-mentre-scrivi-o-detti-se.js — nel foglio Aggiungi: sotto ogni cosa
+// Forma in sequenza: ogni passo riceve in `ris` il risultato del passo prima (era la chiamata alla versione precedente).
+function disegnaAnteprima() {
+  // ── passo 0 · smaltisci/074-01-4-chiudi-la-settimana-in-una-schermata-l.js
+  let ris = (() => {
+    const box = $('rapido-anteprima');
+    if (!box || !ui.rapido) return;
+    const voci = vociDi('rapido');
+    box.hidden = !voci.length;
+    box.innerHTML = voci.length ? voci.map((v, i) => htmlVoceSn(v, i, 'rapido', voci.length === 1)).join('') + notaCtx(voci) : '';
+    const tasto = document.querySelector('#rapidoOverlay [data-act="rapido-salva"]');
+    if (tasto) tasto.innerHTML = etichettaSalva(voci);
+    const nota = document.querySelector('#rapidoOverlay .rapido-nota');
+    if (nota) nota.textContent = voci.length ? 'Tocca un\'etichetta per cambiarla. Niente da confermare: Invio salva tutto.' : 'Una riga, una cosa. Prova: «ricordami venerdì alle 10 di chiamare Rossi».';
+  })();
+  // ── passo 1 · cattura/076-v12-26-10-cosa-hai-in-testa-che-non-perde-ni.js
+  // «unisci ↑» tra due pezzi della stessa frase
+  ris = (() => {
+    ris;
+    const box = $('rapido-anteprima');
+    const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
+    const btn = document.querySelector('#rapidoOverlay [data-act="rapido-salva"]');
+    if (btn && voci.length > 1) btn.innerHTML = `<i class="ti ti-plus"></i>Aggiungi le ${voci.length} cose`;
+    else if (btn && !voci.length) btn.innerHTML = '<i class="ti ti-plus"></i>Aggiungi';
+    const nota = document.querySelector('#rapidoOverlay .rapido-nota');
+    if (nota) nota.textContent = (voci.length ? 'Tocca un\'etichetta per cambiarla. ' : 'Scrivi o detta anche più cose insieme: le divido io. ')
+      + (eTelefono() ? 'La bozza resta salvata.' : `Invio va a capo, ${eMac ? '⌘' : 'Ctrl'}+Invio aggiunge. La bozza resta salvata.`);
+    if (!box || box.hidden) return;
+    box.querySelectorAll('.rap-voce[data-i], .sn-voce[data-i]').forEach(el => {
+      const i = +el.dataset.i;
+      if (!i || !voci[i] || !voci[i - 1]) return;
+      const k = ui.v12Tagli.get(`${voci[i - 1].testo}\u0000${voci[i].testo}`);
+      if (!k || el.querySelector('.v12-unisci')) return;
+      el.insertAdjacentHTML('afterbegin', `<button type="button" class="v12-unisci" data-act="v12-unisci" data-k="${esc(k)}" aria-label="Unisci con la riga sopra">unisci ↑</button>`);
+    });
+    if (voci.length > 1 && !box.querySelector('.v12-capito')) box.insertAdjacentHTML('afterbegin', `<p class="v12-capito"><b>Ho capito ${voci.length} cose</b><span>vanno insieme? tocca «unisci»</span></p>`);
+  })();
+  // ── passo 2 · smaltisci/078-v14-28-10-fatta-sparisce.js
+  ris = (() => {
+    const r = ris;
+    const nota = document.querySelector('#rapidoOverlay .rapido-nota');
+    if (nota && ui.seguitoDi) nota.innerHTML = `<b>Seguito di «${escHtml(ui.seguitoDi.title)}»</b> · con giorno e ora diventa un promemoria con l'avviso.`;
+    return r;
+  })();
+  // ── passo 3 · cattura/081-v17-29-10-collegate-mentre-scrivi-o-detti-se.js
+  // nel foglio Aggiungi: sotto ogni cosa
+  ris = (() => {
+    const r = ris;
+    const box = $('rapido-anteprima');
+    if (!box || box.hidden) return r;
+    const voci = vociDi('rapido');
+    box.querySelectorAll('.sn-voce[data-i], .rap-voce[data-i]').forEach(el => {
+      const v = voci[+el.dataset.i];
+      if (!v || el.querySelector('.v17-coll')) return;
+      const h = htmlCollegate(v.title || v.testo);
+      if (h) el.insertAdjacentHTML('beforeend', h);
+    });
+    return r;
+  })();
+  return ris;
+}
 // nel campo del telefono: quante, e «Modifica» le mostra
 const _disegnaAnteprimaCatturaV17 = disegnaAnteprimaCattura;
 disegnaAnteprimaCattura = function () {

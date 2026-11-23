@@ -228,17 +228,6 @@ function etichettaSalva(voci) {
   if (voci.length === 1) return voci[0].ctx !== state.ctx ? `Salva in ${nomeCtx(voci[0].ctx)}` : 'Salva';
   return `Salva ${voci.length} cose`;
 }
-disegnaAnteprima = function () {
-  const box = $('rapido-anteprima');
-  if (!box || !ui.rapido) return;
-  const voci = vociDi('rapido');
-  box.hidden = !voci.length;
-  box.innerHTML = voci.length ? voci.map((v, i) => htmlVoceSn(v, i, 'rapido', voci.length === 1)).join('') + notaCtx(voci) : '';
-  const tasto = document.querySelector('#rapidoOverlay [data-act="rapido-salva"]');
-  if (tasto) tasto.innerHTML = etichettaSalva(voci);
-  const nota = document.querySelector('#rapidoOverlay .rapido-nota');
-  if (nota) nota.textContent = voci.length ? 'Tocca un\'etichetta per cambiarla. Niente da confermare: Invio salva tutto.' : 'Una riga, una cosa. Prova: «ricordami venerdì alle 10 di chiamare Rossi».';
-};
 disegnaAnteprimaCattura = function () {
   const box = $('cattura-anteprima');
   if (!box) return;

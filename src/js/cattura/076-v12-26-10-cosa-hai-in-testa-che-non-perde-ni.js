@@ -130,28 +130,6 @@ interpretaFrase = function () {
   if (v && typeof v.title === 'string') v.title = v.title.replace(/\s+[-–—](?:\s+[-–—])+\s+/g, ' - ').replace(/(?:\s*[-–—,;])+\s*$/, '').trim() || v.title;
   return v;
 };
-// «unisci ↑» tra due pezzi della stessa frase
-const _disegnaAnteprimaV12 = disegnaAnteprima;
-disegnaAnteprima = function () {
-  _disegnaAnteprimaV12.apply(this, arguments);
-  const box = $('rapido-anteprima');
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  const btn = document.querySelector('#rapidoOverlay [data-act="rapido-salva"]');
-  if (btn && voci.length > 1) btn.innerHTML = `<i class="ti ti-plus"></i>Aggiungi le ${voci.length} cose`;
-  else if (btn && !voci.length) btn.innerHTML = '<i class="ti ti-plus"></i>Aggiungi';
-  const nota = document.querySelector('#rapidoOverlay .rapido-nota');
-  if (nota) nota.textContent = (voci.length ? 'Tocca un\'etichetta per cambiarla. ' : 'Scrivi o detta anche più cose insieme: le divido io. ')
-    + (eTelefono() ? 'La bozza resta salvata.' : `Invio va a capo, ${eMac ? '⌘' : 'Ctrl'}+Invio aggiunge. La bozza resta salvata.`);
-  if (!box || box.hidden) return;
-  box.querySelectorAll('.rap-voce[data-i], .sn-voce[data-i]').forEach(el => {
-    const i = +el.dataset.i;
-    if (!i || !voci[i] || !voci[i - 1]) return;
-    const k = ui.v12Tagli.get(`${voci[i - 1].testo}\u0000${voci[i].testo}`);
-    if (!k || el.querySelector('.v12-unisci')) return;
-    el.insertAdjacentHTML('afterbegin', `<button type="button" class="v12-unisci" data-act="v12-unisci" data-k="${esc(k)}" aria-label="Unisci con la riga sopra">unisci ↑</button>`);
-  });
-  if (voci.length > 1 && !box.querySelector('.v12-capito')) box.insertAdjacentHTML('afterbegin', `<p class="v12-capito"><b>Ho capito ${voci.length} cose</b><span>vanno insieme? tocca «unisci»</span></p>`);
-};
 AZIONI['v12-unisci'] = el => { ui.v12Unite.add(el.dataset.k); salvaUnite(); disegnaAnteprima(); };
 
 // --- 4. Inviato e stampato anche nel database ---

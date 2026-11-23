@@ -86,17 +86,6 @@ function editorVoce(v, i) {
     ${v.q === 3 ? `<select class="input" data-campo="delega" aria-label="A chi"><option value="">A chi?</option>${v.delega && !v.delega.id ? `<option value="nuova:${escAttr(v.delega.nome)}" selected>${escHtml(v.delega.nome)} (nuova)</option>` : ''}${persone.map(p => `<option value="${p.id}"${v.delega && String(v.delega.id) === String(p.id) ? ' selected' : ''}>${escHtml(p.nome)}</option>`).join('')}</select>` : ''}
   </div>`;
 }
-function disegnaAnteprima() {
-  const box = $('rapido-anteprima');
-  if (!box) return;
-  const voci = vociDaRighe(righeCampo($('rapido-testo').value), ui.rapido);
-  box.hidden = !voci.length;
-  box.innerHTML = voci.map((v, i) => `<div class="rap-voce p-q${v.q}" data-i="${i}">
-    <div class="rap-sintesi"><i class="ti ${TIPI[v.q].icon}" aria-hidden="true"></i><span>${escHtml(sintesiVoce(v))}</span>
-      <button type="button" class="btn btn-icon btn-sm" data-act="rap-modifica" data-i="${i}" aria-label="Modifica" aria-expanded="${ui.rapido.aperta === i}"><i class="ti ti-pencil"></i></button></div>
-    ${v.passi.length ? `<p class="rap-passi"><b>${frasePassi(v.passi.length)}</b>: ${v.passi.map(escHtml).join(' · ')}</p>` : ''}
-    ${ui.rapido.aperta === i ? editorVoce(v, i) : ''}</div>`).join('');
-}
 // una correzione nel riepilogo: vale finché la riga del campo resta uguale
 function correggiVoce(i, campo, valore) {
   const righe = righeCampo($('rapido-testo').value);
@@ -120,7 +109,6 @@ document.addEventListener('input', e => {
   if (ed && t.dataset.campo === 'title') correggiVoce(+ed.dataset.i, 'title', t.value);
 });
 AZIONI['rap-modifica'] = el => { const i = +el.dataset.i; ui.rapido = { ...ui.rapido, aperta: ui.rapido.aperta === i ? null : i }; disegnaAnteprima(); };
-$('rapido-testo').addEventListener('input', disegnaAnteprima);
 const _disegnaRapidoV8 = disegnaRapido;
 disegnaRapido = function () { _disegnaRapidoV8(); disegnaAnteprima(); };
 const _apriRapidoV8 = apriRapido;
