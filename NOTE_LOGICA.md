@@ -1093,3 +1093,9 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 - Controllo: stile calcolato di ogni elemento in 80 scenari (telefono, 900 px, computer; chiaro e scuro; contrasto alto; tema del sistema; testo 125%; stampa) identico prima e dopo ogni commit (`tools/riordino/stili.js`), variabili identiche negli 8 stati della radice, prove 32/32. Design e review: `docs/egm/fase-e/`.
 - `VERSIONE_APP` = «2026-11-23 v53 riordino».
 
+
+## v54 · 23/11 — in Oggi «La giornata» non si taglia più
+- Roby (schermata «La giorn… 10 appuntamenti · 10 finiti [Mostra]»): il titolo della testa veniva troncato perché a destra il conteggio e il tasto «Mostra» non andavano a capo.
+- oggi/113: il conteggio sta in uno `<span>` accanto al tasto; se gli appuntamenti sono finiti tutti scrive solo «tutti e N finiti» (un solo «1 finito»), altrimenti «N appuntamenti · M finiti».
+- oggi/011 (CSS): nelle teste con `.v12-mostra` il titolo non si restringe (`flex: none`); conteggio e tasto stanno a destra e vanno a capo se lo spazio non basta.
+- Test: tests/t56.js (computer, 900 px, telefono; giornata finita e a metà). Prove 33 su 33 (t52-golden si lancia sul Mac).

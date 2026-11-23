@@ -151,7 +151,10 @@ function vistaOggi() {
     const head = [...f.querySelectorAll('p.list-head')].find(x => /La giornata/.test(x.textContent));
     if (passati && head) {
       const n = head.querySelector('.mono');
-      if (n) n.innerHTML = `${escHtml(n.textContent)}${n.textContent ? ' · ' : ''}${passati} finiti <button type="button" class="v12-mostra" data-act="v12-passati">${ui.v12Passati ? 'Nascondi' : 'Mostra'}</button>`;
+      if (n) {
+        const tot = parseInt(n.textContent, 10), conta = tot === passati ? `${passati === 1 ? '1 finito' : `tutti e ${passati} finiti`}` : `${escHtml(n.textContent)}${n.textContent ? ' · ' : ''}${passati} finiti`; // v54: se sono finiti tutti, basta dirlo una volta
+        n.innerHTML = `<span>${conta}</span><button type="button" class="v12-mostra" data-act="v12-passati">${ui.v12Passati ? 'Nascondi' : 'Mostra'}</button>`;
+      }
     }
     // in cima
     const vh = f.querySelector('.vh');

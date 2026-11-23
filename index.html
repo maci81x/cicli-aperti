@@ -1744,7 +1744,10 @@ button.sn-r { width: 100%; cursor: pointer; }
 .v12-tempo-corpo .banner-piano { margin: 0; }
 .v12-oggi .giornata .evt-passato { display: none; }
 .v12-oggi.mostra-passati .giornata .evt-passato { display: grid; opacity: .6; }
-.v12-mostra { margin-left: 6px; padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--primary-ink); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
+/* v54: il titolo «La giornata» non si taglia mai; conteggio e tasto vanno a capo a destra */
+.list-head:has(.v12-mostra) > span:first-child { flex: none; }
+.list-head > span.mono:has(.v12-mostra) { flex: 1 1 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px 8px; }
+.v12-mostra { margin-left: 0; padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--primary-ink); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
 .v12-unisci { align-self: flex-end; margin: 0 0 4px auto; display: block; min-height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-caption); font-weight: 700; }
 .v12-capito { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); margin: 0 0 var(--sp-2); font-size: var(--fs-label); }
 .v12-capito span { color: var(--text-2); font-size: var(--fs-caption); }
@@ -17248,7 +17251,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-23 v53 riordino';
+const VERSIONE_APP = '2026-11-23 v54';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -20593,7 +20596,10 @@ function vistaOggi() {
     const head = [...f.querySelectorAll('p.list-head')].find(x => /La giornata/.test(x.textContent));
     if (passati && head) {
       const n = head.querySelector('.mono');
-      if (n) n.innerHTML = `${escHtml(n.textContent)}${n.textContent ? ' · ' : ''}${passati} finiti <button type="button" class="v12-mostra" data-act="v12-passati">${ui.v12Passati ? 'Nascondi' : 'Mostra'}</button>`;
+      if (n) {
+        const tot = parseInt(n.textContent, 10), conta = tot === passati ? `${passati === 1 ? '1 finito' : `tutti e ${passati} finiti`}` : `${escHtml(n.textContent)}${n.textContent ? ' · ' : ''}${passati} finiti`; // v54: se sono finiti tutti, basta dirlo una volta
+        n.innerHTML = `<span>${conta}</span><button type="button" class="v12-mostra" data-act="v12-passati">${ui.v12Passati ? 'Nascondi' : 'Mostra'}</button>`;
+      }
     }
     // in cima
     const vh = f.querySelector('.vh');
