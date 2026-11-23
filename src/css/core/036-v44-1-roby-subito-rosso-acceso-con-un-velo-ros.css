@@ -1,18 +1,4 @@
 /* v44.1 · Roby: Subito rosso acceso con un velo rosso sulla riga; Importante blu; obiettivi blu scuro; Delega ocra */
-html:root, html[data-theme="light"] {
-  --q1: #B42318; --q1-mark: #D92D20; --q1-soft: #FDEEEC;
-  --q2: #1D4ED8; --q2-mark: #2563EB; --q2-soft: #EBF1FE;
-  --q3: #8A5A00; --q3-mark: #A16207; --q3-soft: #FBF1DC;
-  --danger: #B42318; --danger-soft: #FDEEEC;
-  --v26-ob-bg: #EEF0F8; --v26-ob-bordo: #C7CCE6; --v26-ob-ink: #1E3A8A;
-}
-html:root[data-theme="dark"] {
-  --q1: #FF8A80; --q1-mark: #F97066; --q1-soft: #3A1C1A;
-  --q2: #93B4FF; --q2-mark: #7EA6FF; --q2-soft: #1B2744;
-  --q3: #E9B949; --q3-mark: #E9B949; --q3-soft: #33270F;
-  --danger: #FF8A80; --danger-soft: #3A1C1A;
-  --v26-ob-bg: #1A2038; --v26-ob-bordo: #2E3A66; --v26-ob-ink: #B4C6FF;
-}
 html:root .item.p-q1:not(.is-done) .item-row { background: var(--q1-soft); }
 html:root .item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid color-mix(in srgb, var(--q1-mark) 22%, var(--border)); }
 html:root .item.p-q1:not(.is-done) .check-box { border-color: var(--q1-mark); }

@@ -94,12 +94,15 @@ function famiglieInLinea() {
     for (const m of t.matchAll(/\.style\.setProperty\(\s*['"`]([^'"`]+)/g)) fam.add(famiglia(m[1]));
     if (/\.style\.cssText|setAttribute\(\s*['"]style/.test(t)) tutto = true;
     for (const m of t.matchAll(/style=\\?["']([^"']*)\\?["']/g)) {
-      const v = m[1];
-      if (v.includes('${') && !/^[^$]*(\$\{[^}]*\}[^$]*)*$/.test(v)) tutto = true;
+      // i ${…} al posto di un valore non contano; al posto di una proprietà: una costante del file (`const x = \`…\``)
+      // si legge, la copia dello stile in linea già scritto (getAttribute('style')) non aggiunge proprietà, il resto vale «tutte»
+      let v = m[1].replace(/\$\{(\w+)\}/g, (z, nome) => { const c = t.match(new RegExp('const ' + nome + ' = `([^`]*)`')); return c ? c[1] : z; });
+      v = v.replace(/\$\{[^}]*getAttribute\(['"]style['"]\)[^}]*\}/g, '');
       const pezzi = v.split(';').map(x => x.trim()).filter(Boolean);
-      for (const x of pezzi) { const k = x.split(':')[0].trim(); if (/^[a-z-]+$/.test(k)) fam.add(famiglia(k)); else tutto = true; }
+      for (const x of pezzi) { const k = x.split(':')[0].trim(); if (/^[a-z-]+$/.test(k)) fam.add(famiglia(k)); else if (/^\$\{[^}]*getAttribute\($/.test(x)) { /* copia dello stile in linea già scritto */ } else if (x.trim()) { tutto = true; console.error('stile in linea non leggibile: ' + x.slice(0, 60)); } }
     }
   }
+  if (process.env.MOTIVI) console.error('in linea: ' + [...fam].sort().join(' ') + (tutto ? ' + TUTTE' : ''));
   return { fam, tutto };
 }
 
@@ -117,7 +120,9 @@ function salvaFogli(toccati) {
   if (PROVA) return;
   for (const fo of toccati) {
     // regole rimaste vuote (solo commenti o niente) e @media vuote spariscono
-    fo.root.walkRules(r => { if (!r.nodes.some(n => n.type === 'decl')) { const prima = r.prev(); if (prima && prima.type === 'comment' && !/\n\s*\n/.test(r.raws.before || '')) prima.remove(); r.remove(); } });
+    // regola senza dichiarazioni: sparisce con i commenti che ha dentro e con quello sulla sua stessa riga subito dopo;
+    // i commenti sopra (spesso intestazioni di sezione) restano
+    fo.root.walkRules(r => { if (!r.nodes.some(n => n.type === 'decl')) { const dopo = r.next(); if (dopo && dopo.type === 'comment' && !/\n/.test(dopo.raws.before || '')) dopo.remove(); r.remove(); } });
     fo.root.walkAtRules(a => { if (/media/i.test(a.name) && !a.nodes.some(n => n.type !== 'comment')) a.remove(); });
     fs.writeFileSync(path.join('src', fo.f), fo.root.toString());
   }
@@ -158,14 +163,17 @@ function tavolozza() {
     if (da === null && gen !== null) throw new Error(`${n}: sparisce con scuro + contrasto`);
     if (da !== null && da !== gen) B3.set(n, da);
   }
-  const blocco = (sel, m, nota) => m.size ? `/* ${nota} */\n${sel} {\n${[...m].map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}\n` : '';
+  // il commento che stava subito prima della dichiarazione vincente (es. «/* raggi */») viene con lei
+  const commentoDi = (stato, n) => { const x = stato.get(n); const c = x && x.d.d.prev(); return c && c.type === 'comment' ? c.text : null; };
+  const scritti = new Set();
+  const blocco = (sel, m, nota, stato) => m.size ? `/* ${nota} */\n${sel} {\n${[...m].map(([k, v]) => { const c = stato && commentoDi(stato, k); const riga = c && !scritti.has(c) ? `  /* ${c} */\n` : ''; if (c) scritti.add(c); return `${riga}  ${k}: ${v};`; }).join('\n')}\n}\n` : '';
   const file = `/* ══════════════════════════════════════════════════════════════
    Tavolozza: tutte le variabili della radice in un posto solo (fase E del riordino, 23/11).
    Generata da tools/riordino/css_riordina.js tavolozza dai testi che vincevano in ogni stato
    (tema chiaro/scuro × contrasto alto); prima erano sparse in ${reg.length} regole di ${new Set(reg.map(r => r.foglio.f)).size} file (v1, v3, v9, v26, v30, v43, v44.1, v50).
    Per cambiare un colore si modifica qui. data-theme è sempre impostato su <html> dallo script in testa.
    ══════════════════════════════════════════════════════════════ */
-${blocco(':root', B0, 'tema chiaro (e base di tutti gli stati)')}${blocco(':root[data-theme="dark"]', B1, 'tema scuro: solo quello che cambia')}${blocco(':root[data-contrast="alto"]', B2, 'contrasto alto (tema chiaro; vale anche nello scuro se non ridefinito sotto)')}${blocco(':root[data-theme="dark"][data-contrast="alto"]', B3, 'tema scuro + contrasto alto')}`;
+${blocco(':root', B0, 'tema chiaro (e base di tutti gli stati)', S('light-no'))}${blocco(':root[data-theme="dark"]', B1, 'tema scuro: solo quello che cambia')}${blocco(':root[data-contrast="alto"]', B2, 'contrasto alto (tema chiaro; vale anche nello scuro se non ridefinito sotto)')}${blocco(':root[data-theme="dark"][data-contrast="alto"]', B3, 'tema scuro + contrasto alto')}`;
   // togli le dichiarazioni --x dalle regole della radice
   const toccati = new Set(); let tolte = 0;
   for (const r of reg) for (const d of r.decls) if (d.p.startsWith('--')) { d.d.remove(); tolte++; toccati.add(r.foglio); }
@@ -273,7 +281,7 @@ function importanti() {
     else { tolti.push(`${s0} { ${d.p} } (${dove(r)})`); d.d.important = false; d.d.raws.important = undefined; }
   }
   console.log(`importanti: ${coperte.length} dichiarazioni coperte tolte, ${tolti.length} !important tolti, ${restano.length} restano`);
-  if (PROVA) { coperte.forEach(x => console.log('  coperta: ' + x)); tolti.forEach(x => console.log('  tolto: ' + x)); }
+  if (PROVA) { coperte.forEach(x => console.log('  coperta: ' + x)); tolti.forEach(x => console.log('  tolto: ' + x)); if (process.env.MOTIVI) restano.forEach(x => console.log('  resta' + x.slice(1))); }
   scriviCasi('!important che restano', restano.length ? restano : ['nessuno']);
   salvaFogli(new Set(fogli.filter(f => !f.esterno)));
 }

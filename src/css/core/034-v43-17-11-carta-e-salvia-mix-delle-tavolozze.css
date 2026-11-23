@@ -1,37 +1,6 @@
 /* ══ v43 · 17/11 — «Carta e salvia»: mix delle tavolozze A e C (canvas, sezione 16). Meno colore, più ordine.
    Un colore = un significato: inchiostro per il testo, salvia per le azioni, terracotta solo per Subito,
    prugna per gli appuntamenti, blu per gli obiettivi. Niente più caselle rosa piene. ══ */
-html:root, html[data-theme="light"] {
-  --bg: #F6F4EF; --surface: #FFFFFF; --surface-2: #F0EDE6; --surface-3: #FFFFFF;
-  --border: #E7E2D7; --border-strong: #9A9486;
-  --text: #1B1A17; --text-2: #5C574D; --text-3: #6B665B; --done-title: #6B665B; --done-meta: #6B665B;
-  --primary: #2F6B57; --primary-deep: #234F41; --primary-ink: #2F6B57; --primary-soft: #E6F0EB; --on-primary: #FFFFFF;
-  --q4: #6B665B; --q4-mark: #9A9486; --q4-soft: #F0EDE6;
-  --evt: #55548A; --evt-mark: #5B5A8E; --evt-soft: #EFEFF7; --v24-tratto: #B9B8D8;
-  --pensa: #F7F2E2; --pensa-bordo: #DCCB8E; --pensa-ink: #5E4A00; --warn: #8A5A00; --warn-soft: #F7EED6;
-  --inverse-bg: #1D2A24; --inverse-text: #EEF2EE; --inverse-accent: #A7E3C5;
-  --ring: #2F6B57;
-  --shadow-1: 0 1px 2px rgba(27, 26, 23, .05);
-  --shadow-2: 0 1px 2px rgba(27, 26, 23, .05), 0 6px 18px rgba(27, 26, 23, .06);
-  --v31-notte: #1D2A24; --v31-notte-2: #26352E; --v31-notte-3: #344A40; --v31-luce: #A7E3C5; --v31-su-notte: #EEF2EE; --v31-su-notte-2: #B5C4BB;
-  --v31-hl: #E9D27A;
-  --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
-  --v34-io: #FFFFFF; --v34-io-ink: #55548A; --v34-altri: #EFEFF7; --v34-altri-ink: #1B1A17; --v34-altri-2: #55548A;
-  --v34-lib: #F1F6F2; --v34-lib-bordo: #A9CBB9; --v34-lib-ink: #2F6B57;
-}
-html:root[data-theme="dark"] {
-  --bg: #121513; --surface: #1A1E1B; --surface-2: #232823; --surface-3: #2D332E;
-  --border: #2D332E; --border-strong: #8C968E;
-  --text: #EEF1EC; --text-2: #B9C1BA; --text-3: #A0A9A1; --done-title: #B9C1BA; --done-meta: #A0A9A1;
-  --primary: #7FC8A9; --primary-deep: #5FAE8D; --primary-ink: #9ADBBF; --primary-soft: #1C3229; --on-primary: #0E1A15;
-  --evt: #B9B6E8; --evt-mark: #B9B6E8; --evt-soft: #25243A; --v24-tratto: #55548A;
-  --pensa: #2C2714; --pensa-bordo: #6F6226; --pensa-ink: #EAD78F;
-  --inverse-bg: #EEF1EC; --inverse-text: #1D2A24; --inverse-accent: #2F6B57; --ring: #9ADBBF;
-  --v31-notte: #0E1411; --v31-notte-2: #18211C; --v31-notte-3: #26332C;
-  --v34-sub-bg: transparent; --v34-sub-bordo: var(--border); --v34-sub-ink: var(--text);
-  --v34-io: var(--surface); --v34-io-ink: #B9B6E8; --v34-altri: #25243A; --v34-altri-ink: #EEF1EC; --v34-altri-2: #B9B6E8;
-  --v34-lib: #152420; --v34-lib-bordo: #2F5A4A; --v34-lib-ink: #9ADBBF;
-}
 /* Subito: un segno terracotta a sinistra, niente riquadro rosa */
 html:root .item.p-q1:not(.is-done) .item-row { background: transparent; box-shadow: none; position: relative; }
 html:root .item.p-q1:not(.is-done) .item-row::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--q1-mark); }

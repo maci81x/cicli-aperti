@@ -10,23 +10,6 @@
    inchiostro = testo e azioni · rosso = Subito / scade · verde = Importante / tempo libero ·
    blu = obiettivi · viola = appuntamenti · evidenziatore = dove sei.
    ══════════════════════════════════════════════════════════════ */
-html:root, html[data-theme="light"] {
-  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
-  --scrim: rgba(28, 27, 24, .42);
-  --shadow-3: 0 18px 44px rgba(40, 32, 12, .18), 0 2px 6px rgba(40, 32, 12, .06);
-}
-html:root[data-theme="dark"] {
-  --q4: #A39B8A; --q4-mark: #8D8676; --q4-soft: #24221C;
-  --warn: #F2C46A; --warn-soft: #3A2C10;
-  --scrim: rgba(0, 0, 0, .6);
-  --shadow-1: 0 0 0 1px #2C2A23;
-  --shadow-2: 0 0 0 1px #2C2A23, 0 6px 16px rgba(0, 0, 0, .4);
-  --shadow-3: 0 0 0 1px #2C2A23, 0 20px 48px rgba(0, 0, 0, .55);
-  --v31-hl: #E9C64A;
-}
-html:root[data-contrast="alto"] { --border: #8A8270; --border-strong: #55503F; --text-2: #3A362B; --text-3: #47423A; --done-meta: #47423A; }
-html:root[data-theme="dark"][data-contrast="alto"] { --border: #6B6553; --border-strong: #BDB5A4; --text-2: #E2DBCC; --text-3: #CFC7B6; --done-meta: #CFC7B6; }
 
 /* titoli a penna: serif solo per i titoli, il resto resta da leggere */
 .logo { font-family: var(--font-serif); font-weight: 650; letter-spacing: -.02em; font-size: 19px; }

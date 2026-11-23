@@ -11,7 +11,6 @@
 @media (hover: hover) { .evt-riga[data-act="evt-apri"]:hover { filter: brightness(.98); } }
 .evt-quando { margin: 0 0 var(--sp-3); }
 /* 25/10 · mete, tempo per il futuro, falla ora, sera, deleghe (rivisto 25/10: colori neutri per la meta, barra con la fascia 25–30) */
-:root { --meta-ink: var(--text-2); }   /* la meta non usa i colori dei tipi: testo secondario + bandierina */
 .meta-tag { display: inline-flex; align-items: center; gap: 3px; flex: 0 1 auto; min-width: 0; max-width: 13em; color: var(--meta-ink); font-weight: var(--fw-strong); white-space: nowrap; overflow: hidden; }
 .meta-tag > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .meta-tag .ti { font-size: 14px; flex: none; }

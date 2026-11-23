@@ -1,6 +1,7 @@
 # Ordine dei pezzi di index.html: build.js li unisce in questo ordine.
 # L'ordine conta: non riordinare senza aver letto docs/PIANO_RIORDINO.md.
 testa.html
+css/core/000-tavolozza.css
 css/core/000-base.css
 css/core/001-v3.css
 css/cattura/002-v8-riepilogo-della-frase-sotto-il-campo.css

@@ -13,7 +13,6 @@
 .v26-testa > .vh-board { margin-bottom: 0; }
 @media (max-width: 1280px) { .v26-testa { grid-template-columns: minmax(0, 1fr); } }
 .v26-obiettivi { padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--v26-ob-bg, #EEF5FF); border: 1.5px solid var(--v26-ob-bordo, #9EC3F5); color: var(--text); margin-bottom: var(--sp-3); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --v26-ob-bg: #16243A; --v26-ob-bordo: #2F4F7A; --v26-ob-ink: #9CC5F2; } }
 .v26-ob-h { display: flex; align-items: center; gap: var(--sp-2); }
 .v26-ob-h b { flex: 1; color: var(--v26-ob-ink); font-size: var(--fs-label); }
 .v26-ob-h .mono { color: var(--v26-ob-ink); font-size: var(--fs-caption); }

@@ -1,45 +1,14 @@
 /* ══════════════════════════════════════════════════════════════
    DESIGN SYSTEM — token e componenti di DESIGN_SYSTEM.md
    ══════════════════════════════════════════════════════════════ */
-:root {
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
-  /* scala tipografica: 5 livelli */
-  /* in rem: «Dimensione testo» (Impostazioni) scala la radice a 100 / 112 / 125 % */
-  --fs-display: 1.75rem; --lh-display: 2.125rem;
-  --fs-title: 1.25rem;   --lh-title: 1.625rem;
-  --fs-body: 1rem;       --lh-body: 1.5rem;
-  --fs-label: .875rem;   --lh-label: 1.25rem;
-  --fs-caption: .75rem;  --lh-caption: 1rem;
-  --fw-regular: 500;
-  --fw-strong: 700;
-
-  /* spaziature: griglia a 4 */
-  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
-  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
-
-  /* raggi */
-  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-full: 999px;
-
-  /* misure */
-  --tap: 44px;
-  --nav-h: 56px;
-
-  /* movimento */
-  --ease-out: cubic-bezier(.2, .8, .2, 1);
-  --ease-pop: cubic-bezier(.3, 1.6, .5, 1);
-  --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms;
-}
 
 :root, [data-theme="light"] {
   color-scheme: light;
-  --done-opacity: .6;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
   /* nel tema scuro le cose fatte salgono di un livello: titolo su testo-2, dettagli su testo-3 pieni */
-  --done-opacity: 1;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

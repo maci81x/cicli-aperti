@@ -53,8 +53,6 @@
 .semplice .tabbar { grid-template-columns: repeat(2, 1fr); }
 
 /* contrasto alto: bordi più marcati, testo secondario più scuro, badge con bordo */
-[data-contrast="alto"] { --done-opacity: 1; }
-[data-contrast="alto"][data-theme="dark"] { --border: #71807B; --border-strong: #B7C2BE; --text-2: #E2E9E6; --text-3: #CBD5D1; --done-meta: #CBD5D1; }
 [data-contrast="alto"] .tag, [data-contrast="alto"] .rapida, [data-contrast="alto"] .badge, [data-contrast="alto"] .hint-quando { padding: 0 6px; border: 1px solid currentColor; border-radius: var(--r-full); }
 [data-contrast="alto"] .chip, [data-contrast="alto"] .gchip, [data-contrast="alto"] .input { border-width: 2px; }
 [data-contrast="alto"] .group { border-color: var(--border-strong); }

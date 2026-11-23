@@ -1,0 +1,201 @@
+/* ══════════════════════════════════════════════════════════════
+   Tavolozza: tutte le variabili della radice in un posto solo (fase E del riordino, 23/11).
+   Generata da tools/riordino/css_riordina.js tavolozza dai testi che vincevano in ogni stato
+   (tema chiaro/scuro × contrasto alto); prima erano sparse in 16 regole di 8 file (v1, v3, v9, v26, v30, v43, v44.1, v50).
+   Per cambiare un colore si modifica qui. data-theme è sempre impostato su <html> dallo script in testa.
+   ══════════════════════════════════════════════════════════════ */
+/* tema chiaro (e base di tutti gli stati) */
+:root {
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* in rem: «Dimensione testo» (Impostazioni) scala la radice a 100 / 112 / 125 % */
+  --fs-display: 1.75rem;
+  --lh-display: 2.125rem;
+  --fs-title: 1.25rem;
+  --lh-title: 1.625rem;
+  --fs-body: 1rem;
+  --lh-body: 1.5rem;
+  --fs-label: .875rem;
+  --lh-label: 1.25rem;
+  --fs-caption: .75rem;
+  --lh-caption: 1rem;
+  --fw-regular: 500;
+  --fw-strong: 700;
+  /* spaziature: griglia a 4 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  /* raggi */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-full: 999px;
+  /* misure */
+  --tap: 44px;
+  --nav-h: 56px;
+  /* movimento */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-pop: cubic-bezier(.3, 1.6, .5, 1);
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 320ms;
+  --done-opacity: .6;
+  --border: #E7E2D7;
+  --border-strong: #9A9486;
+  --text-2: #5C574D;
+  --text-3: #6B665B;
+  --done-meta: #6B665B;
+  --meta-ink: var(--text-2);
+  --v26-ob-bg: #EEF0F8;
+  --v26-ob-bordo: #C7CCE6;
+  --v26-ob-ink: #1E3A8A;
+  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --scrim: rgba(28, 27, 24, .42);
+  --shadow-3: 0 18px 44px rgba(40, 32, 12, .18), 0 2px 6px rgba(40, 32, 12, .06);
+  --q4: #6B665B;
+  --q4-mark: #9A9486;
+  --q4-soft: #F0EDE6;
+  --warn: #8A5A00;
+  --warn-soft: #F7EED6;
+  --shadow-1: 0 1px 2px rgba(27, 26, 23, .05);
+  --shadow-2: 0 1px 2px rgba(27, 26, 23, .05), 0 6px 18px rgba(27, 26, 23, .06);
+  --v31-hl: #E9D27A;
+  --bg: #F1F4F2;
+  --surface: #FFFFFF;
+  --surface-2: #E8EDEA;
+  --surface-3: #FFFFFF;
+  --text: #1B1A17;
+  --done-title: #6B665B;
+  --primary: #2F6B57;
+  --primary-deep: #234F41;
+  --primary-ink: #2F6B57;
+  --primary-soft: #E6F0EB;
+  --on-primary: #FFFFFF;
+  --evt: #55548A;
+  --evt-mark: #5B5A8E;
+  --evt-soft: #EFEFF7;
+  --v24-tratto: #B9B8D8;
+  --pensa: #F7F2E2;
+  --pensa-bordo: #DCCB8E;
+  --pensa-ink: #5E4A00;
+  --inverse-bg: #1D2A24;
+  --inverse-text: #EEF2EE;
+  --inverse-accent: #A7E3C5;
+  --ring: #2F6B57;
+  --v31-notte: #1D2A24;
+  --v31-notte-2: #26352E;
+  --v31-notte-3: #344A40;
+  --v31-luce: #A7E3C5;
+  --v31-su-notte: #EEF2EE;
+  --v31-su-notte-2: #B5C4BB;
+  --v34-sub-bg: transparent;
+  --v34-sub-bordo: var(--border);
+  --v34-sub-ink: var(--text);
+  --v34-io: #FFFFFF;
+  --v34-io-ink: #55548A;
+  --v34-altri: #EFEFF7;
+  --v34-altri-ink: #1B1A17;
+  --v34-altri-2: #55548A;
+  --v34-lib: #F1F6F2;
+  --v34-lib-bordo: #A9CBB9;
+  --v34-lib-ink: #2F6B57;
+  --q1: #B42318;
+  --q1-mark: #D92D20;
+  --q1-soft: #FDEEEC;
+  --q2: #1D4ED8;
+  --q2-mark: #2563EB;
+  --q2-soft: #EBF1FE;
+  --q3: #8A5A00;
+  --q3-mark: #A16207;
+  --q3-soft: #FBF1DC;
+  --danger: #B42318;
+  --danger-soft: #FDEEEC;
+}
+/* tema scuro: solo quello che cambia */
+:root[data-theme="dark"] {
+  --done-opacity: 1;
+  --border: #2D332E;
+  --border-strong: #8C968E;
+  --text-2: #B9C1BA;
+  --text-3: #A0A9A1;
+  --done-meta: #A0A9A1;
+  --v26-ob-bg: #1A2038;
+  --v26-ob-bordo: #2E3A66;
+  --v26-ob-ink: #B4C6FF;
+  --scrim: rgba(0, 0, 0, .6);
+  --shadow-3: 0 0 0 1px #2C2A23, 0 20px 48px rgba(0, 0, 0, .55);
+  --q4: #A39B8A;
+  --q4-mark: #8D8676;
+  --q4-soft: #24221C;
+  --warn: #F2C46A;
+  --warn-soft: #3A2C10;
+  --shadow-1: 0 0 0 1px #2C2A23;
+  --shadow-2: 0 0 0 1px #2C2A23, 0 6px 16px rgba(0, 0, 0, .4);
+  --v31-hl: #E9C64A;
+  --bg: #121513;
+  --surface: #1A1E1B;
+  --surface-2: #232823;
+  --surface-3: #2D332E;
+  --text: #EEF1EC;
+  --done-title: #B9C1BA;
+  --primary: #7FC8A9;
+  --primary-deep: #5FAE8D;
+  --primary-ink: #9ADBBF;
+  --primary-soft: #1C3229;
+  --on-primary: #0E1A15;
+  --evt: #B9B6E8;
+  --evt-mark: #B9B6E8;
+  --evt-soft: #25243A;
+  --v24-tratto: #55548A;
+  --pensa: #2C2714;
+  --pensa-bordo: #6F6226;
+  --pensa-ink: #EAD78F;
+  --inverse-bg: #EEF1EC;
+  --inverse-text: #1D2A24;
+  --inverse-accent: #2F6B57;
+  --ring: #9ADBBF;
+  --v31-notte: #0E1411;
+  --v31-notte-2: #18211C;
+  --v31-notte-3: #26332C;
+  --v34-io: var(--surface);
+  --v34-io-ink: #B9B6E8;
+  --v34-altri: #25243A;
+  --v34-altri-ink: #EEF1EC;
+  --v34-altri-2: #B9B6E8;
+  --v34-lib: #152420;
+  --v34-lib-bordo: #2F5A4A;
+  --v34-lib-ink: #9ADBBF;
+  --q1: #FF8A80;
+  --q1-mark: #F97066;
+  --q1-soft: #3A1C1A;
+  --q2: #93B4FF;
+  --q2-mark: #7EA6FF;
+  --q2-soft: #1B2744;
+  --q3: #E9B949;
+  --q3-mark: #E9B949;
+  --q3-soft: #33270F;
+  --danger: #FF8A80;
+  --danger-soft: #3A1C1A;
+}
+/* contrasto alto (tema chiaro; vale anche nello scuro se non ridefinito sotto) */
+:root[data-contrast="alto"] {
+  --done-opacity: 1;
+  --border: #8A8270;
+  --border-strong: #55503F;
+  --text-2: #3A362B;
+  --text-3: #47423A;
+  --done-meta: #47423A;
+}
+/* tema scuro + contrasto alto */
+:root[data-theme="dark"][data-contrast="alto"] {
+  --border: #6B6553;
+  --border-strong: #BDB5A4;
+  --text-2: #E2DBCC;
+  --text-3: #CFC7B6;
+  --done-meta: #CFC7B6;
+}

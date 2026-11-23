@@ -1,4 +1,3 @@
 /* v50 · sfondo salvia chiarissimo (solo tema chiaro) */
-html:root:not([data-theme="dark"]) { --bg: #F1F4F2; --surface-2: #E8EDEA; }
 html:root:not([data-theme="dark"]) body, html:root:not([data-theme="dark"]) #main { background: var(--bg); }
 .v47-testa { background: var(--bg); }
