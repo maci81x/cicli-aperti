@@ -28,13 +28,6 @@ async function v26CaricaFissi() {
 const v26EventoFisso = e => !!e && !e.routine && chiaviEvento(e).some(k => state.evtFissi.has(k));
 const v26CosaFissa = c => !!c && !c.done && (computeEffectiveQ(c) === 1 || (!!c.inderogabile && state.inderoColOk));
 
-// la riga di una cosa: classe per il rosso
-const _rigaV26 = riga;
-riga = function (r, o) {
-  const h = _rigaV26.apply(this, arguments);
-  try { if (r && r.c && !r.fatto && v26CosaFissa(r.c)) return h.replace(/^(\s*<div class="item )/, '$1v26-fisso '); } catch (_) {}
-  return h;
-};
 // la riga di un appuntamento: rosso + «non si sposta»
 const _rigaEventoV26 = rigaEvento;
 rigaEvento = function (e) {

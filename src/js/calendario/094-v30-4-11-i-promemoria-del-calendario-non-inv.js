@@ -111,14 +111,6 @@ colonnaDaPianificare = function () {
   return h.replace(/(<div class="chips chips-wrap dp-chips"[^>]*>)/, '$1' + chip);
 };
 AZIONI['v30-dp-rivedere'] = () => { ui.dp.rivedere = !ui.dp.rivedere; render(); };
-const _rigaV30 = riga;
-riga = function (r, opz) {
-  const h = _rigaV30.apply(this, arguments);
-  try {
-    if (!r || !r.c || !r.c.da_rivedere || r.fatto || r.c.done) return h;
-    return h.replace(/<span class="item-meta">/, '<span class="item-meta"><span class="tag-v30" title="Promemoria passato del calendario: è ancora da fare?"><i class="ti ti-calendar-question" aria-hidden="true"></i>da rivedere</span>');
-  } catch (_) { return h; }
-};
 // basta toccarla (spostarla, cambiarla, chiuderla) e non è più «da rivedere»
 const _patchCicloV30 = patchCiclo;
 patchCiclo = function (id, patch) {

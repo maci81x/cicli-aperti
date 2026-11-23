@@ -203,14 +203,6 @@ async function collegaMeta(id, metaId, silenzioso) {
 document.addEventListener('change', e => { if (e.target.id === 'f-meta' && editingId) collegaMeta(editingId, e.target.value); });
 
 // ─── Nella riga: il segno della meta ───
-const _rigaPr = riga;
-riga = function (r, opz) {
-  const h = _rigaPr(r, opz);
-  const m = r && r.c && metaDi(r.c);
-  if (!m) return h;
-  const tag = `<span class="meta-tag" data-tip="Serve a: ${esc(m.testo)}"><i class="ti ti-flag" aria-hidden="true"></i><span><span class="sr-only">Meta: </span>${escHtml(corta(m.testo, 28))}</span></span>`;
-  return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + dentro + (dentro.trim() ? '<span class="sep">·</span>' : '') + tag + b);
-};
 
 // ─── Riordina: un'Importante ti avvicina a una meta? Se no: Delega o Lascia stare (dire no) ───
 const _disegnaRiordinaPr = disegnaRiordina;

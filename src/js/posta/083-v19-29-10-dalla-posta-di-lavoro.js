@@ -12,12 +12,6 @@ const POSTA_TIPI = {
 const daPosta = c => !!(c && (c.fonte === 'posta' || (Array.isArray(c.posta_thread) && c.posta_thread.length)));
 const linkMail = id => `https://mail.google.com/mail/?authuser=r.macinai%40sisoluzioniimpresa.it#all/${encodeURIComponent(id)}`;
 const tagPosta = c => `<span class="tag-posta" title="Dalla posta di lavoro"><i class="ti ti-mail" aria-hidden="true"></i>${(POSTA_TIPI[c.posta_tipo] || {}).l || 'Posta'}</span>`;
-const _rigaV19 = riga;
-riga = function (r, opz) {
-  const h = _rigaV19.apply(this, arguments);
-  if (!r || !r.c || !daPosta(r.c)) return h;
-  return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + tagPosta(r.c) + (dentro.trim() ? '<span class="sep">·</span>' : '') + dentro + b);
-};
 const _apriDettaglioV19 = apriDettaglio;
 apriDettaglio = function (id) {
   const r = _apriDettaglioV19.apply(this, arguments);

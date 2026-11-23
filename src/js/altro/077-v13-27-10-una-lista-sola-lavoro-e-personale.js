@@ -33,12 +33,6 @@ function switchCtx(ctx) {
 
 // --- l'etichetta «Personale» ---
 const TAG_PERS = '<span class="tag-pers">Personale</span>';
-const _rigaV13 = riga;
-riga = function (r, opz) {
-  const h = _rigaV13.apply(this, arguments);
-  if (!r || !r.c || r.c.ctx !== 'personale' || state.filtro === 'personale' && filtroQui()) return h;
-  return h.replace(/(<span class="item-meta">)([\s\S]*?)(<\/span><\/button>)/, (x, a, dentro, b) => a + dentro + (dentro.trim() ? '<span class="sep">·</span>' : '') + TAG_PERS + b);
-};
 const _rigaSceltaSnV13 = rigaSceltaSn;
 rigaSceltaSn = function (id) {
   const h = _rigaSceltaSnV13.apply(this, arguments), c = ciclo(id);
