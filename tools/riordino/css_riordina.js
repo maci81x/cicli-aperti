@@ -199,12 +199,21 @@ function unisci() {
     }
     return null;
   };
+  // sposta le dichiarazioni della regola «da» nella regola «a» (in testa o in coda); il commento sulla stessa riga di «da»
+  // viene con le dichiarazioni, quello sopra «da» va sopra «a» (o resta dov'è se «a» ne ha già uno)
   const sposta = (da, a, inTesta) => {
-    const nodi = da.rule.nodes.slice();
-    const prima = da.rule.prev(); const commento = prima && prima.type === 'comment' && !/\n\s*\n/.test(da.rule.raws.before || '') ? prima : null;
-    if (inTesta) { const primo = a.rule.first; for (const n of nodi) { n.remove(); a.rule.insertBefore(primo, n); } }
-    else for (const n of nodi) { n.remove(); a.rule.append(n); }
-    if (commento) { commento.remove(); (inTesta ? a.rule.prepend.bind(a.rule) : a.rule.insertBefore.bind(a.rule, nodi[0]))(commento); }
+    const nodi = da.rule.nodes.filter(n => n.type === 'decl' || n.type === 'comment');
+    const dopo = da.rule.next(); const coda = dopo && dopo.type === 'comment' && !/\n/.test(dopo.raws.before || '') ? dopo : null;
+    const prima = da.rule.prev(); const sopra = prima && prima.type === 'comment' && /\n/.test(da.rule.raws.before || '') && !/\n\s*\n/.test(da.rule.raws.before || '') ? prima : null;
+    const sep = n => { n.raws.before = ' '; return n; };
+    if (coda) { coda.remove(); nodi.push(sep(coda)); }
+    const giaSopra = a.rule.prev() && a.rule.prev().type === 'comment';
+    if (sopra && giaSopra) { sopra.remove(); nodi.push(sep(sopra)); }   // «a» ha già il suo commento: questo va dentro, dopo le sue dichiarazioni
+    for (const n of nodi) n.remove();
+    if (inTesta) { const primo = a.rule.first; nodi.forEach(n => a.rule.insertBefore(primo, sep(n))); }
+    else nodi.forEach(n => a.rule.append(sep(n)));
+    a.rule.raws.semicolon = true;
+    if (sopra && !giaSopra) { sopra.remove(); a.rule.parent.insertBefore(a.rule, sopra); sopra.raws.before = a.rule.raws.before; }
     da.rule.remove();
   };
   // un'unione alla volta, poi si ricostruisce il modello

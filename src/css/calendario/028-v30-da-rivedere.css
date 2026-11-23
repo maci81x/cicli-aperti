@@ -70,8 +70,6 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
 /* ══════════════════════════════════════════════════════════════
    v32 · 05/11 — il telefono: più spazio, meno scorrere
    ══════════════════════════════════════════════════════════════ */
-/* elenchi più leggeri: le Subito non hanno più lo sfondo rosso, basta il segno rosso */
-.item.p-q1:not(.is-done) .item-row { background: var(--surface); }
 /* le intestazioni non vanno più a capo («La giornata») */
 .list-head > span:first-child { flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-head > span:last-child { min-width: 0; text-align: right; }
@@ -185,7 +183,7 @@ html[data-theme="dark"] .v31-tacche { background-image: repeating-linear-gradien
    Subito = casella rosa con bordo rosso (ovunque) · Importante = foglio bianco
    ══════════════════════════════════════════════════════════════ */
 /* Subito: tutta la casella */
-.item.p-q1:not(.is-done) .item-row { background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
+.item.p-q1:not(.is-done) .item-row { background: var(--surface); /* elenchi più leggeri: le Subito non hanno più lo sfondo rosso, basta il segno rosso */ background: var(--v34-sub-bg); box-shadow: inset 4px 0 0 var(--q1-mark); }
 .item.p-q1:not(.is-done) .item-title { color: var(--v34-sub-ink); font-weight: 600; }
 .item.p-q1:not(.is-done) .check-box { background: var(--surface); }
 .item.p-q1:not(.is-done) + .item.p-q1:not(.is-done) { border-top: 1px solid var(--v34-sub-bordo); }
