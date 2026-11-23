@@ -34,13 +34,4 @@ function v46Rimetti(a) {
   if (view && a.view && view.scrollTop !== a.view) view.scrollTop = a.view;
   if (a.win && Math.abs(window.scrollY - a.win) > 2) window.scrollTo(0, a.win);
 }
-{
-  const _disegnaV46 = disegna;
-  disegna = function () {
-    const a = v46Annota();
-    const r = _disegnaV46.apply(this, arguments);
-    if (a) { v46Rimetti(a); requestAnimationFrame(() => v46Rimetti(a)); }
-    return r;
-  };
-}
 

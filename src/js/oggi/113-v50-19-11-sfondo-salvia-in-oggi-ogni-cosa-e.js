@@ -1,14 +1,6 @@
 // v50 · 19/11 — sfondo salvia; in Oggi ogni cosa è una scheda a sé (Subito / Importante / Delega si distinguono);
 // «Da controllare» anche sul telefono; Delega da Smaltisci torna a Smaltisci
 // ══════════════════════════════════════════════════════════════
-{
-  const _disegnaV50 = disegna;
-  disegna = function () {
-    const r = _disegnaV50.apply(this, arguments);
-    const v = $('view'); if (v) v.classList.toggle('v50-oggi', ui.tab === 'oggi');
-    return r;
-  };
-}
 // vistaOggi: catena appiattita nella fase D del riordino (base + 15 strati); i passi girano nell'ordine di prima.
 //   passo 0 · oggi/012-v2-oggi.js
 //   passo 1 · core/073-03-24-10-iphone-la-vista-non-resta-scivolat.js

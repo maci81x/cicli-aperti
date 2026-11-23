@@ -600,11 +600,6 @@ document.addEventListener('input', e => {
   if (l) l.innerHTML = htmlDaPianificareLista();
 });
 window.matchMedia(`(min-width: ${V6.LARGO}px)`).addEventListener('change', () => render());
-const _disegnaV5 = disegna;
-disegna = function () {
-  _disegnaV5();
-  $('view').classList.toggle('largo', boardAttiva());
-};
 
 // ─── 4. RIORDINA: una cosa alla volta, le più vecchie prima ──
 ui.rio = null;

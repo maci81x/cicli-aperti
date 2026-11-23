@@ -46,12 +46,6 @@ function v33DopoDisegno() {
     }
   }
 }
-const _disegnaV33 = disegna;
-disegna = function () {
-  const r = _disegnaV33.apply(this, arguments);
-  try { v33DopoDisegno(); } catch (e) { console.warn('[v33] dopo:', e.message); }
-  return r;
-};
 let _v33Era = v33Largo();
 window.addEventListener('resize', () => { const ora = v33Largo(); if (ora !== _v33Era) { _v33Era = ora; render(); } });
 

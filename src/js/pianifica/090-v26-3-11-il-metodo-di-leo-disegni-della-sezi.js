@@ -312,11 +312,6 @@ vistaPianifica = function () {
   try { h = v26SegConGiorno(h); if (ui.pian === 'settimana') h = v26InserisciObiettivi(h); } catch (e) { console.warn('[v26] Pianifica:', e.message); }
   return h;
 };
-const _disegnaV26 = disegna;
-disegna = function () {
-  _disegnaV26.apply(this, arguments);
-  if (ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno' && window.innerWidth >= 768) $('view').classList.add('largo');
-};
 
 // --- il foglio di un giorno (PDF, un foglio per giorno) ---
 async function v26AssicuraSettimana(d) {

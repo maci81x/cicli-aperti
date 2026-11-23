@@ -6364,38 +6364,6 @@ function render() {
   Promise.resolve().then(() => { _renderInCoda = false; disegna(); });
 }
 
-function disegna() {
-  document.querySelectorAll('[data-tab]').forEach(b => {
-    if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-  });
-  $('ctx-lavoro').setAttribute('aria-pressed', String(state.ctx === 'lavoro'));
-  $('ctx-personale').setAttribute('aria-pressed', String(state.ctx === 'personale'));
-  updateGcalButton();
-  applyTheme();
-
-  const view = $('view');
-  if (state.loading && !state.cicli.length) { renderSkeleton(); return; }
-  const larga = ui.tab === 'pianifica' && !ui.sub && window.innerWidth >= 768;
-  view.classList.toggle('wide', larga);
-
-  // Tutto tiene fermo il campo di ricerca mentre si scrive: aggiorna solo l'elenco
-  const vista = (modoSemplice() ? 'semplice:' : '') + (ui.sub ? ui.tab + ':' + ui.sub : ui.tab);
-  if (ui.tab === 'tutto' && !ui.sub && view.dataset.vista === vista && $('tutto-corpo')) { aggiornaTutto(); return; }
-
-  const aperto = document.querySelector('.item.is-swiped');
-  const apertoId = aperto ? aperto.dataset.id : null;
-  let html = '';
-  if (ui.tab === 'oggi') html = vistaOggi();
-  else if (ui.tab === 'pianifica') html = vistaPianifica();
-  else if (ui.tab === 'tutto') html = ui.sub === 'attesa' ? vistaAttesa() : vistaTutto();
-  else html = ui.sub === 'fatte' ? vistaFatte() : ui.sub === 'guida' ? vistaGuida() : ui.sub === 'impostazioni' ? vistaImpostazioni() : vistaAltro();
-  view.dataset.vista = vista;
-  view.innerHTML = html;
-  if (ui.tab === 'tutto' && !ui.sub) aggiornaTutto();
-  if (ui.tab === 'pianifica' && ui.pian === 'settimana' && window.innerWidth >= 768) agganciaAgenda();
-  if (apertoId) { const el = view.querySelector(`.item[data-id="${apertoId}"]`); if (el && el.querySelector('.swipe-actions')) el.classList.add('is-swiped'); }
-  if (editingId && $('modalOverlay').classList.contains('open')) disegnaPassi(ciclo(editingId));
-}
 
 function renderSkeleton() {
   $('view').innerHTML = '<div class="vh"><div><h1>&nbsp;</h1></div></div>' + '<div class="skel"></div>'.repeat(5);
@@ -11667,11 +11635,6 @@ document.addEventListener('input', e => {
   if (l) l.innerHTML = htmlDaPianificareLista();
 });
 window.matchMedia(`(min-width: ${V6.LARGO}px)`).addEventListener('change', () => render());
-const _disegnaV5 = disegna;
-disegna = function () {
-  _disegnaV5();
-  $('view').classList.toggle('largo', boardAttiva());
-};
 
 // ─── 4. RIORDINA: una cosa alla volta, le più vecchie prima ──
 ui.rio = null;
@@ -16616,18 +16579,6 @@ function switchCtx(ctx) {
   try { localStorage.setItem(LS.CAT_FILTER, ''); } catch (_) { /* niente */ }
   render();
 }
-const _disegnaV13 = disegna;
-disegna = function () {
-  const r = _disegnaV13.apply(this, arguments);
-  [['ctx-tutto', 'tutto'], ['ctx-lavoro', 'lavoro'], ['ctx-personale', 'personale']].forEach(([id, v]) => { const b = $(id); if (b) b.setAttribute('aria-pressed', String(state.filtro === v)); });
-  const seg = document.querySelector('.top-ctx');
-  if (seg) {
-    const qui = ['oggi', 'tutto'].includes(ui.tab);
-    seg.style.visibility = qui ? '' : 'hidden';
-    seg.setAttribute('aria-label', 'Mostra');
-  }
-  return r;
-};
 
 // --- l'etichetta «Personale» ---
 const TAG_PERS = '<span class="tag-pers">Personale</span>';
@@ -17811,11 +17762,6 @@ aggiornaTutto = function () {
 
 // l'armadio usa tutta la larghezza, come la board della settimana
 const v25ArmadioAttivo = () => ui.tab === 'tutto' && !ui.sub && ui.tutto === 'armadio' && !modoSemplice() && window.innerWidth >= 768;
-const _disegnaV25 = disegna;
-disegna = function () {
-  _disegnaV25.apply(this, arguments);
-  if (v25ArmadioAttivo()) $('view').classList.add('largo');
-};
 const _aggiornaTuttoV25b = aggiornaTutto;
 aggiornaTutto = function () { _aggiornaTuttoV25b.apply(this, arguments); $('view').classList.toggle('largo', v25ArmadioAttivo() || boardAttiva()); };
 
@@ -18161,11 +18107,6 @@ vistaPianifica = function () {
   let h = _vistaPianificaV26.apply(this, arguments);
   try { h = v26SegConGiorno(h); if (ui.pian === 'settimana') h = v26InserisciObiettivi(h); } catch (e) { console.warn('[v26] Pianifica:', e.message); }
   return h;
-};
-const _disegnaV26 = disegna;
-disegna = function () {
-  _disegnaV26.apply(this, arguments);
-  if (ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno' && window.innerWidth >= 768) $('view').classList.add('largo');
 };
 
 // --- il foglio di un giorno (PDF, un foglio per giorno) ---
@@ -19465,12 +19406,6 @@ function v32AggiornaTesta() {
     tit.innerHTML = escHtml(t) + (ui.tab === 'oggi' ? ` <small>· ${gg} ${d.getDate()} ${mm}</small>` : '');
   }
 }
-const _disegnaV32 = disegna;
-disegna = function () {
-  const r = _disegnaV32.apply(this, arguments);
-  try { v32AggiornaTesta(); const main = $('main'); document.body.classList.toggle('v32-giu', v32Tel() && !!main && main.scrollTop > 56); } catch (e) { console.warn('[v32] testa:', e.message); }
-  return r;
-};
 v32AggiornaTesta();
 
 // ══════════════════════════════════════════════════════════════
@@ -19522,12 +19457,6 @@ function v33DopoDisegno() {
     }
   }
 }
-const _disegnaV33 = disegna;
-disegna = function () {
-  const r = _disegnaV33.apply(this, arguments);
-  try { v33DopoDisegno(); } catch (e) { console.warn('[v33] dopo:', e.message); }
-  return r;
-};
 let _v33Era = v33Largo();
 window.addEventListener('resize', () => { const ora = v33Largo(); if (ora !== _v33Era) { _v33Era = ora; render(); } });
 
@@ -19706,11 +19635,6 @@ AZIONI['v40-tutte'] = el => { ui.v40Tutte = ui.v40Tutte || {}; ui.v40Tutte[el.da
   document.addEventListener('dragend', () => { if (!v40Drag) return; v40Drag = null; pulisci(); rimandaRender(false); });
 }
 
-// v40.2 · la vista Giorno non si allarga oltre 1240px
-{
-  const _dV402 = disegna;
-  disegna = function () { _dV402.apply(this, arguments); const v = $('view'); if (v) v.classList.toggle('v40g', ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno'); v40Altezza(); };
-}
 // l'elenco finisce sempre dentro lo schermo: altezza = spazio fino in fondo, meno quello che c'è sotto (In settimana, Stampa)
 function v40Altezza() {
   const sc = document.querySelector('.v40-scroll'); if (!sc) return;
@@ -19933,7 +19857,6 @@ function v44Aggiorna() {
 const v44Chiedi = () => { if (!V44.raf) V44.raf = requestAnimationFrame(v44Aggiorna); };
 document.addEventListener('scroll', v44Chiedi, true);
 window.addEventListener('resize', v44Chiedi);
-{ const _dV44 = disegna; disegna = function () { _dV44.apply(this, arguments); v44Chiedi(); }; }
 // i bottoni della barra passano dalle stesse azioni della pagina
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('#v44-testa [data-act]');
@@ -20046,15 +19969,6 @@ function v46Rimetti(a) {
   if (view && a.view && view.scrollTop !== a.view) view.scrollTop = a.view;
   if (a.win && Math.abs(window.scrollY - a.win) > 2) window.scrollTo(0, a.win);
 }
-{
-  const _disegnaV46 = disegna;
-  disegna = function () {
-    const a = v46Annota();
-    const r = _disegnaV46.apply(this, arguments);
-    if (a) { v46Rimetti(a); requestAnimationFrame(() => v46Rimetti(a)); }
-    return r;
-  };
-}
 
 // v46 · sul telefono, in Pianifica › Settimana: scorrendo resta in alto la settimana (‹ ›) con la fila dei giorni
 function v46BarraTel(bar) {
@@ -20135,23 +20049,6 @@ ui.v47Indietro = ui.v47Indietro !== false;
       const d = document.createElement('div'); d.appendChild(f); h = d.innerHTML;
     } catch (e) { console.warn('[v47] settimana:', e.message); }
     return h;
-  };
-  // dopo il disegno: giorni tutti in vista e altezza della testa per le intestazioni fisse
-  const _dV47 = disegna;
-  disegna = function () {
-    _dV47.apply(this, arguments);
-    const view = $('view'), on = !!(view && view.querySelector('.v47-testa'));
-    if (view) view.classList.toggle('v47-on', on);
-    if (!on) return;
-    const cols = view.querySelector('.cols.board');
-    if (cols) {
-      const sez = [...cols.children].filter(x => x.classList.contains('bcol'));
-      const giorni = sez.filter(x => !x.classList.contains('bcol-dp'));
-      const pieno = s => !!s.querySelector('.item') || [...s.querySelectorAll('.evt-riga')].some(e => /\d{2}:\d{2}/.test(e.textContent) && !e.closest('.spazio-riga, .cusc-riga'));
-      cols.style.gridTemplateColumns = `minmax(200px, 240px) ${giorni.map(s => pieno(s) ? 'minmax(0, 1fr)' : 'minmax(0, .75fr)').join(' ')}`;
-    }
-    const alza = () => { const b = view.querySelector('.v47-testa'); if (b) document.documentElement.style.setProperty('--v47-h', Math.round(b.getBoundingClientRect().height) + 'px'); };
-    alza(); requestAnimationFrame(alza);
   };
   // la barra della v44 sul computer non serve più: la testa resta già in vista
   const _v44V47 = v44Aggiorna;
@@ -20437,22 +20334,10 @@ function v49Orari() {
     if (o) t.innerHTML = `Libero dalle <span class="mono">${escHtml(o.textContent)}</span>`;
   });
 }
-{
-  const _disegnaV49 = disegna;
-  disegna = function () { const r = _disegnaV49.apply(this, arguments); try { v49Orari(); } catch (e) { console.warn('[v49] orari:', e.message); } return r; };
-}
 // ══════════════════════════════════════════════════════════════
 // v50 · 19/11 — sfondo salvia; in Oggi ogni cosa è una scheda a sé (Subito / Importante / Delega si distinguono);
 // «Da controllare» anche sul telefono; Delega da Smaltisci torna a Smaltisci
 // ══════════════════════════════════════════════════════════════
-{
-  const _disegnaV50 = disegna;
-  disegna = function () {
-    const r = _disegnaV50.apply(this, arguments);
-    const v = $('view'); if (v) v.classList.toggle('v50-oggi', ui.tab === 'oggi');
-    return r;
-  };
-}
 // vistaOggi: catena appiattita nella fase D del riordino (base + 15 strati); i passi girano nell'ordine di prima.
 //   passo 0 · oggi/012-v2-oggi.js
 //   passo 1 · core/073-03-24-10-iphone-la-vista-non-resta-scivolat.js
@@ -20923,9 +20808,136 @@ function v50Appuntamenti() {
     r.removeAttribute('role'); r.removeAttribute('tabindex');
   });
 }
-{
-  const _disegnaV50b = disegna;
-  disegna = function () { const r = _disegnaV50b.apply(this, arguments); try { v50Appuntamenti(); } catch (e) { console.warn('[v50] appuntamenti:', e.message); } return r; };
+// disegna: catena appiattita nella fase D del riordino (base + 13 strati); i passi girano nell'ordine di prima.
+//   passo 0 · core/005-v2-disegno.js
+//   passo 1 · pianifica/063-v6-colori-priorita-telefono-pianifica-a-col.js
+//   passo 2 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js
+//   passo 3 · oggi/089-v25-2-11-il-menu-segue-il-ritmo-strada-a-l-a.js
+//   passo 4 · pianifica/090-v26-3-11-il-metodo-di-leo-disegni-della-sezi.js
+//   passo 5 · oggi/096-v32-05-11-il-telefono-piu-spazio-meno-scorre.js
+//   passo 6 · oggi/097-v33-05-11-il-computer-usare-tutta-la-larghez.js
+//   passo 7 · pianifica/102-v40-2-la-vista-giorno-non-si-allarga-oltre-124.js — v40.2 · la vista Giorno non si allarga oltre 1240px
+//   passo 8 · pianifica/106-v44-17-11-pianifica-sul-computer-scorrendo-i.js
+//   passo 9 · core/108-v46-17-11-quando-spunto-una-casella-in-fondo.js
+//   passo 10 · pianifica/110-v47-19-11-pianifica-settimana-sul-computer-c.js — dopo il disegno: giorni tutti in vista e altezza della testa per le intestazioni fisse
+//   passo 11 · smaltisci/112-v49-19-11-approvate-le-bozze-della-sezione-1.js
+//   passo 12 · oggi/113-v50-19-11-sfondo-salvia-in-oggi-ogni-cosa-e.js
+//   passo 13 · core/114-v50-accessibilita-axe-wcag-2-1-aa.js
+// Forma annidata: alcuni strati fanno qualcosa prima di chiamare la versione precedente, quindi ogni strato resta una
+// funzione interna che chiama la precedente per nome (passo0 = base); si legge dal fondo: l'ultimo passo chiama il penultimo…
+function disegna() {
+  // ── passo 0 · core/005-v2-disegno.js
+  const passo0 = function () {
+    document.querySelectorAll('[data-tab]').forEach(b => {
+      if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    $('ctx-lavoro').setAttribute('aria-pressed', String(state.ctx === 'lavoro'));
+    $('ctx-personale').setAttribute('aria-pressed', String(state.ctx === 'personale'));
+    updateGcalButton();
+    applyTheme();
+
+    const view = $('view');
+    if (state.loading && !state.cicli.length) { renderSkeleton(); return; }
+    const larga = ui.tab === 'pianifica' && !ui.sub && window.innerWidth >= 768;
+    view.classList.toggle('wide', larga);
+
+    // Tutto tiene fermo il campo di ricerca mentre si scrive: aggiorna solo l'elenco
+    const vista = (modoSemplice() ? 'semplice:' : '') + (ui.sub ? ui.tab + ':' + ui.sub : ui.tab);
+    if (ui.tab === 'tutto' && !ui.sub && view.dataset.vista === vista && $('tutto-corpo')) { aggiornaTutto(); return; }
+
+    const aperto = document.querySelector('.item.is-swiped');
+    const apertoId = aperto ? aperto.dataset.id : null;
+    let html = '';
+    if (ui.tab === 'oggi') html = vistaOggi();
+    else if (ui.tab === 'pianifica') html = vistaPianifica();
+    else if (ui.tab === 'tutto') html = ui.sub === 'attesa' ? vistaAttesa() : vistaTutto();
+    else html = ui.sub === 'fatte' ? vistaFatte() : ui.sub === 'guida' ? vistaGuida() : ui.sub === 'impostazioni' ? vistaImpostazioni() : vistaAltro();
+    view.dataset.vista = vista;
+    view.innerHTML = html;
+    if (ui.tab === 'tutto' && !ui.sub) aggiornaTutto();
+    if (ui.tab === 'pianifica' && ui.pian === 'settimana' && window.innerWidth >= 768) agganciaAgenda();
+    if (apertoId) { const el = view.querySelector(`.item[data-id="${apertoId}"]`); if (el && el.querySelector('.swipe-actions')) el.classList.add('is-swiped'); }
+    if (editingId && $('modalOverlay').classList.contains('open')) disegnaPassi(ciclo(editingId));
+  };
+  // ── passo 1 · pianifica/063-v6-colori-priorita-telefono-pianifica-a-col.js
+  const passo1 = function () {
+    passo0();
+    $('view').classList.toggle('largo', boardAttiva());
+  };
+  // ── passo 2 · altro/077-v13-27-10-una-lista-sola-lavoro-e-personale.js
+  const passo2 = function () {
+    const r = passo1.apply(this, arguments);
+    [['ctx-tutto', 'tutto'], ['ctx-lavoro', 'lavoro'], ['ctx-personale', 'personale']].forEach(([id, v]) => { const b = $(id); if (b) b.setAttribute('aria-pressed', String(state.filtro === v)); });
+    const seg = document.querySelector('.top-ctx');
+    if (seg) {
+      const qui = ['oggi', 'tutto'].includes(ui.tab);
+      seg.style.visibility = qui ? '' : 'hidden';
+      seg.setAttribute('aria-label', 'Mostra');
+    }
+    return r;
+  };
+  // ── passo 3 · oggi/089-v25-2-11-il-menu-segue-il-ritmo-strada-a-l-a.js
+  const passo3 = function () {
+    passo2.apply(this, arguments);
+    if (v25ArmadioAttivo()) $('view').classList.add('largo');
+  };
+  // ── passo 4 · pianifica/090-v26-3-11-il-metodo-di-leo-disegni-della-sezi.js
+  const passo4 = function () {
+    passo3.apply(this, arguments);
+    if (ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno' && window.innerWidth >= 768) $('view').classList.add('largo');
+  };
+  // ── passo 5 · oggi/096-v32-05-11-il-telefono-piu-spazio-meno-scorre.js
+  const passo5 = function () {
+    const r = passo4.apply(this, arguments);
+    try { v32AggiornaTesta(); const main = $('main'); document.body.classList.toggle('v32-giu', v32Tel() && !!main && main.scrollTop > 56); } catch (e) { console.warn('[v32] testa:', e.message); }
+    return r;
+  };
+  // ── passo 6 · oggi/097-v33-05-11-il-computer-usare-tutta-la-larghez.js
+  const passo6 = function () {
+    const r = passo5.apply(this, arguments);
+    try { v33DopoDisegno(); } catch (e) { console.warn('[v33] dopo:', e.message); }
+    return r;
+  };
+  // ── passo 7 · pianifica/102-v40-2-la-vista-giorno-non-si-allarga-oltre-124.js
+  // v40.2 · la vista Giorno non si allarga oltre 1240px
+  const passo7 = function () { passo6.apply(this, arguments); const v = $('view'); if (v) v.classList.toggle('v40g', ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno'); v40Altezza(); };
+  // ── passo 8 · pianifica/106-v44-17-11-pianifica-sul-computer-scorrendo-i.js
+  const passo8 = function () { passo7.apply(this, arguments); v44Chiedi(); };
+  // ── passo 9 · core/108-v46-17-11-quando-spunto-una-casella-in-fondo.js
+  const passo9 = function () {
+    const a = v46Annota();
+    const r = passo8.apply(this, arguments);
+    if (a) { v46Rimetti(a); requestAnimationFrame(() => v46Rimetti(a)); }
+    return r;
+  };
+  // ── passo 10 · pianifica/110-v47-19-11-pianifica-settimana-sul-computer-c.js
+  // dopo il disegno: giorni tutti in vista e altezza della testa per le intestazioni fisse
+  const passo10 = function () {
+    passo9.apply(this, arguments);
+    const view = $('view'), on = !!(view && view.querySelector('.v47-testa'));
+    if (view) view.classList.toggle('v47-on', on);
+    if (!on) return;
+    const cols = view.querySelector('.cols.board');
+    if (cols) {
+      const sez = [...cols.children].filter(x => x.classList.contains('bcol'));
+      const giorni = sez.filter(x => !x.classList.contains('bcol-dp'));
+      const pieno = s => !!s.querySelector('.item') || [...s.querySelectorAll('.evt-riga')].some(e => /\d{2}:\d{2}/.test(e.textContent) && !e.closest('.spazio-riga, .cusc-riga'));
+      cols.style.gridTemplateColumns = `minmax(200px, 240px) ${giorni.map(s => pieno(s) ? 'minmax(0, 1fr)' : 'minmax(0, .75fr)').join(' ')}`;
+    }
+    const alza = () => { const b = view.querySelector('.v47-testa'); if (b) document.documentElement.style.setProperty('--v47-h', Math.round(b.getBoundingClientRect().height) + 'px'); };
+    alza(); requestAnimationFrame(alza);
+  };
+  // ── passo 11 · smaltisci/112-v49-19-11-approvate-le-bozze-della-sezione-1.js
+  const passo11 = function () { const r = passo10.apply(this, arguments); try { v49Orari(); } catch (e) { console.warn('[v49] orari:', e.message); } return r; };
+  // ── passo 12 · oggi/113-v50-19-11-sfondo-salvia-in-oggi-ogni-cosa-e.js
+  const passo12 = function () {
+    const r = passo11.apply(this, arguments);
+    const v = $('view'); if (v) v.classList.toggle('v50-oggi', ui.tab === 'oggi');
+    return r;
+  };
+  // ── passo 13 · core/114-v50-accessibilita-axe-wcag-2-1-aa.js
+  const passo13 = function () { const r = passo12.apply(this, arguments); try { v50Appuntamenti(); } catch (e) { console.warn('[v50] appuntamenti:', e.message); } return r; };
+  return passo13.apply(this, arguments);
 }
 </script>
 </body>

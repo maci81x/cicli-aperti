@@ -60,23 +60,6 @@ ui.v47Indietro = ui.v47Indietro !== false;
     } catch (e) { console.warn('[v47] settimana:', e.message); }
     return h;
   };
-  // dopo il disegno: giorni tutti in vista e altezza della testa per le intestazioni fisse
-  const _dV47 = disegna;
-  disegna = function () {
-    _dV47.apply(this, arguments);
-    const view = $('view'), on = !!(view && view.querySelector('.v47-testa'));
-    if (view) view.classList.toggle('v47-on', on);
-    if (!on) return;
-    const cols = view.querySelector('.cols.board');
-    if (cols) {
-      const sez = [...cols.children].filter(x => x.classList.contains('bcol'));
-      const giorni = sez.filter(x => !x.classList.contains('bcol-dp'));
-      const pieno = s => !!s.querySelector('.item') || [...s.querySelectorAll('.evt-riga')].some(e => /\d{2}:\d{2}/.test(e.textContent) && !e.closest('.spazio-riga, .cusc-riga'));
-      cols.style.gridTemplateColumns = `minmax(200px, 240px) ${giorni.map(s => pieno(s) ? 'minmax(0, 1fr)' : 'minmax(0, .75fr)').join(' ')}`;
-    }
-    const alza = () => { const b = view.querySelector('.v47-testa'); if (b) document.documentElement.style.setProperty('--v47-h', Math.round(b.getBoundingClientRect().height) + 'px'); };
-    alza(); requestAnimationFrame(alza);
-  };
   // la barra della v44 sul computer non serve più: la testa resta già in vista
   const _v44V47 = v44Aggiorna;
   v44Aggiorna = function () {

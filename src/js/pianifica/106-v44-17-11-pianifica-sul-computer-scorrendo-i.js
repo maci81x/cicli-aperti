@@ -50,7 +50,6 @@ function v44Aggiorna() {
 const v44Chiedi = () => { if (!V44.raf) V44.raf = requestAnimationFrame(v44Aggiorna); };
 document.addEventListener('scroll', v44Chiedi, true);
 window.addEventListener('resize', v44Chiedi);
-{ const _dV44 = disegna; disegna = function () { _dV44.apply(this, arguments); v44Chiedi(); }; }
 // i bottoni della barra passano dalle stesse azioni della pagina
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('#v44-testa [data-act]');

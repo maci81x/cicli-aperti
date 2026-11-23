@@ -154,8 +154,4 @@ function v49Orari() {
     if (o) t.innerHTML = `Libero dalle <span class="mono">${escHtml(o.textContent)}</span>`;
   });
 }
-{
-  const _disegnaV49 = disegna;
-  disegna = function () { const r = _disegnaV49.apply(this, arguments); try { v49Orari(); } catch (e) { console.warn('[v49] orari:', e.message); } return r; };
-}
 // ══════════════════════════════════════════════════════════════

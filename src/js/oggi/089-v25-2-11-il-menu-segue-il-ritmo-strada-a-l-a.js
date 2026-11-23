@@ -74,11 +74,6 @@ aggiornaTutto = function () {
 
 // l'armadio usa tutta la larghezza, come la board della settimana
 const v25ArmadioAttivo = () => ui.tab === 'tutto' && !ui.sub && ui.tutto === 'armadio' && !modoSemplice() && window.innerWidth >= 768;
-const _disegnaV25 = disegna;
-disegna = function () {
-  _disegnaV25.apply(this, arguments);
-  if (v25ArmadioAttivo()) $('view').classList.add('largo');
-};
 const _aggiornaTuttoV25b = aggiornaTutto;
 aggiornaTutto = function () { _aggiornaTuttoV25b.apply(this, arguments); $('view').classList.toggle('largo', v25ArmadioAttivo() || boardAttiva()); };
 

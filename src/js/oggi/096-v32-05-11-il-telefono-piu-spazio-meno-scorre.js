@@ -81,12 +81,6 @@ function v32AggiornaTesta() {
     tit.innerHTML = escHtml(t) + (ui.tab === 'oggi' ? ` <small>· ${gg} ${d.getDate()} ${mm}</small>` : '');
   }
 }
-const _disegnaV32 = disegna;
-disegna = function () {
-  const r = _disegnaV32.apply(this, arguments);
-  try { v32AggiornaTesta(); const main = $('main'); document.body.classList.toggle('v32-giu', v32Tel() && !!main && main.scrollTop > 56); } catch (e) { console.warn('[v32] testa:', e.message); }
-  return r;
-};
 v32AggiornaTesta();
 
 // ══════════════════════════════════════════════════════════════

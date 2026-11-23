@@ -30,18 +30,6 @@ function switchCtx(ctx) {
   try { localStorage.setItem(LS.CAT_FILTER, ''); } catch (_) { /* niente */ }
   render();
 }
-const _disegnaV13 = disegna;
-disegna = function () {
-  const r = _disegnaV13.apply(this, arguments);
-  [['ctx-tutto', 'tutto'], ['ctx-lavoro', 'lavoro'], ['ctx-personale', 'personale']].forEach(([id, v]) => { const b = $(id); if (b) b.setAttribute('aria-pressed', String(state.filtro === v)); });
-  const seg = document.querySelector('.top-ctx');
-  if (seg) {
-    const qui = ['oggi', 'tutto'].includes(ui.tab);
-    seg.style.visibility = qui ? '' : 'hidden';
-    seg.setAttribute('aria-label', 'Mostra');
-  }
-  return r;
-};
 
 // --- l'etichetta «Personale» ---
 const TAG_PERS = '<span class="tag-pers">Personale</span>';

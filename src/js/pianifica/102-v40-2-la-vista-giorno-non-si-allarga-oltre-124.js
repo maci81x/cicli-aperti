@@ -1,8 +1,3 @@
-// v40.2 · la vista Giorno non si allarga oltre 1240px
-{
-  const _dV402 = disegna;
-  disegna = function () { _dV402.apply(this, arguments); const v = $('view'); if (v) v.classList.toggle('v40g', ui.tab === 'pianifica' && !ui.sub && ui.pian === 'giorno'); v40Altezza(); };
-}
 // l'elenco finisce sempre dentro lo schermo: altezza = spazio fino in fondo, meno quello che c'è sotto (In settimana, Stampa)
 function v40Altezza() {
   const sc = document.querySelector('.v40-scroll'); if (!sc) return;

@@ -8,38 +8,6 @@ function render() {
   Promise.resolve().then(() => { _renderInCoda = false; disegna(); });
 }
 
-function disegna() {
-  document.querySelectorAll('[data-tab]').forEach(b => {
-    if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-  });
-  $('ctx-lavoro').setAttribute('aria-pressed', String(state.ctx === 'lavoro'));
-  $('ctx-personale').setAttribute('aria-pressed', String(state.ctx === 'personale'));
-  updateGcalButton();
-  applyTheme();
-
-  const view = $('view');
-  if (state.loading && !state.cicli.length) { renderSkeleton(); return; }
-  const larga = ui.tab === 'pianifica' && !ui.sub && window.innerWidth >= 768;
-  view.classList.toggle('wide', larga);
-
-  // Tutto tiene fermo il campo di ricerca mentre si scrive: aggiorna solo l'elenco
-  const vista = (modoSemplice() ? 'semplice:' : '') + (ui.sub ? ui.tab + ':' + ui.sub : ui.tab);
-  if (ui.tab === 'tutto' && !ui.sub && view.dataset.vista === vista && $('tutto-corpo')) { aggiornaTutto(); return; }
-
-  const aperto = document.querySelector('.item.is-swiped');
-  const apertoId = aperto ? aperto.dataset.id : null;
-  let html = '';
-  if (ui.tab === 'oggi') html = vistaOggi();
-  else if (ui.tab === 'pianifica') html = vistaPianifica();
-  else if (ui.tab === 'tutto') html = ui.sub === 'attesa' ? vistaAttesa() : vistaTutto();
-  else html = ui.sub === 'fatte' ? vistaFatte() : ui.sub === 'guida' ? vistaGuida() : ui.sub === 'impostazioni' ? vistaImpostazioni() : vistaAltro();
-  view.dataset.vista = vista;
-  view.innerHTML = html;
-  if (ui.tab === 'tutto' && !ui.sub) aggiornaTutto();
-  if (ui.tab === 'pianifica' && ui.pian === 'settimana' && window.innerWidth >= 768) agganciaAgenda();
-  if (apertoId) { const el = view.querySelector(`.item[data-id="${apertoId}"]`); if (el && el.querySelector('.swipe-actions')) el.classList.add('is-swiped'); }
-  if (editingId && $('modalOverlay').classList.contains('open')) disegnaPassi(ciclo(editingId));
-}
 
 function renderSkeleton() {
   $('view').innerHTML = '<div class="vh"><div><h1>&nbsp;</h1></div></div>' + '<div class="skel"></div>'.repeat(5);
