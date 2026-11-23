@@ -2,7 +2,7 @@
 // - l'anteprima del «+» mentre si scrive (#rapido-anteprima, computer) e del campo «Cosa hai in testa?» (#cattura-anteprima, telefono);
 // - le righe che il campo «Cosa hai in testa?» salva (campi stabili, senza id né orari).
 // Copre disegnaAnteprima, disegnaAnteprimaCattura e salvaCattura, che t52 non vede.
-// AGGIORNA=1 node t53-caratterizza.js → riscrive il riferimento (solo per un cambiamento voluto).
+// AGGIORNA=1 node t54-caratterizza.js → riscrive il riferimento (solo per un cambiamento voluto).
 const fs = require('fs'), path = require('path');
 const { apriApp, errori, assertDi } = require('./harness');
 const a = assertDi();

@@ -24,9 +24,9 @@ Ogni catena di strati (`const _x = f; f = function () { … _x() … }`, ripetut
 |---|---|
 | `vistaOggi`, `riga`, `disegna` | `t52-golden`: HTML di Oggi, Pianifica (Settimana e Giorno), Tutto, Un giorno, Altro, Smaltisci su telefono e computer; 16 schermate |
 | `avviaApp` | ogni prova (avvio con sessione finta); `t51` (nomi globali dopo l'avvio) |
-| `disegnaAnteprima`, `salvaCattura` | **nuova** `t53-caratterizza`: HTML dell'anteprima del «+» e del campo «Cosa hai in testa?» mentre si scrive, righe salvate (campi stabili). Verificata al contrario: altera un pezzo dell'anteprima finale → fallisce; altera solo la base catturata → non se ne accorge (prova che quel risultato è sempre sovrascritto) |
+| `disegnaAnteprima`, `salvaCattura` | **nuova** `t54-caratterizza`: HTML dell'anteprima del «+» e del campo «Cosa hai in testa?» mentre si scrive, righe salvate (campi stabili). Verificata al contrario: altera un pezzo dell'anteprima finale → fallisce; altera solo la base catturata → non se ne accorge (prova che quel risultato è sempre sovrascritto) |
 
-Le prove diventano 30 (29 + `t53`).
+Le prove diventano 30 (29 + `t54`).
 
 ## The Problem
 
@@ -35,7 +35,7 @@ Le prove diventano 30 (29 + `t53`).
 ## Goals
 
 *   Sei commit, uno per funzione: `vistaOggi` (base + 15 strati), `disegna` (13), `avviaApp` (7), `disegnaAnteprima` (base catturata + 1 + 3), `salvaCattura` (2), `riga` (6).
-*   Dopo ogni commit: 30/30; `t52` con HTML uguale e 16 schermate a 0,000%; `t53` uguale; `t51` diverso solo per gli alias tolti (riferimento aggiornato nello stesso commit).
+*   Dopo ogni commit: 30/30; `t52` con HTML uguale e 16 schermate a 0,000%; `t54` uguale; `t51` diverso solo per gli alias tolti (riferimento aggiornato nello stesso commit).
 
 ## Non-Goals
 
@@ -83,7 +83,7 @@ In entrambe le forme la funzione finale è una dichiarazione `function` di livel
 
 ### Caso `disegnaAnteprima`
 
-La base (v9) è catturata da `$('rapido-testo').addEventListener('input', disegnaAnteprima)` (riga 12318) prima di essere sostituita; dalla v9 un secondo ascoltatore (riga 13101, `() => disegnaAnteprima()`) chiama sempre l'ultima versione nello stesso evento e riscrive `#rapido-anteprima`. La base scrive solo quell'anteprima (`hidden`, `innerHTML`), quindi il suo risultato è sempre sovrascritto (lo conferma `t53` al contrario). Nel commit di `disegnaAnteprima`: si tolgono la base e il suo ascoltatore, lo strato v10 che sostituiva diventa la base della catena, poi si appiattisce. Il gemello `disegnaAnteprimaCattura` resta com'è (non è nell'elenco).
+La base (v9) è catturata da `$('rapido-testo').addEventListener('input', disegnaAnteprima)` (riga 12318) prima di essere sostituita; dalla v9 un secondo ascoltatore (riga 13101, `() => disegnaAnteprima()`) chiama sempre l'ultima versione nello stesso evento e riscrive `#rapido-anteprima`. La base scrive solo quell'anteprima (`hidden`, `innerHTML`), quindi il suo risultato è sempre sovrascritto (lo conferma `t54` al contrario). Nel commit di `disegnaAnteprima`: si tolgono la base e il suo ascoltatore, lo strato v10 che sostituiva diventa la base della catena, poi si appiattisce. Il gemello `disegnaAnteprimaCattura` resta com'è (non è nell'elenco).
 
 ### Cosa resta dove
 
@@ -134,7 +134,7 @@ Sequenza per ogni funzione (dalla radice, `$T` cartella temporanea):
 
 | # | Funzione | Forma | Alias attesi tolti da `t51` |
 |---|---|---|---|
-| 0 | — | `tests: caratterizzazione prima della fase D` (`t53`) | — |
+| 0 | — | `tests: caratterizzazione prima della fase D` (`t54`) | — |
 | 1 | `vistaOggi` | sequenza (base + 15) | gli alias a colonna 0 della catena (quelli dentro blocchi non sono in `t51`) |
 | 2 | `disegna` | annidata (base + 13) | idem |
 | 3 | `avviaApp` | annidata (base + 7) | idem |

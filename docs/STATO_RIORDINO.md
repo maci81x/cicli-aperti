@@ -32,12 +32,12 @@ Criterio: una prova passa solo se esce con 0 **e** non ha righe `FAIL`.
 | fase B su `main` | 27/27 |
 | + rete di sicurezza (`t51`, `t52`) | 29/29 |
 | ogni commit della fase C | 29/29, 16 schermate di `t52` a 0,000%, HTML uguale |
-| ramo fase D con `t53` | 30/30 (vedi l'ultimo commit) |
+| ramo fase D con `t54` | 30/30 (vedi l'ultimo commit) |
 
 Rete di sicurezza:
 - `t51-globali` — nomi globali dopo l'avvio contro `tests/riferimento/globali.json` (si aggiorna solo quando si tolgono nomi apposta, con `AGGIORNA=1`, controllando il diff).
 - `t52-golden` — HTML di Oggi, Pianifica (Settimana, Giorno), Tutto (Lista, Matrice), Un giorno, Altro, Smaltisci su telefono e computer; 16 schermate (Oggi, Pianifica, Smaltisci, Tutto › Matrice × telefono/computer × chiaro/scuro), soglia 0,1%, immagine delle differenze in `$OUT`. Le schermate dipendono dalla macchina: riferimento preso su questo Mac.
-- `t53-caratterizza` (fase D) — anteprima del «+» e del campo «Cosa hai in testa?» mentre si scrive, righe salvate dal campo.
+- `t54-caratterizza` (fase D) — anteprima del «+» e del campo «Cosa hai in testa?» mentre si scrive, righe salvate dal campo.
 
 ## Fase C — fatta (ramo `riordino/fase-c`)
 
@@ -62,7 +62,7 @@ Verifiche: copertura V8 all'avvio e 76 trappole `[morto]` con le 29 prove: nessu
 ## Fase D — a che punto è (ramo `riordino/fase-d`)
 
 **Fatto (commit di questa interruzione):**
-- `tests/t53-caratterizza.js` + `tests/riferimento/caratterizza.json`, verificata anche al contrario (fallisce se cambia l'anteprima finale).
+- `tests/t54-caratterizza.js` + `tests/riferimento/caratterizza.json`, verificata anche al contrario (fallisce se cambia l'anteprima finale).
 - `tools/riordino/catene.js`: per ogni pezzo di una catena, file, riga, contenitore e nomi locali usati. Risultato sulle sei catene: l'unico nome locale usato dagli strati è il loro alias → il codice si può spostare nel punto dell'ultimo strato.
 - `tools/riordino/appiattisci.js`: genera la funzione unica in due forme esatte (sequenza di passi se ogni strato chiama per prima cosa la versione precedente; forma annidata `passo0…passoN` se qualche strato fa qualcosa prima). Provato in `--prova` su 5 catene: `vistaOggi` (sequenza, 376 righe), `riga` (sequenza), `salvaCattura` (sequenza), `disegna` e `avviaApp` (annidata). **Non ancora applicato a nessuna catena.**
 - `docs/egm/fase-d/design_draft.md`: bozza. La review EGM era appena partita ed è stata fermata: **nessun report**.
@@ -79,7 +79,7 @@ Verifiche: copertura V8 all'avvio e 76 trappole `[morto]` con le 29 prove: nessu
 | `riga` | base + 6 | sequenza | da fare |
 
 **Cose scoperte:**
-- `disegnaAnteprima` e `disegnaAnteprimaCattura`: la base v9 è catturata da `addEventListener('input', disegnaAnteprima)` (riga 12318 di `index.html`) e gira a ogni tasto, ma il suo risultato è sempre sovrascritto dall'ascoltatore v9 `() => disegnaAnteprima()` (riga 13101). `t53` lo conferma: alterando solo la base la prova non cambia.
+- `disegnaAnteprima` e `disegnaAnteprimaCattura`: la base v9 è catturata da `addEventListener('input', disegnaAnteprima)` (riga 12318 di `index.html`) e gira a ogni tasto, ma il suo risultato è sempre sovrascritto dall'ascoltatore v9 `() => disegnaAnteprima()` (riga 13101). `t54` lo conferma: alterando solo la base la prova non cambia.
 - Strati per nome, invisibili all'analisi per alias: `window[nome] = …(window[nome])` per `bpChiudiSettimana`, `inviaPiano`, `salvaEsercizioQ2`, `bpAttiva` (`src/js/pianifica/063-…js:888`) e `creaPdfSettimana`, `quotaSettimana`, `vociCoach`, `bpwCandidati`, `righePdfGiorno` (`src/js/altro/077-…js:22`).
 - Nella forma a sequenza il nome del risultato non può essere `r`: alcuni strati dichiarano una `const r` (corretto nello strumento, sceglie un nome libero).
 - La funzione finale non va dichiarata `async` (restituisce quello che restituiva lo strato più esterno).
