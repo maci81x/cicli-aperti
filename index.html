@@ -636,15 +636,9 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 
 /* v8 · riepilogo della frase sotto il campo */
 .rap-anteprima { display: grid; gap: var(--sp-1); margin-top: var(--sp-2); }
-.rap-voce { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
-.rap-sintesi { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-1) 0 var(--sp-3); font-size: var(--fs-label); color: var(--text); }
-.rap-sintesi > span { flex: 1; min-width: 0; }
 .rap-avvisa { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); padding: 0 var(--sp-3) 0 calc(var(--sp-3) + 24px); font-size: var(--fs-label); color: var(--text-2); cursor: pointer; }
 .rap-avvisa input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
 #cattura-anteprima .rap-avvisa { padding-left: var(--sp-2); }
-.rap-passi { margin: 0; padding: 0 var(--sp-3) var(--sp-2) calc(var(--sp-3) + 24px); font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-2); }
-.rap-voce.p-q1 .rap-sintesi > .ti { color: var(--q1); } .rap-voce.p-q2 .rap-sintesi > .ti { color: var(--q2); }
-.rap-voce.p-q3 .rap-sintesi > .ti { color: var(--q3); } .rap-voce.p-q4 .rap-sintesi > .ti { color: var(--text-3); }
 .rap-edit { display: grid; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); }
 .rap-edit .input { min-height: var(--tap); }
 .rap-edit-riga { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--sp-2); }
@@ -950,7 +944,6 @@ input[type="date"].input, input[type="time"].input { min-width: 0; -webkit-appea
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
 .tag-dopp { display: inline-flex; align-items: center; gap: 4px; flex: none; margin-left: var(--sp-2); padding: 0 8px; min-height: 24px; border-radius: var(--r-full); border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); font-size: var(--fs-caption); font-weight: var(--fw-strong); line-height: 16px; white-space: nowrap; }
 .tag-dopp .ti { font-size: 14px; color: var(--text-2); }
-.rap-sintesi > .tag-dopp { flex: none; min-width: auto; }   /* la regola .rap-sintesi > span la allargava come un campo vuoto */
 .dopp-parente { display: flex; gap: 6px; align-items: center; margin: 2px 0 0; padding-left: 28px; color: var(--text-2); font-size: var(--fs-caption); }
 .dopp-domanda { margin: var(--sp-2) 0 0; font-weight: var(--fw-strong); }
 .dopp-domanda small { display: block; font-weight: normal; color: var(--text-2); }
@@ -12165,9 +12158,7 @@ function correggiVoce(i, campo, valore) {
   else if (campo === 'delega') valori.delega = !valore ? null : valore.startsWith('nuova:') ? { id: null, nome: valore.slice(6) } : (p => p && { id: p.id, nome: p.nome })(personaDi(valore));
   else valori[campo] = String(valore || '').trim() || (campo === 'title' ? v.title : null);
   ui.rapido = { ...ui.rapido, mod: { ...(ui.rapido.mod || {}), [i]: { testo: v.testo, valori } } };
-  if (campo === 'q' || campo === 'data') { disegnaAnteprima(); return; }
-  const riga = document.querySelector(`#rapido-anteprima .rap-voce[data-i="${i}"] .rap-sintesi span`);
-  if (riga) riga.textContent = sintesiVoce(vociDaRighe(righe, ui.rapido)[i]);
+  if (campo === 'q' || campo === 'data') disegnaAnteprima();
 }
 document.addEventListener('change', e => {
   const t = e.target, ed = t.closest && t.closest('#rapido-anteprima .rap-edit');
@@ -16981,7 +16972,7 @@ function disegnaAnteprima() {
     if (nota) nota.textContent = (voci.length ? 'Tocca un\'etichetta per cambiarla. ' : 'Scrivi o detta anche più cose insieme: le divido io. ')
       + (eTelefono() ? 'La bozza resta salvata.' : `Invio va a capo, ${eMac ? '⌘' : 'Ctrl'}+Invio aggiunge. La bozza resta salvata.`);
     if (!box || box.hidden) return;
-    box.querySelectorAll('.rap-voce[data-i], .sn-voce[data-i]').forEach(el => {
+    box.querySelectorAll('.sn-voce[data-i]').forEach(el => {
       const i = +el.dataset.i;
       if (!i || !voci[i] || !voci[i - 1]) return;
       const k = ui.v12Tagli.get(`${voci[i - 1].testo}\u0000${voci[i].testo}`);
@@ -17004,7 +16995,7 @@ function disegnaAnteprima() {
     const box = $('rapido-anteprima');
     if (!box || box.hidden) return r;
     const voci = vociDi('rapido');
-    box.querySelectorAll('.sn-voce[data-i], .rap-voce[data-i]').forEach(el => {
+    box.querySelectorAll('.sn-voce[data-i]').forEach(el => {
       const v = voci[+el.dataset.i];
       if (!v || el.querySelector('.v17-coll')) return;
       const h = htmlCollegate(v.title || v.testo);

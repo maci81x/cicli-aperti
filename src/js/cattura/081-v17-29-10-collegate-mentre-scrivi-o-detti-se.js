@@ -124,7 +124,7 @@ function disegnaAnteprima() {
     if (nota) nota.textContent = (voci.length ? 'Tocca un\'etichetta per cambiarla. ' : 'Scrivi o detta anche più cose insieme: le divido io. ')
       + (eTelefono() ? 'La bozza resta salvata.' : `Invio va a capo, ${eMac ? '⌘' : 'Ctrl'}+Invio aggiunge. La bozza resta salvata.`);
     if (!box || box.hidden) return;
-    box.querySelectorAll('.rap-voce[data-i], .sn-voce[data-i]').forEach(el => {
+    box.querySelectorAll('.sn-voce[data-i]').forEach(el => {
       const i = +el.dataset.i;
       if (!i || !voci[i] || !voci[i - 1]) return;
       const k = ui.v12Tagli.get(`${voci[i - 1].testo}\u0000${voci[i].testo}`);
@@ -147,7 +147,7 @@ function disegnaAnteprima() {
     const box = $('rapido-anteprima');
     if (!box || box.hidden) return r;
     const voci = vociDi('rapido');
-    box.querySelectorAll('.sn-voce[data-i], .rap-voce[data-i]').forEach(el => {
+    box.querySelectorAll('.sn-voce[data-i]').forEach(el => {
       const v = voci[+el.dataset.i];
       if (!v || el.querySelector('.v17-coll')) return;
       const h = htmlCollegate(v.title || v.testo);

@@ -96,9 +96,7 @@ function correggiVoce(i, campo, valore) {
   else if (campo === 'delega') valori.delega = !valore ? null : valore.startsWith('nuova:') ? { id: null, nome: valore.slice(6) } : (p => p && { id: p.id, nome: p.nome })(personaDi(valore));
   else valori[campo] = String(valore || '').trim() || (campo === 'title' ? v.title : null);
   ui.rapido = { ...ui.rapido, mod: { ...(ui.rapido.mod || {}), [i]: { testo: v.testo, valori } } };
-  if (campo === 'q' || campo === 'data') { disegnaAnteprima(); return; }
-  const riga = document.querySelector(`#rapido-anteprima .rap-voce[data-i="${i}"] .rap-sintesi span`);
-  if (riga) riga.textContent = sintesiVoce(vociDaRighe(righe, ui.rapido)[i]);
+  if (campo === 'q' || campo === 'data') disegnaAnteprima();
 }
 document.addEventListener('change', e => {
   const t = e.target, ed = t.closest && t.closest('#rapido-anteprima .rap-edit');

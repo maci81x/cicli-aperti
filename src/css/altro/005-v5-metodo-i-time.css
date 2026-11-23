@@ -2,7 +2,6 @@
 /* appuntamenti: coach, orario del titolo diverso, sovrapposizioni */
 .tag-dopp { display: inline-flex; align-items: center; gap: 4px; flex: none; margin-left: var(--sp-2); padding: 0 8px; min-height: 24px; border-radius: var(--r-full); border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); font-size: var(--fs-caption); font-weight: var(--fw-strong); line-height: 16px; white-space: nowrap; }
 .tag-dopp .ti { font-size: 14px; color: var(--text-2); }
-.rap-sintesi > .tag-dopp { flex: none; min-width: auto; }   /* la regola .rap-sintesi > span la allargava come un campo vuoto */
 .dopp-parente { display: flex; gap: 6px; align-items: center; margin: 2px 0 0; padding-left: 28px; color: var(--text-2); font-size: var(--fs-caption); }
 .dopp-domanda { margin: var(--sp-2) 0 0; font-weight: var(--fw-strong); }
 .dopp-domanda small { display: block; font-weight: normal; color: var(--text-2); }
