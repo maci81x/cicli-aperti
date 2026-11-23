@@ -2,6 +2,7 @@
 // devono restare quelli del riferimento (v50).
 // - HTML di #view: Oggi, Pianifica › Settimana, Pianifica › Giorno, Tutto › Lista, Tutto › Matrice, Un giorno, Altro;
 //   Smaltisci = HTML del foglio #v49Overlay. Telefono e computer.
+// - avvisi in console (warning/error) uguali al riferimento: uno strato chiuso in try/catch che si rompe lascia solo un avviso.
 // - 16 schermate: Oggi, Pianifica (Settimana), Smaltisci, Tutto › Matrice × telefono/computer × chiaro/scuro, confronto pixel per pixel:
 //   passa con al massimo lo 0,1% di pixel diversi; altrimenti salva l'immagine delle differenze in $OUT.
 // Le schermate dipendono dalla macchina (caratteri di sistema, Chromium): il riferimento è di questo Mac.
@@ -84,6 +85,17 @@ function confrontaSchermata(nome, buf) {
   a(quota <= SOGLIA, `schermata ${nome}: ${(quota * 100).toFixed(3)}% di pixel diversi (${n})${quota > SOGLIA ? ` → ${OUT}/diff_${nome}.png` : ''}`);
 }
 
+// Avvisi in console (console.warn/error): molti strati sono chiusi in try/catch con console.warn, quindi un pezzo che
+// si rompe darebbe solo un avviso nuovo. L'elenco (rumore di rete escluso) deve restare quello del riferimento.
+const avvisiDi = logs => [...new Set(logs.filter(l => !/404|finta|Failed to load resource|ERR_|net::|WebSocket/.test(l)))].sort();
+function confrontaAvvisi(nome, elenco) {
+  const file = path.join(DIR, 'golden', 'avvisi_' + nome + '.json'), t = JSON.stringify(elenco, null, 1) + '\n';
+  if (AGGIORNA || !fs.existsSync(file)) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, t); }
+  const rif = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const nuovi = elenco.filter(x => !rif.includes(x)), spariti = rif.filter(x => !elenco.includes(x));
+  a(!nuovi.length && !spariti.length, `${nome}: avvisi in console come nel riferimento (${elenco.length})` + (nuovi.length ? ' nuovi ' + JSON.stringify(nuovi.slice(0, 3)) : '') + (spariti.length ? ' spariti ' + JSON.stringify(spariti.slice(0, 3)) : ''));
+}
+
 async function dispositivo(nome, opzioni) {
   const { browser, page, logs } = await apriApp({ ...opzioni, ora: ORA, events, seed, attesa: 4500 });
   await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; caret-color: transparent !important; }' });
@@ -100,6 +112,7 @@ async function dispositivo(nome, opzioni) {
     }
   }
   { const e = errori(logs); a(!e.length, `${nome}: console pulita ` + JSON.stringify(e.slice(0, 3))); }
+  confrontaAvvisi(nome, avvisiDi(logs));
   await browser.close();
 }
 

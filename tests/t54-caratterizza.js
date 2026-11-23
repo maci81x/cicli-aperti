@@ -16,6 +16,8 @@ const seed = {
 const TESTO_RAPIDO = 'Chiamare il commercialista domani alle 10\nSpesa:\n- latte\n- pane\nSubito: mandare il preventivo a Rossi\nNicco deve sistemare il contratto entro venerdì';
 const TESTO_CATTURA = 'Prenotare la sala riunioni lunedì alle 15';
 const CAMPI = ['title', 'q', 'ctx', 'cat', 'macro_area', 'pianificato_data', 'scheduled_date', 'scheduled_time', 'durata_minuti', 'delega_persona_id', 'delega_controllo', 'done', 'parcheggiato'];
+// avvisi in console (warning/error, rumore di rete escluso): uno strato chiuso in try/catch che si rompe lascia solo un avviso
+const avvisiDi = logs => [...new Set(logs.filter(l => !/404|finta|Failed to load resource|ERR_|net::|WebSocket/.test(l)))].sort();
 const stabile = c => Object.fromEntries(CAMPI.map(k => [k, c[k] === undefined ? null : c[k]]).concat([['passo', !!c.parent_id]]));
 
 (async () => {
@@ -26,6 +28,7 @@ const stabile = c => Object.fromEntries(CAMPI.map(k => [k, c[k] === undefined ? 
   await page.fill('#rapido-testo', TESTO_RAPIDO); await page.waitForTimeout(600);
   attuale.rapido = await page.evaluate(() => ({ hidden: $('rapido-anteprima').hidden, html: $('rapido-anteprima').innerHTML }));
   { const e = errori(logs); a(!e.length, 'computer: console pulita ' + JSON.stringify(e.slice(0, 3))); }
+  attuale.avvisiComputer = avvisiDi(logs);
   await browser.close();
   // telefono: campo «Cosa hai in testa?», anteprima e salvataggio
   let db;
@@ -39,11 +42,12 @@ const stabile = c => Object.fromEntries(CAMPI.map(k => [k, c[k] === undefined ? 
   attuale.salvate = db.tabelle.cicli.filter(c => !prima.has(c.id)).map(stabile).sort((x, y) => String(x.title).localeCompare(String(y.title)));
   attuale.dopo = await page.evaluate(() => ({ campo: $('cattura-testo').value, aperto: document.body.classList.contains('v32-cat') }));
   { const e = errori(logs); a(!e.length, 'telefono: console pulita ' + JSON.stringify(e.slice(0, 3))); }
+  attuale.avvisiTelefono = avvisiDi(logs);
   await browser.close();
 
   if (process.env.AGGIORNA === '1' || !fs.existsSync(RIF)) { fs.mkdirSync(path.dirname(RIF), { recursive: true }); fs.writeFileSync(RIF, JSON.stringify(attuale, null, 1) + '\n'); console.log('riferimento scritto'); }
   const rif = JSON.parse(fs.readFileSync(RIF, 'utf8'));
-  for (const k of ['rapido', 'cattura', 'salvate', 'dopo']) {
+  for (const k of ['rapido', 'cattura', 'salvate', 'dopo', 'avvisiComputer', 'avvisiTelefono']) {
     const x = JSON.stringify(rif[k]), y = JSON.stringify(attuale[k]);
     a(x === y, `${k} uguale al riferimento` + (x === y ? '' : `: atteso ${x.slice(0, 300)} … ottenuto ${y.slice(0, 300)}`));
   }
