@@ -201,6 +201,8 @@ function v26ApriObiettivi(w, y, poi) {
   const ov = v26OverlayObiettivi(), voci = v26ObDi(w, y);
   ui.v26Ob = { w, y, poi };
   const da = getWeekStart(w, y), a = new Date(da); a.setDate(da.getDate() + 6);
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);   // v55: il titolo dice di quale settimana si parla
+  $('v26ob-titolo').textContent = w === cur.week && y === cur.year ? 'Cosa vuoi portare a casa questa settimana?' : w === n.week && y === n.year ? 'Cosa vuoi portare a casa la settimana prossima?' : `Cosa vuoi portare a casa nella settimana ${w}?`;
   $('v26ob-sotto').textContent = `Settimana ${w} (${fmtCorta(da)} – ${fmtCorta(a)}). Da 1 a 5 obiettivi.${poi ? ' Le cose della settimana le scegli dopo, partendo da questi.' : ''}`;
   $('v26ob-campi').innerHTML = Array.from({ length: V26.MAX_OB }, (_, i) => `<label class="v26-ob-campo"><span>Obiettivo ${i + 1}</span><input type="text" class="input" maxlength="120" data-i="${i}" value="${esc((voci[i] || {}).testo || '')}" placeholder="${i === 0 ? 'es. vendere 20.000 €' : i === 1 ? 'es. 10 clienti nuovi' : 'facoltativo'}"></label>`).join('');
   $('v26ob-ok').textContent = poi ? 'Avanti: scegli le cose' : 'Salva';

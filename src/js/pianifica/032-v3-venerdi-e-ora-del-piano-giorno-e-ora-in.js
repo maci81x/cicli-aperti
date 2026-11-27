@@ -13,7 +13,7 @@ async function caricaPianoProssima() {
   const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year), k = settKey(n.week, n.year);
   if (!state.bpTableOk || (ui.pianoProssima && ui.pianoProssima.k === k)) return;
   ui.pianoProssima = { k, esiste: true };   // finché non si sa, niente banner
-  try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan }; render(); }
+  try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan, inviato: !!(plan && plan.inviato_at) }; render(); }
   catch (e) { ui.pianoProssima = null; }
 }
 function apriWizardProssima() {

@@ -1099,3 +1099,9 @@ Nessun cambio di logica: `index.html` è identico byte per byte (SHA-256 `e8ef9b
 - oggi/113: il conteggio sta in uno `<span>` accanto al tasto; se gli appuntamenti sono finiti tutti scrive solo «tutti e N finiti» (un solo «1 finito»), altrimenti «N appuntamenti · M finiti».
 - oggi/011 (CSS): nelle teste con `.v12-mostra` il titolo non si restringe (`flex: none`); conteggio e tasto stanno a destra e vanno a capo se lo spazio non basta.
 - Test: tests/t56.js (computer, 900 px, telefono; giornata finita e a metà). Prove 33 su 33 (t52-golden si lancia sul Mac).
+
+## v55 · 27/11 — il venerdì «Prepara la settimana» apre la settimana prossima
+- Roby: «se clicco prepara la settimana… si riferisce sempre alla settimana appena finita». La carta del ritmo (venerdì dalle 14 e fine settimana, oggi/089) chiamava `wizard`, che da Oggi prende la settimana in corso.
+- oggi/089: la carta usa `banner-piano` (`apriWizardProssima`) e il tasto dice «Prepara la settimana N». Anche «Piano mandato a Leo» guarda il piano della settimana prossima (`ui.pianoProssima.inviato`, nuovo campo in pianifica/032), non quello della settimana che finisce.
+- pianifica/090: il titolo degli obiettivi dice «questa settimana», «la settimana prossima» o «nella settimana N».
+- Test: tests/t57.js. Prove 34 su 34 (t52-golden sul Mac).

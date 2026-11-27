@@ -7,10 +7,12 @@
 const V25 = { RITMO_CHIUSO: 'v25_ritmo_chiuso' };
 function v25Momento(d = new Date()) {
   const g = d.getDay(), h = d.getHours() + d.getMinutes() / 60, feriale = g >= 1 && g <= 5;
-  const bp = state.bp, inviato = !!(bp && bp.inviato_at);
+  // v55: il venerdì e nel fine settimana conta il piano della settimana PROSSIMA, non di quella che finisce
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year), bp = state.bp;
+  const inviato = state.week === n.week && state.year === n.year ? !!(bp && bp.inviato_at) : !!(ui.pianoProssima && ui.pianoProssima.k === settKey(n.week, n.year) && ui.pianoProssima.inviato);
   if ((g === 5 && h >= 14) || g === 6 || g === 0) return inviato
     ? { k: 'ven-ok', ico: 'ti-check', t: 'Piano mandato a Leo', s: 'La settimana prossima è pronta. Se arrivano cose nuove, mettile nell\'armadio.', act: 'tab-tutto', btn: 'Apri l\'armadio' }
-    : { k: 'ven', ico: 'ti-calendar-week', t: 'Venerdì: prepara la settimana prossima', s: 'Scegli le cose dall\'armadio, stampa un foglio per giorno e manda il piano a Leo.', act: 'wizard', btn: 'Prepara la settimana' };
+    : { k: 'ven', ico: 'ti-calendar-week', t: 'Venerdì: prepara la settimana prossima', s: 'Scegli le cose dall\'armadio, stampa un foglio per giorno e manda il piano a Leo.', act: 'banner-piano', btn: `Prepara la settimana ${n.week}` };
   if (g === 1 && h < 9.5) return { k: 'lun', ico: 'ti-users', t: 'Lunedì: la riunione con i venditori', s: 'Confronta i loro piani con i risultati e i target. Prima, 10 minuti sulle urgenze.', act: 'v21-stampa-oggi', btn: 'Stampa il foglio di oggi' };
   if (feriale && h < 9.5) return { k: 'mattina', ico: 'ti-sunrise', t: 'Mattina: 10 minuti', s: 'Controlla «Da rispondere» e la giornata, poi stampa il foglio e lavora sulla carta.', act: 'v21-stampa-oggi', btn: 'Stampa il foglio di oggi' };
   if (feriale && h < 17.5) return { k: 'giorno', ico: 'ti-file-pencil', t: 'Giornata sul foglio', s: 'Qui torna solo per aggiungere le cose nuove che arrivano.', act: 'nuovo', btn: 'Aggiungi una cosa' };

@@ -9123,7 +9123,7 @@ async function caricaPianoProssima() {
   const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year), k = settKey(n.week, n.year);
   if (!state.bpTableOk || (ui.pianoProssima && ui.pianoProssima.k === k)) return;
   ui.pianoProssima = { k, esiste: true };   // finché non si sa, niente banner
-  try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan }; render(); }
+  try { const { plan } = await bpFetchPlan(n.week, n.year); ui.pianoProssima = { k, esiste: !!plan, inviato: !!(plan && plan.inviato_at) }; render(); }
   catch (e) { ui.pianoProssima = null; }
 }
 function apriWizardProssima() {
@@ -17251,7 +17251,7 @@ apriDettaglio = function (id) {
 // se non stai scrivendo si ricarica da sola, altrimenti un messaggio con «Aggiorna».
 // A OGNI RILASCIO cambiare VERSIONE_APP (vedi NOTE_LOGICA.md).
 // ══════════════════════════════════════════════════════════════
-const VERSIONE_APP = '2026-11-23 v54';
+const VERSIONE_APP = '2026-11-27 v55';
 async function controllaVersione() {
   try {
     const r = await fetch(location.pathname + '?versione=' + Date.now(), { cache: 'no-store' });
@@ -17693,10 +17693,12 @@ AZIONI['v24-dp-tutte'] = () => { ui.v24DpTutte = true; render(); };
 const V25 = { RITMO_CHIUSO: 'v25_ritmo_chiuso' };
 function v25Momento(d = new Date()) {
   const g = d.getDay(), h = d.getHours() + d.getMinutes() / 60, feriale = g >= 1 && g <= 5;
-  const bp = state.bp, inviato = !!(bp && bp.inviato_at);
+  // v55: il venerdì e nel fine settimana conta il piano della settimana PROSSIMA, non di quella che finisce
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year), bp = state.bp;
+  const inviato = state.week === n.week && state.year === n.year ? !!(bp && bp.inviato_at) : !!(ui.pianoProssima && ui.pianoProssima.k === settKey(n.week, n.year) && ui.pianoProssima.inviato);
   if ((g === 5 && h >= 14) || g === 6 || g === 0) return inviato
     ? { k: 'ven-ok', ico: 'ti-check', t: 'Piano mandato a Leo', s: 'La settimana prossima è pronta. Se arrivano cose nuove, mettile nell\'armadio.', act: 'tab-tutto', btn: 'Apri l\'armadio' }
-    : { k: 'ven', ico: 'ti-calendar-week', t: 'Venerdì: prepara la settimana prossima', s: 'Scegli le cose dall\'armadio, stampa un foglio per giorno e manda il piano a Leo.', act: 'wizard', btn: 'Prepara la settimana' };
+    : { k: 'ven', ico: 'ti-calendar-week', t: 'Venerdì: prepara la settimana prossima', s: 'Scegli le cose dall\'armadio, stampa un foglio per giorno e manda il piano a Leo.', act: 'banner-piano', btn: `Prepara la settimana ${n.week}` };
   if (g === 1 && h < 9.5) return { k: 'lun', ico: 'ti-users', t: 'Lunedì: la riunione con i venditori', s: 'Confronta i loro piani con i risultati e i target. Prima, 10 minuti sulle urgenze.', act: 'v21-stampa-oggi', btn: 'Stampa il foglio di oggi' };
   if (feriale && h < 9.5) return { k: 'mattina', ico: 'ti-sunrise', t: 'Mattina: 10 minuti', s: 'Controlla «Da rispondere» e la giornata, poi stampa il foglio e lavora sulla carta.', act: 'v21-stampa-oggi', btn: 'Stampa il foglio di oggi' };
   if (feriale && h < 17.5) return { k: 'giorno', ico: 'ti-file-pencil', t: 'Giornata sul foglio', s: 'Qui torna solo per aggiungere le cose nuove che arrivano.', act: 'nuovo', btn: 'Aggiungi una cosa' };
@@ -17995,6 +17997,8 @@ function v26ApriObiettivi(w, y, poi) {
   const ov = v26OverlayObiettivi(), voci = v26ObDi(w, y);
   ui.v26Ob = { w, y, poi };
   const da = getWeekStart(w, y), a = new Date(da); a.setDate(da.getDate() + 6);
+  const cur = bpSettimanaCorrente(), n = bpSettimanaSuccessiva(cur.week, cur.year);   // v55: il titolo dice di quale settimana si parla
+  $('v26ob-titolo').textContent = w === cur.week && y === cur.year ? 'Cosa vuoi portare a casa questa settimana?' : w === n.week && y === n.year ? 'Cosa vuoi portare a casa la settimana prossima?' : `Cosa vuoi portare a casa nella settimana ${w}?`;
   $('v26ob-sotto').textContent = `Settimana ${w} (${fmtCorta(da)} – ${fmtCorta(a)}). Da 1 a 5 obiettivi.${poi ? ' Le cose della settimana le scegli dopo, partendo da questi.' : ''}`;
   $('v26ob-campi').innerHTML = Array.from({ length: V26.MAX_OB }, (_, i) => `<label class="v26-ob-campo"><span>Obiettivo ${i + 1}</span><input type="text" class="input" maxlength="120" data-i="${i}" value="${esc((voci[i] || {}).testo || '')}" placeholder="${i === 0 ? 'es. vendere 20.000 €' : i === 1 ? 'es. 10 clienti nuovi' : 'facoltativo'}"></label>`).join('');
   $('v26ob-ok').textContent = poi ? 'Avanti: scegli le cose' : 'Salva';
